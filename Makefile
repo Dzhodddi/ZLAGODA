@@ -11,4 +11,4 @@ test:
 	curl http://localhost:8080
 
 test-java:
-    curl http://localhost:8081
+  curl http://localhost:8081
