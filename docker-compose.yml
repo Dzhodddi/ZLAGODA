@@ -17,7 +17,19 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-  
+
+  migrate-db:
+    image: migrate/migrate
+    command: [
+      "-path", "/migrations",
+      "-database",  "postgresql://postgres:postgres@zlagoda-db:5432/zlagoda?sslmode=disable", "up"
+    ]
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      - zlagoda-db
+    restart: "no"
+
   go-server:
     build:
       context: .
