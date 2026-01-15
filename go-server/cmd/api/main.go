@@ -1,16 +1,24 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
 	"log"
-	"net/http"
+
+	"github.com/Dzhodddi/ZLAGODA/internal/config"
+	app "github.com/Dzhodddi/ZLAGODA/internal/server"
 )
 
 func main() {
-	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello World")
-	})
+	cfg, err := config.Load()
+	if err != nil {
+		panic(err)
+	}
 
-	log.Fatal(e.Start(":8080"))
+	server, err := app.Setup(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	if err = server.Start(":" + cfg.Port); err != nil {
+		log.Fatal(err)
+	}
 }
