@@ -1,0 +1,162 @@
+basePath: /api/v1
+definitions:
+  views.CategoryResponse:
+    properties:
+      category_name:
+        type: string
+      category_number:
+        type: integer
+    type: object
+  views.CreateNewCategory:
+    properties:
+      category_name:
+        maxLength: 50
+        minLength: 1
+        type: string
+    required:
+    - category_name
+    type: object
+  views.CreateNewCustomerCard:
+    properties:
+      card_number:
+        maxLength: 13
+        minLength: 1
+        type: string
+      city:
+        maxLength: 50
+        type: string
+      customer_name:
+        maxLength: 50
+        minLength: 1
+        type: string
+      customer_patronymic:
+        maxLength: 50
+        minLength: 1
+        type: string
+      customer_percent:
+        maximum: 100
+        minimum: 1
+        type: integer
+      customer_surname:
+        maxLength: 50
+        minLength: 1
+        type: string
+      phone_number:
+        maxLength: 13
+        type: string
+      street:
+        maxLength: 50
+        type: string
+      zipcode:
+        maxLength: 9
+        type: string
+    required:
+    - card_number
+    - customer_name
+    - customer_percent
+    - customer_surname
+    - phone_number
+    type: object
+  views.CustomerCardResponse:
+    properties:
+      card_number:
+        type: string
+      city:
+        type: string
+      customer_name:
+        type: string
+      customer_patronymic:
+        type: string
+      customer_percent:
+        type: integer
+      customer_surname:
+        type: string
+      phone_number:
+        type: string
+      street:
+        type: string
+      zipcode:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  termsOfService: http://swagger.io/terms/
+  title: Go server API
+  version: "1.0"
+paths:
+  /categories:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new product category
+      parameters:
+      - description: Category data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/views.CreateNewCategory'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/views.CategoryResponse'
+        "400":
+          description: Invalid request payload
+          schema:
+            additionalProperties: true
+            type: object
+        "422":
+          description: Validation error
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new category
+      tags:
+      - Category
+  /customer-cards:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new customer discount card and stores it in the database
+      parameters:
+      - description: Customer card data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/views.CreateNewCustomerCard'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/views.CustomerCardResponse'
+        "400":
+          description: Validation error
+          schema:
+            additionalProperties: true
+            type: object
+        "422":
+          description: Validation error
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new customer card
+      tags:
+      - CustomerCard
+swagger: "2.0"

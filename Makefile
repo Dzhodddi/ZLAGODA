@@ -20,3 +20,9 @@ migrate-all-down:
 
 create-migration:
 	migrate create -ext sql -dir migrations -seq $(name)
+
+sqlc-generate:
+	cd go-server && sqlc generate && cd ..
+
+gen-docs:
+	cd go-server && swag init -g internal/server/server.go && cd ..
