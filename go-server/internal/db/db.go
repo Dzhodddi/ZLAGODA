@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -21,9 +21,8 @@ type DatabaseConfig struct {
 	Pool *PoolConfig
 }
 
-func NewPostgresConnection(cfg DatabaseConfig) (*sql.DB, error) {
-
-	db, err := sql.Open(cfg.Driver, cfg.DSN)
+func NewPostgresConnection(cfg DatabaseConfig) (*sqlx.DB, error) {
+	db, err := sqlx.Open(cfg.Driver, cfg.DSN)
 	if err != nil {
 		return nil, err
 	}
