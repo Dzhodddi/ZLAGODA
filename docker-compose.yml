@@ -38,8 +38,8 @@ services:
     depends_on:
       zlagoda-db:
         condition: service_healthy
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@zlagoda:5432/zlagoda?sslmode=disable
+    env_file:
+      - go-server/.env.example
     volumes:
       - ./go-server:/app/go-server
     ports:
