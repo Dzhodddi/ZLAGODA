@@ -54,10 +54,10 @@ services:
     depends_on:
       zlagoda-db:
         condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://zlagoda-db:5432/zlagoda
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+    env_file:
+      - java-server/.env.example
+    volumes:
+      - ./java-server:/app/java-server
     ports:
       - "8081:8080"
     restart: unless-stopped
