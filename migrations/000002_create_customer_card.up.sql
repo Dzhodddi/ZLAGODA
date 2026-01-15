@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS customer_card(
-    card_number BIGSERIAL PRIMARY KEY,
+    card_number VARCHAR(13) PRIMARY KEY,
     customer_surname VARCHAR(50) NOT NULL,
     customer_name VARCHAR(50) NOT NULL,
     customer_patronymic VARCHAR(50),
