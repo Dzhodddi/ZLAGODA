@@ -21,9 +21,11 @@ func NewCardService(cardRepository *repository.CardRepository) *CardService {
 func (s *CardService) CreateNewCustomerCard(ctx context.Context, card views.CreateNewCustomerCard) (*views.CustomerCardResponse, error) {
 	newCard, err := s.cardRepository.CreateNewCard(ctx, card)
 	if err != nil {
-		if errors.Is(err, errorResponse.Conflict()) {
+		var httpErr *errorResponse.HTTPErrorResponse
+		if errors.As(err, &httpErr) {
 			return nil, err
 		}
+		return nil, errorResponse.Internal(err)
 	}
 	return mappers.CardModelToResponse(newCard), nil
 }
