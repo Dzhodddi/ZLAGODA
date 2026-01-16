@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
+import org.example.exception.DeletionException;
 import org.example.exception.EntityNotFoundException;
 import org.example.exception.RegistrationException;
 import org.example.mapper.employee.EmployeeMapper;
@@ -13,6 +14,7 @@ import org.example.model.employee.Role;
 import org.example.model.employee.Employee;
 import org.example.repository.employee.RoleRepository;
 import org.example.repository.employee.EmployeeRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,6 +77,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void deleteEmployeeById(String id) {
+        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (id.equals(currentUserId)) {
+            throw new DeletionException("Cannot delete yourself by your own id: " + id);
+        }
         Employee employee = employeeRepository.findByIdEmployee(id).orElseThrow(
                 () -> new EntityNotFoundException("Cannot delete employee by id: " + id)
         );

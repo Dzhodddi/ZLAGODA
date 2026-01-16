@@ -47,4 +47,9 @@ public class CustomGlobalExceptionHandler {
     public ResponseEntity<String> handleRegistrationException(RegistrationException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(DeletionException.class)
+    public ResponseEntity<String> handleDeletionException(DeletionException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
 }
