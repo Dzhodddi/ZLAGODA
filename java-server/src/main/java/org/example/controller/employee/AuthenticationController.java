@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.login.EmployeeLoginRequestDto;
 import org.example.dto.employee.login.EmployeeLoginResponseDto;
+import org.example.dto.employee.login.RefreshTokenRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.exception.RegistrationException;
@@ -42,5 +43,10 @@ public class AuthenticationController {
             description = "Authenticate an existing employee")
     public EmployeeLoginResponseDto login(@RequestBody @Valid EmployeeLoginRequestDto request) {
         return authenticationService.authenticate(request);
+    }
+
+    @PostMapping("/refresh")
+    public EmployeeLoginResponseDto refresh(@RequestBody @Valid RefreshTokenRequestDto request) {
+        return authenticationService.refreshToken(request);
     }
 }

@@ -19,15 +19,26 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long expiration;
 
+    @Value("${jwt.refresh.expiration}")
+    private long refreshExpiration;
+
     public JwtUtil(@Value("${jwt.secret}") String secret) {
         secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String email) {
+    public String generateAccessToken(String username) {
+        return generateToken(username, expiration);
+    }
+
+    public String generateRefreshToken(String username) {
+        return generateToken(username, refreshExpiration);
+    }
+
+    private String generateToken(String username, long expirationTime) {
         return Jwts.builder()
-                .subject(email)
+                .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(secretKey)
                 .compact();
     }
