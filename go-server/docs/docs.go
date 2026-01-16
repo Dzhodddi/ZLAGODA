@@ -319,6 +319,37 @@ const docTemplate = `{
             }
         },
         "/customer-cards": {
+            "get": {
+                "description": "Retrieves a list of all customer discount cards",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomerCard"
+                ],
+                "summary": "List all customer cards",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/views.CustomerCardResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Creates a new customer discount card and stores it in the database",
                 "consumes": [
@@ -358,6 +389,157 @@ const docTemplate = `{
                     },
                     "422": {
                         "description": "Validation error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/customer-cards/{cardNumber}": {
+            "get": {
+                "description": "Retrieves a customer discount card by its number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomerCard"
+                ],
+                "summary": "Get a customer card by number",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer card number",
+                        "name": "cardNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/views.CustomerCardResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Entity not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates an existing customer discount card",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomerCard"
+                ],
+                "summary": "Update a customer card",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer card number",
+                        "name": "cardNumber",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Customer card data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/views.UpdateCustomerCard"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/views.CustomerCardResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Entity not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes an existing customer discount card",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CustomerCard"
+                ],
+                "summary": "Delete a customer card",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer card number",
+                        "name": "cardNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Entity not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -650,6 +832,53 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 50,
                     "minLength": 1
+                }
+            }
+        },
+        "views.UpdateCustomerCard": {
+            "type": "object",
+            "required": [
+                "customer_name",
+                "customer_percent",
+                "customer_surname",
+                "phone_number"
+            ],
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "customer_name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 1
+                },
+                "customer_patronymic": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 1
+                },
+                "customer_percent": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                },
+                "customer_surname": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 1
+                },
+                "phone_number": {
+                    "type": "string",
+                    "maxLength": 13
+                },
+                "street": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "zipcode": {
+                    "type": "string",
+                    "maxLength": 9
                 }
             }
         }

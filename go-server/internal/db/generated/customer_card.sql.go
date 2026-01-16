@@ -65,3 +65,158 @@ func (q *Queries) CreateNewCustomerCard(ctx context.Context, arg CreateNewCustom
 	)
 	return i, err
 }
+
+const deleteCustomerCardByID = `-- name: DeleteCustomerCardByID :one
+DELETE FROM customer_card
+WHERE card_number = $1
+RETURNING card_number
+`
+
+func (q *Queries) DeleteCustomerCardByID(ctx context.Context, cardNumber string) (string, error) {
+	row := q.db.QueryRowContext(ctx, deleteCustomerCardByID, cardNumber)
+	var card_number string
+	err := row.Scan(&card_number)
+	return card_number, err
+}
+
+const getAllCustomerCards = `-- name: GetAllCustomerCards :many
+SELECT
+    card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+FROM customer_card
+`
+
+func (q *Queries) GetAllCustomerCards(ctx context.Context) ([]CustomerCard, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCustomerCards)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CustomerCard
+	for rows.Next() {
+		var i CustomerCard
+		if err := rows.Scan(
+			&i.CardNumber,
+			&i.CustomerSurname,
+			&i.CustomerName,
+			&i.CustomerPatronymic,
+			&i.PhoneNumber,
+			&i.City,
+			&i.Street,
+			&i.ZipCode,
+			&i.CustomerPercent,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCustomerCardByID = `-- name: GetCustomerCardByID :one
+SELECT
+    card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+FROM customer_card
+WHERE card_number = $1
+`
+
+func (q *Queries) GetCustomerCardByID(ctx context.Context, cardNumber string) (CustomerCard, error) {
+	row := q.db.QueryRowContext(ctx, getCustomerCardByID, cardNumber)
+	var i CustomerCard
+	err := row.Scan(
+		&i.CardNumber,
+		&i.CustomerSurname,
+		&i.CustomerName,
+		&i.CustomerPatronymic,
+		&i.PhoneNumber,
+		&i.City,
+		&i.Street,
+		&i.ZipCode,
+		&i.CustomerPercent,
+	)
+	return i, err
+}
+
+const updateCustomerCard = `-- name: UpdateCustomerCard :one
+UPDATE customer_card
+SET
+    customer_surname = $2,
+    customer_name = $3,
+    customer_patronymic = $4,
+    phone_number = $5,
+    city = $6,
+    street = $7,
+    zip_code = $8,
+    customer_percent = $9
+WHERE card_number = $1
+RETURNING
+	card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+`
+
+type UpdateCustomerCardParams struct {
+	CardNumber         string
+	CustomerSurname    string
+	CustomerName       string
+	CustomerPatronymic sql.NullString
+	PhoneNumber        string
+	City               sql.NullString
+	Street             sql.NullString
+	ZipCode            sql.NullString
+	CustomerPercent    int32
+}
+
+func (q *Queries) UpdateCustomerCard(ctx context.Context, arg UpdateCustomerCardParams) (CustomerCard, error) {
+	row := q.db.QueryRowContext(ctx, updateCustomerCard,
+		arg.CardNumber,
+		arg.CustomerSurname,
+		arg.CustomerName,
+		arg.CustomerPatronymic,
+		arg.PhoneNumber,
+		arg.City,
+		arg.Street,
+		arg.ZipCode,
+		arg.CustomerPercent,
+	)
+	var i CustomerCard
+	err := row.Scan(
+		&i.CardNumber,
+		&i.CustomerSurname,
+		&i.CustomerName,
+		&i.CustomerPatronymic,
+		&i.PhoneNumber,
+		&i.City,
+		&i.Street,
+		&i.ZipCode,
+		&i.CustomerPercent,
+	)
+	return i, err
+}

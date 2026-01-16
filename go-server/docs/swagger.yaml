@@ -159,6 +159,42 @@ definitions:
     required:
     - category_name
     type: object
+  views.UpdateCustomerCard:
+    properties:
+      city:
+        maxLength: 50
+        type: string
+      customer_name:
+        maxLength: 50
+        minLength: 1
+        type: string
+      customer_patronymic:
+        maxLength: 50
+        minLength: 1
+        type: string
+      customer_percent:
+        maximum: 100
+        minimum: 1
+        type: integer
+      customer_surname:
+        maxLength: 50
+        minLength: 1
+        type: string
+      phone_number:
+        maxLength: 13
+        type: string
+      street:
+        maxLength: 50
+        type: string
+      zipcode:
+        maxLength: 9
+        type: string
+    required:
+    - customer_name
+    - customer_percent
+    - customer_surname
+    - phone_number
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -373,6 +409,27 @@ paths:
       tags:
       - Checks
   /customer-cards:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all customer discount cards
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/views.CustomerCardResponse'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all customer cards
+      tags:
+      - CustomerCard
     post:
       consumes:
       - application/json
@@ -407,6 +464,109 @@ paths:
             additionalProperties: true
             type: object
       summary: Create a new customer card
+      tags:
+      - CustomerCard
+  /customer-cards/{cardNumber}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an existing customer discount card
+      parameters:
+      - description: Customer card number
+        in: path
+        name: cardNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a customer card
+      tags:
+      - CustomerCard
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a customer discount card by its number
+      parameters:
+      - description: Customer card number
+        in: path
+        name: cardNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.CustomerCardResponse'
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a customer card by number
+      tags:
+      - CustomerCard
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing customer discount card
+      parameters:
+      - description: Customer card number
+        in: path
+        name: cardNumber
+        required: true
+        type: string
+      - description: Customer card data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/views.UpdateCustomerCard'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.CustomerCardResponse'
+        "400":
+          description: Validation error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a customer card
       tags:
       - CustomerCard
   /sales:
