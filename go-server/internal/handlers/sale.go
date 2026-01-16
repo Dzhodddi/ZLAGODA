@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"context"
-	"net/http"
 	"github.com/labstack/echo/v4"
+	"net/http"
 
+	"github.com/Dzhodddi/ZLAGODA/internal/constants"
+	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/services"
 	validation "github.com/Dzhodddi/ZLAGODA/internal/validator"
-	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
-	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
 )
 
@@ -53,4 +53,3 @@ func (h *SaleHandler) createNewSale(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, newSale)
 }
-

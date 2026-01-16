@@ -1,9 +1,8 @@
-// generate repository code for sale table base on category.go
-
 package repository
 
 import (
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
+	"github.com/lib/pq"
 
 	"context"
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
@@ -27,7 +26,15 @@ func NewSaleRepository(db *sqlx.DB) *SaleRepository {
 func (r *SaleRepository) CreateNewSale(ctx context.Context, sale views.CreateNewSale) (*generated.Sale, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
-	newSale, err := r.queries.CreateNewSale(ctx, sale.SaleName, sale.DiscountPercentage)
+	newSale, err := r.queries.CreateNewSale(
+		ctx,
+		generated.CreateNewSaleParams{
+			ProductNumber: sale.ProductNumber,
+			Upc:           sale.Upc,
+			CheckNumber:   sale.CheckNumber,
+			SellingPrice:  sale.SellingPrice,
+		},
+	)
 	if err != nil {
 		if pgErr, ok := err.(*pq.Error); ok {
 			switch pgErr.Code {
@@ -38,7 +45,6 @@ func (r *SaleRepository) CreateNewSale(ctx context.Context, sale views.CreateNew
 			}
 		}
 		return nil, err
-	}	
+	}
 	return &newSale, nil
-
 }

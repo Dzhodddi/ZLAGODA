@@ -103,6 +103,19 @@ definitions:
     - customer_surname
     - phone_number
     type: object
+  views.CreateNewSale:
+    properties:
+      checkNumber:
+        type: string
+      productNumber:
+        format: int32
+        type: integer
+      sellingPrice:
+        format: float64
+        type: number
+      upc:
+        type: string
+    type: object
   views.CustomerCardResponse:
     properties:
       card_number:
@@ -122,6 +135,19 @@ definitions:
       street:
         type: string
       zipcode:
+        type: string
+    type: object
+  views.SaleResponse:
+    properties:
+      checkNumber:
+        type: string
+      productNumber:
+        format: int32
+        type: integer
+      sellingPrice:
+        format: float64
+        type: number
+      upc:
         type: string
     type: object
 host: localhost:8080
@@ -242,4 +268,41 @@ paths:
       summary: Create a new customer card
       tags:
       - CustomerCard
+  /sales:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new sale
+      parameters:
+      - description: Sale data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/views.CreateNewSale'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/views.SaleResponse'
+        "400":
+          description: Invalid request payload
+          schema:
+            additionalProperties: true
+            type: object
+        "422":
+          description: Validation error
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new createNewSale
+      tags:
+      - Sales
 swagger: "2.0"

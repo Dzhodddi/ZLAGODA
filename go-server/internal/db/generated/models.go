@@ -34,3 +34,10 @@ type CustomerCard struct {
 	ZipCode            sql.NullString
 	CustomerPercent    int32
 }
+
+type Sale struct {
+	ProductNumber int32
+	Upc           string
+	CheckNumber   string
+	SellingPrice  float64
+}
