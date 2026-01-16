@@ -30,6 +30,7 @@ C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\dto\emp
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\config\MapperConfig.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\model\employee\Role.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\config\SecurityConfig.java
+C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\exception\DeletionException.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\controller\employee\AuthenticationController.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\dto\employee\login\EmployeeLoginResponseDto.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\service\product\ProductServiceImpl.java
