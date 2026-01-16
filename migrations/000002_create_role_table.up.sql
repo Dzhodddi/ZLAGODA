@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS role (
 INSERT INTO role (id, name) VALUES (1, 'MANAGER'), (2, 'CASHIER')
     ON CONFLICT (id) DO NOTHING;
 
-SELECT setval('role_id_seq', (SELECT MAX(id) FROM role));
+SELECT setval(pg_get_serial_sequence('role', 'id'), (SELECT MAX(id) FROM role));

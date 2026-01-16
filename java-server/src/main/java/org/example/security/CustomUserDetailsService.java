@@ -1,7 +1,6 @@
 package org.example.security;
 
 import lombok.RequiredArgsConstructor;
-import org.example.exception.EntityNotFoundException;
 import org.example.repository.employee.EmployeeRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,9 +13,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final EmployeeRepository employeeRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String surname) throws UsernameNotFoundException {
-        return employeeRepository.findByEmplSurname(surname)
+    public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
+        return employeeRepository.findByIdEmployee(id)
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "Employee with surname " + surname + " not found"));
+                        "Employee with id " + id + " not found"));
     }
 }

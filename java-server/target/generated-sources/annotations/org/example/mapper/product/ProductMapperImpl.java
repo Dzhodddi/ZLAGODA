@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-16T15:20:05+0200",
+    date = "2026-01-16T22:45:56+0200",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
@@ -22,6 +22,17 @@ public class ProductMapperImpl implements ProductMapper {
 
         ProductDto productDto = new ProductDto();
 
+        if ( product.getId_product() != null ) {
+            productDto.setProduct_id( product.getId_product().intValue() );
+        }
+        if ( product.getProductName() != null ) {
+            productDto.setProduct_name( product.getProductName() );
+        }
+        if ( product.getProductCharacteristics() != null ) {
+            productDto.setProduct_characteristics( product.getProductCharacteristics() );
+        }
+        productDto.setCategory_number( product.getCategoryNumber() );
+
         return productDto;
     }
 
@@ -33,6 +44,14 @@ public class ProductMapperImpl implements ProductMapper {
 
         Product product = new Product();
 
+        if ( requestDto.getProductName() != null ) {
+            product.setProductName( requestDto.getProductName() );
+        }
+        if ( requestDto.getProductCharacteristics() != null ) {
+            product.setProductCharacteristics( requestDto.getProductCharacteristics() );
+        }
+        product.setCategoryNumber( requestDto.getCategoryNumber() );
+
         return product;
     }
 
@@ -41,5 +60,19 @@ public class ProductMapperImpl implements ProductMapper {
         if ( requestDto == null ) {
             return;
         }
+
+        if ( requestDto.getProductName() != null ) {
+            product.setProductName( requestDto.getProductName() );
+        }
+        else {
+            product.setProductName( null );
+        }
+        if ( requestDto.getProductCharacteristics() != null ) {
+            product.setProductCharacteristics( requestDto.getProductCharacteristics() );
+        }
+        else {
+            product.setProductCharacteristics( null );
+        }
+        product.setCategoryNumber( requestDto.getCategoryNumber() );
     }
 }

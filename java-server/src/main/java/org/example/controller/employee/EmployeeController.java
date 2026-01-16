@@ -17,7 +17,7 @@ import java.util.List;
 @Tag(name = "Employee management", description = "Endpoints for managing employees")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/V3/employee")
+@RequestMapping("/employees")
 public class EmployeeController {
 
     private final EmployeeService employeeService;

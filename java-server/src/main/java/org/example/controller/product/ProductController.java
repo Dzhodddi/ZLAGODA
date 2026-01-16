@@ -16,7 +16,7 @@ import java.util.List;
 @Tag(name = "Product management", description = "Endpoints for managing products")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/V3/product")
+@RequestMapping("/products")
 public class ProductController {
 
     private final ProductService productService;

@@ -16,11 +16,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Table(name = "employee")
 public class Employee implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_employee")
-    private Long idEmployee;
+    @Column(name = "id_employee",
+            nullable = false,
+            unique = true,
+            length = 10)
+    private String idEmployee;
 
-    @Column(name = "empl_surname", nullable = false, unique = true, length = 50)
+    @Column(name = "empl_surname", nullable = false, length = 50)
     private String emplSurname;
 
     @Column(name = "empl_name", nullable = false, length = 50)
@@ -66,7 +68,7 @@ public class Employee implements UserDetails {
 
     @Override
     public String getUsername() {
-        return emplSurname;
+        return idEmployee;
     }
 
     @Override

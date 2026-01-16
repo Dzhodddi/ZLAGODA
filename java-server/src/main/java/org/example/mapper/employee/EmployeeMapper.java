@@ -10,9 +10,9 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface EmployeeMapper {
 
-    @Mapping(target = "idEmployee", ignore = true)
+    @Mapping(source = "idEmployee", target = "idEmployee")
     @Mapping(target = "role", ignore = true)
-    @Mapping(target = "salary", ignore = true)
+    @Mapping(source = "salary", target = "salary")
     @Mapping(source = "empl_name", target = "emplName")
     @Mapping(source = "empl_patronymic", target = "emplPatronymic")
     @Mapping(source = "date_of_birth", target = "dateOfBirth")
@@ -31,8 +31,8 @@ public interface EmployeeMapper {
 
     @Mapping(target = "idEmployee", ignore = true)
     @Mapping(target = "role", ignore = true)
-    @Mapping(target = "salary", ignore = true)
-    @Mapping(target = "password", ignore = true)
+    @Mapping(source = "salary", target = "salary")
+    @Mapping(source = "password", target = "password")
     @Mapping(source = "empl_name", target = "emplName")
     @Mapping(source = "empl_patronymic", target = "emplPatronymic")
     @Mapping(source = "date_of_birth", target = "dateOfBirth")

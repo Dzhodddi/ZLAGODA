@@ -29,13 +29,19 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional
     public EmployeeResponseDto register(EmployeeRegistrationRequestDto request)
             throws RegistrationException {
-        if (employeeRepository.existsByEmplSurname(request.getEmplSurname().toLowerCase())) {
+        if (request.getIdEmployee() == null || request.getIdEmployee().isEmpty()) {
+            throw new RegistrationException("Employee ID cannot be null or empty");
+        }
+        if (employeeRepository.existsByIdEmployee(request.getIdEmployee())) {
             throw new RegistrationException(
-                    "Employee with such surname already exists: "
-                            + request.getEmplSurname());
+                    "Employee with such id already exists: "
+                            + request.getIdEmployee());
         }
         Employee employee = employeeMapper.toEmployeeEntity(request);
-        employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+        if (employee.getIdEmployee() == null) {
+            employee.setIdEmployee(request.getIdEmployee());
+        }
+        employee.setPassword(passwordEncoder.encode(request.getPassword()));
         Role role = roleRepository.findById((long) request.getRoleId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Role not found with id: " + request.getRoleId()));

@@ -8,11 +8,35 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-16T15:20:05+0200",
+    date = "2026-01-16T22:45:56+0200",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
 public class EmployeeMapperImpl implements EmployeeMapper {
+
+    @Override
+    public Employee toEmployeeEntity(EmployeeRegistrationRequestDto dto) {
+        if ( dto == null ) {
+            return null;
+        }
+
+        Employee employee = new Employee();
+
+        employee.setIdEmployee( dto.getIdEmployee() );
+        employee.setSalary( dto.getSalary() );
+        employee.setEmplName( dto.getEmpl_name() );
+        employee.setEmplPatronymic( dto.getEmpl_patronymic() );
+        employee.setDateOfBirth( dto.getDate_of_birth() );
+        employee.setDateOfStart( dto.getDate_of_start() );
+        employee.setPhoneNumber( dto.getPhone_number() );
+        employee.setZipCode( dto.getZip_code() );
+        employee.setPassword( dto.getPassword() );
+        employee.setEmplSurname( dto.getEmplSurname() );
+        employee.setCity( dto.getCity() );
+        employee.setStreet( dto.getStreet() );
+
+        return employee;
+    }
 
     @Override
     public EmployeeResponseDto toEmployeeResponseDto(Employee employee) {
@@ -22,73 +46,36 @@ public class EmployeeMapperImpl implements EmployeeMapper {
 
         EmployeeResponseDto employeeResponseDto = new EmployeeResponseDto();
 
-        if ( employee.getEmplSurname() != null ) {
-            employeeResponseDto.setEmplSurname( employee.getEmplSurname() );
-        }
-        if ( employee.getEmpl_name() != null ) {
-            employeeResponseDto.setEmpl_name( employee.getEmpl_name() );
-        }
-        if ( employee.getDate_of_birth() != null ) {
-            employeeResponseDto.setDate_of_birth( employee.getDate_of_birth() );
-        }
-        if ( employee.getDate_of_start() != null ) {
-            employeeResponseDto.setDate_of_start( employee.getDate_of_start() );
-        }
-        if ( employee.getPhone_number() != null ) {
-            employeeResponseDto.setPhone_number( employee.getPhone_number() );
-        }
-        if ( employee.getCity() != null ) {
-            employeeResponseDto.setCity( employee.getCity() );
-        }
-        if ( employee.getStreet() != null ) {
-            employeeResponseDto.setStreet( employee.getStreet() );
-        }
-        if ( employee.getZip_code() != null ) {
-            employeeResponseDto.setZip_code( employee.getZip_code() );
-        }
+        employeeResponseDto.setEmpl_name( employee.getEmplName() );
+        employeeResponseDto.setDate_of_birth( employee.getDateOfBirth() );
+        employeeResponseDto.setDate_of_start( employee.getDateOfStart() );
+        employeeResponseDto.setPhone_number( employee.getPhoneNumber() );
+        employeeResponseDto.setZip_code( employee.getZipCode() );
+        employeeResponseDto.setIdEmployee( employee.getIdEmployee() );
+        employeeResponseDto.setEmplSurname( employee.getEmplSurname() );
+        employeeResponseDto.setSalary( employee.getSalary() );
+        employeeResponseDto.setCity( employee.getCity() );
+        employeeResponseDto.setStreet( employee.getStreet() );
 
         return employeeResponseDto;
     }
 
     @Override
-    public Employee toEmployeeEntity(EmployeeRegistrationRequestDto requestDto) {
+    public void updateEmployeeFromDto(EmployeeRegistrationRequestDto requestDto, Employee employee) {
         if ( requestDto == null ) {
-            return null;
+            return;
         }
 
-        Employee employee = new Employee();
-
-        if ( requestDto.getEmplSurname() != null ) {
-            employee.setEmplSurname( requestDto.getEmplSurname() );
-        }
-        if ( requestDto.getEmpl_name() != null ) {
-            employee.setEmpl_name( requestDto.getEmpl_name() );
-        }
-        if ( requestDto.getEmpl_patronymic() != null ) {
-            employee.setEmpl_patronymic( requestDto.getEmpl_patronymic() );
-        }
-        if ( requestDto.getDate_of_birth() != null ) {
-            employee.setDate_of_birth( requestDto.getDate_of_birth() );
-        }
-        if ( requestDto.getDate_of_start() != null ) {
-            employee.setDate_of_start( requestDto.getDate_of_start() );
-        }
-        if ( requestDto.getPhone_number() != null ) {
-            employee.setPhone_number( requestDto.getPhone_number() );
-        }
-        if ( requestDto.getCity() != null ) {
-            employee.setCity( requestDto.getCity() );
-        }
-        if ( requestDto.getStreet() != null ) {
-            employee.setStreet( requestDto.getStreet() );
-        }
-        if ( requestDto.getZip_code() != null ) {
-            employee.setZip_code( requestDto.getZip_code() );
-        }
-        if ( requestDto.getPassword() != null ) {
-            employee.setPassword( requestDto.getPassword() );
-        }
-
-        return employee;
+        employee.setSalary( requestDto.getSalary() );
+        employee.setPassword( requestDto.getPassword() );
+        employee.setEmplName( requestDto.getEmpl_name() );
+        employee.setEmplPatronymic( requestDto.getEmpl_patronymic() );
+        employee.setDateOfBirth( requestDto.getDate_of_birth() );
+        employee.setDateOfStart( requestDto.getDate_of_start() );
+        employee.setPhoneNumber( requestDto.getPhone_number() );
+        employee.setZipCode( requestDto.getZip_code() );
+        employee.setEmplSurname( requestDto.getEmplSurname() );
+        employee.setCity( requestDto.getCity() );
+        employee.setStreet( requestDto.getStreet() );
     }
 }

@@ -1,14 +1,15 @@
 package org.example.dto.employee.registration;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.dto.employee.registration.annotation.FieldMatch;
-import org.example.model.employee.Role;
 import org.hibernate.validator.constraints.Length;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -17,6 +18,9 @@ import java.util.Date;
         second = "repeatPassword",
         message = "Password and repeated password do not match")
 public class EmployeeRegistrationRequestDto {
+    @NotBlank
+    @Length(min = 1, max = 10)
+    private String idEmployee;
     @NotBlank
     @Length(min = 1, max = 50)
     private String emplSurname;
@@ -36,6 +40,9 @@ public class EmployeeRegistrationRequestDto {
     @NotBlank
     @Length(min = 8, max = 13)
     private String phone_number;
+    @NotNull
+    @DecimalMin("0.0")
+    private BigDecimal salary;
     @NotBlank
     @Length(min = 1, max = 50)
     private String city;
