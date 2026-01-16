@@ -62,6 +62,6 @@ npm start
 ## Документація API
 Документація Swagger доступна за адресами:
 
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/swagger-ui/index.html (Go)
 
-http://localhost:8081/swagger-ui/index.html
+http://localhost:8081/swagger-ui/index.html (Java)
