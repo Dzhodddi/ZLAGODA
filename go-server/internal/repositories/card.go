@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
@@ -10,8 +11,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
-
-var ErrCustomerCardExists = errorResponse.Conflict(constants.EntityAlreadyExists)
 
 type CardRepository struct {
 	db      *sqlx.DB
@@ -42,7 +41,7 @@ func (r *CardRepository) CreateNewCard(ctx context.Context, card views.CreateNew
 	})
 	if err != nil {
 		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
-			return nil, ErrCustomerCardExists
+			return nil, errorResponse.Conflict()
 		}
 		return nil, err
 	}
