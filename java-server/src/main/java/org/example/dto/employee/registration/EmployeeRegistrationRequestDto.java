@@ -1,15 +1,14 @@
 package org.example.dto.employee.registration;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.dto.employee.registration.annotation.FieldMatch;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -33,6 +32,7 @@ public class EmployeeRegistrationRequestDto {
     private int roleId;
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")
+    @Past
     private Date date_of_birth;
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")

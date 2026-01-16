@@ -1,6 +1,8 @@
 package org.example.service.employee;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setRole(role);
         if (employee.getSalary() == null) {
             employee.setSalary(new BigDecimal("0.00"));
+        }
+        LocalDate birthDate = request.getDate_of_birth().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        if (birthDate.isAfter(LocalDate.now().minusYears(18))) {
+            throw new RegistrationException("Age cannot be less than 18 years");
         }
         employeeRepository.save(employee);
         return employeeMapper.toEmployeeResponseDto(employee);
