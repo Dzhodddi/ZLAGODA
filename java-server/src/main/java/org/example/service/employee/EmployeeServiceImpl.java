@@ -41,6 +41,12 @@ public class EmployeeServiceImpl implements EmployeeService {
                     "Employee with such id already exists: "
                             + request.getIdEmployee());
         }
+        LocalDate birthDate = request.getDate_of_birth().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        if (birthDate.isAfter(LocalDate.now().minusYears(18))) {
+            throw new RegistrationException("Employee must be at least 18 years old");
+        }
         Employee employee = employeeMapper.toEmployeeEntity(request);
         if (employee.getIdEmployee() == null) {
             employee.setIdEmployee(request.getIdEmployee());
@@ -52,12 +58,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setRole(role);
         if (employee.getSalary() == null) {
             employee.setSalary(new BigDecimal("0.00"));
-        }
-        LocalDate birthDate = request.getDate_of_birth().toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-        if (birthDate.isBefore(LocalDate.now().minusYears(18))) {
-            throw new RegistrationException("Age cannot be less than 18 years");
         }
         employeeRepository.save(employee);
         return employeeMapper.toEmployeeResponseDto(employee);
