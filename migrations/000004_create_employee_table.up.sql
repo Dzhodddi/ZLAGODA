@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS employee(
-    id_employee BIGSERIAL PRIMARY KEY,
+    id_employee VARCHAR(10) PRIMARY KEY,
     empl_surname VARCHAR(50) NOT NULL UNIQUE,
     empl_name VARCHAR(50) NOT NULL,
     empl_patronymic VARCHAR(50),
