@@ -18,7 +18,6 @@ org\example\service\employee\EmployeeServiceImpl.class
 org\example\security\JwtUtil.class
 org\example\model\employee\Employee.class
 org\example\exception\RegistrationException.class
-org\example\exception\DeletionException.class
 org\example\model\product\Product.class
 org\example\mapper\product\ProductMapperImpl.class
 org\example\mapper\product\ProductMapper.class
