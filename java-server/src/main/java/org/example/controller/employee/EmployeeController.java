@@ -64,7 +64,7 @@ public class EmployeeController {
             description = "Delete an existing employee by its id"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public void deleteEmployeeById(@PathVariable Long id) {
+    public void deleteEmployeeById(@PathVariable String id) {
         employeeService.deleteEmployeeById(id);
     }
 }
