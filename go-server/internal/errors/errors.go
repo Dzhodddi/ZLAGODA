@@ -3,6 +3,8 @@ package error_response
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 )
 
 type HTTPErrorResponse struct {
@@ -50,6 +52,10 @@ func Unauthorized(msg string) *HTTPErrorResponse {
 	return NewError(http.StatusUnauthorized, msg, nil)
 }
 
-func Conflict(msg string) *HTTPErrorResponse {
-	return NewError(http.StatusUnprocessableEntity, msg, nil)
+func Conflict() *HTTPErrorResponse {
+	return NewError(http.StatusUnprocessableEntity, constants.EntityAlreadyExists, nil)
+}
+
+func BadForeignKey() *HTTPErrorResponse {
+	return NewError(http.StatusUnprocessableEntity, constants.ViolateForeignKey, nil)
 }

@@ -6,11 +6,21 @@ package generated
 
 import (
 	"database/sql"
+	"time"
 )
 
 type Category struct {
 	CategoryNumber int64
 	CategoryName   string
+}
+
+type Check struct {
+	CheckNumber string
+	IDEmployee  string
+	CardNumber  string
+	PrintDate   time.Time
+	SumTotal    float64
+	Vat         float64
 }
 
 type CustomerCard struct {
