@@ -44,18 +44,14 @@ func Internal(err error) *HTTPErrorResponse {
 	return NewError(http.StatusInternalServerError, "Internal Server Error", err)
 }
 
-func NotFound(msg string) *HTTPErrorResponse {
-	return NewError(http.StatusNotFound, msg, nil)
-}
-
-func Unauthorized(msg string) *HTTPErrorResponse {
-	return NewError(http.StatusUnauthorized, msg, nil)
-}
-
 func Conflict() *HTTPErrorResponse {
 	return NewError(http.StatusUnprocessableEntity, constants.EntityAlreadyExists, nil)
 }
 
 func BadForeignKey() *HTTPErrorResponse {
 	return NewError(http.StatusUnprocessableEntity, constants.ViolateForeignKey, nil)
+}
+
+func EntityNotFound() *HTTPErrorResponse {
+	return NewError(http.StatusUnprocessableEntity, constants.EntityDoesNotExist, nil)
 }

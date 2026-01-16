@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/services"
+	"github.com/Dzhodddi/ZLAGODA/internal/utils"
 	validation "github.com/Dzhodddi/ZLAGODA/internal/validator"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 type CategoryHandler struct {
@@ -23,6 +25,12 @@ func NewCategoryHandler(categoryService services.CategoryService) *CategoryHandl
 func (h *CategoryHandler) RegisterRouts(e *echo.Group) {
 	category := e.Group("/categories")
 	category.POST("", h.createCategory)
+	category.GET("", h.getAllCategories)
+
+	id := category.Group("/:id")
+	id.PUT("", h.updateCategory)
+	id.DELETE("", h.deleteCategory)
+	id.GET("", h.getCategoryByID)
 }
 
 // createCategory godoc
@@ -33,10 +41,10 @@ func (h *CategoryHandler) RegisterRouts(e *echo.Group) {
 // @Accept       json
 // @Produce      json
 // @Param        payload  body      views.CreateNewCategory  true  "Category data"
-// @Success      201  {object}  views.CategoryResponse
-// @Failure      400  {object}  map[string]any  "Invalid request payload"
-// @Failure      422  {object}  map[string]any  "Validation error"
-// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Success      201  {object}  views.CategoryResponse "Payload of category"
+// @Failure      400  {object}  map[string]any
+// @Failure      422  {object}  map[string]any
+// @Failure      500  {object}  map[string]any
 // @Router       /categories [post]
 func (h *CategoryHandler) createCategory(c echo.Context) error {
 	var payload views.CreateNewCategory
@@ -51,4 +59,106 @@ func (h *CategoryHandler) createCategory(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusCreated, category)
+}
+
+// updateCategory godoc
+//
+// @Summary      Update an existing category
+// @Description  Updates an existing product category by ID
+// @Tags         Category
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int64     true "Category ID"
+// @Param        payload  body      views.UpdateCategory  true	"Payload of category"
+// @Success      200  {object}  views.CategoryResponse
+// @Failure      400  {object}  map[string]any
+// @Failure      422  {object}  map[string]any
+// @Failure      404  {object}  map[string]any
+// @Failure      500  {object}  map[string]any
+// @Router       /categories/{id} [put]
+func (h *CategoryHandler) updateCategory(c echo.Context) error {
+	id, err := utils.ParseStringToInt(c.Param("id"))
+	if err != nil {
+		return errorResponse.BadRequest(constants.EntityDoesNotExist, err)
+	}
+	var payload views.UpdateCategory
+	if err = c.Bind(&payload); err != nil {
+		return errorResponse.BadRequest(constants.ValidationError, err)
+	}
+	if err = validation.ValidateStruct(payload); err != nil {
+		return errorResponse.ValidationError(constants.ValidationError, err)
+	}
+
+	category, err := h.categoryService.UpdateCategory(c.Request().Context(), payload, id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, category)
+}
+
+// deleteCategory godoc
+//
+// @Summary      Delete a category
+// @Description  Deletes an existing product category by ID
+// @Tags         Category
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int64     true  "Category ID"
+// @Success      204  {object}  map[string]any
+// @Failure      404  {object}  map[string]any
+// @Failure      500  {object}  map[string]any
+// @Router       /categories/{id} [delete]
+func (h *CategoryHandler) deleteCategory(c echo.Context) error {
+	id, err := utils.ParseStringToInt(c.Param("id"))
+	if err != nil {
+		return errorResponse.BadRequest(constants.EntityDoesNotExist, err)
+	}
+	err = h.categoryService.DeleteCategory(c.Request().Context(), id)
+	if err != nil {
+		return err
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
+// getCategoryByID godoc
+//
+// @Summary      Get a category by ID
+// @Description  Retrieves an existing product category by ID
+// @Tags         Category
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int64     true  "Category ID"
+// @Success      200  {object}  views.CategoryResponse
+// @Failure      404  {object}  map[string]any
+// @Failure      500  {object}  map[string]any
+// @Router       /categories/{id} [get]
+func (h *CategoryHandler) getCategoryByID(c echo.Context) error {
+	id, err := utils.ParseStringToInt(c.Param("id"))
+	if err != nil {
+		return errorResponse.BadRequest(constants.EntityDoesNotExist, err)
+	}
+
+	category, err := h.categoryService.GetCategoryByID(c.Request().Context(), id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, category)
+}
+
+// getAllCategories godoc
+//
+// @Summary      Get all categories
+// @Description  Retrieves all product categories
+// @Tags         Category
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}  views.CategoryResponse
+// @Failure      500  {object}  map[string]any
+// @Router       /categories [get]
+func (h *CategoryHandler) getAllCategories(c echo.Context) error {
+	categories, err := h.categoryService.GetAllCategories(c.Request().Context())
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, categories)
 }
