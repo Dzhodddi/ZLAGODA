@@ -37,7 +37,7 @@
 - **Frontend:** React
 - **Фреймворки/інструменти:** Hibernate, Spring Boot, Swagger, Docker
 
-## Встановлення та запуск
+## Установлення та запуск
 1. **Клонувати репозиторій:**
 ```bash
 git clone <URL>
