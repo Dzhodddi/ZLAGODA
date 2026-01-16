@@ -56,7 +56,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         LocalDate birthDate = request.getDate_of_birth().toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
-        if (birthDate.isAfter(LocalDate.now().minusYears(18))) {
+        if (birthDate.isBefore(LocalDate.now().minusYears(18))) {
             throw new RegistrationException("Age cannot be less than 18 years");
         }
         employeeRepository.save(employee);
