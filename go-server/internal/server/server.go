@@ -1,6 +1,8 @@
 package app
 
 import (
+	"net/http"
+
 	_ "github.com/Dzhodddi/ZLAGODA/docs"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/handlers"
@@ -9,7 +11,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	swaggerDocs "github.com/swaggo/echo-swagger"
-	"net/http"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/config"
 	"github.com/Dzhodddi/ZLAGODA/internal/db"
@@ -49,6 +50,7 @@ func setupMiddlewares(e *echo.Echo, cfg *config.Config) {
 	e.GET("/swagger/*", swaggerDocs.WrapHandler)
 	e.HTTPErrorHandler = errorResponse.GlobalHTTPErrorHandler(cfg.Env)
 	e.Use(echoMiddleware.RequestLogger())
+	e.Use(echoMiddleware.Recover())
 	e.Debug = true
 }
 
@@ -68,6 +70,8 @@ func setupDatabase(cfg *config.Config) (*sqlx.DB, error) {
 func setupAllRoutes(db *sqlx.DB, router *echo.Group) {
 	setupCategoryRouts(db, router)
 	setupCustomerCardRouts(db, router)
+	setupChecksRouts(db, router)
+	setupSaleRouts(db, router)
 }
 
 func setupCategoryRouts(db *sqlx.DB, router *echo.Group) {
@@ -82,4 +86,18 @@ func setupCustomerCardRouts(db *sqlx.DB, router *echo.Group) {
 	service := services.NewCardService(repo)
 	handler := handlers.NewCardHandler(*service)
 	handler.RegisterRouts(router)
+}
+
+func setupChecksRouts(db *sqlx.DB, router *echo.Group) {
+	repo := repository.NewCheckRepository(db)
+	service := services.NewCheckService(repo)
+	handler := handlers.NewCheckHandler(*service)
+	handler.RegisterRouts(router)
+}
+
+func setupSaleRouts(db *sqlx.DB, router *echo.Group) {
+	repo := repository.NewSaleRepository(db)
+	service := services.NewSaleService(repo)
+	handler := handlers.NewSaleHandler(service)
+	handler.RegisterRoutes(router)
 }

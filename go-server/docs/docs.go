@@ -71,6 +71,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/checks": {
+            "post": {
+                "description": "Creates a new check",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Create a new check",
+                "parameters": [
+                    {
+                        "description": "Check data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/views.CreateNewCheck"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/views.CheckResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/customer-cards": {
             "post": {
                 "description": "Creates a new customer discount card and stores it in the database",
@@ -125,6 +180,61 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/sales": {
+            "post": {
+                "description": "Creates a new sale",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sales"
+                ],
+                "summary": "Create a new createNewSale",
+                "parameters": [
+                    {
+                        "description": "Sale data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/views.CreateNewSale"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/views.SaleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -139,6 +249,29 @@ const docTemplate = `{
                 }
             }
         },
+        "views.CheckResponse": {
+            "type": "object",
+            "properties": {
+                "card_number": {
+                    "type": "string"
+                },
+                "check_number": {
+                    "type": "string"
+                },
+                "id_employee": {
+                    "type": "string"
+                },
+                "print_date": {
+                    "type": "string"
+                },
+                "sum_total": {
+                    "type": "number"
+                },
+                "vat": {
+                    "type": "number"
+                }
+            }
+        },
         "views.CreateNewCategory": {
             "type": "object",
             "required": [
@@ -149,6 +282,46 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 50,
                     "minLength": 1
+                }
+            }
+        },
+        "views.CreateNewCheck": {
+            "type": "object",
+            "required": [
+                "card_number",
+                "check_number",
+                "id_employee",
+                "print_date",
+                "sum_total",
+                "vat"
+            ],
+            "properties": {
+                "card_number": {
+                    "type": "string",
+                    "maxLength": 13,
+                    "minLength": 1
+                },
+                "check_number": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 1
+                },
+                "id_employee": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 1
+                },
+                "print_date": {
+                    "type": "string"
+                },
+                "sum_total": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "vat": {
+                    "type": "number",
+                    "maximum": 999999999.9999,
+                    "minimum": 0
                 }
             }
         },
@@ -205,6 +378,25 @@ const docTemplate = `{
                 }
             }
         },
+        "views.CreateNewSale": {
+            "type": "object",
+            "properties": {
+                "checkNumber": {
+                    "type": "string"
+                },
+                "productNumber": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "sellingPrice": {
+                    "type": "number",
+                    "format": "float64"
+                },
+                "upc": {
+                    "type": "string"
+                }
+            }
+        },
         "views.CustomerCardResponse": {
             "type": "object",
             "properties": {
@@ -233,6 +425,25 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "zipcode": {
+                    "type": "string"
+                }
+            }
+        },
+        "views.SaleResponse": {
+            "type": "object",
+            "properties": {
+                "checkNumber": {
+                    "type": "string"
+                },
+                "productNumber": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "sellingPrice": {
+                    "type": "number",
+                    "format": "float64"
+                },
+                "upc": {
                     "type": "string"
                 }
             }
