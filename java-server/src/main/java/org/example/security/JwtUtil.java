@@ -40,11 +40,11 @@ public class JwtUtil {
                     .parseSignedClaims(token);
             return !claimsJws.getPayload().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtException("Expired or invalid JWT token: " + token, e);
+            return false;
         }
     }
 
-    public String getEmail(String token) {
+    public String getUsername(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 

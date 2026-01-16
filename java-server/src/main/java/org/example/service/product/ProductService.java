@@ -2,14 +2,15 @@ package org.example.service.product;
 
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
+import org.example.model.product.Product;
 
 import java.util.List;
 
 public interface ProductService {
 
-    ProductDto save(ProductRequestDto requestDto);
+    List<ProductDto> getAll();
 
-    List<ProductDto> findAll();
+    ProductDto save(ProductRequestDto requestDto);
 
     ProductDto updateProductById(Long id, ProductRequestDto requestDto);
 

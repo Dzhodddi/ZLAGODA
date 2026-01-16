@@ -28,10 +28,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+        String path = request.getServletPath();
+        if (path.matches("^/auth(/.*)?$")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         String token = getToken(request);
         if (token != null && jwtUtil.isValidToken(token)) {
-            String email = jwtUtil.getEmail(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            String username = jwtUtil.getUsername(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);

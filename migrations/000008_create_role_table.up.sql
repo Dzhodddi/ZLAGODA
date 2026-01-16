@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS role (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(20) NOT NULL UNIQUE
+);
+
+INSERT INTO role (id, name) VALUES (1, 'MANAGER'), (2, 'CASHIER')
+    ON CONFLICT (id) DO NOTHING;
+
+SELECT setval('role_id_seq', (SELECT MAX(id) FROM role));

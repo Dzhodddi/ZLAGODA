@@ -1,7 +1,8 @@
 package org.example.security;
 
 import lombok.RequiredArgsConstructor;
-import mate.academy.repository.user.UserRepository;
+import org.example.exception.EntityNotFoundException;
+import org.example.repository.employee.EmployeeRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,12 +11,12 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-    private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email)
+    public UserDetails loadUserByUsername(String surname) throws UsernameNotFoundException {
+        return employeeRepository.findByEmplSurname(surname)
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "User with email " + email + " not found"));
+                        "Employee with surname " + surname + " not found"));
     }
 }

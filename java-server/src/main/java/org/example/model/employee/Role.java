@@ -22,7 +22,7 @@ public class Role implements GrantedAuthority {
     @Enumerated(EnumType.STRING)
     private RoleName name;
 
-    //@Override
+    @Override
     public String getAuthority() {
         return name.name();
     }

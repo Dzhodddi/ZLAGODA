@@ -1,5 +1,6 @@
 package org.example.service.product;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.product.ProductDto;
@@ -17,18 +18,20 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     @Override
+    public List<ProductDto> getAll() {
+        List<Product> entities = productRepository.findAll();
+        List<ProductDto> res = new ArrayList<>();
+        for (Product entity : entities) {
+            res.add(productMapper.toDto(entity));
+        }
+        return res;
+    }
+
+    @Override
     public ProductDto save(ProductRequestDto requestDto) {
         Product product = productMapper.toEntity(requestDto);
         productRepository.save(product);
         return productMapper.toDto(product);
-    }
-
-    @Override
-    public List<ProductDto> findAll() {
-        return productRepository.findAll()
-                .stream()
-                .map(productMapper::toDto)
-                .toList();
     }
 
     @Override

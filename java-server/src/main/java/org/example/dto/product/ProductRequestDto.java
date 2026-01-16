@@ -9,9 +9,10 @@ import lombok.Setter;
 @Setter
 public class ProductRequestDto {
     @NotBlank
-    private String product_name;
+    private String productName;
     @NotBlank
-    private String product_characteristics;
+    private String productCharacteristics;
     @NotNull
-    private int category_number;
+    private int categoryNumber;
 }
+

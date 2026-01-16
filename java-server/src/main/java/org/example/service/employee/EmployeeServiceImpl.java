@@ -1,6 +1,8 @@
 package org.example.service.employee;
 
-import java.util.Set;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
@@ -22,25 +24,54 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeMapper employeeMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
-    private final ShoppingCartService shoppingCartService;
 
     @Override
     @Transactional
     public EmployeeResponseDto register(EmployeeRegistrationRequestDto request)
             throws RegistrationException {
-        if (employeeRepository.existsByEmail(request.getEmail().toLowerCase())) {
+        if (employeeRepository.existsByEmplSurname(request.getEmplSurname().toLowerCase())) {
             throw new RegistrationException(
-                    "Employee with such email already exists: "
-                            + request.getEmail());
+                    "Employee with such surname already exists: "
+                            + request.getEmplSurname());
         }
         Employee employee = employeeMapper.toEmployeeEntity(request);
         employee.setPassword(passwordEncoder.encode(employee.getPassword()));
-        Role defaultRole = roleRepository.findRoleByName(Role.RoleName.CASHIER)
+        Role role = roleRepository.findById((long) request.getRoleId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Role USER not found: " + Role.RoleName.CASHIER));
-        employee.setRoles(Set.of(defaultRole));
+                        "Role not found with id: " + request.getRoleId()));
+        employee.setRole(role);
+        if (employee.getSalary() == null) {
+            employee.setSalary(new BigDecimal("0.00"));
+        }
         employeeRepository.save(employee);
-        shoppingCartService.add(employee);
         return employeeMapper.toEmployeeResponseDto(employee);
+    }
+
+    @Override
+    public List<EmployeeResponseDto> getAll() {
+        List<Employee> entities = employeeRepository.findAll();
+        List<EmployeeResponseDto> res = new ArrayList<>();
+        for (Employee entity : entities) {
+            res.add(employeeMapper.toEmployeeResponseDto(entity));
+        }
+        return res;
+    }
+
+    @Override
+    public EmployeeResponseDto updateEmployeeById(Long id, EmployeeRegistrationRequestDto requestDto) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Cannot update employee by id: " + id)
+        );
+        employeeMapper.updateEmployeeFromDto(requestDto, employee);
+        Employee updatedEmployee = employeeRepository.save(employee);
+        return employeeMapper.toEmployeeResponseDto(updatedEmployee);
+    }
+
+    @Override
+    public void deleteEmployeeById(Long id) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Cannot delete employee by id: " + id)
+        );
+        employeeRepository.delete(employee);
     }
 }

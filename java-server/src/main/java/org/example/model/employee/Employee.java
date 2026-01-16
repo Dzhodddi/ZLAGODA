@@ -1,59 +1,72 @@
 package org.example.model.employee;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Date;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE users SET is_deleted = true WHERE id = ?")
-@SQLRestriction("is_deleted = false")
-@Table(name = "users")
-public class Employee implements EmployeeDetails {
+@Table(name = "employee")
+public class Employee implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false, unique = true)
-    private String email;
+    @Column(name = "id_employee")
+    private Long idEmployee;
+
+    @Column(name = "empl_surname", nullable = false, unique = true, length = 50)
+    private String emplSurname;
+
+    @Column(name = "empl_name", nullable = false, length = 50)
+    private String emplName;
+
+    @Column(name = "empl_patronymic", length = 50)
+    private String emplPatronymic;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    @Column(name = "salary", nullable = false, precision = 13, scale = 4)
+    private BigDecimal salary;
+
+    @Column(name = "date_of_birth", nullable = false)
+    @Temporal(TemporalType.DATE)
+    private Date dateOfBirth;
+
+    @Column(name = "date_of_start", nullable = false)
+    @Temporal(TemporalType.DATE)
+    private Date dateOfStart;
+
+    @Column(name = "phone_number", nullable = false, length = 13)
+    private String phoneNumber;
+
+    @Column(nullable = false, length = 50)
+    private String city;
+
+    @Column(nullable = false, length = 50)
+    private String street;
+
+    @Column(name = "zip_code", nullable = false, length = 9)
+    private String zipCode;
+
     @Column(nullable = false)
     private String password;
-    @Column(nullable = false)
-    private String firstName;
-    @Column(nullable = false)
-    private String lastName;
-    private String shippingAddress;
-    @Column(nullable = false)
-    private boolean isDeleted = false;
-    @ManyToMany
-    @JoinTable(name = "users_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+        return List.of(role);
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return emplSurname;
     }
 
     @Override
@@ -74,5 +87,10 @@ public class Employee implements EmployeeDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 }
