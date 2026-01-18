@@ -137,4 +137,18 @@ public class CustomGlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler(InvalidRoleException.class)
+    public ResponseEntity<String> handleInvalidRole(InvalidRoleException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCategoryException.class)
+    public ResponseEntity<String> handleInvalidCategory(InvalidCategoryException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ex.getMessage());
+    }
 }

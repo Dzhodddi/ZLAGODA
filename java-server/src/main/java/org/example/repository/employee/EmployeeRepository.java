@@ -5,6 +5,7 @@ import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.exception.EntityNotFoundException;
+import org.example.exception.InvalidRoleException;
 import org.example.mapper.employee.EmployeeMapper;
 import org.example.mapper.employee.EmployeeRowMapper;
 import org.example.model.employee.Employee;
@@ -61,7 +62,7 @@ public class EmployeeRepository {
             return employeeMapper.toEmployeeResponseDto(saved);
 
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("Invalid role or data integrity violation", e);
+            throw new InvalidRoleException("Invalid role name: " + employee.getRole());
         }
     }
 
@@ -111,7 +112,7 @@ public class EmployeeRepository {
                     .orElseThrow(() -> new EntityNotFoundException("Employee not found after update: " + id));
 
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("Invalid role or data integrity violation", e);
+            throw new InvalidRoleException("Invalid role name: " + requestDto.getRole());
         }
     }
 

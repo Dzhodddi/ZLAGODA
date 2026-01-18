@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
 import org.example.exception.EntityNotFoundException;
+import org.example.exception.InvalidCategoryException;
 import org.example.mapper.product.ProductMapper;
 import org.example.mapper.product.ProductRowMapper;
 import org.example.model.product.Product;
@@ -80,7 +81,8 @@ public class ProductRepository {
                         .orElseThrow(() -> new EntityNotFoundException("Product not found after update: " + product.getId_product()));
             }
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("Invalid category or data integrity violation", e);
+            throw new InvalidCategoryException("Invalid category: "
+                    + product.getCategory_number());
         }
     }
 
@@ -113,7 +115,7 @@ public class ProductRepository {
                     .orElseThrow(() -> new EntityNotFoundException("Product not found after update: " + id));
 
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("Invalid category or data integrity violation", e);
+            throw new InvalidCategoryException("Invalid category: " + requestDto.getCategory_number());
         }
     }
 

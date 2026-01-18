@@ -6,6 +6,7 @@ import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.exception.DeletionException;
 import org.example.exception.EntityNotFoundException;
+import org.example.exception.InvalidRoleException;
 import org.example.exception.RegistrationException;
 import org.example.mapper.employee.EmployeeMapper;
 import org.example.model.employee.Role;
@@ -54,13 +55,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setId_employee(request.getId_employee());
         employee.setPassword(passwordEncoder.encode(request.getPassword()));
 
+        Role.RoleName roleEnum;
         try {
-            Role.RoleName roleEnum = Role.RoleName.valueOf(request.getRole());
-            Role role = new Role();
-            role.setName(roleEnum);
-            employee.setRole(role);
+            roleEnum = Role.RoleName.valueOf(request.getRole().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new RegistrationException("Invalid role name: " + request.getRole());
+            throw new InvalidRoleException("Invalid role name: " + request.getRole());
         }
 
         if (employee.getSalary() == null) {
