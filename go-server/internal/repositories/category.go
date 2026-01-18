@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/lib/pq"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
@@ -60,6 +61,12 @@ func (r *CategoryRepository) DeleteCategory(ctx context.Context, id int64) error
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return errorResponse.EntityNotFound()
+		}
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			if pqErr.Code == "23503" {
+				return errorResponse.BadForeignKey()
+			}
 		}
 		return err
 	}

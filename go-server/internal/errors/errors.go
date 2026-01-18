@@ -53,5 +53,5 @@ func BadForeignKey() *HTTPErrorResponse {
 }
 
 func EntityNotFound() *HTTPErrorResponse {
-	return NewError(http.StatusUnprocessableEntity, constants.EntityDoesNotExist, nil)
+	return NewError(http.StatusNotFound, constants.EntityDoesNotExist, nil)
 }

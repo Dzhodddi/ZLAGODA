@@ -106,6 +106,12 @@ func (r *CardRepository) DeleteCustomerCard(ctx context.Context, cardNumber stri
 		if errors.Is(err, sql.ErrNoRows) {
 			return errorResponse.EntityNotFound()
 		}
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			if pqErr.Code == "23503" {
+				return errorResponse.BadForeignKey()
+			}
+		}
 		return err
 	}
 	return nil
