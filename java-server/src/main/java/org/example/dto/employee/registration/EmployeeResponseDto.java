@@ -8,16 +8,16 @@ import java.util.Date;
 @Getter
 @Setter
 public class EmployeeResponseDto {
-    private String idEmployee;
-    private String emplSurname;
-    private String emplName;
-    private String emplPatronymic;
+    private String id_employee;
+    private String empl_surname;
+    private String empl_name;
+    private String empl_patronymic;
     private String role;
     private BigDecimal salary;
-    private Date dateOfBirth;
-    private Date dateOfStart;
-    private String phoneNumber;
+    private Date date_of_birth;
+    private Date date_of_start;
+    private String phone_number;
     private String city;
     private String street;
-    private String zipCode;
+    private String zip_code;
 }

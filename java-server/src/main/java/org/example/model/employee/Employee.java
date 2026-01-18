@@ -12,18 +12,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 @Setter
 public class Employee implements UserDetails {
-    private String idEmployee;
-    private String emplSurname;
-    private String emplName;
-    private String emplPatronymic;
+    private String id_employee;
+    private String empl_surname;
+    private String empl_name;
+    private String empl_patronymic;
     private Role role;
     private BigDecimal salary;
-    private Date dateOfBirth;
-    private Date dateOfStart;
-    private String phoneNumber;
+    private Date date_of_birth;
+    private Date date_of_start;
+    private String phone_number;
     private String city;
     private String street;
-    private String zipCode;
+    private String zip_code;
     private String password;
 
     @Override
@@ -33,7 +33,7 @@ public class Employee implements UserDetails {
 
     @Override
     public String getUsername() {
-        return idEmployee;
+        return id_employee;
     }
 
     @Override

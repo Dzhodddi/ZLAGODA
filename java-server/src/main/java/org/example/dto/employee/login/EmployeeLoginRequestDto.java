@@ -10,7 +10,7 @@ import lombok.Setter;
 public class EmployeeLoginRequestDto {
     @NotBlank
     @Size(min = 1, max = 10)
-    private String idEmployee;
+    private String id_employee;
     @NotBlank
     @Size(min = 8, max = 20)
     private String password;

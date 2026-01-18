@@ -3,7 +3,6 @@ package org.example.service.product;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
-import org.example.exception.EntityNotFoundException;
 import org.example.mapper.product.ProductMapper;
 import org.example.model.product.Product;
 import org.example.repository.product.ProductRepository;
@@ -35,12 +34,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDto updateProductById(Long id, ProductRequestDto requestDto) {
-        Product product = repository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Product not found: " + id));
-
-        mapper.updateProductFromDto(requestDto, product);
-        return mapper.toDto(repository.save(product));
+        return repository.updateProductById(id, requestDto);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.example.service.employee;
 
+import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.exception.RegistrationException;
@@ -11,7 +12,7 @@ public interface EmployeeService {
 
     List<EmployeeResponseDto> getAll();
 
-    EmployeeResponseDto updateEmployeeById(String id, EmployeeRegistrationRequestDto requestDto);
+    EmployeeResponseDto updateEmployeeById(String id, EmployeeUpdateRequestDto requestDto);
 
     void deleteEmployeeById(String id);
 }

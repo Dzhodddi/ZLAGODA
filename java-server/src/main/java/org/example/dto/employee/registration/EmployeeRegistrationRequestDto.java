@@ -1,11 +1,12 @@
 package org.example.dto.employee.registration;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.dto.employee.registration.annotation.CustomDateDeserializer;
 import org.example.dto.employee.registration.annotation.FieldMatch;
 import org.hibernate.validator.constraints.Length;
 import java.math.BigDecimal;
@@ -16,32 +17,32 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldMatch(first = "password",
-        second = "repeatPassword",
+        second = "repeat_password",
         message = "Password and repeated password do not match")
 public class EmployeeRegistrationRequestDto {
     @NotBlank
     @Length(min = 1, max = 10)
-    private String idEmployee;
+    private String id_employee;
     @NotBlank
     @Length(min = 1, max = 50)
-    private String emplSurname;
+    private String empl_surname;
     @NotBlank
     @Length(min = 1, max = 50)
-    private String emplName;
+    private String empl_name;
     @Length(min = 1, max = 50)
-    private String emplPatronymic;
+    private String empl_patronymic;
     @NotBlank
     private String role;
     @NotNull
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonDeserialize(using = CustomDateDeserializer.class)
     @Past
-    private Date dateOfBirth;
+    private Date date_of_birth;
     @NotNull
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date dateOfStart;
+    @JsonDeserialize(using = CustomDateDeserializer.class)
+    private Date date_of_start;
     @NotBlank
     @Length(min = 8, max = 13)
-    private String phoneNumber;
+    private String phone_number;
     @NotNull
     @DecimalMin("0.0")
     private BigDecimal salary;
@@ -53,11 +54,11 @@ public class EmployeeRegistrationRequestDto {
     private String street;
     @NotBlank
     @Length(min = 3, max = 9)
-    private String zipCode;
+    private String zip_code;
     @NotBlank(message = "Password is required")
     @Length(min = 8, max = 100)
     private String password;
     @NotBlank(message = "Repeat password is required")
     @Length(min = 8, max = 100)
-    private String repeatPassword;
+    private String repeat_password;
 }

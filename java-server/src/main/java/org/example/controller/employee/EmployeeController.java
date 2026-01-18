@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.exception.RegistrationException;
@@ -52,7 +53,7 @@ public class EmployeeController {
     @PreAuthorize("hasRole('MANAGER')")
     public EmployeeResponseDto updateEmployeeById(
             @PathVariable String id,
-            @RequestBody @Valid EmployeeRegistrationRequestDto employeeRequestDto
+            @RequestBody @Valid EmployeeUpdateRequestDto employeeRequestDto
     ) {
         return employeeService.updateEmployeeById(id, employeeRequestDto);
     }

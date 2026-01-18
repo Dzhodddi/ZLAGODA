@@ -7,6 +7,7 @@ org\example\security\JwtAuthenticationFilter.class
 org\example\controller\employee\EmployeeController.class
 org\example\dto\employee\registration\EmployeeResponseDto.class
 org\example\mapper\product\ProductRowMapper.class
+org\example\dto\employee\EmployeeUpdateRequestDto.class
 org\example\mapper\employee\EmployeeMapperImpl.class
 org\example\dto\employee\login\EmployeeLoginRequestDto.class
 org\example\dto\employee\registration\annotation\FieldMatchValidator.class
@@ -24,6 +25,7 @@ org\example\security\JwtUtil.class
 org\example\dto\employee\login\RefreshTokenRequestDto.class
 org\example\model\employee\Employee.class
 org\example\exception\RegistrationException.class
+org\example\dto\employee\registration\annotation\CustomDateDeserializer.class
 org\example\exception\DeletionException.class
 org\example\model\product\Product.class
 org\example\mapper\product\ProductMapperImpl.class
@@ -33,7 +35,6 @@ org\example\model\employee\Role.class
 org\example\service\product\ProductServiceImpl.class
 org\example\dto\employee\registration\annotation\FieldMatch.class
 org\example\dto\product\ProductDto.class
-org\example\config\DataInitializer.class
 org\example\exception\EntityNotFoundException.class
 org\example\service\employee\EmployeeService.class
 org\example\security\CustomUserDetailsService.class

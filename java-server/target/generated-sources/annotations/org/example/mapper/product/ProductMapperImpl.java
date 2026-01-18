@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-18T01:25:29+0200",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
+    date = "2026-01-18T16:09:47+0200",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
 )
 @Component
 public class ProductMapperImpl implements ProductMapper {
@@ -22,12 +22,12 @@ public class ProductMapperImpl implements ProductMapper {
 
         ProductDto productDto = new ProductDto();
 
-        if ( product.getIdProduct() != null ) {
-            productDto.setIdProduct( product.getIdProduct().intValue() );
+        if ( product.getId_product() != null ) {
+            productDto.setId_product( product.getId_product().intValue() );
         }
-        productDto.setProductName( product.getProductName() );
-        productDto.setProductCharacteristics( product.getProductCharacteristics() );
-        productDto.setCategoryNumber( product.getCategoryNumber() );
+        productDto.setProduct_name( product.getProduct_name() );
+        productDto.setProduct_characteristics( product.getProduct_characteristics() );
+        productDto.setCategory_number( product.getCategory_number() );
 
         return productDto;
     }
@@ -40,21 +40,10 @@ public class ProductMapperImpl implements ProductMapper {
 
         Product product = new Product();
 
-        product.setProductName( requestDto.getProductName() );
-        product.setProductCharacteristics( requestDto.getProductCharacteristics() );
-        product.setCategoryNumber( requestDto.getCategoryNumber() );
+        product.setProduct_name( requestDto.getProduct_name() );
+        product.setProduct_characteristics( requestDto.getProduct_characteristics() );
+        product.setCategory_number( requestDto.getCategory_number() );
 
         return product;
-    }
-
-    @Override
-    public void updateProductFromDto(ProductRequestDto requestDto, Product product) {
-        if ( requestDto == null ) {
-            return;
-        }
-
-        product.setProductName( requestDto.getProductName() );
-        product.setProductCharacteristics( requestDto.getProductCharacteristics() );
-        product.setCategoryNumber( requestDto.getCategoryNumber() );
     }
 }

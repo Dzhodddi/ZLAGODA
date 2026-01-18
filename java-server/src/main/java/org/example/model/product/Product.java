@@ -6,8 +6,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Product {
-    private Long idProduct;
-    private String productName;
-    private String productCharacteristics;
-    private int categoryNumber;
+    private Long id_product;
+    private String product_name;
+    private String product_characteristics;
+    private int category_number;
 }
