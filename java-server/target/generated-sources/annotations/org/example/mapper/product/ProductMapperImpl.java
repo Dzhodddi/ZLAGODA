@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-16T23:53:04+0200",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
+    date = "2026-01-18T01:25:29+0200",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
 public class ProductMapperImpl implements ProductMapper {
@@ -22,16 +22,12 @@ public class ProductMapperImpl implements ProductMapper {
 
         ProductDto productDto = new ProductDto();
 
-        if ( product.getId_product() != null ) {
-            productDto.setProduct_id( product.getId_product().intValue() );
+        if ( product.getIdProduct() != null ) {
+            productDto.setIdProduct( product.getIdProduct().intValue() );
         }
-        if ( product.getProductName() != null ) {
-            productDto.setProduct_name( product.getProductName() );
-        }
-        if ( product.getProductCharacteristics() != null ) {
-            productDto.setProduct_characteristics( product.getProductCharacteristics() );
-        }
-        productDto.setCategory_number( product.getCategoryNumber() );
+        productDto.setProductName( product.getProductName() );
+        productDto.setProductCharacteristics( product.getProductCharacteristics() );
+        productDto.setCategoryNumber( product.getCategoryNumber() );
 
         return productDto;
     }
@@ -44,12 +40,8 @@ public class ProductMapperImpl implements ProductMapper {
 
         Product product = new Product();
 
-        if ( requestDto.getProductName() != null ) {
-            product.setProductName( requestDto.getProductName() );
-        }
-        if ( requestDto.getProductCharacteristics() != null ) {
-            product.setProductCharacteristics( requestDto.getProductCharacteristics() );
-        }
+        product.setProductName( requestDto.getProductName() );
+        product.setProductCharacteristics( requestDto.getProductCharacteristics() );
         product.setCategoryNumber( requestDto.getCategoryNumber() );
 
         return product;
@@ -61,18 +53,8 @@ public class ProductMapperImpl implements ProductMapper {
             return;
         }
 
-        if ( requestDto.getProductName() != null ) {
-            product.setProductName( requestDto.getProductName() );
-        }
-        else {
-            product.setProductName( null );
-        }
-        if ( requestDto.getProductCharacteristics() != null ) {
-            product.setProductCharacteristics( requestDto.getProductCharacteristics() );
-        }
-        else {
-            product.setProductCharacteristics( null );
-        }
+        product.setProductName( requestDto.getProductName() );
+        product.setProductCharacteristics( requestDto.getProductCharacteristics() );
         product.setCategoryNumber( requestDto.getCategoryNumber() );
     }
 }

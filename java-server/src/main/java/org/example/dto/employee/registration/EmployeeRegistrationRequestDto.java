@@ -2,17 +2,19 @@ package org.example.dto.employee.registration;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.dto.employee.registration.annotation.FieldMatch;
 import org.hibernate.validator.constraints.Length;
-
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldMatch(first = "password",
         second = "repeatPassword",
         message = "Password and repeated password do not match")
@@ -25,21 +27,21 @@ public class EmployeeRegistrationRequestDto {
     private String emplSurname;
     @NotBlank
     @Length(min = 1, max = 50)
-    private String empl_name;
+    private String emplName;
     @Length(min = 1, max = 50)
-    private String empl_patronymic;
-    @NotNull
-    private int roleId;
+    private String emplPatronymic;
+    @NotBlank
+    private String role;
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Past
-    private Date date_of_birth;
+    private Date dateOfBirth;
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date date_of_start;
+    private Date dateOfStart;
     @NotBlank
     @Length(min = 8, max = 13)
-    private String phone_number;
+    private String phoneNumber;
     @NotNull
     @DecimalMin("0.0")
     private BigDecimal salary;
@@ -51,7 +53,7 @@ public class EmployeeRegistrationRequestDto {
     private String street;
     @NotBlank
     @Length(min = 3, max = 9)
-    private String zip_code;
+    private String zipCode;
     @NotBlank(message = "Password is required")
     @Length(min = 8, max = 100)
     private String password;

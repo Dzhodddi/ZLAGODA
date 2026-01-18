@@ -2,7 +2,6 @@ package org.example.dto.employee.registration;
 
 import lombok.Getter;
 import lombok.Setter;
-
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -11,12 +10,14 @@ import java.util.Date;
 public class EmployeeResponseDto {
     private String idEmployee;
     private String emplSurname;
-    private String empl_name;
+    private String emplName;
+    private String emplPatronymic;
+    private String role;
     private BigDecimal salary;
-    private Date date_of_birth;
-    private Date date_of_start;
-    private String phone_number;
+    private Date dateOfBirth;
+    private Date dateOfStart;
+    private String phoneNumber;
     private String city;
     private String street;
-    private String zip_code;
+    private String zipCode;
 }

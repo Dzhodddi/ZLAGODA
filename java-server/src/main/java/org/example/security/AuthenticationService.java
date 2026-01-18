@@ -23,26 +23,20 @@ public class AuthenticationService {
                         request.getPassword()
                 )
         );
-
         String username = authentication.getName();
         String accessToken = jwtUtil.generateAccessToken(username);
         String refreshToken = jwtUtil.generateRefreshToken(username);
-
         return new EmployeeLoginResponseDto(accessToken, refreshToken);
     }
 
     public EmployeeLoginResponseDto refreshToken(RefreshTokenRequestDto request) {
         String refreshToken = request.getRefreshToken();
-
         if (!jwtUtil.isValidToken(refreshToken)) {
             throw new AuthenticationException("Invalid or expired refresh token");
         }
-
         String username = jwtUtil.getUsername(refreshToken);
-
         String newAccessToken = jwtUtil.generateAccessToken(username);
         String newRefreshToken = jwtUtil.generateRefreshToken(username);
-
         return new EmployeeLoginResponseDto(newAccessToken, newRefreshToken);
     }
 }

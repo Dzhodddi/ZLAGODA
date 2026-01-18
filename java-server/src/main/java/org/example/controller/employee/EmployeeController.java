@@ -51,7 +51,7 @@ public class EmployeeController {
     )
     @PreAuthorize("hasRole('MANAGER')")
     public EmployeeResponseDto updateEmployeeById(
-            @PathVariable Long id,
+            @PathVariable String id,
             @RequestBody @Valid EmployeeRegistrationRequestDto employeeRequestDto
     ) {
         return employeeService.updateEmployeeById(id, employeeRequestDto);

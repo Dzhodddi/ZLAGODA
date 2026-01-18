@@ -1,7 +1,5 @@
 package org.example.service.product;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
@@ -9,44 +7,44 @@ import org.example.exception.EntityNotFoundException;
 import org.example.mapper.product.ProductMapper;
 import org.example.model.product.Product;
 import org.example.repository.product.ProductRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
 public class ProductServiceImpl implements ProductService {
-    private final ProductRepository productRepository;
-    private final ProductMapper productMapper;
+
+    private final ProductRepository repository;
+    @Qualifier("productMapper")
+    private final ProductMapper mapper;
 
     @Override
     public List<ProductDto> getAll() {
-        List<Product> entities = productRepository.findAll();
-        List<ProductDto> res = new ArrayList<>();
-        for (Product entity : entities) {
-            res.add(productMapper.toDto(entity));
-        }
-        return res;
+        return repository.findAll()
+                .stream()
+                .map(mapper::toDto)
+                .toList();
     }
 
     @Override
     public ProductDto save(ProductRequestDto requestDto) {
-        Product product = productMapper.toEntity(requestDto);
-        productRepository.save(product);
-        return productMapper.toDto(product);
+        Product product = mapper.toEntity(requestDto);
+        return mapper.toDto(repository.save(product));
     }
 
     @Override
     public ProductDto updateProductById(Long id, ProductRequestDto requestDto) {
-        Product product = productRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Cannot update product by id: " + id));
-        productMapper.updateProductFromDto(requestDto, product);
-        Product updatedProduct = productRepository.save(product);
-        return productMapper.toDto(updatedProduct);
+        Product product = repository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Product not found: " + id));
+
+        mapper.updateProductFromDto(requestDto, product);
+        return mapper.toDto(repository.save(product));
     }
 
     @Override
     public void deleteProductById(Long id) {
-        Product product = productRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Cannot delete product by id: " + id));
-        productRepository.delete(product);
+        repository.deleteById(id);
     }
 }

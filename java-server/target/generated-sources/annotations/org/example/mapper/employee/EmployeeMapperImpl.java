@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-16T23:53:03+0200",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
+    date = "2026-01-18T01:25:29+0200",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
 public class EmployeeMapperImpl implements EmployeeMapper {
@@ -23,17 +23,18 @@ public class EmployeeMapperImpl implements EmployeeMapper {
         Employee employee = new Employee();
 
         employee.setIdEmployee( dto.getIdEmployee() );
-        employee.setSalary( dto.getSalary() );
-        employee.setEmplName( dto.getEmpl_name() );
-        employee.setEmplPatronymic( dto.getEmpl_patronymic() );
-        employee.setDateOfBirth( dto.getDate_of_birth() );
-        employee.setDateOfStart( dto.getDate_of_start() );
-        employee.setPhoneNumber( dto.getPhone_number() );
-        employee.setZipCode( dto.getZip_code() );
-        employee.setPassword( dto.getPassword() );
         employee.setEmplSurname( dto.getEmplSurname() );
+        employee.setEmplName( dto.getEmplName() );
+        employee.setEmplPatronymic( dto.getEmplPatronymic() );
+        employee.setRole( map( dto.getRole() ) );
+        employee.setSalary( dto.getSalary() );
+        employee.setDateOfBirth( dto.getDateOfBirth() );
+        employee.setDateOfStart( dto.getDateOfStart() );
+        employee.setPhoneNumber( dto.getPhoneNumber() );
         employee.setCity( dto.getCity() );
         employee.setStreet( dto.getStreet() );
+        employee.setZipCode( dto.getZipCode() );
+        employee.setPassword( dto.getPassword() );
 
         return employee;
     }
@@ -46,36 +47,19 @@ public class EmployeeMapperImpl implements EmployeeMapper {
 
         EmployeeResponseDto employeeResponseDto = new EmployeeResponseDto();
 
-        employeeResponseDto.setEmpl_name( employee.getEmplName() );
-        employeeResponseDto.setDate_of_birth( employee.getDateOfBirth() );
-        employeeResponseDto.setDate_of_start( employee.getDateOfStart() );
-        employeeResponseDto.setPhone_number( employee.getPhoneNumber() );
-        employeeResponseDto.setZip_code( employee.getZipCode() );
         employeeResponseDto.setIdEmployee( employee.getIdEmployee() );
         employeeResponseDto.setEmplSurname( employee.getEmplSurname() );
+        employeeResponseDto.setEmplName( employee.getEmplName() );
+        employeeResponseDto.setEmplPatronymic( employee.getEmplPatronymic() );
+        employeeResponseDto.setRole( map( employee.getRole() ) );
         employeeResponseDto.setSalary( employee.getSalary() );
+        employeeResponseDto.setDateOfBirth( employee.getDateOfBirth() );
+        employeeResponseDto.setDateOfStart( employee.getDateOfStart() );
+        employeeResponseDto.setPhoneNumber( employee.getPhoneNumber() );
         employeeResponseDto.setCity( employee.getCity() );
         employeeResponseDto.setStreet( employee.getStreet() );
+        employeeResponseDto.setZipCode( employee.getZipCode() );
 
         return employeeResponseDto;
-    }
-
-    @Override
-    public void updateEmployeeFromDto(EmployeeRegistrationRequestDto requestDto, Employee employee) {
-        if ( requestDto == null ) {
-            return;
-        }
-
-        employee.setSalary( requestDto.getSalary() );
-        employee.setPassword( requestDto.getPassword() );
-        employee.setEmplName( requestDto.getEmpl_name() );
-        employee.setEmplPatronymic( requestDto.getEmpl_patronymic() );
-        employee.setDateOfBirth( requestDto.getDate_of_birth() );
-        employee.setDateOfStart( requestDto.getDate_of_start() );
-        employee.setPhoneNumber( requestDto.getPhone_number() );
-        employee.setZipCode( requestDto.getZip_code() );
-        employee.setEmplSurname( requestDto.getEmplSurname() );
-        employee.setCity( requestDto.getCity() );
-        employee.setStreet( requestDto.getStreet() );
     }
 }

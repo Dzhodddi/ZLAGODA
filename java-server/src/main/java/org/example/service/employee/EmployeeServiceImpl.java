@@ -3,7 +3,6 @@ package org.example.service.employee;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
@@ -41,7 +40,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                     "Employee with such id already exists: "
                             + request.getIdEmployee());
         }
-        LocalDate birthDate = request.getDate_of_birth().toInstant()
+        LocalDate birthDate = request.getDateOfBirth().toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
         if (birthDate.isAfter(LocalDate.now().minusYears(18))) {
@@ -52,35 +51,31 @@ public class EmployeeServiceImpl implements EmployeeService {
             employee.setIdEmployee(request.getIdEmployee());
         }
         employee.setPassword(passwordEncoder.encode(request.getPassword()));
-        Role role = roleRepository.findById((long) request.getRoleId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Role not found with id: " + request.getRoleId()));
-        employee.setRole(role);
+        try {
+            Role.RoleName roleEnum = Role.RoleName.valueOf(request.getRole());
+            Role role = new Role();
+            role.setName(roleEnum);
+            employee.setRole(role);
+        } catch (IllegalArgumentException e) {
+            throw new RegistrationException("Invalid role name: " + request.getRole());
+        }
         if (employee.getSalary() == null) {
             employee.setSalary(new BigDecimal("0.00"));
         }
-        employeeRepository.save(employee);
-        return employeeMapper.toEmployeeResponseDto(employee);
+        return employeeRepository.save(employee);
     }
 
     @Override
     public List<EmployeeResponseDto> getAll() {
-        List<Employee> entities = employeeRepository.findAll();
-        List<EmployeeResponseDto> res = new ArrayList<>();
-        for (Employee entity : entities) {
-            res.add(employeeMapper.toEmployeeResponseDto(entity));
-        }
-        return res;
+        return employeeRepository.findAll();
     }
 
     @Override
-    public EmployeeResponseDto updateEmployeeById(Long id, EmployeeRegistrationRequestDto requestDto) {
-        Employee employee = employeeRepository.findById(id).orElseThrow(
+    public EmployeeResponseDto updateEmployeeById(String id, EmployeeRegistrationRequestDto requestDto) {
+        employeeRepository.findByIdEmployee(id).orElseThrow(
                 () -> new EntityNotFoundException("Cannot update employee by id: " + id)
         );
-        employeeMapper.updateEmployeeFromDto(requestDto, employee);
-        Employee updatedEmployee = employeeRepository.save(employee);
-        return employeeMapper.toEmployeeResponseDto(updatedEmployee);
+        return employeeRepository.updateEmployeeById(id, requestDto);
     }
 
     @Override
@@ -89,9 +84,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (id.equals(currentUserId)) {
             throw new DeletionException("Cannot delete yourself by your own id: " + id);
         }
-        Employee employee = employeeRepository.findByIdEmployee(id).orElseThrow(
+        employeeRepository.findByIdEmployee(id).orElseThrow(
                 () -> new EntityNotFoundException("Cannot delete employee by id: " + id)
         );
-        employeeRepository.delete(employee);
+        employeeRepository.deleteEmployeeById(id);
     }
 }
