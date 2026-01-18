@@ -59,7 +59,7 @@ public class CustomGlobalExceptionHandler {
             DataIntegrityViolationException ex
     ) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body("Data integrity violation");
     }
 
