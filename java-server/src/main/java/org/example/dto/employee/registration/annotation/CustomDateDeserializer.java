@@ -11,18 +11,10 @@ import java.util.Date;
 public class CustomDateDeserializer extends JsonDeserializer<Date> {
     @Override
     public Date deserialize(JsonParser p, DeserializationContext context) throws IOException {
-        String date = p.getText();
-        if (date.matches("\\d{4}-\\d{2}")) {
-            date += "-01";
-        }
-        if (date.matches("\\d{4}")) {
-            date += "-01";
-            date += "-01";
-        }
         try {
-            return new SimpleDateFormat("yyyy-MM-dd").parse(date);
+            return new SimpleDateFormat("yyyy-MM-dd").parse(p.getText());
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Date parsing failed: " + p.getText(), e);
         }
     }
 }
