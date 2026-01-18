@@ -41,7 +41,7 @@ public class CustomGlobalExceptionHandler {
         ).toList();
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(allErrors);
     }
 
