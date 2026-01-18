@@ -6,4 +6,5 @@ const (
 	EntityAlreadyExists = "Already exists"
 	ViolateForeignKey   = "Violate foreign key"
 	InvalidTimeFormat   = "Invalid format, must be RFC3339"
+	EntityDoesNotExist  = "Entity does not exist"
 )

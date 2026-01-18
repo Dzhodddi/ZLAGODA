@@ -1,6 +1,9 @@
 package utils
 
-import "database/sql"
+import (
+	"database/sql"
+	"strconv"
+)
 
 func ToNullString(s *string) sql.NullString {
 	if s == nil {
@@ -14,4 +17,12 @@ func SqlNullToString(s sql.NullString) *string {
 		return nil
 	}
 	return &s.String
+}
+
+func ParseStringToInt(s string) (int64, error) {
+	id, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
 }

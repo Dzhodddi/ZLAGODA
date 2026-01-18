@@ -6,3 +6,20 @@ VALUES
     RETURNING
 	category_number,
 	category_name;
+
+-- name: UpdateCategory :one
+UPDATE category
+SET category_name = $2
+WHERE category_number = $1
+RETURNING category_number, category_name;
+
+-- name: GetCategoryByID :one
+SELECT category_number, category_name FROM category WHERE category_number = $1;
+
+-- name: GetAllCategories :many
+SELECT category_number, category_name FROM category ORDER BY category_number;
+
+-- name: DeleteCategoryByID :one
+DELETE FROM category
+WHERE category_number = $1
+RETURNING category_number;
