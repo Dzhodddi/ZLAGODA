@@ -1,7 +1,11 @@
 package org.example.exception;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -60,7 +64,16 @@ public class CustomGlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handleInvalidJson() {
+    public ResponseEntity<String> handleInvalidJson(HttpMessageNotReadableException ex) {
+        Throwable cause = ex.getCause();
+        while (cause != null) {
+            if (cause instanceof DateFormatException) {
+                return ResponseEntity
+                        .badRequest()
+                        .body("Invalid date format. Expected format: yyyy-MM-dd");
+            }
+            cause = cause.getCause();
+        }
         return ResponseEntity
                 .badRequest()
                 .body("Invalid JSON format");
@@ -116,5 +129,12 @@ public class CustomGlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Unexpected error occurred");
+    }
+
+    @ExceptionHandler(DateFormatException.class)
+    public ResponseEntity<String> handleDateFormatException(DateFormatException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
     }
 }
