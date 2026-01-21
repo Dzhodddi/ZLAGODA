@@ -25,7 +25,7 @@ func NewCheckRepository(db *sqlx.DB) *CheckRepository {
 	}
 }
 
-// TODO [add calculation of totat sum of products, deletion from store_product table and create and insert data into check_product table]
+// TODO [deletion from store_product table and create and insert data into check_product table]
 func (r *CheckRepository) CreateNewCheck(
 	ctx context.Context,
 	check views.CreateNewCheck,
@@ -36,7 +36,7 @@ func (r *CheckRepository) CreateNewCheck(
 ) (*generated.Check, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
-	err := r.isPossibleToCreateCheck(ctx, formattedSqlPayload, len(keys), append([]interface{}{keys}, payload...))
+	totalPrice, err := r.calculateCheckTotalSumIfValid(ctx, formattedSqlPayload, len(keys), append([]interface{}{keys}, payload...))
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (r *CheckRepository) CreateNewCheck(
 			IDEmployee:  check.IDEmployee,
 			CardNumber:  check.CardNumber,
 			PrintDate:   printTime,
-			SumTotal:    0,
+			SumTotal:    totalPrice,
 			Vat:         check.VAT,
 		},
 	)
@@ -65,8 +65,9 @@ func (r *CheckRepository) CreateNewCheck(
 	return &newCheck, nil
 }
 
-func (r *CheckRepository) isPossibleToCreateCheck(ctx context.Context, formattedSqlPayload string, resultLen int, args []any) error {
+func (r *CheckRepository) calculateCheckTotalSumIfValid(ctx context.Context, formattedSqlPayload string, resultLen int, args []any) (float64, error) {
 	var count int
+	var totalPrice float64
 	query, args, err := sqlx.In(fmt.Sprintf(`
 	WITH
 	found_products AS (
@@ -77,24 +78,24 @@ func (r *CheckRepository) isPossibleToCreateCheck(ctx context.Context, formatted
 	payload (upc, quantity) AS (
 	  VALUES %s
 	)
-	SELECT COUNT(*)
+	SELECT COUNT(*), SUM(s.selling_price * p.quantity)
 	FROM found_products f
 	JOIN store_product s ON s.upc = f.upc
 	JOIN payload p ON p.upc = f.upc
 	WHERE s.products_number >= p.quantity;
 `, formattedSqlPayload), args...)
 	if err != nil {
-		return err
+		return -1, err
 	}
 	query = r.db.Rebind(query)
-	err = r.db.QueryRowxContext(ctx, query, args...).Scan(&count)
+	err = r.db.QueryRowxContext(ctx, query, args...).Scan(&count, &totalPrice)
 	if err != nil {
-		return err
+		return -1, err
 	}
 	if count != resultLen {
-		return errorResponse.BadForeignKey()
+		return -1, errorResponse.BadForeignKey()
 	}
-	return nil
+	return totalPrice, nil
 }
 
 func (r *CheckRepository) calculateProductSum(ctx context.Context) (float64, error) {
