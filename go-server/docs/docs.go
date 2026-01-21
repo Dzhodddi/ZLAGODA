@@ -454,14 +454,10 @@ const docTemplate = `{
         "views.StoreProduct": {
             "type": "object",
             "required": [
-                "price",
                 "quantity",
                 "upc"
             ],
             "properties": {
-                "price": {
-                    "type": "number"
-                },
                 "quantity": {
                     "type": "integer",
                     "minimum": 1

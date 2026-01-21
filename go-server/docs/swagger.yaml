@@ -154,8 +154,6 @@ definitions:
     type: object
   views.StoreProduct:
     properties:
-      price:
-        type: number
       quantity:
         minimum: 1
         type: integer
@@ -164,7 +162,6 @@ definitions:
         minLength: 1
         type: string
     required:
-    - price
     - quantity
     - upc
     type: object

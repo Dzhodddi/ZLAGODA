@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"log"
 	"strings"
 	"time"
 
@@ -23,17 +24,27 @@ func NewCheckService(checkRepository *repository.CheckRepository) *CheckService 
 }
 
 func (s *CheckService) CreateCheck(ctx context.Context, check views.CreateNewCheck, printTime time.Time) (*views.CheckResponse, error) {
-	totalPrice := 0.0
-	rawPayloadSQL := ""
-	values := make([]interface{}, 0, 2*len(check.Products))
-	keys := make([]string, 0, len(check.Products))
+	// hashmap UPC: quantity
+	upcToQuantity := make(map[string]int)
 	for _, product := range check.Products {
-		keys = append(keys, product.UPC)
-		values = append(values, product.UPC, product.Quantity)
+		_, ok := upcToQuantity[product.UPC]
+		if !ok {
+			upcToQuantity[product.UPC] = product.Quantity
+		} else {
+			upcToQuantity[product.UPC] += product.Quantity
+		}
+	}
+	rawPayloadSQL := ""
+	payload := make([]interface{}, 0, len(upcToQuantity))
+	keys := make([]string, 0, len(upcToQuantity))
+	for key, value := range upcToQuantity {
+		log.Println(key, value)
+		keys = append(keys, key)
+		payload = append(payload, key, value)
 		rawPayloadSQL += "(?, ?::int),"
 	}
 	rawPayloadSQL = strings.TrimSuffix(rawPayloadSQL, ",")
-	newCheck, err := s.checkRepository.CreateNewCheck(ctx, check, printTime, rawPayloadSQL, totalPrice, values, keys)
+	newCheck, err := s.checkRepository.CreateNewCheck(ctx, check, printTime, rawPayloadSQL, payload, keys)
 	if err != nil {
 		var httpErr *errorResponse.HTTPErrorResponse
 		if errors.As(err, &httpErr) {
