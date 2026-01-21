@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
@@ -22,7 +23,17 @@ func NewCheckService(checkRepository *repository.CheckRepository) *CheckService 
 }
 
 func (s *CheckService) CreateCheck(ctx context.Context, check views.CreateNewCheck, printTime time.Time) (*views.CheckResponse, error) {
-	newCheck, err := s.checkRepository.CreateNewCheck(ctx, check, printTime)
+	totalPrice := 0.0
+	rawPayloadSQL := ""
+	values := make([]interface{}, 0, 2*len(check.Products))
+	keys := make([]string, 0, len(check.Products))
+	for _, product := range check.Products {
+		keys = append(keys, product.UPC)
+		values = append(values, product.UPC, product.Quantity)
+		rawPayloadSQL += "(?, ?::int),"
+	}
+	rawPayloadSQL = strings.TrimSuffix(rawPayloadSQL, ",")
+	newCheck, err := s.checkRepository.CreateNewCheck(ctx, check, printTime, rawPayloadSQL, totalPrice, values, keys)
 	if err != nil {
 		var httpErr *errorResponse.HTTPErrorResponse
 		if errors.As(err, &httpErr) {

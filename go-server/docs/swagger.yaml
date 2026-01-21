@@ -47,9 +47,11 @@ definitions:
         type: string
       print_date:
         type: string
-      sum_total:
-        minimum: 0
-        type: number
+      products:
+        items:
+          $ref: '#/definitions/views.StoreProduct'
+        minItems: 1
+        type: array
       vat:
         maximum: 9.999999999999e+08
         minimum: 0
@@ -59,7 +61,7 @@ definitions:
     - check_number
     - id_employee
     - print_date
-    - sum_total
+    - products
     - vat
     type: object
   views.CreateNewCustomerCard:
@@ -149,6 +151,22 @@ definitions:
         type: number
       upc:
         type: string
+    type: object
+  views.StoreProduct:
+    properties:
+      price:
+        type: number
+      quantity:
+        minimum: 1
+        type: integer
+      upc:
+        maxLength: 12
+        minLength: 1
+        type: string
+    required:
+    - price
+    - quantity
+    - upc
     type: object
 host: localhost:8080
 info:

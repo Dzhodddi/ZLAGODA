@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
@@ -24,9 +25,45 @@ func NewCheckRepository(db *sqlx.DB) *CheckRepository {
 	}
 }
 
-func (r *CheckRepository) CreateNewCheck(ctx context.Context, check views.CreateNewCheck, printTime time.Time) (*generated.Check, error) {
+func (r *CheckRepository) CreateNewCheck(
+	ctx context.Context,
+	check views.CreateNewCheck,
+	printTime time.Time,
+	formattedSqlPayload string,
+	totalPrice float64,
+	flattenedValues []interface{},
+	keys []string,
+) (*generated.Check, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
+	var count int
+	query, args, err := sqlx.In(fmt.Sprintf(`
+	WITH
+	found_products AS (
+	  SELECT upc
+	  FROM store_product
+	  WHERE upc IN (?)
+	),
+	payload (upc, quantity) AS (
+	  VALUES %s
+	)
+	SELECT COUNT(*)
+	FROM found_products f
+	JOIN store_product s ON s.upc = f.upc
+	JOIN payload p ON p.upc = f.upc
+	WHERE s.products_number > p.quantity;
+`, formattedSqlPayload), append([]interface{}{keys}, flattenedValues...)...)
+	if err != nil {
+		return nil, err
+	}
+	query = r.db.Rebind(query)
+	err = r.db.QueryRowxContext(ctx, query, args...).Scan(&count)
+	if err != nil {
+		return nil, err
+	}
+	if count != len(keys) {
+		return nil, errorResponse.BadForeignKey()
+	}
 	newCheck, err := r.queries.CreateNewCheck(
 		ctx,
 		generated.CreateNewCheckParams{
@@ -34,7 +71,7 @@ func (r *CheckRepository) CreateNewCheck(ctx context.Context, check views.Create
 			IDEmployee:  check.IDEmployee,
 			CardNumber:  check.CardNumber,
 			PrintDate:   printTime,
-			SumTotal:    check.SumTotal,
+			SumTotal:    totalPrice,
 			Vat:         check.VAT,
 		},
 	)

@@ -292,7 +292,7 @@ const docTemplate = `{
                 "check_number",
                 "id_employee",
                 "print_date",
-                "sum_total",
+                "products",
                 "vat"
             ],
             "properties": {
@@ -314,9 +314,12 @@ const docTemplate = `{
                 "print_date": {
                     "type": "string"
                 },
-                "sum_total": {
-                    "type": "number",
-                    "minimum": 0
+                "products": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/views.StoreProduct"
+                    }
                 },
                 "vat": {
                     "type": "number",
@@ -445,6 +448,28 @@ const docTemplate = `{
                 },
                 "upc": {
                     "type": "string"
+                }
+            }
+        },
+        "views.StoreProduct": {
+            "type": "object",
+            "required": [
+                "price",
+                "quantity",
+                "upc"
+            ],
+            "properties": {
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "upc": {
+                    "type": "string",
+                    "maxLength": 12,
+                    "minLength": 1
                 }
             }
         }
