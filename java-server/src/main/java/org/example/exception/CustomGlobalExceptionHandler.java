@@ -151,4 +151,11 @@ public class CustomGlobalExceptionHandler {
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler(InvalidProductException.class)
+    public ResponseEntity<String> handleInvalidProduct(InvalidProductException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ex.getMessage());
+    }
 }
