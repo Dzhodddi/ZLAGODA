@@ -25,3 +25,73 @@ func (q *Queries) CreateNewCategory(ctx context.Context, categoryName string) (C
 	err := row.Scan(&i.CategoryNumber, &i.CategoryName)
 	return i, err
 }
+
+const deleteCategoryByID = `-- name: DeleteCategoryByID :one
+DELETE FROM category
+WHERE category_number = $1
+RETURNING category_number
+`
+
+func (q *Queries) DeleteCategoryByID(ctx context.Context, categoryNumber int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, deleteCategoryByID, categoryNumber)
+	var category_number int64
+	err := row.Scan(&category_number)
+	return category_number, err
+}
+
+const getAllCategories = `-- name: GetAllCategories :many
+SELECT category_number, category_name FROM category ORDER BY category_number
+`
+
+func (q *Queries) GetAllCategories(ctx context.Context) ([]Category, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCategories)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Category
+	for rows.Next() {
+		var i Category
+		if err := rows.Scan(&i.CategoryNumber, &i.CategoryName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCategoryByID = `-- name: GetCategoryByID :one
+SELECT category_number, category_name FROM category WHERE category_number = $1
+`
+
+func (q *Queries) GetCategoryByID(ctx context.Context, categoryNumber int64) (Category, error) {
+	row := q.db.QueryRowContext(ctx, getCategoryByID, categoryNumber)
+	var i Category
+	err := row.Scan(&i.CategoryNumber, &i.CategoryName)
+	return i, err
+}
+
+const updateCategory = `-- name: UpdateCategory :one
+UPDATE category
+SET category_name = $2
+WHERE category_number = $1
+RETURNING category_number, category_name
+`
+
+type UpdateCategoryParams struct {
+	CategoryNumber int64
+	CategoryName   string
+}
+
+func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error) {
+	row := q.db.QueryRowContext(ctx, updateCategory, arg.CategoryNumber, arg.CategoryName)
+	var i Category
+	err := row.Scan(&i.CategoryNumber, &i.CategoryName)
+	return i, err
+}

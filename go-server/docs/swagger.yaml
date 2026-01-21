@@ -150,6 +150,51 @@ definitions:
       upc:
         type: string
     type: object
+  views.UpdateCategory:
+    properties:
+      category_name:
+        maxLength: 50
+        minLength: 1
+        type: string
+    required:
+    - category_name
+    type: object
+  views.UpdateCustomerCard:
+    properties:
+      city:
+        maxLength: 50
+        type: string
+      customer_name:
+        maxLength: 50
+        minLength: 1
+        type: string
+      customer_patronymic:
+        maxLength: 50
+        minLength: 1
+        type: string
+      customer_percent:
+        maximum: 100
+        minimum: 1
+        type: integer
+      customer_surname:
+        maxLength: 50
+        minLength: 1
+        type: string
+      phone_number:
+        maxLength: 13
+        type: string
+      street:
+        maxLength: 50
+        type: string
+      zipcode:
+        maxLength: 9
+        type: string
+    required:
+    - customer_name
+    - customer_percent
+    - customer_surname
+    - phone_number
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -158,6 +203,27 @@ info:
   version: "1.0"
 paths:
   /categories:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all product categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/views.CategoryResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all categories
+      tags:
+      - Category
     post:
       consumes:
       - application/json
@@ -173,25 +239,136 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Payload of category
           schema:
             $ref: '#/definitions/views.CategoryResponse'
         "400":
-          description: Invalid request payload
+          description: Bad Request
           schema:
             additionalProperties: true
             type: object
         "422":
-          description: Validation error
+          description: Unprocessable Entity
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Internal server error
+          description: Internal Server Error
           schema:
             additionalProperties: true
             type: object
       summary: Create a new category
+      tags:
+      - Category
+  /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an existing product category by ID
+      parameters:
+      - description: Category ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a category
+      tags:
+      - Category
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an existing product category by ID
+      parameters:
+      - description: Category ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.CategoryResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a category by ID
+      tags:
+      - Category
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing product category by ID
+      parameters:
+      - description: Category ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payload of category
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/views.UpdateCategory'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.CategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an existing category
       tags:
       - Category
   /checks:
@@ -232,6 +409,27 @@ paths:
       tags:
       - Checks
   /customer-cards:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all customer discount cards
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/views.CustomerCardResponse'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all customer cards
+      tags:
+      - CustomerCard
     post:
       consumes:
       - application/json
@@ -266,6 +464,109 @@ paths:
             additionalProperties: true
             type: object
       summary: Create a new customer card
+      tags:
+      - CustomerCard
+  /customer-cards/{cardNumber}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an existing customer discount card
+      parameters:
+      - description: Customer card number
+        in: path
+        name: cardNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a customer card
+      tags:
+      - CustomerCard
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a customer discount card by its number
+      parameters:
+      - description: Customer card number
+        in: path
+        name: cardNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.CustomerCardResponse'
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a customer card by number
+      tags:
+      - CustomerCard
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing customer discount card
+      parameters:
+      - description: Customer card number
+        in: path
+        name: cardNumber
+        required: true
+        type: string
+      - description: Customer card data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/views.UpdateCustomerCard'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.CustomerCardResponse'
+        "400":
+          description: Validation error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a customer card
       tags:
       - CustomerCard
   /sales:
