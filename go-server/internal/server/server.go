@@ -37,7 +37,10 @@ func Setup(cfg *config.Config) (*Server, error) {
 	v1 := e.Group("/api/v1")
 
 	v1.GET("/health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, "ok")
+		query := `UPDATE store_product`
+		_, err = database.NamedExec(query, map[string]interface{}{})
+
+		return c.JSON(http.StatusOK, err)
 	})
 	setupAllRoutes(database, v1)
 	return &Server{
