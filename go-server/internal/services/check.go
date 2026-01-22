@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"log"
 	"strings"
 	"time"
 
@@ -24,7 +23,6 @@ func NewCheckService(checkRepository *repository.CheckRepository) *CheckService 
 }
 
 func (s *CheckService) CreateCheck(ctx context.Context, check views.CreateNewCheck, printTime time.Time) (*views.CheckResponse, error) {
-	// hashmap UPC: quantity
 	upcToQuantity := make(map[string]int)
 	for _, product := range check.Products {
 		_, ok := upcToQuantity[product.UPC]
@@ -38,7 +36,6 @@ func (s *CheckService) CreateCheck(ctx context.Context, check views.CreateNewChe
 	payload := make([]interface{}, 0, len(upcToQuantity))
 	keys := make([]string, 0, len(upcToQuantity))
 	for key, value := range upcToQuantity {
-		log.Println(key, value)
 		keys = append(keys, key)
 		payload = append(payload, key, value)
 		rawPayloadSQL += "(?, ?::int),"

@@ -18,6 +18,20 @@ type CheckRepository struct {
 	queries *generated.Queries
 }
 
+type Product struct {
+	SellingPrice float64 `db:"selling_price"`
+	Quantity     int     `db:"quantity"`
+	UPC          string  `db:"upc"`
+}
+
+type CheckStoreProduct struct {
+	CheckNumber  string    `db:"check_number"`
+	UPC          string    `db:"upc"`
+	SellingPrice float64   `db:"selling_price"`
+	Quantity     int       `db:"quantity"`
+	CheckDate    time.Time `db:"check_date"`
+}
+
 func NewCheckRepository(db *sqlx.DB) *CheckRepository {
 	return &CheckRepository{
 		db:      db,
@@ -25,7 +39,6 @@ func NewCheckRepository(db *sqlx.DB) *CheckRepository {
 	}
 }
 
-// TODO [deletion from store_product table and create and insert data into check_product table]
 func (r *CheckRepository) CreateNewCheck(
 	ctx context.Context,
 	check views.CreateNewCheck,
@@ -36,11 +49,19 @@ func (r *CheckRepository) CreateNewCheck(
 ) (*generated.Check, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
-	totalPrice, err := r.calculateCheckTotalSumIfValid(ctx, formattedSqlPayload, len(keys), append([]interface{}{keys}, payload...))
+	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	newCheck, err := r.queries.CreateNewCheck(
+	txQueries := generated.New(tx.Tx)
+	defer func() {
+		_ = tx.Rollback()
+	}()
+	productsList, totalPrice, err := r.calculateCheckTotalSumIfValid(ctx, tx, formattedSqlPayload, len(keys), append([]interface{}{keys}, payload...))
+	if err != nil {
+		return nil, err
+	}
+	newCheck, err := txQueries.CreateNewCheck(
 		ctx,
 		generated.CreateNewCheckParams{
 			CheckNumber: check.CheckNumber,
@@ -62,12 +83,32 @@ func (r *CheckRepository) CreateNewCheck(
 		}
 		return nil, err
 	}
+	storeProductList := make([]CheckStoreProduct, 0, len(*productsList))
+	for _, p := range *productsList {
+		storeProductList = append(storeProductList, CheckStoreProduct{
+			CheckNumber:  check.CheckNumber,
+			UPC:          p.UPC,
+			SellingPrice: p.SellingPrice,
+			Quantity:     p.Quantity,
+			CheckDate:    printTime,
+		})
+	}
+	err = r.saveProducts(ctx, tx, storeProductList)
+	if err != nil {
+		return nil, err
+	}
+	err = r.reduceStoreProductQuantity(ctx, tx, storeProductList, keys)
+	if err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
 	return &newCheck, nil
 }
 
-func (r *CheckRepository) calculateCheckTotalSumIfValid(ctx context.Context, formattedSqlPayload string, resultLen int, args []any) (float64, error) {
-	var count int
-	var totalPrice float64
+func (r *CheckRepository) calculateCheckTotalSumIfValid(ctx context.Context, tx *sqlx.Tx, formattedSqlPayload string, resultLen int, args []any) (*[]Product, float64, error) {
+	var products []Product
 	query, args, err := sqlx.In(fmt.Sprintf(`
 	WITH
 	found_products AS (
@@ -78,26 +119,50 @@ func (r *CheckRepository) calculateCheckTotalSumIfValid(ctx context.Context, for
 	payload (upc, quantity) AS (
 	  VALUES %s
 	)
-	SELECT COUNT(*), SUM(s.selling_price * p.quantity)
+	SELECT s.selling_price, p.quantity, s.upc
 	FROM found_products f
 	JOIN store_product s ON s.upc = f.upc
 	JOIN payload p ON p.upc = f.upc
 	WHERE s.products_number >= p.quantity;
 `, formattedSqlPayload), args...)
 	if err != nil {
-		return -1, err
+		return nil, -1, err
 	}
-	query = r.db.Rebind(query)
-	err = r.db.QueryRowxContext(ctx, query, args...).Scan(&count, &totalPrice)
+	query = tx.Rebind(query)
+	err = tx.SelectContext(ctx, &products, query, args...)
 	if err != nil {
-		return -1, err
+		return nil, -1, err
 	}
-	if count != resultLen {
-		return -1, errorResponse.BadForeignKey()
+	if len(products) != resultLen {
+		return nil, -1, errorResponse.BadForeignKey()
 	}
-	return totalPrice, nil
+	totalPrice := 0.0
+	for _, p := range products {
+		totalPrice += p.SellingPrice * float64(p.Quantity)
+	}
+	return &products, totalPrice, nil
 }
 
-func (r *CheckRepository) calculateProductSum(ctx context.Context) (float64, error) {
-	return 0, nil
+func (r *CheckRepository) saveProducts(ctx context.Context, tx *sqlx.Tx, productPayload []CheckStoreProduct) error {
+	query := `INSERT INTO check_store_product (check_number, UPC, selling_price, quantity, check_date) VALUES (:check_number, :upc, :selling_price, :quantity, :check_date)`
+	_, err := tx.NamedExecContext(ctx, query, productPayload)
+	return err
+}
+
+func (r *CheckRepository) reduceStoreProductQuantity(ctx context.Context, tx *sqlx.Tx, storeProducts []CheckStoreProduct, upc []string) error {
+	query := `UPDATE store_product SET products_number = products_number - :quantity WHERE UPC = :upc`
+	stmt, err := tx.PrepareNamedContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = stmt.Close()
+	}()
+
+	for _, product := range storeProducts {
+		if _, err = stmt.ExecContext(ctx, product); err != nil {
+			return err
+		}
+	}
+	return nil
 }
