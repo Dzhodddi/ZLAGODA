@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"context"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
@@ -13,10 +14,10 @@ import (
 )
 
 type SaleHandler struct {
-	service *services.SaleService
+	service services.SaleService
 }
 
-func NewSaleHandler(service *services.SaleService) *SaleHandler {
+func NewSaleHandler(service services.SaleService) *SaleHandler {
 	return &SaleHandler{service: service}
 }
 

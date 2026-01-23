@@ -4,30 +4,39 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
 	"github.com/lib/pq"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
-	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
 	"github.com/jmoiron/sqlx"
 )
 
-type CategoryRepository struct {
+type CategoryRepository interface {
+	CreateNewCategory(ctx context.Context, category views.CreateNewCategory) (*generated.Category, error)
+	UpdateCategory(ctx context.Context, category views.UpdateCategory, categoryId int64) (*generated.Category, error)
+	DeleteCategory(ctx context.Context, id int64) error
+	GetCategoryByID(ctx context.Context, id int64) (*generated.Category, error)
+	GetAllCategories(ctx context.Context) ([]generated.Category, error)
+}
+
+type categoryRepository struct {
 	db      *sqlx.DB
 	queries *generated.Queries
 }
 
-func NewCategoryRepository(db *sqlx.DB) *CategoryRepository {
-	return &CategoryRepository{
+func NewCategoryRepository(db *sqlx.DB) CategoryRepository {
+	return &categoryRepository{
 		db:      db,
 		queries: generated.New(db.DB),
 	}
 }
 
-func (r *CategoryRepository) CreateNewCategory(ctx context.Context, category views.CreateNewCategory) (*generated.Category, error) {
+func (r *categoryRepository) CreateNewCategory(ctx context.Context, category views.CreateNewCategory) (*generated.Category, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
+
 	newCategory, err := r.queries.CreateNewCategory(ctx, category.CategoryName)
 	if err != nil {
 		return nil, err
@@ -35,9 +44,10 @@ func (r *CategoryRepository) CreateNewCategory(ctx context.Context, category vie
 	return &newCategory, nil
 }
 
-func (r *CategoryRepository) UpdateCategory(ctx context.Context, category views.UpdateCategory, categoryId int64) (*generated.Category, error) {
+func (r *categoryRepository) UpdateCategory(ctx context.Context, category views.UpdateCategory, categoryId int64) (*generated.Category, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
+
 	updatedCategory, err := r.queries.UpdateCategory(
 		ctx,
 		generated.UpdateCategoryParams{
@@ -47,25 +57,26 @@ func (r *CategoryRepository) UpdateCategory(ctx context.Context, category views.
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errorResponse.EntityNotFound()
+			return nil, ErrNotFound
 		}
 		return nil, err
 	}
 	return &updatedCategory, nil
 }
 
-func (r *CategoryRepository) DeleteCategory(ctx context.Context, id int64) error {
+func (r *categoryRepository) DeleteCategory(ctx context.Context, id int64) error {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
+
 	_, err := r.queries.DeleteCategoryByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return errorResponse.EntityNotFound()
+			return ErrNotFound
 		}
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
 			if pqErr.Code == "23503" {
-				return errorResponse.BadForeignKey()
+				return ErrForeignKey
 			}
 		}
 		return err
@@ -73,22 +84,24 @@ func (r *CategoryRepository) DeleteCategory(ctx context.Context, id int64) error
 	return nil
 }
 
-func (r *CategoryRepository) GetCategoryByID(ctx context.Context, id int64) (*generated.Category, error) {
+func (r *categoryRepository) GetCategoryByID(ctx context.Context, id int64) (*generated.Category, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
+
 	category, err := r.queries.GetCategoryByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errorResponse.EntityNotFound()
+			return nil, ErrNotFound
 		}
 		return nil, err
 	}
 	return &category, nil
 }
 
-func (r *CategoryRepository) GetAllCategories(ctx context.Context) ([]generated.Category, error) {
+func (r *categoryRepository) GetAllCategories(ctx context.Context) ([]generated.Category, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
+
 	categories, err := r.queries.GetAllCategories(ctx)
 	if err != nil {
 		return nil, err

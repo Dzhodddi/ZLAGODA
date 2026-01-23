@@ -7,26 +7,33 @@ import (
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
-	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/utils"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
 
-type CardRepository struct {
+type CardRepository interface {
+	CreateNewCard(ctx context.Context, card views.CreateNewCustomerCard) (*generated.CustomerCard, error)
+	GetCustomerCard(ctx context.Context, cardNumber string) (*generated.CustomerCard, error)
+	UpdateCustomerCard(ctx context.Context, card views.UpdateCustomerCard, cardNumber string) (*generated.CustomerCard, error)
+	DeleteCustomerCard(ctx context.Context, cardNumber string) error
+	ListCustomerCards(ctx context.Context) ([]generated.CustomerCard, error)
+}
+
+type cardRepository struct {
 	db      *sqlx.DB
 	queries *generated.Queries
 }
 
-func NewCardRepository(db *sqlx.DB) *CardRepository {
-	return &CardRepository{
+func NewCardRepository(db *sqlx.DB) CardRepository {
+	return &cardRepository{
 		db:      db,
 		queries: generated.New(db.DB),
 	}
 }
 
-func (r *CardRepository) CreateNewCard(ctx context.Context, card views.CreateNewCustomerCard) (*generated.CustomerCard, error) {
+func (r *cardRepository) CreateNewCard(ctx context.Context, card views.CreateNewCustomerCard) (*generated.CustomerCard, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
@@ -43,28 +50,28 @@ func (r *CardRepository) CreateNewCard(ctx context.Context, card views.CreateNew
 	})
 	if err != nil {
 		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
-			return nil, errorResponse.Conflict()
+			return nil, ErrConflict
 		}
 		return nil, err
 	}
 	return &newCard, nil
 }
 
-func (r *CardRepository) GetCustomerCard(ctx context.Context, cardNumber string) (*generated.CustomerCard, error) {
+func (r *cardRepository) GetCustomerCard(ctx context.Context, cardNumber string) (*generated.CustomerCard, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
 	card, err := r.queries.GetCustomerCardByID(ctx, cardNumber)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errorResponse.EntityNotFound()
+			return nil, ErrNotFound
 		}
 		return nil, err
 	}
 	return &card, nil
 }
 
-func (r *CardRepository) UpdateCustomerCard(ctx context.Context, card views.UpdateCustomerCard, cardNumber string) (*generated.CustomerCard, error) {
+func (r *cardRepository) UpdateCustomerCard(ctx context.Context, card views.UpdateCustomerCard, cardNumber string) (*generated.CustomerCard, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
@@ -84,12 +91,12 @@ func (r *CardRepository) UpdateCustomerCard(ctx context.Context, card views.Upda
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errorResponse.EntityNotFound()
+			return nil, ErrNotFound
 		}
 		if pgErr, ok := err.(*pq.Error); ok {
 			switch pgErr.Code {
 			case "23503": // Foreign key constraint violation
-				return nil, errorResponse.BadForeignKey()
+				return nil, ErrForeignKey
 			}
 		}
 		return nil, err
@@ -97,19 +104,19 @@ func (r *CardRepository) UpdateCustomerCard(ctx context.Context, card views.Upda
 	return &result, nil
 }
 
-func (r *CardRepository) DeleteCustomerCard(ctx context.Context, cardNumber string) error {
+func (r *cardRepository) DeleteCustomerCard(ctx context.Context, cardNumber string) error {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
 	_, err := r.queries.DeleteCustomerCardByID(ctx, cardNumber)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return errorResponse.EntityNotFound()
+			return ErrNotFound
 		}
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
 			if pqErr.Code == "23503" {
-				return errorResponse.BadForeignKey()
+				return ErrForeignKey
 			}
 		}
 		return err
@@ -117,9 +124,10 @@ func (r *CardRepository) DeleteCustomerCard(ctx context.Context, cardNumber stri
 	return nil
 }
 
-func (r *CardRepository) ListCustomerCards(ctx context.Context) ([]generated.CustomerCard, error) {
+func (r *cardRepository) ListCustomerCards(ctx context.Context) ([]generated.CustomerCard, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
+
 	rows, err := r.queries.GetAllCustomerCards(ctx)
 	if err != nil {
 		return nil, err
