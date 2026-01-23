@@ -1,5 +1,9 @@
 package org.example.service.employee;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
@@ -12,16 +16,10 @@ import org.example.mapper.employee.EmployeeMapper;
 import org.example.model.employee.Role;
 import org.example.model.employee.Employee;
 import org.example.repository.employee.EmployeeRepository;
-import org.example.repository.employee.RoleRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +28,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
 
     @Override
     @Transactional
