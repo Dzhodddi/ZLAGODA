@@ -36,7 +36,7 @@ public class ProductController {
             summary = "Create a new product",
             description = "Create a new product"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('Manager')")
     public ProductDto createProduct(
             @RequestBody @Valid ProductRequestDto productRequestDto
     ) {
@@ -48,7 +48,7 @@ public class ProductController {
             summary = "Update a product",
             description = "Update an existing product by its id"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('Manager')")
     public ProductDto updateProductById(
             @PathVariable Long id,
             @RequestBody @Valid ProductRequestDto productRequestDto
@@ -62,7 +62,7 @@ public class ProductController {
             summary = "Delete a product",
             description = "Delete an existing product by its id"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('Manager')")
     public void deleteProductById(@PathVariable Long id) {
         productService.deleteProductById(id);
     }

@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS store_product (
     selling_price DECIMAL(13,4) NOT NULL,
     products_number INT NOT NULL,
     promotional_product BOOLEAN NOT NULL,
+    is_deleted BOOLEAN NOT NULL,
+
     FOREIGN KEY (UPC_prom)
     REFERENCES store_product(UPC)
     ON UPDATE CASCADE

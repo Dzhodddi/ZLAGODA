@@ -13,4 +13,5 @@ public class StoreProduct {
     private BigDecimal selling_price;
     private int products_number;
     private boolean promotional_product;
+    private boolean is_deleted = Boolean.FALSE;
 }

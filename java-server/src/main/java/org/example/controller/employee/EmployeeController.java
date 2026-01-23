@@ -38,7 +38,7 @@ public class EmployeeController {
             summary = "Create a new employee",
             description = "Create a new employee"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('Manager')")
     public EmployeeResponseDto createEmployee(
             @RequestBody @Valid EmployeeRegistrationRequestDto employeeRequestDto
     ) throws RegistrationException {
@@ -50,7 +50,7 @@ public class EmployeeController {
             summary = "Update an employee",
             description = "Update an existing employee by its id"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('Manager')")
     public EmployeeResponseDto updateEmployeeById(
             @PathVariable String id,
             @RequestBody @Valid EmployeeUpdateRequestDto employeeRequestDto
@@ -64,7 +64,7 @@ public class EmployeeController {
             summary = "Delete an employee",
             description = "Delete an existing employee by its id"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('Manager')")
     public void deleteEmployeeById(@PathVariable String id) {
         employeeService.deleteEmployeeById(id);
     }
