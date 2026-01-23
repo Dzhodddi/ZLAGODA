@@ -12,5 +12,5 @@ public interface StoreProductService {
 
     StoreProductDto updateByUPC(String upc, StoreProductRequestDto requestDto);
 
-    void deleteByUPC(String upc);
+    void softDeleteByUPC(String upc);
 }

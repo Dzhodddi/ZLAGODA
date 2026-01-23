@@ -15,6 +15,6 @@ public class Role implements GrantedAuthority {
     }
 
     public enum RoleName {
-        MANAGER, CASHIER
+        Manager, Cashier
     }
 }

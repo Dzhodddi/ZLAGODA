@@ -57,7 +57,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Role.RoleName roleEnum;
         try {
-            roleEnum = Role.RoleName.valueOf(request.getRole().toUpperCase());
+            roleEnum = Role.RoleName.valueOf(request.getRole());
         } catch (IllegalArgumentException e) {
             throw new InvalidRoleException("Invalid role name: " + request.getRole());
         }

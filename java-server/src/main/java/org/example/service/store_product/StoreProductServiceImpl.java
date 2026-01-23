@@ -36,7 +36,7 @@ public class StoreProductServiceImpl implements StoreProductService {
     }
 
     @Override
-    public void deleteByUPC(String upc) {
-        repository.deleteByUPC(upc);
+    public void softDeleteByUPC(String upc) {
+        repository.softDeleteByUPC(upc);
     }
 }

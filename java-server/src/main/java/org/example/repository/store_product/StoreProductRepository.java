@@ -30,14 +30,14 @@ public class StoreProductRepository {
     private final StoreProductMapper mapper;
 
     public List<StoreProduct> findAll() {
-        return jdbcTemplate.query("SELECT * FROM store_product", rowMapper);
+        return jdbcTemplate.query("SELECT * FROM store_product WHERE is_deleted = false", rowMapper);
     }
 
     public Optional<StoreProduct> findByUPC(String upc) {
         try {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
-                            "SELECT * FROM store_product WHERE UPC = ?",
+                            "SELECT * FROM store_product WHERE UPC = ? AND is_deleted = false",
                             rowMapper,
                             upc
                     )
@@ -67,8 +67,9 @@ public class StoreProductRepository {
                         id_product,
                         selling_price,
                         products_number,
-                        promotional_product
-                    ) VALUES (?, ?, ?, ?, ?, ?)
+                        promotional_product,
+                        is_deleted
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
                     RETURNING *
                     """,
                     rowMapper,
@@ -77,7 +78,8 @@ public class StoreProductRepository {
                     requestDto.getId_product(),
                     priceWithVat,
                     requestDto.getProducts_number(),
-                    requestDto.isPromotional_product()
+                    requestDto.isPromotional_product(),
+                    Boolean.FALSE
             );
         } catch (DataIntegrityViolationException e) {
             throw new InvalidProductException(
@@ -108,7 +110,7 @@ public class StoreProductRepository {
                         selling_price = ?,
                         products_number = ?,
                         promotional_product = ?
-                    WHERE UPC = ?
+                    WHERE UPC = ? AND is_deleted = false
                     """,
                     requestDto.getUPC_prom(),
                     requestDto.getId_product(),
@@ -131,16 +133,14 @@ public class StoreProductRepository {
         }
     }
 
-    public void deleteByUPC(String upc) {
-        if (!existsByUPC(upc)) {
-            throw new EntityNotFoundException("Store product not found: " + upc);
-        }
-        jdbcTemplate.update("DELETE FROM store_product WHERE UPC = ?", upc);
+    public void softDeleteByUPC(String upc) {
+        String sql = "UPDATE store_product SET is_deleted = true WHERE UPC = ? AND is_deleted = false";
+        jdbcTemplate.update(sql, upc);
     }
 
     public boolean existsByUPC(String upc) {
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM store_product WHERE UPC = ?",
+                "SELECT * FROM store_product WHERE UPC = ? AND is_deleted = false",
                 Integer.class,
                 upc
         );
@@ -154,7 +154,7 @@ public class StoreProductRepository {
                 """
                 UPDATE store_product
                 SET selling_price = ?, promotional_product = ?
-                WHERE UPC = ?
+                WHERE UPC = ? AND is_deleted = false
                 """,
                 price, promotional, upc
         );
