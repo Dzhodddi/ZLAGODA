@@ -1,6 +1,6 @@
 export COMPOSE_BAKE=true
 DB_URL=postgresql://postgres:postgres@localhost:5432/zlagoda?sslmode=disable
-.PHONY: up down test migrate-all-up migrate-all-down create-migration
+.PHONY: up down test migrate-all-up migrate-all-down create-migration test-all test-unit test-integration
 
 up:
 	docker compose up --build
@@ -21,8 +21,11 @@ migrate-all-down:
 create-migration:
 	migrate create -ext sql -dir migrations -seq $(name)
 
-sqlc-generate:
-	cd go-server && sqlc generate && cd ..
+test-all:
+	bash test.sh
 
-gen-docs:
-	cd go-server && swag init -g internal/server/server.go && cd ..
+test-unit:
+	bash test.sh test-unit
+
+test-integration:
+	bash test.sh test-integration
