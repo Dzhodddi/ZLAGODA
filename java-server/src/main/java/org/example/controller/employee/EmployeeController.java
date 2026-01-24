@@ -1,5 +1,6 @@
 package org.example.controller.employee;
 
+import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -9,7 +10,11 @@ import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.exception.RegistrationException;
 import org.example.service.employee.EmployeeService;
+import org.example.service.report.PdfReportGeneratorService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +27,7 @@ import java.util.List;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+    private final PdfReportGeneratorService pdfReportGeneratorService;
 
     @GetMapping
     @Operation(
@@ -67,5 +73,19 @@ public class EmployeeController {
     @PreAuthorize("hasRole('Manager')")
     public void deleteEmployeeById(@PathVariable String id) {
         employeeService.deleteEmployeeById(id);
+    }
+
+    @GetMapping(value = "/report", produces = MediaType.APPLICATION_PDF_VALUE)
+    @Operation(
+            summary = "Download employees report",
+            description = "Download employees pdf report"
+    )
+    @PreAuthorize("hasRole('Manager')")
+    public ResponseEntity<byte[]> employeePdf() throws DocumentException {
+        List<EmployeeResponseDto> employees = employeeService.getAll();
+        byte[] pdf = pdfReportGeneratorService.employeeToPdf(employees);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=employees.pdf")
+                .body(pdf);
     }
 }
