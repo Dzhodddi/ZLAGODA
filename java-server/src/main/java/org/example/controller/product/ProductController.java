@@ -4,8 +4,9 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
 import org.example.service.product.ProductService;
@@ -16,8 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Product management", description = "Endpoints for managing products")
 @RequiredArgsConstructor
@@ -31,10 +30,30 @@ public class ProductController {
     @GetMapping
     @Operation(
             summary = "Get all products",
-            description = "Get all products"
+            description = "Get all products sorted by their names"
     )
     public List<ProductDto> getAll() {
         return productService.getAll();
+    }
+
+    @GetMapping("by-name/{name}")
+    @Operation(
+            summary = "Search products by name",
+            description = "Search products by their name"
+    )
+    @PreAuthorize("hasRole('Cashier')")
+    public Optional<ProductDto> getAllByName(@PathVariable String name) {
+        return productService.findByName(name);
+    }
+
+    @GetMapping("by-category/{id}")
+    @Operation(
+            summary = "Get all products by their category",
+            description = "Get all products by their category"
+    )
+    @PreAuthorize("hasRole('Manager')")
+    public Optional<ProductDto> getAllByName(@PathVariable int id) {
+        return productService.findByCategoryId(id);
     }
 
     @PostMapping

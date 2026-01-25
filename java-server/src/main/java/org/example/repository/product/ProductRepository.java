@@ -24,7 +24,8 @@ public class ProductRepository {
     private final ProductMapper productMapper;
 
     public List<Product> findAll() {
-        return jdbcTemplate.query("SELECT * FROM product", rowMapper);
+        return jdbcTemplate.query("SELECT * FROM product ORDER BY product_name",
+                rowMapper);
     }
 
     public Optional<Product> findById(Long id) {
@@ -34,6 +35,34 @@ public class ProductRepository {
                             "SELECT * FROM product WHERE id_product = ?",
                             rowMapper,
                             id
+                    )
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Product> findByName(String name) {
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(
+                            "SELECT * FROM product WHERE product_name = ?",
+                            rowMapper,
+                            name
+                    )
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Product> findByCategoryId(int category_number) {
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(
+                            "SELECT * FROM product WHERE category_number = ? ORDER BY product_name",
+                            rowMapper,
+                            category_number
                     )
             );
         } catch (EmptyResultDataAccessException e) {

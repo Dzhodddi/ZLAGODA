@@ -1,4 +1,5 @@
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\exception\CustomGlobalExceptionHandler.java
+C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\service\report\PdfReportGeneratorService.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\exception\InvalidProductException.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\dto\employee\EmployeeUpdateRequestDto.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\exception\RegistrationException.java
@@ -47,6 +48,7 @@ C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\dto\emp
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\repository\employee\RoleRepository.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\service\employee\EmployeeService.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\service\store_product\StoreProductService.java
+C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\service\report\PdfReportGeneratorServiceImpl.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\Application.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\dto\employee\login\RefreshTokenRequestDto.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\exception\DateFormatException.java

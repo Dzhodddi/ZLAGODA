@@ -50,7 +50,7 @@ public class BatchRepository {
                     requestDto.getQuantity(),
                     priceWithVat
             );
-            StoreProduct storeProduct = storeProductRepository.findByUPC(requestDto.getUPC())
+            StoreProduct storeProduct = storeProductRepository.findAllInfoByUPC(requestDto.getUPC())
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Store product not found: " + requestDto.getUPC()
                     ));
@@ -74,7 +74,7 @@ public class BatchRepository {
                     updatedQuantity,
                     storeProduct.getUPC()
             );
-            return storeProductRepository.findByUPC(storeProduct.getUPC()).get();
+            return storeProductRepository.findAllInfoByUPC(storeProduct.getUPC()).get();
         } catch (DataIntegrityViolationException e) {
             throw new InvalidProductException(
                     "Invalid product or UPC reference: " + requestDto.getUPC()

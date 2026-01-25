@@ -1,6 +1,7 @@
 package org.example.repository.employee;
 
 import lombok.RequiredArgsConstructor;
+import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
@@ -25,7 +26,7 @@ public class EmployeeRepository {
     private final EmployeeMapper employeeMapper;
 
     public List<EmployeeResponseDto> findAll() {
-        return jdbcTemplate.query("SELECT * FROM employee", employeeRowMapper)
+        return jdbcTemplate.query("SELECT * FROM employee ORDER BY empl_surname", employeeRowMapper)
                 .stream()
                 .map(employeeMapper::toEmployeeResponseDto)
                 .toList();
@@ -144,5 +145,38 @@ public class EmployeeRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public List<EmployeeResponseDto> findAllCashiers() {
+        return jdbcTemplate.query("""
+                        SELECT * FROM employee
+                        WHERE empl_role = 'Cashier'
+                        ORDER BY empl_surname
+                        """,
+                        employeeRowMapper)
+                .stream()
+                .map(employeeMapper::toEmployeeResponseDto)
+                .toList();
+    }
+
+    public Optional<EmployeeContactDto> findPhoneAndAddressBySurname(String surname) {
+        return Optional.ofNullable(
+                jdbcTemplate.queryForObject(
+                        """
+                        SELECT phone_number, city, street, zip_code
+                        FROM employee
+                        WHERE empl_surname = ?
+                        """,
+                        (rs, rowNum) -> {
+                            EmployeeContactDto dto = new EmployeeContactDto();
+                            dto.setPhone_number(rs.getString("phone_number"));
+                            dto.setCity(rs.getString("city"));
+                            dto.setStreet(rs.getString("street"));
+                            dto.setZip_code(rs.getString("zip_code"));
+                            return dto;
+                        },
+                        surname
+                )
+        );
     }
 }

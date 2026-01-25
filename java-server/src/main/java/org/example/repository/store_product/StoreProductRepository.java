@@ -5,7 +5,9 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.store_product.StoreProductCharacteristicsDto;
 import org.example.dto.store_product.StoreProductDto;
+import org.example.dto.store_product.StoreProductPriceAndQuantityDto;
 import org.example.dto.store_product.StoreProductRequestDto;
 import org.example.exception.EntityNotFoundException;
 import org.example.exception.InvalidProductException;
@@ -29,16 +31,121 @@ public class StoreProductRepository {
     @Qualifier("storeProductMapper")
     private final StoreProductMapper mapper;
 
-    public List<StoreProduct> findAll() {
-        return jdbcTemplate.query("SELECT * FROM store_product WHERE is_deleted = false", rowMapper);
+    public List<StoreProduct> findAllSortedByName() {
+        return jdbcTemplate.query("""
+             SELECT sp.*
+             FROM store_product sp
+             INNER JOIN product p ON sp.id_product = p.id_product
+             WHERE sp.is_deleted = false
+             ORDER BY p.product_name ASC
+             """,
+                rowMapper);
     }
 
-    public Optional<StoreProduct> findByUPC(String upc) {
+    public List<StoreProduct> findAllSortedByQuantity() {
+        return jdbcTemplate.query("""
+             SELECT * FROM store_product
+             WHERE is_deleted = false
+             ORDER BY products_number ASC
+             """,
+                rowMapper);
+    }
+
+    public List<StoreProduct> findPromotionalSortedByQuantity() {
+        return jdbcTemplate.query("""
+             SELECT * FROM store_product
+             WHERE promotional_product = true AND is_deleted = false
+             ORDER BY products_number ASC
+             """,
+                rowMapper);
+    }
+
+    public List<StoreProduct> findPromotionalSortedByName() {
+        return jdbcTemplate.query("""
+             SELECT sp.*
+             FROM store_product sp
+             INNER JOIN product p ON sp.id_product = p.id_product
+             WHERE sp.promotional_product = true AND sp.is_deleted = false
+             ORDER BY p.product_name ASC
+             """,
+                rowMapper);
+    }
+
+    public List<StoreProduct> findNonPromotionalSortedByQuantity() {
+        return jdbcTemplate.query("""
+             SELECT * FROM store_product
+             WHERE promotional_product = false AND is_deleted = false
+             ORDER BY products_number ASC
+             """,
+                rowMapper);
+    }
+
+    public List<StoreProduct> findNonPromotionalSortedByName() {
+        return jdbcTemplate.query("""
+             SELECT sp.*
+             FROM store_product sp
+             INNER JOIN product p ON sp.id_product = p.id_product
+             WHERE sp.promotional_product = false AND sp.is_deleted = false
+             ORDER BY p.product_name ASC
+             """,
+                rowMapper);
+    }
+
+    public Optional<StoreProduct> findAllInfoByUPC(String upc) {
         try {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
                             "SELECT * FROM store_product WHERE UPC = ? AND is_deleted = false",
                             rowMapper,
+                            upc
+                    )
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<StoreProductCharacteristicsDto> findByUPC(String upc) {
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(
+                            """
+                            SELECT selling_price, products_number, product_name, p.product_characteristics
+                            FROM store_product
+                            INNER JOIN product p ON store_product.id_product = p.id_product
+                            WHERE UPC = ? AND is_deleted = false
+                            """,
+                            (rs, rowNum) -> {
+                                StoreProductCharacteristicsDto dto = new StoreProductCharacteristicsDto();
+                                dto.setSelling_price(rs.getBigDecimal("selling_price"));
+                                dto.setProducts_number(rs.getInt("products_number"));
+                                dto.setProduct_name(rs.getString("product_name"));
+                                dto.setProduct_characteristics(rs.getString("product_characteristics"));
+                                return dto;
+                            },
+                            upc
+                    )
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<StoreProductPriceAndQuantityDto> findPriceAndQuantityByUPC(String upc) {
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(
+                            """
+                            SELECT selling_price AND products_number
+                            FROM store_product
+                            WHERE UPC = ? AND is_deleted = false
+                            """,
+                            (rs, rowNum) -> {
+                                StoreProductPriceAndQuantityDto dto = new StoreProductPriceAndQuantityDto();
+                                dto.setSelling_price(rs.getBigDecimal("selling_price"));
+                                dto.setProducts_number(rs.getInt("products_number"));
+                                return dto;
+                            },
                             upc
                     )
             );
@@ -124,7 +231,7 @@ public class StoreProductRepository {
                 throw new EntityNotFoundException("Update failed, store product not found: " + upc);
             }
 
-            return findByUPC(upc)
+            return findAllInfoByUPC(upc)
                     .map(mapper::toDto)
                     .orElseThrow(() -> new EntityNotFoundException("Store product not found after update: " + upc));
 
@@ -140,7 +247,7 @@ public class StoreProductRepository {
 
     public boolean existsByUPC(String upc) {
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT * FROM store_product WHERE UPC = ? AND is_deleted = false",
+                "SELECT COUNT(*) FROM store_product WHERE UPC = ? AND is_deleted = false",
                 Integer.class,
                 upc
         );

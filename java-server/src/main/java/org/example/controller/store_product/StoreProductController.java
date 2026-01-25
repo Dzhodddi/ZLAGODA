@@ -6,9 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.store_product.BatchRequestDto;
-import org.example.dto.store_product.StoreProductDto;
-import org.example.dto.store_product.StoreProductRequestDto;
+import org.example.dto.store_product.*;
 import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
@@ -17,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Store product management", description = "Endpoints for managing store products")
@@ -32,10 +32,57 @@ public class StoreProductController {
     @GetMapping
     @Operation(
             summary = "Get all store products",
-            description = "Retrieve all store products"
+            description = "Get all store products sorted"
     )
+    @PreAuthorize("hasAnyRole('Cashier', 'Manager')")
     public List<StoreProductDto> getAll() {
-        return storeProductService.getAll();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isManager = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_Manager"));
+        if (isManager) {
+            return storeProductService.getAllSortedByQuantity();
+        }
+        return storeProductService.getAllSortedByName();
+    }
+
+    @GetMapping("/prom/sorted-by-name")
+    @Operation(
+            summary = "Get all promotional store products sorted by name",
+            description = "Get all promotional store products sorted by name"
+    )
+    @PreAuthorize("hasAnyRole('Cashier', 'Manager')")
+    public List<StoreProductDto> getPromotionalSortedByName() {
+        return storeProductService.getPromotionalSortedByName();
+    }
+
+    @GetMapping("/non-prom/sorted-by-name")
+    @Operation(
+            summary = "Get all non-promotional store products sorted by name",
+            description = "Get all non-promotional store products sorted by name"
+    )
+    @PreAuthorize("hasAnyRole('Cashier', 'Manager')")
+    public List<StoreProductDto> getNonPromotionalSortedByName() {
+        return storeProductService.getNonPromotionalSortedByName();
+    }
+
+    @GetMapping("/prom/sorted-by-quantity")
+    @Operation(
+            summary = "Get all promotional store products sorted by quantity",
+            description = "Get all promotional store products sorted by quantity"
+    )
+    @PreAuthorize("hasAnyRole('Cashier', 'Manager')")
+    public List<StoreProductDto> getPromotionalSortedByQuantity() {
+        return storeProductService.getPromotionalSortedByQuantity();
+    }
+
+    @GetMapping("/non-prom/sorted-by-quantity")
+    @Operation(
+            summary = "Get all non-promotional store products sorted by quantity",
+            description = "Get all non-promotional store products sorted by quantity"
+    )
+    @PreAuthorize("hasAnyRole('Cashier', 'Manager')")
+    public List<StoreProductDto> getNonPromotionalSortedByQuantity() {
+        return storeProductService.getNonPromotionalSortedByQuantity();
     }
 
     @PostMapping
@@ -75,6 +122,26 @@ public class StoreProductController {
         storeProductService.softDeleteByUPC(upc);
     }
 
+    @GetMapping("/characteristics/{upc}")
+    @Operation(
+            summary = "Find selling price, quantity, name and characteristics by UPC",
+                description = "Find store product's selling price, quantity, name and characteristics by its UPC"
+    )
+    @PreAuthorize("hasRole('Manager')")
+    public StoreProductCharacteristicsDto findByUpc(@PathVariable String upc) {
+        return storeProductService.findByUPC(upc);
+    }
+
+    @GetMapping("/price-and-quantity/{upc}")
+    @Operation(
+            summary = "Find selling price and quantity by UPC",
+            description = "Find store product's price and quantity by its UPC"
+    )
+    @PreAuthorize("hasRole('Cashier')")
+    public StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(@PathVariable String upc) {
+        return storeProductService.findPriceAndQuantityByUPC(upc);
+    }
+
     @PostMapping("/receive")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(
@@ -109,7 +176,7 @@ public class StoreProductController {
     )
     @PreAuthorize("hasRole('Manager')")
     public ResponseEntity<byte[]> storeProductPdf() throws DocumentException {
-        List<StoreProductDto> storeProduct = storeProductService.getAll();
+        List<StoreProductDto> storeProduct = storeProductService.getAllSortedByQuantity();
         byte[] pdf = pdfReportGeneratorService.storeProductToPdf(storeProduct);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=store_products.pdf")

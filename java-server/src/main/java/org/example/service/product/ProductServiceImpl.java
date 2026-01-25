@@ -9,6 +9,7 @@ import org.example.repository.product.ProductRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -35,6 +36,18 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDto updateProductById(Long id, ProductRequestDto requestDto) {
         return repository.updateProductById(id, requestDto);
+    }
+
+    @Override
+    public Optional<ProductDto> findByName(String name) {
+        Optional<Product> product = repository.findByName(name);
+        return product.map(mapper::toDto);
+    }
+
+    @Override
+    public Optional<ProductDto> findByCategoryId(int category_number) {
+        Optional<Product> product = repository.findByCategoryId(category_number);
+        return product.map(mapper::toDto);
     }
 
     @Override
