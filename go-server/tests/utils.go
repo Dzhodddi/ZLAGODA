@@ -21,7 +21,7 @@ type IntegrationSuite struct {
 	DB *sqlx.DB
 }
 
-func (s *IntegrationSuite) SetupDatabase() {
+func (s *IntegrationSuite) SetupSuite() {
 	dbHost := os.Getenv("DB_HOST")
 	if dbHost == "" {
 		dbHost = "localhost"
