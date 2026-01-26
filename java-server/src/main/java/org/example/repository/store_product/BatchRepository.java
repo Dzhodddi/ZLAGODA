@@ -1,7 +1,7 @@
 package org.example.repository.store_product;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.store_product.BatchRequestDto;
+import org.example.dto.store_product.batch.BatchRequestDto;
 import org.example.exception.EntityNotFoundException;
 import org.example.exception.InvalidProductException;
 import org.example.model.store_product.StoreProduct;
@@ -50,7 +50,7 @@ public class BatchRepository {
                     requestDto.getQuantity(),
                     priceWithVat
             );
-            StoreProduct storeProduct = storeProductRepository.findByUPC(requestDto.getUPC())
+            StoreProduct storeProduct = storeProductRepository.findAllInfoByUPC(requestDto.getUPC())
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Store product not found: " + requestDto.getUPC()
                     ));
@@ -74,7 +74,7 @@ public class BatchRepository {
                     updatedQuantity,
                     storeProduct.getUPC()
             );
-            return storeProductRepository.findByUPC(storeProduct.getUPC()).get();
+            return storeProductRepository.findAllInfoByUPC(storeProduct.getUPC()).get();
         } catch (DataIntegrityViolationException e) {
             throw new InvalidProductException(
                     "Invalid product or UPC reference: " + requestDto.getUPC()

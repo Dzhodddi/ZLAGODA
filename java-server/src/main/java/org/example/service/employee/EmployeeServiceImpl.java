@@ -4,7 +4,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
@@ -90,5 +93,26 @@ public class EmployeeServiceImpl implements EmployeeService {
                 () -> new EntityNotFoundException("Cannot delete employee by id: " + id)
         );
         employeeRepository.deleteEmployeeById(id);
+    }
+
+    @Override
+    public List<EmployeeResponseDto> getAllCashiers() {
+        return employeeRepository.findAllCashiers();
+    }
+
+    @Override
+    public EmployeeResponseDto getMe() {
+        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Employee> currentUser = employeeRepository.findByIdEmployee(currentUserId);
+        return currentUser.map(employeeMapper::toEmployeeResponseDto)
+                .orElseThrow(() -> new EntityNotFoundException(
+                "Can't find authorized cashier by id: " + currentUserId));
+    }
+
+    @Override
+    public Optional<EmployeeContactDto> findPhoneAndAddressBySurname(String surname) {
+        return Optional.ofNullable(employeeRepository.findPhoneAndAddressBySurname(surname)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Cannot find employee by surname: " + surname)));
     }
 }

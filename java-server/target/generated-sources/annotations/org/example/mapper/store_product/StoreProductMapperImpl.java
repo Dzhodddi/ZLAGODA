@@ -1,14 +1,14 @@
 package org.example.mapper.store_product;
 
 import javax.annotation.processing.Generated;
-import org.example.dto.store_product.StoreProductDto;
-import org.example.dto.store_product.StoreProductRequestDto;
+import org.example.dto.store_product.product.StoreProductDto;
+import org.example.dto.store_product.product.StoreProductRequestDto;
 import org.example.model.store_product.StoreProduct;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-25T00:21:55+0200",
+    date = "2026-01-26T17:44:02+0200",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
 )
 @Component

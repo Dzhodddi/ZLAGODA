@@ -4,7 +4,7 @@ import com.itextpdf.text.DocumentException;
 import java.util.List;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.product.ProductDto;
-import org.example.dto.store_product.StoreProductDto;
+import org.example.dto.store_product.product.StoreProductDto;
 
 public interface PdfReportGeneratorService {
 

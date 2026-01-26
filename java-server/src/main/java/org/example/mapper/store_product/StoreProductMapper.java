@@ -1,7 +1,7 @@
 package org.example.mapper.store_product;
 
-import org.example.dto.store_product.StoreProductDto;
-import org.example.dto.store_product.StoreProductRequestDto;
+import org.example.dto.store_product.product.StoreProductDto;
+import org.example.dto.store_product.product.StoreProductRequestDto;
 import org.example.model.store_product.StoreProduct;
 import org.mapstruct.Mapper;
 

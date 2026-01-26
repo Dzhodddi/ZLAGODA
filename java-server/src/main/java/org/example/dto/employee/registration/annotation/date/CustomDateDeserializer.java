@@ -1,4 +1,4 @@
-package org.example.dto.employee.registration.annotation;
+package org.example.dto.employee.registration.annotation.date;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

@@ -2,7 +2,6 @@ package org.example.service.product;
 
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
-import org.example.model.product.Product;
 
 import java.util.List;
 
@@ -13,6 +12,10 @@ public interface ProductService {
     ProductDto save(ProductRequestDto requestDto);
 
     ProductDto updateProductById(Long id, ProductRequestDto requestDto);
+
+    List<ProductDto> findByName(String name);
+
+    List<ProductDto> findByCategoryId(int category_number);
 
     void deleteProductById(Long id);
 }

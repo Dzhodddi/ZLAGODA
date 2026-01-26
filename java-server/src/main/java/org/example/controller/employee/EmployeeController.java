@@ -4,7 +4,11 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
@@ -16,9 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
 
 @Tag(name = "Employee management", description = "Endpoints for managing employees")
 @RequiredArgsConstructor
@@ -32,8 +36,9 @@ public class EmployeeController {
     @GetMapping
     @Operation(
             summary = "Get all employees",
-            description = "Get all employees"
+            description = "Get all employees sorted by their surnames"
     )
+    @PreAuthorize("hasRole('Manager')")
     public List<EmployeeResponseDto> getAll() {
         return employeeService.getAll();
     }
@@ -87,5 +92,44 @@ public class EmployeeController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=employees.pdf")
                 .body(pdf);
+    }
+
+    @GetMapping("/cashiers")
+    @Operation(
+            summary = "Get all cashiers",
+            description = "Get all cashiers sorted by their surnames"
+    )
+    @PreAuthorize("hasRole('Manager')")
+    public List<EmployeeResponseDto> getAllCashiers() {
+        return employeeService.getAllCashiers();
+    }
+
+    @GetMapping("/me")
+    @Operation(
+            summary = "Get information about authorized cashier",
+            description = "Get all information about currently authorized cashier"
+    )
+    @PreAuthorize("hasRole('Cashier')")
+    public EmployeeResponseDto getMe(Authentication auth) {
+        boolean isCashier = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_Cashier"));
+        boolean isManager = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_Manager"));
+        if (!isCashier || isManager) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only Cashier can access this endpoint");
+        }
+        return employeeService.getMe();
+    }
+
+    @GetMapping(params = "surname")
+    @Operation(
+            summary = "Find employee's phone and address by their surname",
+            description = "Find employee's phone and address by their surname"
+    )
+    @PreAuthorize("hasRole('Manager')")
+    public EmployeeContactDto findPhoneAndAddressBySurname(
+            @RequestParam String surname) {
+        return employeeService.findPhoneAndAddressBySurname(surname).orElse(null);
     }
 }

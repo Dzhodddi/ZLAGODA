@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.List;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.product.ProductDto;
-import org.example.dto.store_product.StoreProductDto;
+import org.example.dto.store_product.product.StoreProductDto;
 import org.springframework.stereotype.Service;
 
 @Service

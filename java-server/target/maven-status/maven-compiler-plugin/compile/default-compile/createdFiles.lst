@@ -59,6 +59,8 @@ org\example\dto\employee\registration\annotation\CustomDateDeserializer.class
 org\example\model\product\Product.class
 org\example\model\employee\Role.class
 org\example\service\store_product\StoreProductService.class
+org\example\service\report\PdfReportGeneratorServiceImpl.class
+org\example\service\report\PdfReportGeneratorService.class
 org\example\repository\store_product\BatchRepository.class
 org\example\service\employee\EmployeeService.class
 org\example\config\SecurityConfig.class

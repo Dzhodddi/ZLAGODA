@@ -4,8 +4,9 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
 import org.example.service.product.ProductService;
@@ -15,9 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
 
 @Tag(name = "Product management", description = "Endpoints for managing products")
 @RequiredArgsConstructor
@@ -31,10 +32,34 @@ public class ProductController {
     @GetMapping
     @Operation(
             summary = "Get all products",
-            description = "Get all products"
+            description = "Get all products sorted by their names"
     )
     public List<ProductDto> getAll() {
         return productService.getAll();
+    }
+
+    @GetMapping(value = "/search")
+    @Operation(
+            summary = "Search products",
+            description = "Search products by their name or category"
+    )
+    public List<ProductDto> search(@RequestParam(required = false) String name,
+                                       @RequestParam(required = false) Integer categoryId,
+                                       Authentication auth) {
+        boolean isCashier = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("Cashier"));
+        if (name != null && !name.isEmpty()) {
+            if (!isCashier) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Only Cashier can search products by name");
+            }
+            return productService.findByName(name);
+        }
+        if (categoryId != null) {
+            return productService.findByCategoryId(categoryId);
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Please provide either an appropriate parameter");
     }
 
     @PostMapping
