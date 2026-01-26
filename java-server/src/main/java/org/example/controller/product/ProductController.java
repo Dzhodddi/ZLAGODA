@@ -1,13 +1,19 @@
 package org.example.controller.product;
 
+import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
 import org.example.service.product.ProductService;
+import org.example.service.report.PdfReportGeneratorService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +26,7 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final PdfReportGeneratorService pdfReportGeneratorService;
 
     @GetMapping
     @Operation(
@@ -65,5 +72,19 @@ public class ProductController {
     @PreAuthorize("hasRole('Manager')")
     public void deleteProductById(@PathVariable Long id) {
         productService.deleteProductById(id);
+    }
+
+    @GetMapping(value = "/report", produces = MediaType.APPLICATION_PDF_VALUE)
+    @Operation(
+            summary = "Download products report",
+            description = "Download products pdf report"
+    )
+    @PreAuthorize("hasRole('Manager')")
+    public ResponseEntity<byte[]> productPdf() throws DocumentException {
+        List<ProductDto> products = productService.getAll();
+        byte[] pdf = pdfReportGeneratorService.productToPdf(products);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=products.pdf")
+                .body(pdf);
     }
 }

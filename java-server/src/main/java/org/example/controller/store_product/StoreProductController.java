@@ -1,5 +1,6 @@
 package org.example.controller.store_product;
 
+import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -8,9 +9,13 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.store_product.BatchRequestDto;
 import org.example.dto.store_product.StoreProductDto;
 import org.example.dto.store_product.StoreProductRequestDto;
+import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +27,7 @@ public class StoreProductController {
 
     private final StoreProductService storeProductService;
     private final BatchService batchService;
+    private final PdfReportGeneratorService pdfReportGeneratorService;
 
     @GetMapping
     @Operation(
@@ -94,5 +100,19 @@ public class StoreProductController {
     @PreAuthorize("hasRole('Manager')")
     public void deleteExpired() {
         batchService.removeExpired();
+    }
+
+    @GetMapping(value = "/report", produces = MediaType.APPLICATION_PDF_VALUE)
+    @Operation(
+            summary = "Download store products report",
+            description = "Download store products pdf report"
+    )
+    @PreAuthorize("hasRole('Manager')")
+    public ResponseEntity<byte[]> storeProductPdf() throws DocumentException {
+        List<StoreProductDto> storeProduct = storeProductService.getAll();
+        byte[] pdf = pdfReportGeneratorService.storeProductToPdf(storeProduct);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=store_products.pdf")
+                .body(pdf);
     }
 }
