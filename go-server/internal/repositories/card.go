@@ -127,11 +127,11 @@ func (r *cardRepository) DeleteCustomerCard(ctx context.Context, cardNumber stri
 }
 
 func (r *cardRepository) ListCustomerCards(ctx context.Context) ([]generated.CustomerCard, error) {
-	return r.getListHelper(ctx, r.ListCustomerCards)
+	return r.getListHelper(ctx, r.queries.GetAllCustomerCards)
 }
 
 func (r *cardRepository) ListCustomerCardsSortedBySurname(ctx context.Context) ([]generated.CustomerCard, error) {
-	return r.getListHelper(ctx, r.ListCustomerCardsSortedBySurname)
+	return r.getListHelper(ctx, r.queries.GetAllCustomerCardsSortedBySurname)
 }
 
 func (r *cardRepository) ListCustomerCardsSortedByPercent(ctx context.Context, percent int) ([]generated.CustomerCard, error) {
