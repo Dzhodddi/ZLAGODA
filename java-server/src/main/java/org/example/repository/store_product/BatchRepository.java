@@ -1,7 +1,7 @@
 package org.example.repository.store_product;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.store_product.BatchRequestDto;
+import org.example.dto.store_product.batch.BatchRequestDto;
 import org.example.exception.EntityNotFoundException;
 import org.example.exception.InvalidProductException;
 import org.example.model.store_product.StoreProduct;

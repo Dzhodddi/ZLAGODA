@@ -2,10 +2,7 @@ package org.example.service.store_product;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.store_product.StoreProductCharacteristicsDto;
-import org.example.dto.store_product.StoreProductDto;
-import org.example.dto.store_product.StoreProductPriceAndQuantityDto;
-import org.example.dto.store_product.StoreProductRequestDto;
+import org.example.dto.store_product.product.*;
 import org.example.exception.EntityNotFoundException;
 import org.example.mapper.store_product.StoreProductMapper;
 import org.example.repository.store_product.StoreProductRepository;
@@ -20,6 +17,27 @@ public class StoreProductServiceImpl implements StoreProductService {
     @Qualifier("storeProductMapper")
     private final StoreProductMapper mapper;
 
+    public List<?> getAll(String sortedBy, Boolean prom) {
+        if ("name".equals(sortedBy)) {
+            if (prom == null) {
+                return getAllSortedByName();
+            }
+            return prom
+                    ? getPromotionalSortedByName()
+                    : getNonPromotionalSortedByName();
+        }
+        if ("quantity".equals(sortedBy)) {
+            if (prom == null) {
+                return getAllSortedByQuantity();
+            }
+            return prom
+                    ? getPromotionalSortedByQuantity()
+                    : getNonPromotionalSortedByQuantity();
+        }
+        throw new IllegalArgumentException("Unsupported sortedBy value: " + sortedBy);
+    }
+
+
     @Override
     public List<StoreProductDto> getAllSortedByQuantity() {
         return repository.findAllSortedByQuantity()
@@ -29,11 +47,8 @@ public class StoreProductServiceImpl implements StoreProductService {
     }
 
     @Override
-    public List<StoreProductDto> getAllSortedByName() {
-        return repository.findAllSortedByName()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+    public List<StoreProductWithNameDto> getAllSortedByName() {
+        return repository.findAllSortedByName();
     }
 
     @Override
@@ -53,19 +68,13 @@ public class StoreProductServiceImpl implements StoreProductService {
     }
 
     @Override
-    public List<StoreProductDto> getPromotionalSortedByName() {
-        return repository.findPromotionalSortedByName()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+    public List<StoreProductWithNameDto> getPromotionalSortedByName() {
+        return repository.findPromotionalSortedByName();
     }
 
     @Override
-    public List<StoreProductDto> getNonPromotionalSortedByName() {
-        return repository.findNonPromotionalSortedByName()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+    public List<StoreProductWithNameDto> getNonPromotionalSortedByName() {
+        return repository.findNonPromotionalSortedByName();
     }
 
     @Override

@@ -1,26 +1,22 @@
 package org.example.service.store_product;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.example.dto.store_product.StoreProductCharacteristicsDto;
-import org.example.dto.store_product.StoreProductDto;
-import org.example.dto.store_product.StoreProductPriceAndQuantityDto;
-import org.example.dto.store_product.StoreProductRequestDto;
+import org.example.dto.store_product.product.*;
 
 public interface StoreProductService {
 
     List<StoreProductDto> getAllSortedByQuantity();
 
-    List<StoreProductDto> getAllSortedByName();
+    List<StoreProductWithNameDto> getAllSortedByName();
 
     List<StoreProductDto> getPromotionalSortedByQuantity();
 
     List<StoreProductDto> getNonPromotionalSortedByQuantity();
 
-    List<StoreProductDto> getPromotionalSortedByName();
+    List<StoreProductWithNameDto> getPromotionalSortedByName();
 
-    List<StoreProductDto> getNonPromotionalSortedByName();
+    List<StoreProductWithNameDto> getNonPromotionalSortedByName();
 
     StoreProductDto save(StoreProductRequestDto requestDto);
 
@@ -31,4 +27,6 @@ public interface StoreProductService {
     StoreProductCharacteristicsDto findByUPC(String upc);
 
     StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(String upc);
+
+    List<?> getAll(String sortedBy, Boolean prom);
 }

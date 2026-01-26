@@ -6,7 +6,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.store_product.*;
+import org.example.dto.store_product.batch.BatchRequestDto;
+import org.example.dto.store_product.product.*;
 import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
@@ -18,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @Tag(name = "Store product management", description = "Endpoints for managing store products")
 @RequiredArgsConstructor
@@ -32,57 +34,30 @@ public class StoreProductController {
     @GetMapping
     @Operation(
             summary = "Get all store products",
-            description = "Get all store products sorted"
+            description = """
+    Get all store products with optional filters:
+    - sortedBy: name | quantity
+    - prom: true | false
+    """
     )
-    @PreAuthorize("hasAnyRole('Cashier', 'Manager')")
-    public List<StoreProductDto> getAll() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public List<?> getStoreProducts(
+            @RequestParam String sortedBy,
+            @RequestParam(required = false) Boolean prom,
+            Authentication auth
+    ) {
+        boolean isCashier = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("Cashier"));
         boolean isManager = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_Manager"));
-        if (isManager) {
-            return storeProductService.getAllSortedByQuantity();
+                .anyMatch(a -> a.getAuthority().equals("Manager"));
+        if ("name".equals(sortedBy) && !isCashier) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only Cashier can sort by name");
         }
-        return storeProductService.getAllSortedByName();
-    }
-
-    @GetMapping("/prom/sorted-by-name")
-    @Operation(
-            summary = "Get all promotional store products sorted by name",
-            description = "Get all promotional store products sorted by name"
-    )
-    @PreAuthorize("hasAnyRole('Cashier', 'Manager')")
-    public List<StoreProductDto> getPromotionalSortedByName() {
-        return storeProductService.getPromotionalSortedByName();
-    }
-
-    @GetMapping("/non-prom/sorted-by-name")
-    @Operation(
-            summary = "Get all non-promotional store products sorted by name",
-            description = "Get all non-promotional store products sorted by name"
-    )
-    @PreAuthorize("hasAnyRole('Cashier', 'Manager')")
-    public List<StoreProductDto> getNonPromotionalSortedByName() {
-        return storeProductService.getNonPromotionalSortedByName();
-    }
-
-    @GetMapping("/prom/sorted-by-quantity")
-    @Operation(
-            summary = "Get all promotional store products sorted by quantity",
-            description = "Get all promotional store products sorted by quantity"
-    )
-    @PreAuthorize("hasAnyRole('Cashier', 'Manager')")
-    public List<StoreProductDto> getPromotionalSortedByQuantity() {
-        return storeProductService.getPromotionalSortedByQuantity();
-    }
-
-    @GetMapping("/non-prom/sorted-by-quantity")
-    @Operation(
-            summary = "Get all non-promotional store products sorted by quantity",
-            description = "Get all non-promotional store products sorted by quantity"
-    )
-    @PreAuthorize("hasAnyRole('Cashier', 'Manager')")
-    public List<StoreProductDto> getNonPromotionalSortedByQuantity() {
-        return storeProductService.getNonPromotionalSortedByQuantity();
+        if ("quantity".equals(sortedBy) && !isManager) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only Manager can sort by quantity");
+        }
+        return storeProductService.getAll(sortedBy, prom);
     }
 
     @PostMapping
@@ -122,24 +97,47 @@ public class StoreProductController {
         storeProductService.softDeleteByUPC(upc);
     }
 
-    @GetMapping("/characteristics/{upc}")
+    @GetMapping("/{upc}")
     @Operation(
-            summary = "Find selling price, quantity, name and characteristics by UPC",
-                description = "Find store product's selling price, quantity, name and characteristics by its UPC"
+            summary = "Find store product info by UPC",
+            description = "Returns different data based on query parameters and user role"
     )
-    @PreAuthorize("hasRole('Manager')")
-    public StoreProductCharacteristicsDto findByUpc(@PathVariable String upc) {
-        return storeProductService.findByUPC(upc);
-    }
-
-    @GetMapping("/price-and-quantity/{upc}")
-    @Operation(
-            summary = "Find selling price and quantity by UPC",
-            description = "Find store product's price and quantity by its UPC"
-    )
-    @PreAuthorize("hasRole('Cashier')")
-    public StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(@PathVariable String upc) {
-        return storeProductService.findPriceAndQuantityByUPC(upc);
+    public ResponseEntity<?> findByUpc(
+            @PathVariable String upc,
+            @RequestParam(required = false) Boolean selling_price,
+            @RequestParam(required = false) Boolean quantity,
+            @RequestParam(required = false) Boolean name,
+            @RequestParam(required = false) Boolean characteristics,
+            Authentication auth
+    ) {
+        boolean isManager = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("Manager"));
+        boolean isCashier = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("Cashier"));
+        if (Boolean.TRUE.equals(selling_price) &&
+                Boolean.TRUE.equals(quantity) &&
+                Boolean.TRUE.equals(name) &&
+                Boolean.TRUE.equals(characteristics)) {
+            if (!isManager) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Only Manager can access full product characteristics");
+            }
+            return ResponseEntity.ok(storeProductService.findByUPC(upc));
+        }
+        if (Boolean.TRUE.equals(selling_price) &&
+                Boolean.TRUE.equals(quantity) &&
+                name == null &&
+                characteristics == null) {
+            if (!isCashier) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Only Cashier can access price and quantity");
+            }
+            return ResponseEntity.ok(storeProductService.findPriceAndQuantityByUPC(upc));
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Invalid parameter combination. Use either: " +
+                        "(selling_price, quantity) for Cashier or " +
+                        "(selling_price, quantity, name, characteristics) for Manager");
     }
 
     @PostMapping("/receive")

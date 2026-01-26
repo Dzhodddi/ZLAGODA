@@ -1,8 +1,8 @@
 package org.example.service.store_product;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.store_product.BatchRequestDto;
-import org.example.dto.store_product.StoreProductDto;
+import org.example.dto.store_product.batch.BatchRequestDto;
+import org.example.dto.store_product.product.StoreProductDto;
 import org.example.mapper.store_product.StoreProductMapper;
 import org.example.repository.store_product.BatchRepository;
 import org.springframework.stereotype.Service;

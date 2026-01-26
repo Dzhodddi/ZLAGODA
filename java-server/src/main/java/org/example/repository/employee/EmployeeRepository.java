@@ -160,23 +160,27 @@ public class EmployeeRepository {
     }
 
     public Optional<EmployeeContactDto> findPhoneAndAddressBySurname(String surname) {
-        return Optional.ofNullable(
-                jdbcTemplate.queryForObject(
-                        """
-                        SELECT phone_number, city, street, zip_code
-                        FROM employee
-                        WHERE empl_surname = ?
-                        """,
-                        (rs, rowNum) -> {
-                            EmployeeContactDto dto = new EmployeeContactDto();
-                            dto.setPhone_number(rs.getString("phone_number"));
-                            dto.setCity(rs.getString("city"));
-                            dto.setStreet(rs.getString("street"));
-                            dto.setZip_code(rs.getString("zip_code"));
-                            return dto;
-                        },
-                        surname
-                )
-        );
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(
+                            """
+                            SELECT phone_number, city, street, zip_code
+                            FROM employee
+                            WHERE empl_surname = ?
+                            """,
+                            (rs, rowNum) -> {
+                                EmployeeContactDto dto = new EmployeeContactDto();
+                                dto.setPhone_number(rs.getString("phone_number"));
+                                dto.setCity(rs.getString("city"));
+                                dto.setStreet(rs.getString("street"));
+                                dto.setZip_code(rs.getString("zip_code"));
+                                return dto;
+                            },
+                            surname
+                    )
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 }

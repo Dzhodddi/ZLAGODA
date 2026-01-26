@@ -6,8 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.dto.employee.registration.annotation.CustomDateDeserializer;
-import org.example.dto.employee.registration.annotation.FieldMatch;
+import org.example.dto.employee.registration.annotation.date.CustomDateDeserializer;
+import org.example.dto.employee.registration.annotation.date.MinYear;
+import org.example.dto.employee.registration.annotation.field_match.FieldMatch;
 import org.hibernate.validator.constraints.Length;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -36,6 +37,7 @@ public class EmployeeRegistrationRequestDto {
     @NotNull
     @JsonDeserialize(using = CustomDateDeserializer.class)
     @Past
+    @MinYear(1900)
     private Date date_of_birth;
     @NotNull
     @JsonDeserialize(using = CustomDateDeserializer.class)

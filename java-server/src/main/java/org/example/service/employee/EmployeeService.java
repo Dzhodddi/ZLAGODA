@@ -1,6 +1,7 @@
 package org.example.service.employee;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
@@ -21,5 +22,5 @@ public interface EmployeeService {
 
     EmployeeResponseDto getMe();
 
-    EmployeeContactDto findPhoneAndAddressBySurname(String surname);
+    Optional<EmployeeContactDto> findPhoneAndAddressBySurname(String surname);
 }

@@ -16,7 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @Tag(name = "Product management", description = "Endpoints for managing products")
 @RequiredArgsConstructor
@@ -36,24 +38,28 @@ public class ProductController {
         return productService.getAll();
     }
 
-    @GetMapping("by-name/{name}")
+    @GetMapping(value = "/search")
     @Operation(
-            summary = "Search products by name",
-            description = "Search products by their name"
+            summary = "Search products",
+            description = "Search products by their name or category"
     )
-    @PreAuthorize("hasRole('Cashier')")
-    public Optional<ProductDto> getAllByName(@PathVariable String name) {
-        return productService.findByName(name);
-    }
-
-    @GetMapping("by-category/{id}")
-    @Operation(
-            summary = "Get all products by their category",
-            description = "Get all products by their category"
-    )
-    @PreAuthorize("hasRole('Manager')")
-    public Optional<ProductDto> getAllByName(@PathVariable int id) {
-        return productService.findByCategoryId(id);
+    public List<ProductDto> search(@RequestParam(required = false) String name,
+                                       @RequestParam(required = false) Integer categoryId,
+                                       Authentication auth) {
+        boolean isCashier = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("Cashier"));
+        if (name != null && !name.isEmpty()) {
+            if (!isCashier) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Only Cashier can search products by name");
+            }
+            return productService.findByName(name);
+        }
+        if (categoryId != null) {
+            return productService.findByCategoryId(categoryId);
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Please provide either an appropriate parameter");
     }
 
     @PostMapping

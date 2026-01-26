@@ -42,32 +42,18 @@ public class ProductRepository {
         }
     }
 
-    public Optional<Product> findByName(String name) {
-        try {
-            return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(
+    public List<Product> findByName(String name) {
+        return jdbcTemplate.query(
                             "SELECT * FROM product WHERE product_name = ?",
                             rowMapper,
-                            name
-                    )
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+                            name);
     }
 
-    public Optional<Product> findByCategoryId(int category_number) {
-        try {
-            return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(
+    public List<Product> findByCategoryId(int category_number) {
+        return jdbcTemplate.query(
                             "SELECT * FROM product WHERE category_number = ? ORDER BY product_name",
                             rowMapper,
-                            category_number
-                    )
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+                            category_number);
     }
 
     public Product save(Product product) {

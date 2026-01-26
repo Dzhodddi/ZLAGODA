@@ -1,4 +1,4 @@
-package org.example.dto.store_product;
+package org.example.dto.store_product.product;
 
 import java.math.BigDecimal;
 import lombok.Getter;

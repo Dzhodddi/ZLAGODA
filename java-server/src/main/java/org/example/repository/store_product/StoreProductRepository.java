@@ -5,10 +5,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.store_product.StoreProductCharacteristicsDto;
-import org.example.dto.store_product.StoreProductDto;
-import org.example.dto.store_product.StoreProductPriceAndQuantityDto;
-import org.example.dto.store_product.StoreProductRequestDto;
+import org.example.dto.store_product.product.*;
 import org.example.exception.EntityNotFoundException;
 import org.example.exception.InvalidProductException;
 import org.example.mapper.store_product.StoreProductMapper;
@@ -31,16 +28,27 @@ public class StoreProductRepository {
     @Qualifier("storeProductMapper")
     private final StoreProductMapper mapper;
 
-    public List<StoreProduct> findAllSortedByName() {
+    public List<StoreProductWithNameDto> findAllSortedByName() {
         return jdbcTemplate.query("""
-             SELECT sp.*
-             FROM store_product sp
-             INNER JOIN product p ON sp.id_product = p.id_product
-             WHERE sp.is_deleted = false
-             ORDER BY p.product_name ASC
-             """,
-                rowMapper);
+        SELECT sp.*, p.product_name
+        FROM store_product sp
+        JOIN product p ON sp.id_product = p.id_product
+        WHERE sp.is_deleted = false
+        ORDER BY p.product_name
+        """,
+                (rs, rowNum) -> {
+                    StoreProductWithNameDto dto = new StoreProductWithNameDto();
+                    dto.setUPC(rs.getString("UPC"));
+                    dto.setUPC_prom(rs.getString("UPC_prom"));
+                    dto.setId_product(rs.getInt("id_product"));
+                    dto.setSelling_price(rs.getBigDecimal("selling_price"));
+                    dto.setProducts_number(rs.getInt("products_number"));
+                    dto.setPromotional_product(rs.getBoolean("promotional_product"));
+                    dto.setProduct_name(rs.getString("product_name"));
+                    return dto;
+                });
     }
+
 
     public List<StoreProduct> findAllSortedByQuantity() {
         return jdbcTemplate.query("""
@@ -60,15 +68,25 @@ public class StoreProductRepository {
                 rowMapper);
     }
 
-    public List<StoreProduct> findPromotionalSortedByName() {
+    public List<StoreProductWithNameDto> findPromotionalSortedByName() {
         return jdbcTemplate.query("""
-             SELECT sp.*
+             SELECT sp.*, p.product_name
              FROM store_product sp
              INNER JOIN product p ON sp.id_product = p.id_product
              WHERE sp.promotional_product = true AND sp.is_deleted = false
              ORDER BY p.product_name ASC
              """,
-                rowMapper);
+                (rs, rowNum) -> {
+                    StoreProductWithNameDto dto = new StoreProductWithNameDto();
+                    dto.setUPC(rs.getString("UPC"));
+                    dto.setUPC_prom(rs.getString("UPC_prom"));
+                    dto.setId_product(rs.getInt("id_product"));
+                    dto.setSelling_price(rs.getBigDecimal("selling_price"));
+                    dto.setProducts_number(rs.getInt("products_number"));
+                    dto.setPromotional_product(rs.getBoolean("promotional_product"));
+                    dto.setProduct_name(rs.getString("product_name"));
+                    return dto;
+                });
     }
 
     public List<StoreProduct> findNonPromotionalSortedByQuantity() {
@@ -80,15 +98,25 @@ public class StoreProductRepository {
                 rowMapper);
     }
 
-    public List<StoreProduct> findNonPromotionalSortedByName() {
+    public List<StoreProductWithNameDto> findNonPromotionalSortedByName() {
         return jdbcTemplate.query("""
-             SELECT sp.*
+             SELECT sp.*, p.product_name
              FROM store_product sp
              INNER JOIN product p ON sp.id_product = p.id_product
              WHERE sp.promotional_product = false AND sp.is_deleted = false
              ORDER BY p.product_name ASC
              """,
-                rowMapper);
+                (rs, rowNum) -> {
+                    StoreProductWithNameDto dto = new StoreProductWithNameDto();
+                    dto.setUPC(rs.getString("UPC"));
+                    dto.setUPC_prom(rs.getString("UPC_prom"));
+                    dto.setId_product(rs.getInt("id_product"));
+                    dto.setSelling_price(rs.getBigDecimal("selling_price"));
+                    dto.setProducts_number(rs.getInt("products_number"));
+                    dto.setPromotional_product(rs.getBoolean("promotional_product"));
+                    dto.setProduct_name(rs.getString("product_name"));
+                    return dto;
+                });
     }
 
     public Optional<StoreProduct> findAllInfoByUPC(String upc) {
@@ -136,7 +164,7 @@ public class StoreProductRepository {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
                             """
-                            SELECT selling_price AND products_number
+                            SELECT selling_price, products_number
                             FROM store_product
                             WHERE UPC = ? AND is_deleted = false
                             """,

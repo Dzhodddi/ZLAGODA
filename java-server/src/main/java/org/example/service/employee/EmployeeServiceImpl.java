@@ -110,9 +110,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeContactDto findPhoneAndAddressBySurname(String surname) {
-        return employeeRepository.findPhoneAndAddressBySurname(surname)
+    public Optional<EmployeeContactDto> findPhoneAndAddressBySurname(String surname) {
+        return Optional.ofNullable(employeeRepository.findPhoneAndAddressBySurname(surname)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Cannot find employee by surname: " + surname));
+                        "Cannot find employee by surname: " + surname)));
     }
 }

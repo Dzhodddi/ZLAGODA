@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -39,15 +40,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Optional<ProductDto> findByName(String name) {
-        Optional<Product> product = repository.findByName(name);
-        return product.map(mapper::toDto);
+    public List<ProductDto> findByName(String name) {
+        List<Product> products = repository.findByName(name);
+        return products.stream()
+                .map(mapper::toDto)
+                .toList();
     }
 
     @Override
-    public Optional<ProductDto> findByCategoryId(int category_number) {
-        Optional<Product> product = repository.findByCategoryId(category_number);
-        return product.map(mapper::toDto);
+    public List<ProductDto> findByCategoryId(int category_number) {
+        List<Product> products = repository.findByCategoryId(category_number);
+        return products.stream()
+                .map(mapper::toDto)
+                .toList();
     }
 
     @Override
