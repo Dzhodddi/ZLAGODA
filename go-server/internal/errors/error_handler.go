@@ -3,9 +3,11 @@ package error_response
 import (
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/Dzhodddi/ZLAGODA/internal/config"
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
-	"net/http"
+	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 
 	"github.com/labstack/echo/v4"
 )
@@ -17,13 +19,27 @@ func GlobalHTTPErrorHandler(env config.Env) func(error, echo.Context) {
 		details := ""
 
 		var appErr *HTTPErrorResponse
-		if errors.As(err, &appErr) {
+		var echoErr *echo.HTTPError
+
+		switch {
+		case errors.Is(err, repository.ErrNotFound):
+			code = http.StatusNotFound
+			msg = "Entity not found"
+		case errors.Is(err, repository.ErrConflict):
+			code = http.StatusUnprocessableEntity
+			msg = "Entity already exists"
+		case errors.Is(err, repository.ErrForeignKey):
+			code = http.StatusBadRequest
+			msg = "Invalid reference"
+
+		case errors.As(err, &appErr):
 			code = appErr.Code
 			msg = appErr.Message
 			details = appErr.Details
-		} else if he, ok := err.(*echo.HTTPError); ok {
-			code = he.Code
-			msg = fmt.Sprintf("%v", he.Message)
+
+		case errors.As(err, &echoErr):
+			code = echoErr.Code
+			msg = fmt.Sprintf("%v", echoErr.Message)
 		}
 		if env == config.Prod {
 			details = ""

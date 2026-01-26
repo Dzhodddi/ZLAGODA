@@ -7,16 +7,10 @@ import (
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
-	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
-
-type CheckRepository struct {
-	db      *sqlx.DB
-	queries *generated.Queries
-}
 
 type Product struct {
 	SellingPrice float64 `db:"selling_price"`
@@ -32,14 +26,47 @@ type CheckStoreProduct struct {
 	CheckDate    time.Time `db:"check_date"`
 }
 
-func NewCheckRepository(db *sqlx.DB) *CheckRepository {
-	return &CheckRepository{
+type CheckRepository interface {
+	CreateNewCheck(
+		ctx context.Context,
+		check views.CreateNewCheck,
+		printTime time.Time,
+		formattedSqlPayload string,
+		payload []interface{},
+		keys []string,
+	) (*generated.Check, error)
+	calculateCheckTotalSumIfValid(
+		ctx context.Context,
+		tx *sqlx.Tx,
+		formattedSqlPayload string,
+		resultLen int,
+		args []any,
+	) (*[]Product, float64, error)
+	saveProducts(
+		ctx context.Context,
+		tx *sqlx.Tx,
+		productPayload []CheckStoreProduct,
+	) error
+	reduceStoreProductQuantity(
+		ctx context.Context,
+		tx *sqlx.Tx,
+		storeProducts []CheckStoreProduct,
+	) error
+}
+
+type checkRepository struct {
+	db      *sqlx.DB
+	queries *generated.Queries
+}
+
+func NewCheckRepository(db *sqlx.DB) CheckRepository {
+	return &checkRepository{
 		db:      db,
 		queries: generated.New(db.DB),
 	}
 }
 
-func (r *CheckRepository) CreateNewCheck(
+func (r *checkRepository) CreateNewCheck(
 	ctx context.Context,
 	check views.CreateNewCheck,
 	printTime time.Time,
@@ -49,6 +76,7 @@ func (r *CheckRepository) CreateNewCheck(
 ) (*generated.Check, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
+
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -76,9 +104,9 @@ func (r *CheckRepository) CreateNewCheck(
 		if pgErr, ok := err.(*pq.Error); ok {
 			switch pgErr.Code {
 			case "23503": // Foreign key constraint violation
-				return nil, errorResponse.BadForeignKey()
+				return nil, ErrForeignKey
 			case "23505": // Unique constraint violation
-				return nil, errorResponse.Conflict()
+				return nil, ErrConflict
 			}
 		}
 		return nil, err
@@ -97,7 +125,7 @@ func (r *CheckRepository) CreateNewCheck(
 	if err != nil {
 		return nil, err
 	}
-	err = r.reduceStoreProductQuantity(ctx, tx, storeProductList, keys)
+	err = r.reduceStoreProductQuantity(ctx, tx, storeProductList)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +135,7 @@ func (r *CheckRepository) CreateNewCheck(
 	return &newCheck, nil
 }
 
-func (r *CheckRepository) calculateCheckTotalSumIfValid(ctx context.Context, tx *sqlx.Tx, formattedSqlPayload string, resultLen int, args []any) (*[]Product, float64, error) {
+func (r *checkRepository) calculateCheckTotalSumIfValid(ctx context.Context, tx *sqlx.Tx, formattedSqlPayload string, resultLen int, args []any) (*[]Product, float64, error) {
 	var products []Product
 	query, args, err := sqlx.In(fmt.Sprintf(`
 	WITH
@@ -134,7 +162,7 @@ func (r *CheckRepository) calculateCheckTotalSumIfValid(ctx context.Context, tx 
 		return nil, -1, err
 	}
 	if len(products) != resultLen {
-		return nil, -1, errorResponse.BadForeignKey()
+		return nil, -1, ErrForeignKey
 	}
 	totalPrice := 0.0
 	for _, p := range products {
@@ -143,13 +171,13 @@ func (r *CheckRepository) calculateCheckTotalSumIfValid(ctx context.Context, tx 
 	return &products, totalPrice, nil
 }
 
-func (r *CheckRepository) saveProducts(ctx context.Context, tx *sqlx.Tx, productPayload []CheckStoreProduct) error {
+func (r *checkRepository) saveProducts(ctx context.Context, tx *sqlx.Tx, productPayload []CheckStoreProduct) error {
 	query := `INSERT INTO check_store_product (check_number, UPC, selling_price, quantity, check_date) VALUES (:check_number, :upc, :selling_price, :quantity, :check_date)`
 	_, err := tx.NamedExecContext(ctx, query, productPayload)
 	return err
 }
 
-func (r *CheckRepository) reduceStoreProductQuantity(ctx context.Context, tx *sqlx.Tx, storeProducts []CheckStoreProduct, upc []string) error {
+func (r *checkRepository) reduceStoreProductQuantity(ctx context.Context, tx *sqlx.Tx, storeProducts []CheckStoreProduct) error {
 	query := `UPDATE store_product SET products_number = products_number - :quantity WHERE UPC = :upc`
 	stmt, err := tx.PrepareNamedContext(ctx, query)
 	if err != nil {

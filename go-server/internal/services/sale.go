@@ -2,30 +2,30 @@ package services
 
 import (
 	"context"
-	"errors"
-	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
+	"fmt"
+
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
 )
 
-type SaleService struct {
-	repository *repository.SaleRepository
+type SaleService interface {
+	CreateNewSale(ctx context.Context, sale views.CreateNewSale) (*views.SaleResponse, error)
 }
 
-func NewSaleService(repository *repository.SaleRepository) *SaleService {
-	return &SaleService{repository: repository}
+type saleService struct {
+	saleRepository repository.SaleRepository
 }
 
-func (s *SaleService) CreateNewSale(ctx context.Context, sale views.CreateNewSale) (*views.SaleResponse, error) {
-	newSale, err := s.repository.CreateNewSale(ctx, sale)
+func NewSaleService(saleRepository repository.SaleRepository) SaleService {
+	return &saleService{saleRepository: saleRepository}
+}
+
+func (s *saleService) CreateNewSale(ctx context.Context, sale views.CreateNewSale) (*views.SaleResponse, error) {
+	newSale, err := s.saleRepository.CreateNewSale(ctx, sale)
 	if err != nil {
-		var httpErr *errorResponse.HTTPErrorResponse
-		if errors.As(err, &httpErr) {
-			return nil, err
-		}
-		return nil, errorResponse.Internal(err)
+		return nil, fmt.Errorf("failed to create sale: %w", err)
 	}
 	return mappers.SaleModelToResponse(newSale), nil
 }

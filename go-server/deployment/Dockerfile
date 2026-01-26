@@ -1,9 +1,17 @@
-FROM golang:alpine AS base
+FROM golang:1.25.5-bookworm AS base
 WORKDIR /app
-RUN apk add --no-cache git make
-COPY go-server/go.mod go-server/go.sum ./go-server/
+RUN apt-get update && apt-get install -y make git && rm -rf /var/lib/apt/lists/*
+COPY go-server/go.mod go-server/go.sum go-server/Makefile ./go-server/
 WORKDIR /app/go-server
 RUN go mod download
+
+
+FROM base AS test
+COPY go-server ./
+WORKDIR /app/go-server
+COPY migrations ./migrations
+ENTRYPOINT ["make"]
+CMD ["test-all"]
 
 FROM base AS dev
 RUN go install github.com/air-verse/air@latest

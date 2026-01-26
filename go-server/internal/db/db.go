@@ -2,8 +2,9 @@ package db
 
 import (
 	"context"
-	"github.com/jmoiron/sqlx"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 
 	_ "github.com/lib/pq"
 )
