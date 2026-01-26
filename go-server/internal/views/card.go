@@ -34,3 +34,8 @@ type UpdateCustomerCard struct {
 	Zipcode            *string `json:"zipcode" validate:"omitempty,max=9"`
 	CustomerPercent    int32   `json:"customer_percent" validate:"required,max=100,min=1"`
 }
+
+type ListQueryParams struct {
+	Percent *int  `query:"percent" validate:"omitempty,min=1,max=100"`
+	Sorted  *bool `query:"sorted"`
+}

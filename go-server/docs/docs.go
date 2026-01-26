@@ -331,6 +331,20 @@ const docTemplate = `{
                     "CustomerCard"
                 ],
                 "summary": "List all customer cards",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "percent",
+                        "name": "percent",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "sorted",
+                        "name": "sorted",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

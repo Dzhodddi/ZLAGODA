@@ -428,6 +428,15 @@ paths:
       consumes:
       - application/json
       description: Retrieves a list of all customer discount cards
+      parameters:
+      - description: percent
+        in: query
+        name: percent
+        type: integer
+      - description: sorted
+        in: query
+        name: sorted
+        type: boolean
       produces:
       - application/json
       responses:

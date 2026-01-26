@@ -136,11 +136,22 @@ func (h *CardHandler) deleteCustomerCard(c echo.Context) error {
 // @Tags         CustomerCard
 // @Accept       json
 // @Produce      json
+//
+//	@Param			percent	query		int	false	"percent"
+//	@Param			sorted 	query		bool	false	"sorted"
+//
 // @Success      200  {array}  views.CustomerCardResponse
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /customer-cards [get]
 func (h *CardHandler) listCustomerCards(c echo.Context) error {
-	cards, err := h.service.ListCustomerCards(c.Request().Context())
+	var q views.ListQueryParams
+	if err := c.Bind(&q); err != nil {
+		return errorResponse.ValidationError(constants.ValidationError, err)
+	}
+	if err := validation.ValidateStruct(q); err != nil {
+		return errorResponse.ValidationError(constants.ValidationError, err)
+	}
+	cards, err := h.service.ListCustomerCards(c.Request().Context(), q)
 	if err != nil {
 		return err
 	}
