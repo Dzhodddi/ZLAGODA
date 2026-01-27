@@ -15,7 +15,7 @@ type CardService interface {
 	GetCustomerCard(ctx context.Context, cardNumber string) (*views.CustomerCardResponse, error)
 	UpdateCustomerCard(ctx context.Context, card views.UpdateCustomerCard, cardNumber string) (*views.CustomerCardResponse, error)
 	DeleteCustomerCard(ctx context.Context, cardNumber string) error
-	ListCustomerCards(ctx context.Context, q views.ListQueryParams) ([]*views.CustomerCardResponse, error)
+	ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]*views.CustomerCardResponse, error)
 }
 
 type cardService struct {
@@ -58,7 +58,7 @@ func (s *cardService) DeleteCustomerCard(ctx context.Context, cardNumber string)
 	return nil
 }
 
-func (s *cardService) ListCustomerCards(ctx context.Context, q views.ListQueryParams) ([]*views.CustomerCardResponse, error) {
+func (s *cardService) ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]*views.CustomerCardResponse, error) {
 	var cards []generated.CustomerCard
 	var err error
 	switch {

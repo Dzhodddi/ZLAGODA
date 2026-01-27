@@ -23,3 +23,6 @@ SELECT category_number, category_name FROM category ORDER BY category_number;
 DELETE FROM category
 WHERE category_number = $1
 RETURNING category_number;
+
+-- name: GetAllCategoriesSortedByName :many
+SELECT category_number, category_name FROM category ORDER BY category_name;

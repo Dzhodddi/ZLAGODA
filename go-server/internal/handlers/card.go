@@ -144,7 +144,7 @@ func (h *CardHandler) deleteCustomerCard(c echo.Context) error {
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /customer-cards [get]
 func (h *CardHandler) listCustomerCards(c echo.Context) error {
-	var q views.ListQueryParams
+	var q views.ListCustomerCardsQueryParams
 	if err := c.Bind(&q); err != nil {
 		return errorResponse.ValidationError(constants.ValidationError, err)
 	}
