@@ -28,7 +28,7 @@ public class ProductRepository {
                 rowMapper);
     }
 
-    public Optional<Product> findById(Long id) {
+    public Optional<Product> findById(int id) {
         try {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
@@ -58,7 +58,7 @@ public class ProductRepository {
 
     public Product save(Product product) {
         try {
-            if (product.getId_product() == null) {
+            if (product.getId_product() == 0) {
                 return jdbcTemplate.queryForObject(
                         """
                         INSERT INTO product (
@@ -101,7 +101,7 @@ public class ProductRepository {
         }
     }
 
-    public ProductDto updateProductById(Long id, ProductRequestDto requestDto) {
+    public ProductDto updateProductById(int id, ProductRequestDto requestDto) {
         if (!existsByIdProduct(id)) {
             throw new EntityNotFoundException("Product not found: " + id);
         }
@@ -134,14 +134,14 @@ public class ProductRepository {
         }
     }
 
-    public void deleteById(Long id) {
+    public void deleteById(int id) {
         if (!existsByIdProduct(id)) {
             throw new EntityNotFoundException("Product not found: " + id);
         }
         jdbcTemplate.update("DELETE FROM product WHERE id_product = ?", id);
     }
 
-    public boolean existsByIdProduct(Long idProduct) {
+    public boolean existsByIdProduct(int idProduct) {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM product WHERE id_product = ?",
                 Integer.class,

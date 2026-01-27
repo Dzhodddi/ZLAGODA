@@ -294,4 +294,12 @@ public class StoreProductRepository {
                 price, promotional, upc
         );
     }
+
+    public List<StoreProduct> findAll() {
+        return jdbcTemplate.query("""
+             SELECT * FROM store_product
+             WHERE is_deleted = false
+             """,
+                rowMapper);
+    }
 }

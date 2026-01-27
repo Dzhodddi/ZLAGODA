@@ -150,7 +150,7 @@ public class EmployeeRepository {
     public List<EmployeeResponseDto> findAllCashiers() {
         return jdbcTemplate.query("""
                         SELECT * FROM employee
-                        WHERE empl_role = 'Cashier'
+                        WHERE empl_role = 'CASHIER'
                         ORDER BY empl_surname
                         """,
                         employeeRowMapper)

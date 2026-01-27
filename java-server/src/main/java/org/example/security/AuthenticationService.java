@@ -32,7 +32,7 @@ public class AuthenticationService {
     public EmployeeLoginResponseDto refreshToken(RefreshTokenRequestDto request) {
         String refreshToken = request.getRefreshToken();
         if (!jwtUtil.isValidToken(refreshToken)) {
-            throw new AuthenticationException("Invalid or expired refresh token");
+            throw new AuthenticationException("Invalid or expired refresh token: " + refreshToken);
         }
         String username = jwtUtil.getUsername(refreshToken);
         String newAccessToken = jwtUtil.generateAccessToken(username);

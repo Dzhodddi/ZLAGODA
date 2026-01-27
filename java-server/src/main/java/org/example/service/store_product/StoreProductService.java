@@ -6,6 +6,8 @@ import org.example.dto.store_product.product.*;
 
 public interface StoreProductService {
 
+    List<StoreProductDto> getAll();
+
     List<StoreProductDto> getAllSortedByQuantity();
 
     List<StoreProductWithNameDto> getAllSortedByName();

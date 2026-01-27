@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: embedded
+
+jwt:
+  secret: test-secret-key-for-testing-purposes-only-minimum-256-bits-long
+  expiration: 3600000

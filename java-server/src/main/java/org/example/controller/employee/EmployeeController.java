@@ -5,13 +5,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
+import org.example.exception.AuthorizationException;
 import org.example.exception.RegistrationException;
 import org.example.service.employee.EmployeeService;
 import org.example.service.report.PdfReportGeneratorService;
@@ -21,8 +20,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Employee management", description = "Endpoints for managing employees")
 @RequiredArgsConstructor
@@ -38,7 +45,7 @@ public class EmployeeController {
             summary = "Get all employees",
             description = "Get all employees sorted by their surnames"
     )
-    @PreAuthorize("hasRole('Manager')")
+    @PreAuthorize("hasRole('MANAGER')")
     public List<EmployeeResponseDto> getAll() {
         return employeeService.getAll();
     }
@@ -49,7 +56,7 @@ public class EmployeeController {
             summary = "Create a new employee",
             description = "Create a new employee"
     )
-    @PreAuthorize("hasRole('Manager')")
+    @PreAuthorize("hasRole('MANAGER')")
     public EmployeeResponseDto createEmployee(
             @RequestBody @Valid EmployeeRegistrationRequestDto employeeRequestDto
     ) throws RegistrationException {
@@ -61,7 +68,7 @@ public class EmployeeController {
             summary = "Update an employee",
             description = "Update an existing employee by its id"
     )
-    @PreAuthorize("hasRole('Manager')")
+    @PreAuthorize("hasRole('MANAGER')")
     public EmployeeResponseDto updateEmployeeById(
             @PathVariable String id,
             @RequestBody @Valid EmployeeUpdateRequestDto employeeRequestDto
@@ -75,7 +82,7 @@ public class EmployeeController {
             summary = "Delete an employee",
             description = "Delete an existing employee by its id"
     )
-    @PreAuthorize("hasRole('Manager')")
+    @PreAuthorize("hasRole('MANAGER')")
     public void deleteEmployeeById(@PathVariable String id) {
         employeeService.deleteEmployeeById(id);
     }
@@ -85,7 +92,7 @@ public class EmployeeController {
             summary = "Download employees report",
             description = "Download employees pdf report"
     )
-    @PreAuthorize("hasRole('Manager')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<byte[]> employeePdf() throws DocumentException {
         List<EmployeeResponseDto> employees = employeeService.getAll();
         byte[] pdf = pdfReportGeneratorService.employeeToPdf(employees);
@@ -99,7 +106,7 @@ public class EmployeeController {
             summary = "Get all cashiers",
             description = "Get all cashiers sorted by their surnames"
     )
-    @PreAuthorize("hasRole('Manager')")
+    @PreAuthorize("hasRole('MANAGER')")
     public List<EmployeeResponseDto> getAllCashiers() {
         return employeeService.getAllCashiers();
     }
@@ -109,15 +116,14 @@ public class EmployeeController {
             summary = "Get information about authorized cashier",
             description = "Get all information about currently authorized cashier"
     )
-    @PreAuthorize("hasRole('Cashier')")
+    @PreAuthorize("hasRole('CASHIER')")
     public EmployeeResponseDto getMe(Authentication auth) {
         boolean isCashier = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_Cashier"));
+                .anyMatch(a -> a.getAuthority().equals("CASHIER"));
         boolean isManager = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_Manager"));
+                .anyMatch(a -> a.getAuthority().equals("MANAGER"));
         if (!isCashier || isManager) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Only Cashier can access this endpoint");
+            throw new AuthorizationException("Only Cashier can access this endpoint");
         }
         return employeeService.getMe();
     }
@@ -127,7 +133,7 @@ public class EmployeeController {
             summary = "Find employee's phone and address by their surname",
             description = "Find employee's phone and address by their surname"
     )
-    @PreAuthorize("hasRole('Manager')")
+    @PreAuthorize("hasRole('MANAGER')")
     public EmployeeContactDto findPhoneAndAddressBySurname(
             @RequestParam String surname) {
         return employeeService.findPhoneAndAddressBySurname(surname).orElse(null);

@@ -1,10 +1,13 @@
 package org.example.service.store_product;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.example.dto.store_product.product.*;
 import org.example.exception.EntityNotFoundException;
 import org.example.mapper.store_product.StoreProductMapper;
+import org.example.model.store_product.StoreProduct;
 import org.example.repository.store_product.StoreProductRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -34,9 +37,16 @@ public class StoreProductServiceImpl implements StoreProductService {
                     ? getPromotionalSortedByQuantity()
                     : getNonPromotionalSortedByQuantity();
         }
-        throw new IllegalArgumentException("Unsupported sortedBy value: " + sortedBy);
+        return getAll();
     }
 
+    @Override
+    public List<StoreProductDto> getAll() {
+        List<StoreProduct> products = repository.findAll();
+        return products.stream()
+                .map(mapper::toDto)
+                .toList();
+    }
 
     @Override
     public List<StoreProductDto> getAllSortedByQuantity() {
