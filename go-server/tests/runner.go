@@ -37,8 +37,10 @@ func RunRepositoryTest[Input any, Output any](
 
 			if tc.ExpectedError != nil {
 				assert.ErrorIs(s.T(), err, tc.ExpectedError)
-			} else {
-				assert.NoError(s.T(), err)
+				return
+			}
+			if !assert.NoError(s.T(), err) {
+				return
 			}
 
 			if tc.AssertResult != nil {
