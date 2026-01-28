@@ -39,7 +39,8 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
                             + "Salary: " + e.getSalary() + "\n"
                             + "Phone: " + e.getPhone_number() + "\n"
                             + "Address: " + e.getCity() + ", "
-                            + e.getStreet() + ", " + e.getZip_code() + "\n\n"
+                            + e.getStreet() + ", " + e.getZip_code() + "\n\n",
+                    font
             ));
         }
         document.close();
@@ -60,7 +61,8 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
                     "Product ID: " + p.getId_product() + "\n"
                             + "Name: " + p.getProduct_name() + "\n"
                             + "Characteristics: " + p.getProduct_characteristics() + "\n"
-                            + "Category number: " + p.getCategory_number() + "\n\n"
+                            + "Category number: " + p.getCategory_number() + "\n\n",
+                    font
             ));
         }
         document.close();
@@ -83,7 +85,8 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
                             "Product ID: " + sp.getId_product() + "\n" +
                             "Selling price: " + sp.getSelling_price() + "\n" +
                             "Quantity: " + sp.getProducts_number() + "\n" +
-                            "Promotional: " + sp.isPromotional_product() + "\n\n"
+                            "Promotional: " + sp.isPromotional_product() + "\n\n",
+                    font
             ));
         }
         document.close();
