@@ -1,4 +1,7 @@
 package org.example.dto.employee.login;
 
-public record EmployeeLoginResponseDto(String accessToken, String refreshToken) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record EmployeeLoginResponseDto(@JsonProperty("access_token") String accessToken,
+                                       @JsonProperty("refresh_token") String refreshToken) {
 }

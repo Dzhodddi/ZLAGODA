@@ -125,11 +125,31 @@ class EmployeeRepositoryTest {
     @Test
     @DisplayName("save should insert new employee and return EmployeeResponseDto")
     void save_newEmployee_shouldReturnResponseDto() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(employeeRowMapper),
-                anyString(), anyString(), anyString(), anyString(), anyString(),
-                any(BigDecimal.class), any(Date.class), any(Date.class),
-                anyString(), anyString(), anyString(), anyString(), anyString()))
+        // Mock the INSERT operation (update method)
+        when(jdbcTemplate.update(
+                contains("INSERT INTO employee"),
+                eq("EMP001"),
+                eq("Іваненко"),
+                eq("Іван"),
+                eq("Іванович"),
+                eq("MANAGER"),
+                eq(new BigDecimal("15000.00")),
+                any(Date.class),
+                any(Date.class),
+                eq("+380501234567"),
+                eq("Київ"),
+                eq("Хрещатик 1"),
+                eq("01001"),
+                eq("password123")))
+                .thenReturn(1);
+
+        // Mock the subsequent findByIdEmployee call
+        when(jdbcTemplate.queryForObject(
+                contains("SELECT * FROM employee WHERE id_employee = ?"),
+                eq(employeeRowMapper),
+                eq("EMP001")))
                 .thenReturn(employee);
+
         when(employeeMapper.toEmployeeResponseDto(employee))
                 .thenReturn(employeeResponseDto);
 
@@ -137,22 +157,43 @@ class EmployeeRepositoryTest {
 
         assertNotNull(result);
         assertEquals("EMP001", result.getId_employee());
-        verify(jdbcTemplate, times(1)).queryForObject(
+
+        verify(jdbcTemplate, times(1)).update(
                 contains("INSERT INTO employee"),
-                eq(employeeRowMapper),
-                anyString(), anyString(), anyString(), anyString(), anyString(),
-                any(BigDecimal.class), any(Date.class), any(Date.class),
-                anyString(), anyString(), anyString(), anyString(), anyString()
+                eq("EMP001"),
+                eq("Іваненко"),
+                eq("Іван"),
+                eq("Іванович"),
+                eq("MANAGER"),
+                eq(new BigDecimal("15000.00")),
+                any(Date.class),
+                any(Date.class),
+                eq("+380501234567"),
+                eq("Київ"),
+                eq("Хрещатик 1"),
+                eq("01001"),
+                eq("password123")
         );
     }
 
     @Test
     @DisplayName("save should throw InvalidRoleException on data integrity violation")
     void save_invalidRole_shouldThrowException() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(employeeRowMapper),
-                anyString(), anyString(), anyString(), anyString(), anyString(),
-                any(BigDecimal.class), any(Date.class), any(Date.class),
-                anyString(), anyString(), anyString(), anyString(), anyString()))
+        when(jdbcTemplate.update(
+                contains("INSERT INTO employee"),
+                eq("EMP001"),
+                eq("Іваненко"),
+                eq("Іван"),
+                eq("Іванович"),
+                eq("MANAGER"),
+                eq(new BigDecimal("15000.00")),
+                any(Date.class),
+                any(Date.class),
+                eq("+380501234567"),
+                eq("Київ"),
+                eq("Хрещатик 1"),
+                eq("01001"),
+                eq("password123")))
                 .thenThrow(DataIntegrityViolationException.class);
 
         assertThrows(InvalidRoleException.class, () -> repository.save(employee));

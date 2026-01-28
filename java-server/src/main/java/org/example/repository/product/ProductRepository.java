@@ -51,9 +51,14 @@ public class ProductRepository {
 
     public List<Product> findByCategoryId(int category_number) {
         return jdbcTemplate.query(
-                            "SELECT * FROM product WHERE category_number = ? ORDER BY product_name",
-                            rowMapper,
-                            category_number);
+                """
+                      SELECT *
+                      FROM product
+                      WHERE category_number = ?
+                      ORDER BY product_name
+                     """,
+                rowMapper,
+                category_number);
     }
 
     public Product save(Product product) {

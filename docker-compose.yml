@@ -51,7 +51,7 @@ services:
     build:
       context: ./java-server
       dockerfile: docker/Dockerfile
-      target: test
+      target: dev
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://zlagoda-db:5432/zlagoda
       - SPRING_DATASOURCE_USERNAME=postgres

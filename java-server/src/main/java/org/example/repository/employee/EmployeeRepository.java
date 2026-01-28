@@ -33,17 +33,16 @@ public class EmployeeRepository {
 
     public EmployeeResponseDto save(Employee employee) {
         try {
-            Employee saved = jdbcTemplate.queryForObject(
+            jdbcTemplate.update(
                     """
                     INSERT INTO employee (
                         id_employee, empl_surname, empl_name, empl_patronymic,
                         empl_role, empl_salary,
                         date_of_birth, date_of_start,
                         phone_number, city, street, zip_code, password
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    RETURNING *
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
-                    employeeRowMapper,
                     employee.getId_employee(),
                     employee.getEmpl_surname(),
                     employee.getEmpl_name(),
@@ -59,7 +58,10 @@ public class EmployeeRepository {
                     employee.getPassword()
             );
 
-            return employeeMapper.toEmployeeResponseDto(saved);
+            return findByIdEmployee(employee.getId_employee())
+                    .map(employeeMapper::toEmployeeResponseDto)
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Employee not found after saving: " + employee.getId_employee()));
 
         } catch (DataIntegrityViolationException e) {
             throw new InvalidRoleException("Invalid role name: " + employee.getRole());

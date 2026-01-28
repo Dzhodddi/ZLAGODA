@@ -1,4 +1,4 @@
-CREATE TABLE batch (
+CREATE TABLE IF NOT EXISTS batch (
     id SERIAL PRIMARY KEY,
     UPC VARCHAR(12) NOT NULL,
     delivery_date DATE NOT NULL,

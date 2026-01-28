@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.Date;
-
 import org.example.dto.employee.login.EmployeeLoginRequestDto;
 import org.example.dto.employee.login.EmployeeLoginResponseDto;
 import org.example.dto.employee.login.RefreshTokenRequestDto;
@@ -26,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -104,12 +104,12 @@ class AuthenticationControllerTest {
         when(authenticationService.authenticate(any(EmployeeLoginRequestDto.class)))
                 .thenReturn(loginResponse);
 
-        mockMvc.perform(post("/auth/login")
+        ResultActions resultActions = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("access-token"))
-                .andExpect(jsonPath("$.refreshToken").value("refresh-token"));
+                .andExpect(jsonPath("$.access_token").value("access-token"))
+                .andExpect(jsonPath("$.refresh_token").value("refresh-token"));
     }
 
     @Test
@@ -128,7 +128,7 @@ class AuthenticationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(refreshRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("new-access-token"))
-                .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"));
+                .andExpect(jsonPath("$.access_token").value("new-access-token"))
+                .andExpect(jsonPath("$.refresh_token").value("new-refresh-token"));
     }
 }
