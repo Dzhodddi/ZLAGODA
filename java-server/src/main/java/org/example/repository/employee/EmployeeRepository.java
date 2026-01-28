@@ -11,6 +11,7 @@ import org.example.exception.InvalidRoleException;
 import org.example.mapper.employee.EmployeeMapper;
 import org.example.mapper.employee.EmployeeRowMapper;
 import org.example.model.employee.Employee;
+import org.example.model.employee.Role;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,7 +48,7 @@ public class EmployeeRepository {
                     employee.getEmpl_surname(),
                     employee.getEmpl_name(),
                     employee.getEmpl_patronymic(),
-                    employee.getRole().getName().name(),
+                    employee.getRole().getName().name().toUpperCase().trim(),
                     employee.getSalary(),
                     employee.getDate_of_birth(),
                     employee.getDate_of_start(),
@@ -64,7 +65,7 @@ public class EmployeeRepository {
                             "Employee not found after saving: " + employee.getId_employee()));
 
         } catch (DataIntegrityViolationException e) {
-            throw new InvalidRoleException("Invalid role name: " + employee.getRole());
+            throw new InvalidRoleException("Invalid role name: " + employee.getRole().getName());
         }
     }
 
@@ -72,6 +73,13 @@ public class EmployeeRepository {
                                                   EmployeeUpdateRequestDto requestDto) {
         if (!existsByIdEmployee(id)) {
             throw new EntityNotFoundException("Employee not found: " + id);
+        }
+
+        try {
+            Role.RoleName.valueOf(requestDto.getRole().toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidRoleException("Invalid role name: " + requestDto.getRole()
+                    + ". Allowed values: MANAGER, CASHIER");
         }
 
         try {
@@ -94,7 +102,7 @@ public class EmployeeRepository {
                     requestDto.getEmpl_surname(),
                     requestDto.getEmpl_name(),
                     requestDto.getEmpl_patronymic(),
-                    requestDto.getRole(),
+                    requestDto.getRole().toUpperCase().trim(),
                     requestDto.getSalary(),
                     requestDto.getDate_of_birth(),
                     requestDto.getDate_of_start(),
