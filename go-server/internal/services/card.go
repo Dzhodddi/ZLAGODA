@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
@@ -14,7 +15,7 @@ type CardService interface {
 	GetCustomerCard(ctx context.Context, cardNumber string) (*views.CustomerCardResponse, error)
 	UpdateCustomerCard(ctx context.Context, card views.UpdateCustomerCard, cardNumber string) (*views.CustomerCardResponse, error)
 	DeleteCustomerCard(ctx context.Context, cardNumber string) error
-	ListCustomerCards(ctx context.Context) ([]*views.CustomerCardResponse, error)
+	ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]*views.CustomerCardResponse, error)
 }
 
 type cardService struct {
@@ -57,8 +58,18 @@ func (s *cardService) DeleteCustomerCard(ctx context.Context, cardNumber string)
 	return nil
 }
 
-func (s *cardService) ListCustomerCards(ctx context.Context) ([]*views.CustomerCardResponse, error) {
-	cards, err := s.cardRepository.ListCustomerCards(ctx)
+func (s *cardService) ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]*views.CustomerCardResponse, error) {
+	var cards []generated.CustomerCard
+	var err error
+	switch {
+	case q.Percent != nil:
+		cards, err = s.cardRepository.ListCustomerCardsSortedByPercent(ctx, *q.Percent)
+	case q.Sorted != nil && *q.Sorted:
+		cards, err = s.cardRepository.ListCustomerCardsSortedBySurname(ctx)
+	default:
+		cards, err = s.cardRepository.ListCustomerCards(ctx)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all cards: %w", err)
 	}

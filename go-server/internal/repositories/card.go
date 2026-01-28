@@ -19,6 +19,8 @@ type CardRepository interface {
 	UpdateCustomerCard(ctx context.Context, card views.UpdateCustomerCard, cardNumber string) (*generated.CustomerCard, error)
 	DeleteCustomerCard(ctx context.Context, cardNumber string) error
 	ListCustomerCards(ctx context.Context) ([]generated.CustomerCard, error)
+	ListCustomerCardsSortedBySurname(ctx context.Context) ([]generated.CustomerCard, error)
+	ListCustomerCardsSortedByPercent(ctx context.Context, percent int) ([]generated.CustomerCard, error)
 }
 
 type cardRepository struct {
@@ -125,10 +127,29 @@ func (r *cardRepository) DeleteCustomerCard(ctx context.Context, cardNumber stri
 }
 
 func (r *cardRepository) ListCustomerCards(ctx context.Context) ([]generated.CustomerCard, error) {
+	return r.getListHelper(ctx, r.queries.GetAllCustomerCards)
+}
+
+func (r *cardRepository) ListCustomerCardsSortedBySurname(ctx context.Context) ([]generated.CustomerCard, error) {
+	return r.getListHelper(ctx, r.queries.GetAllCustomerCardsSortedBySurname)
+}
+
+func (r *cardRepository) ListCustomerCardsSortedByPercent(ctx context.Context, percent int) ([]generated.CustomerCard, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
-	rows, err := r.queries.GetAllCustomerCards(ctx)
+	rows, err := r.ListCustomerCardsSortedByPercent(ctx, percent)
+	if err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
+func (r *cardRepository) getListHelper(ctx context.Context, queryList func(ctx context.Context) ([]generated.CustomerCard, error)) ([]generated.CustomerCard, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	rows, err := queryList(ctx)
 	if err != nil {
 		return nil, err
 	}

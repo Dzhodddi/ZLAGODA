@@ -66,6 +66,33 @@ func (q *Queries) GetAllCategories(ctx context.Context) ([]Category, error) {
 	return items, nil
 }
 
+const getAllCategoriesSortedByName = `-- name: GetAllCategoriesSortedByName :many
+SELECT category_number, category_name FROM category ORDER BY category_name
+`
+
+func (q *Queries) GetAllCategoriesSortedByName(ctx context.Context) ([]Category, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCategoriesSortedByName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Category
+	for rows.Next() {
+		var i Category
+		if err := rows.Scan(&i.CategoryNumber, &i.CategoryName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCategoryByID = `-- name: GetCategoryByID :one
 SELECT category_number, category_name FROM category WHERE category_number = $1
 `

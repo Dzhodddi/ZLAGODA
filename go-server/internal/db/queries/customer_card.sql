@@ -51,6 +51,11 @@ SELECT
 FROM customer_card
 WHERE card_number = $1;
 
+-- name: DeleteCustomerCardByID :one
+DELETE FROM customer_card
+WHERE card_number = $1
+RETURNING card_number;
+
 -- name: GetAllCustomerCards :many
 SELECT
     card_number,
@@ -64,7 +69,31 @@ SELECT
 	customer_percent
 FROM customer_card;
 
--- name: DeleteCustomerCardByID :one
-DELETE FROM customer_card
-WHERE card_number = $1
-RETURNING card_number;
+-- name: GetAllCustomerCardsSortedBySurname :many
+SELECT
+    card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+FROM customer_card
+ORDER BY customer_surname;
+
+-- name: GetCustomerCardsByPercentSorted :many
+SELECT
+    card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+FROM customer_card
+WHERE customer_percent = $1
+ORDER BY customer_surname;

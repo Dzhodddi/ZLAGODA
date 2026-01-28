@@ -12,3 +12,7 @@ type CategoryResponse struct {
 type UpdateCategory struct {
 	CategoryName string `json:"category_name" validate:"required,max=50,min=1"`
 }
+
+type ListCategoryQueryParams struct {
+	Sorted *bool `query:"sorted"`
+}

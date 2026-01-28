@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
@@ -14,7 +15,7 @@ type CategoryService interface {
 	UpdateCategory(ctx context.Context, updateCategory views.UpdateCategory, categoryId int64) (*views.CategoryResponse, error)
 	DeleteCategory(ctx context.Context, id int64) error
 	GetCategoryByID(ctx context.Context, id int64) (*views.CategoryResponse, error)
-	GetAllCategories(ctx context.Context) ([]*views.CategoryResponse, error)
+	GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]*views.CategoryResponse, error)
 }
 
 type categoryService struct {
@@ -59,10 +60,17 @@ func (s *categoryService) GetCategoryByID(ctx context.Context, id int64) (*views
 	return mappers.CategoryModelToResponse(category), nil
 }
 
-func (s *categoryService) GetAllCategories(ctx context.Context) ([]*views.CategoryResponse, error) {
-	categories, err := s.categoryRepository.GetAllCategories(ctx)
+func (s *categoryService) GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]*views.CategoryResponse, error) {
+	var categories []generated.Category
+	var err error
+	switch {
+	case q.Sorted != nil && *q.Sorted:
+		categories, err = s.categoryRepository.GetAllCategoriesSortedByName(ctx)
+	default:
+		categories, err = s.categoryRepository.GetAllCategories(ctx)
+	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch all categories: %w", err)
+		return nil, fmt.Errorf("failed to fetch categories: %w", err)
 	}
 	var categoryResponses []*views.CategoryResponse
 	for _, category := range categories {

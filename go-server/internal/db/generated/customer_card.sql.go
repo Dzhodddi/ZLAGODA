@@ -126,6 +126,54 @@ func (q *Queries) GetAllCustomerCards(ctx context.Context) ([]CustomerCard, erro
 	return items, nil
 }
 
+const getAllCustomerCardsSortedBySurname = `-- name: GetAllCustomerCardsSortedBySurname :many
+SELECT
+    card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+FROM customer_card
+ORDER BY customer_surname
+`
+
+func (q *Queries) GetAllCustomerCardsSortedBySurname(ctx context.Context) ([]CustomerCard, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCustomerCardsSortedBySurname)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CustomerCard
+	for rows.Next() {
+		var i CustomerCard
+		if err := rows.Scan(
+			&i.CardNumber,
+			&i.CustomerSurname,
+			&i.CustomerName,
+			&i.CustomerPatronymic,
+			&i.PhoneNumber,
+			&i.City,
+			&i.Street,
+			&i.ZipCode,
+			&i.CustomerPercent,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCustomerCardByID = `-- name: GetCustomerCardByID :one
 SELECT
     card_number,
@@ -156,6 +204,55 @@ func (q *Queries) GetCustomerCardByID(ctx context.Context, cardNumber string) (C
 		&i.CustomerPercent,
 	)
 	return i, err
+}
+
+const getCustomerCardsByPercentSorted = `-- name: GetCustomerCardsByPercentSorted :many
+SELECT
+    card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+FROM customer_card
+WHERE customer_percent = $1
+ORDER BY customer_surname
+`
+
+func (q *Queries) GetCustomerCardsByPercentSorted(ctx context.Context, customerPercent int32) ([]CustomerCard, error) {
+	rows, err := q.db.QueryContext(ctx, getCustomerCardsByPercentSorted, customerPercent)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CustomerCard
+	for rows.Next() {
+		var i CustomerCard
+		if err := rows.Scan(
+			&i.CardNumber,
+			&i.CustomerSurname,
+			&i.CustomerName,
+			&i.CustomerPatronymic,
+			&i.PhoneNumber,
+			&i.City,
+			&i.Street,
+			&i.ZipCode,
+			&i.CustomerPercent,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateCustomerCard = `-- name: UpdateCustomerCard :one

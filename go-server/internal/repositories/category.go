@@ -19,6 +19,7 @@ type CategoryRepository interface {
 	DeleteCategory(ctx context.Context, id int64) error
 	GetCategoryByID(ctx context.Context, id int64) (*generated.Category, error)
 	GetAllCategories(ctx context.Context) ([]generated.Category, error)
+	GetAllCategoriesSortedByName(ctx context.Context) ([]generated.Category, error)
 }
 
 type categoryRepository struct {
@@ -99,10 +100,18 @@ func (r *categoryRepository) GetCategoryByID(ctx context.Context, id int64) (*ge
 }
 
 func (r *categoryRepository) GetAllCategories(ctx context.Context) ([]generated.Category, error) {
+	return r.getListHelper(ctx, r.queries.GetAllCategories)
+}
+
+func (r *categoryRepository) GetAllCategoriesSortedByName(ctx context.Context) ([]generated.Category, error) {
+	return r.getListHelper(ctx, r.queries.GetAllCategoriesSortedByName)
+}
+
+func (r *categoryRepository) getListHelper(ctx context.Context, queryFunc func(ctx context.Context) ([]generated.Category, error)) ([]generated.Category, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
-	categories, err := r.queries.GetAllCategories(ctx)
+	categories, err := queryFunc(ctx)
 	if err != nil {
 		return nil, err
 	}

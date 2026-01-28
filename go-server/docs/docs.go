@@ -29,6 +29,14 @@ const docTemplate = `{
                     "Category"
                 ],
                 "summary": "Get all categories",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "sorted",
+                        "name": "sorted",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -331,6 +339,20 @@ const docTemplate = `{
                     "CustomerCard"
                 ],
                 "summary": "List all customer cards",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "percent",
+                        "name": "percent",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "sorted",
+                        "name": "sorted",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

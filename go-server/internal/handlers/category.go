@@ -152,11 +152,21 @@ func (h *CategoryHandler) getCategoryByID(c echo.Context) error {
 // @Tags         Category
 // @Accept       json
 // @Produce      json
+//
+//	@Param			sorted 	query		bool	false	"sorted"
+//
 // @Success      200  {array}  views.CategoryResponse
 // @Failure      500  {object}  map[string]any
 // @Router       /categories [get]
 func (h *CategoryHandler) getAllCategories(c echo.Context) error {
-	categories, err := h.categoryService.GetAllCategories(c.Request().Context())
+	var q views.ListCategoryQueryParams
+	if err := c.Bind(&q); err != nil {
+		return errorResponse.ValidationError(constants.ValidationError, err)
+	}
+	if err := validation.ValidateStruct(q); err != nil {
+		return errorResponse.ValidationError(constants.ValidationError, err)
+	}
+	categories, err := h.categoryService.GetAllCategories(c.Request().Context(), q)
 	if err != nil {
 		return err
 	}
