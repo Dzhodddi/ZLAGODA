@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: org.example.controller.product.ProductControllerTest
 -------------------------------------------------------------------------------
-Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.137 s -- in org.example.controller.product.ProductControllerTest
+Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.781 s -- in org.example.controller.product.ProductControllerTest

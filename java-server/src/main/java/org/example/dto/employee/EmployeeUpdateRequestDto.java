@@ -1,5 +1,6 @@
 package org.example.dto.employee;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -36,9 +37,11 @@ public class EmployeeUpdateRequestDto {
     @NotNull
     @JsonDeserialize(using = CustomDateDeserializer.class)
     @Past
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date date_of_birth;
     @NotNull
     @JsonDeserialize(using = CustomDateDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date date_of_start;
     @NotBlank
     @Length(min = 8, max = 13)
