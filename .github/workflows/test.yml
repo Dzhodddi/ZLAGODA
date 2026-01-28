@@ -2,9 +2,11 @@ name: Java CI with Maven and Testcontainers
 
 on:
   push:
-    branches: [ main ]
+    paths:
+      - 'java-server/**'
   pull_request:
-    branches: [ main ]
+    paths:
+      - 'java-server/**'
 
 jobs:
   build:
@@ -17,6 +19,9 @@ jobs:
           - 2375:2375
         env:
           DOCKER_TLS_CERTDIR: ""
+    defaults:
+      run:
+        working-directory: java-server
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
