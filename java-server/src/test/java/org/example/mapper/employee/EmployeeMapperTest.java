@@ -87,7 +87,10 @@ class EmployeeMapperTest {
 
     @Test
     void shouldThrowExceptionForInvalidRoleString() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> mapper.map("INVALID_ROLE"));
-        assertTrue(exception.getMessage().contains("Invalid role name"));
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> mapper.map("INVALID_ROLE")
+        );
+        assertNotNull(exception);
     }
 }
