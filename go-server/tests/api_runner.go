@@ -14,7 +14,7 @@ import (
 type APITestCase[ResponseType any] struct {
 	Name         string
 	Method       string
-	URL          string
+	URL          func() string
 	Body         interface{}
 	Setup        func()
 	ExpectedCode int
@@ -41,7 +41,7 @@ func RunAPITest[ResponseType any](
 				reqBody, _ = json.Marshal(tc.Body)
 			}
 
-			req := httptest.NewRequest(tc.Method, tc.URL, bytes.NewBuffer(reqBody))
+			req := httptest.NewRequest(tc.Method, tc.URL(), bytes.NewBuffer(reqBody))
 			req.Header.Set("Content-Type", "application/json")
 
 			w := httptest.NewRecorder()

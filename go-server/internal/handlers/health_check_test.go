@@ -22,7 +22,7 @@ func (s *HealthHandlerSuite) TestHealthCheck() {
 		{
 			Name:         "Success: System is Healthy",
 			Method:       http.MethodGet,
-			URL:          "/api/v1/health",
+			URL:          func() string { return "/api/v1/health" },
 			ExpectedCode: http.StatusOK,
 			AssertResult: func(t *testing.T, res string) {
 				assert.Equal(t, "ok", res)

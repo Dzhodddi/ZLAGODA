@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"github.com/labstack/gommon/log"
 	"net/http"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/config"
@@ -16,6 +17,7 @@ type HandlerSuite struct {
 	Echo   *echo.Echo
 
 	CategoryRepo repository.CategoryRepository
+	CardRepo     repository.CardRepository
 }
 
 func (s *HandlerSuite) SetupSuite() {
@@ -27,4 +29,5 @@ func (s *HandlerSuite) SetupSuite() {
 	s.Require().NoError(err)
 	s.Echo = server.Echo
 	s.CategoryRepo = repository.NewCategoryRepository(s.DB)
+	s.CardRepo = repository.NewCardRepository(s.DB)
 }

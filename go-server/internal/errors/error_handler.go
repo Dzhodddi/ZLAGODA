@@ -24,13 +24,13 @@ func GlobalHTTPErrorHandler(env config.Env) func(error, echo.Context) {
 		switch {
 		case errors.Is(err, repository.ErrNotFound):
 			code = http.StatusNotFound
-			msg = "Entity not found"
+			msg = err.Error()
 		case errors.Is(err, repository.ErrConflict):
 			code = http.StatusUnprocessableEntity
-			msg = "Entity already exists"
+			msg = err.Error()
 		case errors.Is(err, repository.ErrForeignKey):
 			code = http.StatusBadRequest
-			msg = "Invalid reference"
+			msg = err.Error()
 
 		case errors.As(err, &appErr):
 			code = appErr.Code
