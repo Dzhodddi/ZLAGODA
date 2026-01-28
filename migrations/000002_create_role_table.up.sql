@@ -2,5 +2,5 @@ CREATE TABLE IF NOT EXISTS roles (
     name VARCHAR(10) PRIMARY KEY
 );
 
-INSERT INTO roles VALUES ('MANAGER'), ('CASHIER')
+INSERT INTO roles VALUES ('Manager'), ('Cashier')
 ON CONFLICT (name) DO NOTHING;

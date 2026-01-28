@@ -13,12 +13,16 @@ public interface EmployeeMapper {
 
     EmployeeResponseDto toEmployeeResponseDto(Employee employee);
 
-    default Role map(String roleName) {
-        if (roleName == null || roleName.isBlank()) {
+    default Role map(String value) {
+        if (value == null) {
             return null;
         }
         Role role = new Role();
-        role.setName(Role.RoleName.valueOf(roleName.toUpperCase().trim()));
+        try {
+            role.setName(Role.RoleName.valueOf(value));
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid role name: " + value);
+        }
         return role;
     }
 
