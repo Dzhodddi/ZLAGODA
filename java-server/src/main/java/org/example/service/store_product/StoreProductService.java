@@ -2,7 +2,11 @@ package org.example.service.store_product;
 
 import java.util.List;
 
-import org.example.dto.store_product.product.*;
+import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
+import org.example.dto.store_product.product.StoreProductDto;
+import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
+import org.example.dto.store_product.product.StoreProductRequestDto;
+import org.example.dto.store_product.product.StoreProductWithNameDto;
 
 public interface StoreProductService {
 

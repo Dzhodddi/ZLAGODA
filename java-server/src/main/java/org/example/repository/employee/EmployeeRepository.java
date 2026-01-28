@@ -1,9 +1,10 @@
 package org.example.repository.employee;
 
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
-import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.exception.EntityNotFoundException;
 import org.example.exception.InvalidRoleException;
@@ -14,8 +15,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository

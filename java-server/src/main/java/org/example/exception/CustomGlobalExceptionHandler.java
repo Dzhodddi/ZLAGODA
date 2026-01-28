@@ -2,7 +2,6 @@ package org.example.exception;
 
 import java.util.List;
 import java.util.stream.Stream;
-
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
