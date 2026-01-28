@@ -4,6 +4,8 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.store_product.batch.BatchRequestDto;
@@ -179,7 +181,7 @@ public class StoreProductController {
             description = "Download store products pdf report"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<byte[]> storeProductPdf() throws DocumentException {
+    public ResponseEntity<byte[]> storeProductPdf() throws DocumentException, IOException {
         List<StoreProductDto> storeProduct = storeProductService.getAllSortedByQuantity();
         byte[] pdf = pdfReportGeneratorService.storeProductToPdf(storeProduct);
         return ResponseEntity.ok()

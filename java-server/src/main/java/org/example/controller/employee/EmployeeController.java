@@ -4,6 +4,8 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.EmployeeContactDto;
@@ -93,7 +95,7 @@ public class EmployeeController {
             description = "Download employees pdf report"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<byte[]> employeePdf() throws DocumentException {
+    public ResponseEntity<byte[]> employeePdf() throws DocumentException, IOException {
         List<EmployeeResponseDto> employees = employeeService.getAll();
         byte[] pdf = pdfReportGeneratorService.employeeToPdf(employees);
         return ResponseEntity.ok()

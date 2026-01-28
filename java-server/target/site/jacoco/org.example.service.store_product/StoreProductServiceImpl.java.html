@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StoreProductServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spring-boot-first-project</a> &gt; <a href="index.source.html" class="el_package">org.example.service.store_product</a> &gt; <span class="el_source">StoreProductServiceImpl.java</span></div><h1>StoreProductServiceImpl.java</h1><pre class="source lang-java linenums">package org.example.service.store_product;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
+import org.example.dto.store_product.product.*;
+import org.example.exception.EntityNotFoundException;
+import org.example.mapper.store_product.StoreProductMapper;
+import org.example.model.store_product.StoreProduct;
+import org.example.repository.store_product.StoreProductRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+<span class="fc" id="L15">@RequiredArgsConstructor</span>
+@Service
+public class StoreProductServiceImpl implements StoreProductService {
+
+    private final StoreProductRepository repository;
+    @Qualifier(&quot;storeProductMapper&quot;)
+    private final StoreProductMapper mapper;
+
+    public List&lt;?&gt; getAll(String sortedBy, Boolean prom) {
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (&quot;name&quot;.equals(sortedBy)) {</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">            if (prom == null) {</span>
+<span class="fc" id="L26">                return getAllSortedByName();</span>
+            }
+<span class="fc bfc" id="L28" title="All 2 branches covered.">            return prom</span>
+<span class="fc" id="L29">                    ? getPromotionalSortedByName()</span>
+<span class="fc" id="L30">                    : getNonPromotionalSortedByName();</span>
+        }
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (&quot;quantity&quot;.equals(sortedBy)) {</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">            if (prom == null) {</span>
+<span class="fc" id="L34">                return getAllSortedByQuantity();</span>
+            }
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">            return prom</span>
+<span class="fc" id="L37">                    ? getPromotionalSortedByQuantity()</span>
+<span class="nc" id="L38">                    : getNonPromotionalSortedByQuantity();</span>
+        }
+<span class="fc" id="L40">        return getAll();</span>
+    }
+
+    @Override
+    public List&lt;StoreProductDto&gt; getAll() {
+<span class="fc" id="L45">        List&lt;StoreProduct&gt; products = repository.findAll();</span>
+<span class="fc" id="L46">        return products.stream()</span>
+<span class="fc" id="L47">                .map(mapper::toDto)</span>
+<span class="fc" id="L48">                .toList();</span>
+    }
+
+    @Override
+    public List&lt;StoreProductDto&gt; getAllSortedByQuantity() {
+<span class="fc" id="L53">        return repository.findAllSortedByQuantity()</span>
+<span class="fc" id="L54">                .stream()</span>
+<span class="fc" id="L55">                .map(mapper::toDto)</span>
+<span class="fc" id="L56">                .toList();</span>
+    }
+
+    @Override
+    public List&lt;StoreProductWithNameDto&gt; getAllSortedByName() {
+<span class="fc" id="L61">        return repository.findAllSortedByName();</span>
+    }
+
+    @Override
+    public List&lt;StoreProductDto&gt; getPromotionalSortedByQuantity() {
+<span class="fc" id="L66">        return repository.findPromotionalSortedByQuantity()</span>
+<span class="fc" id="L67">                .stream()</span>
+<span class="fc" id="L68">                .map(mapper::toDto)</span>
+<span class="fc" id="L69">                .toList();</span>
+    }
+
+    @Override
+    public List&lt;StoreProductDto&gt; getNonPromotionalSortedByQuantity() {
+<span class="fc" id="L74">        return repository.findNonPromotionalSortedByQuantity()</span>
+<span class="fc" id="L75">                .stream()</span>
+<span class="fc" id="L76">                .map(mapper::toDto)</span>
+<span class="fc" id="L77">                .toList();</span>
+    }
+
+    @Override
+    public List&lt;StoreProductWithNameDto&gt; getPromotionalSortedByName() {
+<span class="fc" id="L82">        return repository.findPromotionalSortedByName();</span>
+    }
+
+    @Override
+    public List&lt;StoreProductWithNameDto&gt; getNonPromotionalSortedByName() {
+<span class="fc" id="L87">        return repository.findNonPromotionalSortedByName();</span>
+    }
+
+    @Override
+    public StoreProductDto save(StoreProductRequestDto requestDto) {
+<span class="fc" id="L92">        return mapper.toDto(repository.save(requestDto));</span>
+    }
+
+    @Override
+    public StoreProductDto updateByUPC(String upc, StoreProductRequestDto requestDto) {
+<span class="fc" id="L97">        return repository.updateByUPC(upc, requestDto);</span>
+    }
+
+    @Override
+    public void softDeleteByUPC(String upc) {
+<span class="fc" id="L102">        repository.softDeleteByUPC(upc);</span>
+<span class="fc" id="L103">    }</span>
+
+    @Override
+    public StoreProductCharacteristicsDto findByUPC(String upc) {
+<span class="fc" id="L107">        return repository.findByUPC(upc)</span>
+<span class="fc" id="L108">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;No product found with UPC: &quot; + upc));</span>
+    }
+
+    @Override
+    public StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(String upc) {
+<span class="fc" id="L113">        return repository.findPriceAndQuantityByUPC(upc)</span>
+<span class="fc" id="L114">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;No product found with UPC: &quot; + upc));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

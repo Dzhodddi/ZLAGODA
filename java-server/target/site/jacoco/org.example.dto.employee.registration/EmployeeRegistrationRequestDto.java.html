@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmployeeRegistrationRequestDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spring-boot-first-project</a> &gt; <a href="index.source.html" class="el_package">org.example.dto.employee.registration</a> &gt; <span class="el_source">EmployeeRegistrationRequestDto.java</span></div><h1>EmployeeRegistrationRequestDto.java</h1><pre class="source lang-java linenums">package org.example.dto.employee.registration;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.example.dto.employee.registration.annotation.date.CustomDateDeserializer;
+import org.example.dto.employee.registration.annotation.date.MinYear;
+import org.example.dto.employee.registration.annotation.field_match.FieldMatch;
+import org.example.dto.employee.registration.annotation.role.ValidRole;
+import org.hibernate.validator.constraints.Length;
+import java.math.BigDecimal;
+import java.util.Date;
+
+@Getter
+<span class="fc" id="L22">@Setter</span>
+<span class="fc" id="L23">@NoArgsConstructor</span>
+<span class="nc" id="L24">@AllArgsConstructor</span>
+@FieldMatch(first = &quot;password&quot;,
+        second = &quot;repeat_password&quot;,
+        message = &quot;Password and repeated password do not match&quot;)
+public class EmployeeRegistrationRequestDto {
+    @NotBlank
+    @Length(min = 1, max = 10)
+<span class="fc" id="L31">    private String id_employee;</span>
+    @NotBlank
+    @Length(min = 1, max = 50)
+<span class="fc" id="L34">    private String empl_surname;</span>
+    @NotBlank
+    @Length(min = 1, max = 50)
+<span class="fc" id="L37">    private String empl_name;</span>
+    @Length(min = 1, max = 50)
+<span class="fc" id="L39">    private String empl_patronymic;</span>
+    @NotBlank
+    @ValidRole
+<span class="fc" id="L42">    private String role;</span>
+    @NotNull
+    @JsonDeserialize(using = CustomDateDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;yyyy-MM-dd&quot;)
+    @Past
+    @MinYear(1900)
+<span class="fc" id="L48">    private Date date_of_birth;</span>
+    @NotNull
+    @JsonDeserialize(using = CustomDateDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;yyyy-MM-dd&quot;)
+<span class="fc" id="L52">    private Date date_of_start;</span>
+    @NotBlank
+    @Length(min = 8, max = 13)
+<span class="fc" id="L55">    private String phone_number;</span>
+    @NotNull
+    @DecimalMin(&quot;0.0&quot;)
+<span class="fc" id="L58">    private BigDecimal salary;</span>
+    @NotBlank
+    @Length(min = 1, max = 50)
+<span class="fc" id="L61">    private String city;</span>
+    @NotBlank
+    @Length(min = 1, max = 50)
+<span class="fc" id="L64">    private String street;</span>
+    @NotBlank
+    @Length(min = 3, max = 9)
+<span class="fc" id="L67">    private String zip_code;</span>
+    @NotBlank(message = &quot;Password is required&quot;)
+    @Length(min = 8, max = 100)
+<span class="fc" id="L70">    private String password;</span>
+    @NotBlank(message = &quot;Repeat password is required&quot;)
+    @Length(min = 8, max = 100)
+<span class="fc" id="L73">    private String repeat_password;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

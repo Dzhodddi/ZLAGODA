@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomGlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spring-boot-first-project</a> &gt; <a href="index.source.html" class="el_package">org.example.exception</a> &gt; <span class="el_source">CustomGlobalExceptionHandler.java</span></div><h1>CustomGlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package org.example.exception;
+
+import java.util.List;
+import java.util.stream.Stream;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+<span class="fc" id="L17">public class CustomGlobalExceptionHandler {</span>
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;List&lt;String&gt;&gt; handleValidationExceptions(
+            MethodArgumentNotValidException ex
+    ) {
+<span class="fc" id="L23">        List&lt;String&gt; fieldErrors = ex.getBindingResult()</span>
+<span class="fc" id="L24">                .getFieldErrors()</span>
+<span class="fc" id="L25">                .stream()</span>
+<span class="fc" id="L26">                .map(error -&gt; error.getField() + &quot; &quot; + error.getDefaultMessage())</span>
+<span class="fc" id="L27">                .toList();</span>
+
+<span class="fc" id="L29">        List&lt;String&gt; globalErrors = ex.getBindingResult()</span>
+<span class="fc" id="L30">                .getGlobalErrors()</span>
+<span class="fc" id="L31">                .stream()</span>
+<span class="fc" id="L32">                .map(DefaultMessageSourceResolvable::getDefaultMessage)</span>
+<span class="fc" id="L33">                .toList();</span>
+
+<span class="fc" id="L35">        List&lt;String&gt; allErrors = Stream.concat(</span>
+<span class="fc" id="L36">                fieldErrors.stream(),</span>
+<span class="fc" id="L37">                globalErrors.stream()</span>
+<span class="fc" id="L38">        ).toList();</span>
+
+<span class="fc" id="L40">        return ResponseEntity</span>
+<span class="fc" id="L41">                .status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
+<span class="fc" id="L42">                .body(allErrors);</span>
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity&lt;String&gt; handleIllegalArgumentException(
+            IllegalArgumentException ex
+    ) {
+<span class="fc" id="L49">        return ResponseEntity</span>
+<span class="fc" id="L50">                .status(HttpStatus.BAD_REQUEST)</span>
+<span class="fc" id="L51">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity&lt;String&gt; handleDataIntegrityViolationException(
+            DataIntegrityViolationException ex
+    ) {
+<span class="fc" id="L58">        return ResponseEntity</span>
+<span class="fc" id="L59">                .status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
+<span class="fc" id="L60">                .body(&quot;Data integrity violation&quot;);</span>
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity&lt;String&gt; handleInvalidJson(HttpMessageNotReadableException ex) {
+<span class="fc" id="L65">        Throwable cause = ex.getCause();</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        while (cause != null) {</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            if (cause instanceof DateFormatException) {</span>
+<span class="fc" id="L68">                return ResponseEntity</span>
+<span class="fc" id="L69">                        .badRequest()</span>
+<span class="fc" id="L70">                        .body(&quot;Invalid date format. Expected format: yyyy-MM-dd&quot;);</span>
+            }
+<span class="fc" id="L72">            cause = cause.getCause();</span>
+        }
+<span class="fc" id="L74">        return ResponseEntity</span>
+<span class="fc" id="L75">                .badRequest()</span>
+<span class="fc" id="L76">                .body(&quot;Invalid JSON format&quot;);</span>
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity&lt;String&gt; handleAuthenticationException(
+            AuthenticationException ex
+    ) {
+<span class="fc" id="L83">        return ResponseEntity</span>
+<span class="fc" id="L84">                .status(HttpStatus.UNAUTHORIZED)</span>
+<span class="fc" id="L85">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity&lt;String&gt; handleBadCredentialsException(
+            BadCredentialsException ex
+    ) {
+<span class="fc" id="L92">        return ResponseEntity</span>
+<span class="fc" id="L93">                .status(HttpStatus.UNAUTHORIZED)</span>
+<span class="fc" id="L94">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity&lt;String&gt; handleEntityNotFoundException(
+            EntityNotFoundException ex
+    ) {
+<span class="fc" id="L101">        return ResponseEntity</span>
+<span class="fc" id="L102">                .status(HttpStatus.NOT_FOUND)</span>
+<span class="fc" id="L103">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(RegistrationException.class)
+    public ResponseEntity&lt;String&gt; handleRegistrationException(
+            RegistrationException ex
+    ) {
+<span class="fc" id="L110">        return ResponseEntity</span>
+<span class="fc" id="L111">                .status(HttpStatus.CONFLICT)</span>
+<span class="fc" id="L112">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(DeletionException.class)
+    public ResponseEntity&lt;String&gt; handleDeletionException(
+            DeletionException ex
+    ) {
+<span class="fc" id="L119">        return ResponseEntity</span>
+<span class="fc" id="L120">                .status(HttpStatus.CONFLICT)</span>
+<span class="fc" id="L121">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;String&gt; handleAllExceptions(Exception ex) {
+<span class="fc" id="L126">        ex.printStackTrace();</span>
+<span class="fc" id="L127">        return ResponseEntity</span>
+<span class="fc" id="L128">                .status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="fc" id="L129">                .body(&quot;Unexpected error occurred&quot;);</span>
+    }
+
+    @ExceptionHandler(DateFormatException.class)
+    public ResponseEntity&lt;String&gt; handleDateFormatException(DateFormatException ex) {
+<span class="fc" id="L134">        return ResponseEntity</span>
+<span class="fc" id="L135">                .status(HttpStatus.BAD_REQUEST)</span>
+<span class="fc" id="L136">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(InvalidRoleException.class)
+    public ResponseEntity&lt;String&gt; handleInvalidRole(InvalidRoleException ex) {
+<span class="fc" id="L141">        return ResponseEntity</span>
+<span class="fc" id="L142">                .status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
+<span class="fc" id="L143">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(InvalidCategoryException.class)
+    public ResponseEntity&lt;String&gt; handleInvalidCategory(InvalidCategoryException ex) {
+<span class="fc" id="L148">        return ResponseEntity</span>
+<span class="fc" id="L149">                .status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
+<span class="fc" id="L150">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(InvalidProductException.class)
+    public ResponseEntity&lt;String&gt; handleInvalidProduct(InvalidProductException ex) {
+<span class="fc" id="L155">        return ResponseEntity</span>
+<span class="fc" id="L156">                .status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
+<span class="fc" id="L157">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity&lt;String&gt; handleAuthorizationException(AuthorizationException ex) {
+<span class="fc" id="L162">        return ResponseEntity</span>
+<span class="fc" id="L163">                .status(HttpStatus.FORBIDDEN)</span>
+<span class="fc" id="L164">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(InvalidParameterException.class)
+    public ResponseEntity&lt;String&gt; handleInvalidParameter(InvalidParameterException ex) {
+<span class="fc" id="L169">        return ResponseEntity</span>
+<span class="fc" id="L170">                .status(HttpStatus.BAD_REQUEST)</span>
+<span class="fc" id="L171">                .body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity&lt;String&gt; handleAccessDeniedException(AccessDeniedException ex) {
+<span class="fc" id="L176">        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -24,6 +24,7 @@ C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\excepti
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\service\employee\EmployeeServiceImpl.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\service\store_product\BatchServiceImpl.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\controller\employee\EmployeeController.java
+C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\config\JacksonConfig.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\dto\employee\registration\annotation\role\ValidRoleValidator.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\dto\product\ProductRequestDto.java
 C:\Users\Acer\IdeaProjects\ZLAGODA\java-server\src\main\java\org\example\mapper\store_product\StoreProductRowMapper.java

@@ -19,6 +19,7 @@ org\example\repository\product\ProductRepository.class
 org\example\dto\employee\registration\annotation\date\MinYear.class
 org\example\dto\employee\registration\annotation\date\CustomDateDeserializer.class
 org\example\security\JwtUtil.class
+org\example\dto\employee\registration\annotation\role\ValidRole.class
 org\example\model\employee\Employee.class
 org\example\exception\RegistrationException.class
 org\example\exception\InvalidProductException.class
@@ -33,6 +34,7 @@ org\example\service\product\ProductServiceImpl.class
 org\example\dto\product\ProductDto.class
 org\example\exception\EntityNotFoundException.class
 org\example\security\CustomUserDetailsService.class
+org\example\config\JacksonConfig.class
 org\example\exception\CustomGlobalExceptionHandler.class
 org\example\repository\employee\EmployeeRepository.class
 org\example\service\store_product\StoreProductServiceImpl.class
@@ -74,4 +76,5 @@ org\example\config\SecurityConfig.class
 org\example\model\employee\Role$RoleName.class
 org\example\exception\InvalidParameterException.class
 org\example\config\MapperConfig.class
+org\example\dto\employee\registration\annotation\role\ValidRoleValidator.class
 org\example\service\store_product\BatchService.class

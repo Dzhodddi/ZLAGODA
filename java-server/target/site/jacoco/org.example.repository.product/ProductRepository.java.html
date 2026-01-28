@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spring-boot-first-project</a> &gt; <a href="index.source.html" class="el_package">org.example.repository.product</a> &gt; <span class="el_source">ProductRepository.java</span></div><h1>ProductRepository.java</h1><pre class="source lang-java linenums">package org.example.repository.product;
+
+import lombok.RequiredArgsConstructor;
+import org.example.dto.product.ProductDto;
+import org.example.dto.product.ProductRequestDto;
+import org.example.exception.EntityNotFoundException;
+import org.example.exception.InvalidCategoryException;
+import org.example.mapper.product.ProductMapper;
+import org.example.mapper.product.ProductRowMapper;
+import org.example.model.product.Product;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Optional;
+
+<span class="fc" id="L18">@RequiredArgsConstructor</span>
+@Repository
+public class ProductRepository {
+
+    private final JdbcTemplate jdbcTemplate;
+    private final ProductRowMapper rowMapper;
+    private final ProductMapper productMapper;
+
+    public List&lt;Product&gt; findAll() {
+<span class="fc" id="L27">        return jdbcTemplate.query(&quot;SELECT * FROM product ORDER BY product_name&quot;,</span>
+                rowMapper);
+    }
+
+    public Optional&lt;Product&gt; findById(int id) {
+        try {
+<span class="fc" id="L33">            return Optional.ofNullable(</span>
+<span class="fc" id="L34">                    jdbcTemplate.queryForObject(</span>
+                            &quot;SELECT * FROM product WHERE id_product = ?&quot;,
+                            rowMapper,
+<span class="fc" id="L37">                            id</span>
+                    )
+            );
+<span class="fc" id="L40">        } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L41">            return Optional.empty();</span>
+        }
+    }
+
+    public List&lt;Product&gt; findByName(String name) {
+<span class="fc" id="L46">        return jdbcTemplate.query(</span>
+                            &quot;SELECT * FROM product WHERE product_name = ?&quot;,
+                            rowMapper,
+                            name);
+    }
+
+    public List&lt;Product&gt; findByCategoryId(int category_number) {
+<span class="fc" id="L53">        return jdbcTemplate.query(</span>
+                &quot;&quot;&quot;
+                      SELECT *
+                      FROM product
+                      WHERE category_number = ?
+                      ORDER BY product_name
+                     &quot;&quot;&quot;,
+                rowMapper,
+<span class="fc" id="L61">                category_number);</span>
+    }
+
+    public Product save(Product product) {
+        try {
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            if (product.getId_product() == 0) {</span>
+<span class="fc" id="L67">                return jdbcTemplate.queryForObject(</span>
+                        &quot;&quot;&quot;
+                        INSERT INTO product (
+                            product_name,
+                            product_characteristics,
+                            category_number
+                        ) VALUES (?, ?, ?)
+                        RETURNING *
+                        &quot;&quot;&quot;,
+                        rowMapper,
+<span class="fc" id="L77">                        product.getProduct_name(),</span>
+<span class="fc" id="L78">                        product.getProduct_characteristics(),</span>
+<span class="fc" id="L79">                        product.getCategory_number()</span>
+                );
+            } else {
+<span class="fc" id="L82">                int updated = jdbcTemplate.update(</span>
+                        &quot;&quot;&quot;
+                        UPDATE product SET
+                            product_name = ?,
+                            product_characteristics = ?,
+                            category_number = ?
+                        WHERE id_product = ?
+                        &quot;&quot;&quot;,
+<span class="fc" id="L90">                        product.getProduct_name(),</span>
+<span class="fc" id="L91">                        product.getProduct_characteristics(),</span>
+<span class="fc" id="L92">                        product.getCategory_number(),</span>
+<span class="fc" id="L93">                        product.getId_product()</span>
+                );
+
+<span class="fc bfc" id="L96" title="All 2 branches covered.">                if (updated == 0) {</span>
+<span class="fc" id="L97">                    throw new EntityNotFoundException(&quot;Product not found: &quot; + product.getId_product());</span>
+                }
+
+<span class="fc" id="L100">                return findById(product.getId_product())</span>
+<span class="pc" id="L101">                        .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Product not found after update: &quot; + product.getId_product()));</span>
+            }
+<span class="fc" id="L103">        } catch (DataIntegrityViolationException e) {</span>
+<span class="fc" id="L104">            throw new InvalidCategoryException(&quot;Invalid category: &quot;</span>
+<span class="fc" id="L105">                    + product.getCategory_number());</span>
+        }
+    }
+
+    public ProductDto updateProductById(int id, ProductRequestDto requestDto) {
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (!existsByIdProduct(id)) {</span>
+<span class="fc" id="L111">            throw new EntityNotFoundException(&quot;Product not found: &quot; + id);</span>
+        }
+
+        try {
+<span class="fc" id="L115">            int updatedRows = jdbcTemplate.update(</span>
+                    &quot;&quot;&quot;
+                    UPDATE product SET
+                        product_name = ?,
+                        product_characteristics = ?,
+                        category_number = ?
+                    WHERE id_product = ?
+                    &quot;&quot;&quot;,
+<span class="fc" id="L123">                    requestDto.getProduct_name(),</span>
+<span class="fc" id="L124">                    requestDto.getProduct_characteristics(),</span>
+<span class="fc" id="L125">                    requestDto.getCategory_number(),</span>
+<span class="fc" id="L126">                    id</span>
+            );
+
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">            if (updatedRows == 0) {</span>
+<span class="nc" id="L130">                throw new EntityNotFoundException(&quot;Update failed, product not found: &quot; + id);</span>
+            }
+
+<span class="fc" id="L133">            return findById(id)</span>
+<span class="fc" id="L134">                    .map(productMapper::toDto)</span>
+<span class="pc" id="L135">                    .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Product not found after update: &quot; + id));</span>
+
+<span class="fc" id="L137">        } catch (DataIntegrityViolationException e) {</span>
+<span class="fc" id="L138">            throw new InvalidCategoryException(&quot;Invalid category: &quot; + requestDto.getCategory_number());</span>
+        }
+    }
+
+    public void deleteById(int id) {
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        if (!existsByIdProduct(id)) {</span>
+<span class="fc" id="L144">            throw new EntityNotFoundException(&quot;Product not found: &quot; + id);</span>
+        }
+<span class="fc" id="L146">        jdbcTemplate.update(&quot;DELETE FROM product WHERE id_product = ?&quot;, id);</span>
+<span class="fc" id="L147">    }</span>
+
+    public boolean existsByIdProduct(int idProduct) {
+<span class="fc" id="L150">        Integer count = jdbcTemplate.queryForObject(</span>
+                &quot;SELECT COUNT(*) FROM product WHERE id_product = ?&quot;,
+                Integer.class,
+<span class="fc" id="L153">                idProduct</span>
+        );
+<span class="pc bpc" id="L155" title="1 of 4 branches missed.">        return count != null &amp;&amp; count &gt; 0;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Employee.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spring-boot-first-project</a> &gt; <a href="index.source.html" class="el_package">org.example.model.employee</a> &gt; <span class="el_source">Employee.java</span></div><h1>Employee.java</h1><pre class="source lang-java linenums">package org.example.model.employee;
+
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+@Getter
+<span class="fc" id="L13">@Setter</span>
+<span class="fc" id="L14">public class Employee implements UserDetails {</span>
+<span class="fc" id="L15">    private String id_employee;</span>
+<span class="fc" id="L16">    private String empl_surname;</span>
+<span class="fc" id="L17">    private String empl_name;</span>
+<span class="fc" id="L18">    private String empl_patronymic;</span>
+<span class="fc" id="L19">    private Role role;</span>
+<span class="fc" id="L20">    private BigDecimal salary;</span>
+<span class="fc" id="L21">    private Date date_of_birth;</span>
+<span class="fc" id="L22">    private Date date_of_start;</span>
+<span class="fc" id="L23">    private String phone_number;</span>
+<span class="fc" id="L24">    private String city;</span>
+<span class="fc" id="L25">    private String street;</span>
+<span class="fc" id="L26">    private String zip_code;</span>
+    private String password;
+
+    @Override
+    public Collection&lt;? extends GrantedAuthority&gt; getAuthorities() {
+<span class="fc" id="L31">        return List.of(role);</span>
+    }
+
+    @Override
+    public String getUsername() {
+<span class="fc" id="L36">        return id_employee;</span>
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+<span class="fc" id="L41">        return true;</span>
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+<span class="fc" id="L46">        return true;</span>
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+<span class="fc" id="L51">        return true;</span>
+    }
+
+    @Override
+    public boolean isEnabled() {
+<span class="fc" id="L56">        return true;</span>
+    }
+
+    @Override
+    public String getPassword() {
+<span class="fc" id="L61">        return password;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

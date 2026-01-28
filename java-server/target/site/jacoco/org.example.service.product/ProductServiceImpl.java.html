@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spring-boot-first-project</a> &gt; <a href="index.source.html" class="el_package">org.example.service.product</a> &gt; <span class="el_source">ProductServiceImpl.java</span></div><h1>ProductServiceImpl.java</h1><pre class="source lang-java linenums">package org.example.service.product;
+
+import lombok.RequiredArgsConstructor;
+import org.example.dto.product.ProductDto;
+import org.example.dto.product.ProductRequestDto;
+import org.example.mapper.product.ProductMapper;
+import org.example.model.product.Product;
+import org.example.repository.product.ProductRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+<span class="fc" id="L13">@RequiredArgsConstructor</span>
+@Service
+public class ProductServiceImpl implements ProductService {
+
+    private final ProductRepository repository;
+    @Qualifier(&quot;productMapper&quot;)
+    private final ProductMapper mapper;
+
+    @Override
+    public List&lt;ProductDto&gt; getAll() {
+<span class="fc" id="L23">        return repository.findAll()</span>
+<span class="fc" id="L24">                .stream()</span>
+<span class="fc" id="L25">                .map(mapper::toDto)</span>
+<span class="fc" id="L26">                .toList();</span>
+    }
+
+    @Override
+    public ProductDto save(ProductRequestDto requestDto) {
+<span class="fc" id="L31">        Product product = mapper.toEntity(requestDto);</span>
+<span class="fc" id="L32">        return mapper.toDto(repository.save(product));</span>
+    }
+
+    @Override
+    public ProductDto updateProductById(int id, ProductRequestDto requestDto) {
+<span class="fc" id="L37">        return repository.updateProductById(id, requestDto);</span>
+    }
+
+    @Override
+    public List&lt;ProductDto&gt; findByName(String name) {
+<span class="fc" id="L42">        List&lt;Product&gt; products = repository.findByName(name);</span>
+<span class="fc" id="L43">        return products.stream()</span>
+<span class="fc" id="L44">                .map(mapper::toDto)</span>
+<span class="fc" id="L45">                .toList();</span>
+    }
+
+    @Override
+    public List&lt;ProductDto&gt; findByCategoryId(int category_number) {
+<span class="fc" id="L50">        List&lt;Product&gt; products = repository.findByCategoryId(category_number);</span>
+<span class="fc" id="L51">        return products.stream()</span>
+<span class="fc" id="L52">                .map(mapper::toDto)</span>
+<span class="fc" id="L53">                .toList();</span>
+    }
+
+    @Override
+    public void deleteProductById(int id) {
+<span class="fc" id="L58">        repository.deleteById(id);</span>
+<span class="fc" id="L59">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

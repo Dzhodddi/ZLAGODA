@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StoreProductRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spring-boot-first-project</a> &gt; <a href="index.source.html" class="el_package">org.example.repository.store_product</a> &gt; <span class="el_source">StoreProductRepository.java</span></div><h1>StoreProductRepository.java</h1><pre class="source lang-java linenums">package org.example.repository.store_product;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.example.dto.store_product.product.*;
+import org.example.exception.EntityNotFoundException;
+import org.example.exception.InvalidProductException;
+import org.example.mapper.store_product.StoreProductMapper;
+import org.example.mapper.store_product.StoreProductRowMapper;
+import org.example.model.store_product.StoreProduct;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
+@Repository
+public class StoreProductRepository {
+
+<span class="fc" id="L24">    private static final BigDecimal VAT_RATE = new BigDecimal(&quot;0.20&quot;);</span>
+<span class="fc" id="L25">    private static final BigDecimal PROM_RATE = new BigDecimal(&quot;0.80&quot;);</span>
+    private final JdbcTemplate jdbcTemplate;
+    private final StoreProductRowMapper rowMapper;
+    @Qualifier(&quot;storeProductMapper&quot;)
+    private final StoreProductMapper mapper;
+
+    public List&lt;StoreProductWithNameDto&gt; findAllSortedByName() {
+<span class="fc" id="L32">        return jdbcTemplate.query(&quot;&quot;&quot;</span>
+        SELECT sp.*, p.product_name
+        FROM store_product sp
+        JOIN product p ON sp.id_product = p.id_product
+        WHERE sp.is_deleted = false
+        ORDER BY p.product_name
+        &quot;&quot;&quot;,
+                (rs, rowNum) -&gt; {
+<span class="nc" id="L40">                    StoreProductWithNameDto dto = new StoreProductWithNameDto();</span>
+<span class="nc" id="L41">                    dto.setUPC(rs.getString(&quot;UPC&quot;));</span>
+<span class="nc" id="L42">                    dto.setUPC_prom(rs.getString(&quot;UPC_prom&quot;));</span>
+<span class="nc" id="L43">                    dto.setId_product(rs.getInt(&quot;id_product&quot;));</span>
+<span class="nc" id="L44">                    dto.setSelling_price(rs.getBigDecimal(&quot;selling_price&quot;));</span>
+<span class="nc" id="L45">                    dto.setProducts_number(rs.getInt(&quot;products_number&quot;));</span>
+<span class="nc" id="L46">                    dto.setPromotional_product(rs.getBoolean(&quot;promotional_product&quot;));</span>
+<span class="nc" id="L47">                    dto.setProduct_name(rs.getString(&quot;product_name&quot;));</span>
+<span class="nc" id="L48">                    return dto;</span>
+                });
+    }
+
+
+    public List&lt;StoreProduct&gt; findAllSortedByQuantity() {
+<span class="fc" id="L54">        return jdbcTemplate.query(&quot;&quot;&quot;</span>
+             SELECT * FROM store_product
+             WHERE is_deleted = false
+             ORDER BY products_number ASC
+             &quot;&quot;&quot;,
+                rowMapper);
+    }
+
+    public List&lt;StoreProduct&gt; findPromotionalSortedByQuantity() {
+<span class="fc" id="L63">        return jdbcTemplate.query(&quot;&quot;&quot;</span>
+             SELECT * FROM store_product
+             WHERE promotional_product = true AND is_deleted = false
+             ORDER BY products_number ASC
+             &quot;&quot;&quot;,
+                rowMapper);
+    }
+
+    public List&lt;StoreProductWithNameDto&gt; findPromotionalSortedByName() {
+<span class="fc" id="L72">        return jdbcTemplate.query(&quot;&quot;&quot;</span>
+             SELECT sp.*, p.product_name
+             FROM store_product sp
+             INNER JOIN product p ON sp.id_product = p.id_product
+             WHERE sp.promotional_product = true AND sp.is_deleted = false
+             ORDER BY p.product_name ASC
+             &quot;&quot;&quot;,
+                (rs, rowNum) -&gt; {
+<span class="nc" id="L80">                    StoreProductWithNameDto dto = new StoreProductWithNameDto();</span>
+<span class="nc" id="L81">                    dto.setUPC(rs.getString(&quot;UPC&quot;));</span>
+<span class="nc" id="L82">                    dto.setUPC_prom(rs.getString(&quot;UPC_prom&quot;));</span>
+<span class="nc" id="L83">                    dto.setId_product(rs.getInt(&quot;id_product&quot;));</span>
+<span class="nc" id="L84">                    dto.setSelling_price(rs.getBigDecimal(&quot;selling_price&quot;));</span>
+<span class="nc" id="L85">                    dto.setProducts_number(rs.getInt(&quot;products_number&quot;));</span>
+<span class="nc" id="L86">                    dto.setPromotional_product(rs.getBoolean(&quot;promotional_product&quot;));</span>
+<span class="nc" id="L87">                    dto.setProduct_name(rs.getString(&quot;product_name&quot;));</span>
+<span class="nc" id="L88">                    return dto;</span>
+                });
+    }
+
+    public List&lt;StoreProduct&gt; findNonPromotionalSortedByQuantity() {
+<span class="fc" id="L93">        return jdbcTemplate.query(&quot;&quot;&quot;</span>
+             SELECT * FROM store_product
+             WHERE promotional_product = false AND is_deleted = false
+             ORDER BY products_number ASC
+             &quot;&quot;&quot;,
+                rowMapper);
+    }
+
+    public List&lt;StoreProductWithNameDto&gt; findNonPromotionalSortedByName() {
+<span class="fc" id="L102">        return jdbcTemplate.query(&quot;&quot;&quot;</span>
+             SELECT sp.*, p.product_name
+             FROM store_product sp
+             INNER JOIN product p ON sp.id_product = p.id_product
+             WHERE sp.promotional_product = false AND sp.is_deleted = false
+             ORDER BY p.product_name ASC
+             &quot;&quot;&quot;,
+                (rs, rowNum) -&gt; {
+<span class="nc" id="L110">                    StoreProductWithNameDto dto = new StoreProductWithNameDto();</span>
+<span class="nc" id="L111">                    dto.setUPC(rs.getString(&quot;UPC&quot;));</span>
+<span class="nc" id="L112">                    dto.setUPC_prom(rs.getString(&quot;UPC_prom&quot;));</span>
+<span class="nc" id="L113">                    dto.setId_product(rs.getInt(&quot;id_product&quot;));</span>
+<span class="nc" id="L114">                    dto.setSelling_price(rs.getBigDecimal(&quot;selling_price&quot;));</span>
+<span class="nc" id="L115">                    dto.setProducts_number(rs.getInt(&quot;products_number&quot;));</span>
+<span class="nc" id="L116">                    dto.setPromotional_product(rs.getBoolean(&quot;promotional_product&quot;));</span>
+<span class="nc" id="L117">                    dto.setProduct_name(rs.getString(&quot;product_name&quot;));</span>
+<span class="nc" id="L118">                    return dto;</span>
+                });
+    }
+
+    public Optional&lt;StoreProduct&gt; findAllInfoByUPC(String upc) {
+        try {
+<span class="fc" id="L124">            return Optional.ofNullable(</span>
+<span class="fc" id="L125">                    jdbcTemplate.queryForObject(</span>
+                            &quot;SELECT * FROM store_product WHERE UPC = ? AND is_deleted = false&quot;,
+                            rowMapper,
+                            upc
+                    )
+            );
+<span class="fc" id="L131">        } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L132">            return Optional.empty();</span>
+        }
+    }
+
+    public Optional&lt;StoreProductCharacteristicsDto&gt; findByUPC(String upc) {
+        try {
+<span class="fc" id="L138">            return Optional.ofNullable(</span>
+<span class="fc" id="L139">                    jdbcTemplate.queryForObject(</span>
+                            &quot;&quot;&quot;
+                            SELECT selling_price, products_number, product_name, p.product_characteristics
+                            FROM store_product
+                            INNER JOIN product p ON store_product.id_product = p.id_product
+                            WHERE UPC = ? AND is_deleted = false
+                            &quot;&quot;&quot;,
+                            (rs, rowNum) -&gt; {
+<span class="nc" id="L147">                                StoreProductCharacteristicsDto dto = new StoreProductCharacteristicsDto();</span>
+<span class="nc" id="L148">                                dto.setSelling_price(rs.getBigDecimal(&quot;selling_price&quot;));</span>
+<span class="nc" id="L149">                                dto.setProducts_number(rs.getInt(&quot;products_number&quot;));</span>
+<span class="nc" id="L150">                                dto.setProduct_name(rs.getString(&quot;product_name&quot;));</span>
+<span class="nc" id="L151">                                dto.setProduct_characteristics(rs.getString(&quot;product_characteristics&quot;));</span>
+<span class="nc" id="L152">                                return dto;</span>
+                            },
+                            upc
+                    )
+            );
+<span class="fc" id="L157">        } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L158">            return Optional.empty();</span>
+        }
+    }
+
+    public Optional&lt;StoreProductPriceAndQuantityDto&gt; findPriceAndQuantityByUPC(String upc) {
+        try {
+<span class="fc" id="L164">            return Optional.ofNullable(</span>
+<span class="fc" id="L165">                    jdbcTemplate.queryForObject(</span>
+                            &quot;&quot;&quot;
+                            SELECT selling_price, products_number
+                            FROM store_product
+                            WHERE UPC = ? AND is_deleted = false
+                            &quot;&quot;&quot;,
+                            (rs, rowNum) -&gt; {
+<span class="nc" id="L172">                                StoreProductPriceAndQuantityDto dto = new StoreProductPriceAndQuantityDto();</span>
+<span class="nc" id="L173">                                dto.setSelling_price(rs.getBigDecimal(&quot;selling_price&quot;));</span>
+<span class="nc" id="L174">                                dto.setProducts_number(rs.getInt(&quot;products_number&quot;));</span>
+<span class="nc" id="L175">                                return dto;</span>
+                            },
+                            upc
+                    )
+            );
+<span class="fc" id="L180">        } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L181">            return Optional.empty();</span>
+        }
+    }
+
+    public StoreProduct save(StoreProductRequestDto requestDto) {
+        BigDecimal priceWithVat;
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if (requestDto.isPromotional_product()) {</span>
+<span class="fc" id="L188">            priceWithVat = (requestDto.getPrice().multiply(PROM_RATE))</span>
+<span class="fc" id="L189">                    .multiply(BigDecimal.ONE.add(VAT_RATE))</span>
+<span class="fc" id="L190">                    .setScale(2, RoundingMode.HALF_UP);</span>
+        } else {
+<span class="fc" id="L192">            priceWithVat = (requestDto.getPrice())</span>
+<span class="fc" id="L193">                    .multiply(BigDecimal.ONE.add(VAT_RATE))</span>
+<span class="fc" id="L194">                    .setScale(2, RoundingMode.HALF_UP);</span>
+        }
+        try {
+<span class="fc" id="L197">            return jdbcTemplate.queryForObject(</span>
+                    &quot;&quot;&quot;
+                    INSERT INTO store_product (
+                        UPC,
+                        UPC_prom,
+                        id_product,
+                        selling_price,
+                        products_number,
+                        promotional_product,
+                        is_deleted
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    RETURNING *
+                    &quot;&quot;&quot;,
+                    rowMapper,
+<span class="fc" id="L211">                    requestDto.getUPC(),</span>
+<span class="fc" id="L212">                    requestDto.getUPC_prom(),</span>
+<span class="fc" id="L213">                    requestDto.getId_product(),</span>
+                    priceWithVat,
+<span class="fc" id="L215">                    requestDto.getProducts_number(),</span>
+<span class="fc" id="L216">                    requestDto.isPromotional_product(),</span>
+                    Boolean.FALSE
+            );
+<span class="fc" id="L219">        } catch (DataIntegrityViolationException e) {</span>
+<span class="fc" id="L220">            throw new InvalidProductException(</span>
+<span class="fc" id="L221">                    &quot;Invalid product or UPC reference: &quot; + requestDto.getId_product());</span>
+        }
+    }
+
+    public StoreProductDto updateByUPC(String upc, StoreProductRequestDto requestDto) {
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        if (!existsByUPC(upc)) {</span>
+<span class="fc" id="L227">            throw new EntityNotFoundException(&quot;Store product not found: &quot; + upc);</span>
+        }
+        BigDecimal priceWithVat;
+<span class="fc bfc" id="L230" title="All 2 branches covered.">        if (requestDto.isPromotional_product()) {</span>
+<span class="fc" id="L231">            priceWithVat = (requestDto.getPrice().multiply(PROM_RATE))</span>
+<span class="fc" id="L232">                    .multiply(BigDecimal.ONE.add(VAT_RATE))</span>
+<span class="fc" id="L233">                    .setScale(2, RoundingMode.HALF_UP);</span>
+        } else {
+<span class="fc" id="L235">            priceWithVat = (requestDto.getPrice())</span>
+<span class="fc" id="L236">                    .multiply(BigDecimal.ONE.add(VAT_RATE))</span>
+<span class="fc" id="L237">                    .setScale(2, RoundingMode.HALF_UP);</span>
+        }
+        try {
+<span class="fc" id="L240">            int updatedRows = jdbcTemplate.update(</span>
+                    &quot;&quot;&quot;
+                    UPDATE store_product SET
+                        UPC_prom = ?,
+                        id_product = ?,
+                        selling_price = ?,
+                        products_number = ?,
+                        promotional_product = ?
+                    WHERE UPC = ? AND is_deleted = false
+                    &quot;&quot;&quot;,
+<span class="fc" id="L250">                    requestDto.getUPC_prom(),</span>
+<span class="fc" id="L251">                    requestDto.getId_product(),</span>
+                    priceWithVat,
+<span class="fc" id="L253">                    requestDto.getProducts_number(),</span>
+<span class="fc" id="L254">                    requestDto.isPromotional_product(),</span>
+                    upc
+            );
+
+<span class="fc bfc" id="L258" title="All 2 branches covered.">            if (updatedRows == 0) {</span>
+<span class="fc" id="L259">                throw new EntityNotFoundException(&quot;Update failed, store product not found: &quot; + upc);</span>
+            }
+
+<span class="fc" id="L262">            return findAllInfoByUPC(upc)</span>
+<span class="fc" id="L263">                    .map(mapper::toDto)</span>
+<span class="fc" id="L264">                    .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Store product not found after update: &quot; + upc));</span>
+
+<span class="fc" id="L266">        } catch (DataIntegrityViolationException e) {</span>
+<span class="fc" id="L267">            throw new InvalidProductException(&quot;Invalid product or UPC reference: &quot; + requestDto.getId_product());</span>
+        }
+    }
+
+    public void softDeleteByUPC(String upc) {
+<span class="fc" id="L272">        String sql = &quot;UPDATE store_product SET is_deleted = true WHERE UPC = ? AND is_deleted = false&quot;;</span>
+<span class="fc" id="L273">        jdbcTemplate.update(sql, upc);</span>
+<span class="fc" id="L274">    }</span>
+
+    public boolean existsByUPC(String upc) {
+<span class="fc" id="L277">        Integer count = jdbcTemplate.queryForObject(</span>
+                &quot;SELECT COUNT(*) FROM store_product WHERE UPC = ? AND is_deleted = false&quot;,
+                Integer.class,
+                upc
+        );
+<span class="fc bfc" id="L282" title="All 4 branches covered.">        return count != null &amp;&amp; count &gt; 0;</span>
+    }
+
+    public void updateProductPriceAndPromotion(String upc,
+                                               BigDecimal price,
+                                               boolean promotional) {
+<span class="fc" id="L288">        jdbcTemplate.update(</span>
+                &quot;&quot;&quot;
+                UPDATE store_product
+                SET selling_price = ?, promotional_product = ?
+                WHERE UPC = ? AND is_deleted = false
+                &quot;&quot;&quot;,
+<span class="fc" id="L294">                price, promotional, upc</span>
+        );
+<span class="fc" id="L296">    }</span>
+
+    public List&lt;StoreProduct&gt; findAll() {
+<span class="fc" id="L299">        return jdbcTemplate.query(&quot;&quot;&quot;</span>
+             SELECT * FROM store_product
+             WHERE is_deleted = false
+             &quot;&quot;&quot;,
+                rowMapper);
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
