@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/lib/pq"
 
 	"context"
@@ -41,7 +43,8 @@ func (r *saleRepository) CreateNewSale(ctx context.Context, sale views.CreateNew
 		},
 	)
 	if err != nil {
-		if pgErr, ok := err.(*pq.Error); ok {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) {
 			switch pgErr.Code {
 			case "23503": // Foreign key constraint violation
 				return nil, ErrForeignKey

@@ -51,7 +51,8 @@ func (r *cardRepository) CreateNewCard(ctx context.Context, card views.CreateNew
 		CustomerPercent:    card.CustomerPercent,
 	})
 	if err != nil {
-		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return nil, ErrConflict
 		}
 		return nil, err
@@ -95,7 +96,8 @@ func (r *cardRepository) UpdateCustomerCard(ctx context.Context, card views.Upda
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
-		if pgErr, ok := err.(*pq.Error); ok {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) {
 			switch pgErr.Code {
 			case "23503": // Foreign key constraint violation
 				return nil, ErrForeignKey
@@ -138,7 +140,7 @@ func (r *cardRepository) ListCustomerCardsSortedByPercent(ctx context.Context, p
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
-	rows, err := r.ListCustomerCardsSortedByPercent(ctx, percent)
+	rows, err := r.queries.GetCustomerCardsByPercentSorted(ctx, int32(percent))
 	if err != nil {
 		return nil, err
 	}

@@ -13,13 +13,13 @@ import (
 	swaggerDocs "github.com/swaggo/echo-swagger"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/config"
-	"github.com/Dzhodddi/ZLAGODA/internal/db"
 	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
 	*echo.Echo
 	Config *config.Config
+	DB     *sqlx.DB
 }
 
 // @title Go server API
@@ -27,25 +27,19 @@ type Server struct {
 // @termsOfService http://swagger.io/terms/
 // @host localhost:8080
 // @BasePath /api/v1
-func Setup(cfg *config.Config) (*Server, error) {
+func Setup(cfg *config.Config, database *sqlx.DB) (*Server, error) {
 	e := echo.New()
 	setupMiddlewares(e, cfg)
-	database, err := setupDatabase(cfg)
-	if err != nil {
-		return nil, err
-	}
 	v1 := e.Group("/api/v1")
 
 	v1.GET("/health", func(c echo.Context) error {
-		query := `UPDATE store_product`
-		_, err = database.NamedExec(query, map[string]interface{}{})
-
-		return c.JSON(http.StatusOK, err)
+		return c.JSON(http.StatusOK, "ok")
 	})
 	setupAllRoutes(database, v1)
 	return &Server{
 		Echo:   e,
 		Config: cfg,
+		DB:     database,
 	}, nil
 }
 
@@ -55,19 +49,6 @@ func setupMiddlewares(e *echo.Echo, cfg *config.Config) {
 	e.Use(echoMiddleware.RequestLogger())
 	e.Use(echoMiddleware.Recover())
 	e.Debug = true
-}
-
-func setupDatabase(cfg *config.Config) (*sqlx.DB, error) {
-	dbConfig := db.DatabaseConfig{
-		Driver: "postgres",
-		DSN:    cfg.PostgresDSN,
-		Pool: &db.PoolConfig{
-			MaxOpenConnections: cfg.MaxOpenConnections,
-			MaxIdleConnections: cfg.MaxIdleConnections,
-			ConnMaxLifetime:    cfg.ConnMaxLifetime,
-		},
-	}
-	return db.NewPostgresConnection(dbConfig)
 }
 
 func setupAllRoutes(db *sqlx.DB, router *echo.Group) {
