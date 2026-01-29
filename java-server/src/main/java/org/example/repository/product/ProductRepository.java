@@ -10,10 +10,14 @@ import org.example.mapper.product.ProductRowMapper;
 import org.example.model.product.Product;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Repository
@@ -23,16 +27,34 @@ public class ProductRepository {
     private final ProductRowMapper rowMapper;
     private final ProductMapper productMapper;
 
-    public List<Product> findAll() {
-        return jdbcTemplate.query("SELECT * FROM product ORDER BY product_name",
-                rowMapper);
+    public Page<ProductDto> findAll(Pageable pageable) {
+        List<ProductDto> products = jdbcTemplate.query(
+                """
+                    SELECT *
+                    FROM product 
+                    ORDER BY product_name 
+                    LIMIT ?
+                    OFFSET ?
+                    """,
+                rowMapper,
+                        pageable.getPageSize(),
+                        pageable.getOffset()
+                ).stream()
+                .map(productMapper::toDto)
+                .collect(Collectors.toList());
+        long total = getTotalCount();
+        return new PageImpl<>(products, pageable, total);
     }
 
     public Optional<Product> findById(int id) {
         try {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
-                            "SELECT * FROM product WHERE id_product = ?",
+                            """
+                            SELECT *
+                            FROM product
+                            WHERE id_product = ?
+                            """,
                             rowMapper,
                             id
                     )
@@ -42,23 +64,63 @@ public class ProductRepository {
         }
     }
 
-    public List<Product> findByName(String name) {
-        return jdbcTemplate.query(
-                            "SELECT * FROM product WHERE product_name = ?",
+    public Page<ProductDto> findByName(String name, Pageable pageable) {
+        List<ProductDto> products = jdbcTemplate.query(
+                            """
+                            SELECT *
+                            FROM product
+                            WHERE product_name = ?
+                            LIMIT ?
+                            OFFSET ?
+                            """,
                             rowMapper,
-                            name);
+                            name,
+                        pageable.getPageSize(),
+                        pageable.getOffset())
+                .stream()
+                .map(productMapper::toDto)
+                .collect(Collectors.toList());
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                    SELECT COUNT(*)
+                    FROM product
+                    WHERE product_name = ?
+                    """,
+                Integer.class,
+                name
+        );
+        long total = count != null ? count : 0;
+        return new PageImpl<>(products, pageable, total);
     }
 
-    public List<Product> findByCategoryId(int category_number) {
-        return jdbcTemplate.query(
+    public Page<ProductDto> findByCategoryId(int category_number, Pageable pageable) {
+        List<ProductDto> products = jdbcTemplate.query(
                 """
-                      SELECT *
-                      FROM product
-                      WHERE category_number = ?
-                      ORDER BY product_name
+                     SELECT *
+                     FROM product
+                     WHERE category_number = ?
+                     ORDER BY product_name
+                     LIMIT ?
+                     OFFSET ?
                      """,
                 rowMapper,
-                category_number);
+                category_number,
+                pageable.getPageSize(),
+                pageable.getOffset())
+                .stream()
+                .map(productMapper::toDto)
+                .collect(Collectors.toList());
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                    SELECT COUNT(*)
+                    FROM product
+                    WHERE category_number = ?
+                    """,
+                Integer.class,
+                category_number
+        );
+        long total = count != null ? count : 0;
+        return new PageImpl<>(products, pageable, total);
     }
 
     public Product save(Product product) {
@@ -98,7 +160,8 @@ public class ProductRepository {
                 }
 
                 return findById(product.getId_product())
-                        .orElseThrow(() -> new EntityNotFoundException("Product not found after update: " + product.getId_product()));
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                "Product not found after update: " + product.getId_product()));
             }
         } catch (DataIntegrityViolationException e) {
             throw new InvalidCategoryException("Invalid category: "
@@ -143,15 +206,45 @@ public class ProductRepository {
         if (!existsByIdProduct(id)) {
             throw new EntityNotFoundException("Product not found: " + id);
         }
-        jdbcTemplate.update("DELETE FROM product WHERE id_product = ?", id);
+        jdbcTemplate.update("""
+                        DELETE
+                        FROM product
+                        WHERE id_product = ?
+                        """, id);
     }
 
     public boolean existsByIdProduct(int idProduct) {
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM product WHERE id_product = ?",
+                """
+                SELECT COUNT(*)
+                FROM product
+                WHERE id_product = ?
+                """,
                 Integer.class,
                 idProduct
         );
         return count != null && count > 0;
+    }
+
+    public List<ProductDto> findAllNoPagination() {
+        return jdbcTemplate.query("""
+                            SELECT *
+                            FROM product
+                            ORDER BY product_name
+                            """,
+                        rowMapper)
+                .stream()
+                .map(productMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private long getTotalCount() {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM product""",
+                Integer.class
+        );
+        return count != null ? count : 0;
     }
 }

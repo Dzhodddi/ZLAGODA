@@ -19,6 +19,8 @@ import org.example.mapper.employee.EmployeeMapper;
 import org.example.model.employee.Role;
 import org.example.model.employee.Employee;
 import org.example.repository.employee.EmployeeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -70,9 +72,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<EmployeeResponseDto> getAll() {
-        return employeeRepository.findAll();
+    public Page<EmployeeResponseDto> getAll(Pageable pageable) {
+        return employeeRepository.findAll(pageable);
     }
+
 
     @Override
     public EmployeeResponseDto updateEmployeeById(String id,
@@ -96,8 +99,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<EmployeeResponseDto> getAllCashiers() {
-        return employeeRepository.findAllCashiers();
+    public Page<EmployeeResponseDto> getAllCashiers(Pageable pageable) {
+        return employeeRepository.findAllCashiers(pageable);
     }
 
     @Override
@@ -114,5 +117,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         return Optional.ofNullable(employeeRepository.findPhoneAndAddressBySurname(surname)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Cannot find employee by surname: " + surname)));
+    }
+
+    @Override
+    public List<EmployeeResponseDto> findAllNoPagination() {
+        return employeeRepository.findAllNoPagination();
     }
 }

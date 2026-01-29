@@ -37,6 +37,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -207,14 +211,16 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("getAll should return list of employees")
     void getAll_shouldReturnList() {
-        when(employeeRepository.findAll()).thenReturn(List.of(employeeResponseDto));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<EmployeeResponseDto> page = new PageImpl<>(List.of(employeeResponseDto));
+        when(employeeRepository.findAll(any(Pageable.class))).thenReturn(page);
 
-        List<EmployeeResponseDto> result = service.getAll();
+        Page<EmployeeResponseDto> result = service.getAll(pageable);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("EMP001", result.get(0).getId_employee());
-        verify(employeeRepository, times(1)).findAll();
+        assertEquals(1, result.getContent().size());
+        assertEquals("EMP001", result.getContent().get(0).getId_employee());
+        verify(employeeRepository, times(1)).findAll(any(Pageable.class));
     }
 
     @Test
@@ -280,13 +286,15 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("getAllCashiers should return list of cashiers")
     void getAllCashiers_shouldReturnCashiers() {
-        when(employeeRepository.findAllCashiers()).thenReturn(List.of(employeeResponseDto));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<EmployeeResponseDto> page = new PageImpl<>(List.of(employeeResponseDto));
+        when(employeeRepository.findAllCashiers(any(Pageable.class))).thenReturn(page);
 
-        List<EmployeeResponseDto> result = service.getAllCashiers();
+        Page<EmployeeResponseDto> result = service.getAllCashiers(pageable);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(employeeRepository, times(1)).findAllCashiers();
+        assertEquals(1, result.getContent().size());
+        verify(employeeRepository, times(1)).findAllCashiers(any(Pageable.class));
     }
 
     @Test

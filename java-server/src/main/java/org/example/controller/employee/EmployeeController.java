@@ -16,6 +16,8 @@ import org.example.exception.AuthorizationException;
 import org.example.exception.RegistrationException;
 import org.example.service.employee.EmployeeService;
 import org.example.service.report.PdfReportGeneratorService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,8 +50,9 @@ public class EmployeeController {
             description = "Get all employees sorted by their surnames"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public List<EmployeeResponseDto> getAll() {
-        return employeeService.getAll();
+    public Page<EmployeeResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "10") int size) {
+        return employeeService.getAll(PageRequest.of(page, size));
     }
 
     @PostMapping
@@ -96,7 +99,7 @@ public class EmployeeController {
     )
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<byte[]> employeePdf() throws DocumentException, IOException {
-        List<EmployeeResponseDto> employees = employeeService.getAll();
+        List<EmployeeResponseDto> employees = employeeService.findAllNoPagination();
         byte[] pdf = pdfReportGeneratorService.employeeToPdf(employees);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=employees.pdf")
@@ -109,8 +112,9 @@ public class EmployeeController {
             description = "Get all cashiers sorted by their surnames"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public List<EmployeeResponseDto> getAllCashiers() {
-        return employeeService.getAllCashiers();
+    public Page<EmployeeResponseDto> getAllCashiers(@RequestParam(defaultValue = "0") int page,
+                                                    @RequestParam(defaultValue = "10") int size) {
+        return employeeService.getAllCashiers(PageRequest.of(page, size));
     }
 
     @GetMapping("/me")

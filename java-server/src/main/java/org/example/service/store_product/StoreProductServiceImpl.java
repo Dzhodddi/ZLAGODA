@@ -1,15 +1,18 @@
 package org.example.service.store_product;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
-import org.example.dto.store_product.product.*;
+import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
+import org.example.dto.store_product.product.StoreProductDto;
+import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
+import org.example.dto.store_product.product.StoreProductRequestDto;
+import org.example.dto.store_product.product.StoreProductWithNameDto;
 import org.example.exception.EntityNotFoundException;
 import org.example.mapper.store_product.StoreProductMapper;
-import org.example.model.store_product.StoreProduct;
 import org.example.repository.store_product.StoreProductRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -20,71 +23,64 @@ public class StoreProductServiceImpl implements StoreProductService {
     @Qualifier("storeProductMapper")
     private final StoreProductMapper mapper;
 
-    public List<?> getAll(String sortedBy, Boolean prom) {
+    public Page<?> getAll(String sortedBy, Boolean prom, Pageable pageable) {
         if ("name".equals(sortedBy)) {
             if (prom == null) {
-                return getAllSortedByName();
+                return getAllSortedByName(pageable);
             }
             return prom
-                    ? getPromotionalSortedByName()
-                    : getNonPromotionalSortedByName();
+                    ? getPromotionalSortedByName(pageable)
+                    : getNonPromotionalSortedByName(pageable);
         }
         if ("quantity".equals(sortedBy)) {
             if (prom == null) {
-                return getAllSortedByQuantity();
+                return getAllSortedByQuantity(pageable);
             }
             return prom
-                    ? getPromotionalSortedByQuantity()
-                    : getNonPromotionalSortedByQuantity();
+                    ? getPromotionalSortedByQuantity(pageable)
+                    : getNonPromotionalSortedByQuantity(pageable);
         }
-        return getAll();
+        return getAll(pageable);
     }
 
     @Override
-    public List<StoreProductDto> getAll() {
-        List<StoreProduct> products = repository.findAll();
-        return products.stream()
-                .map(mapper::toDto)
-                .toList();
+    public Page<StoreProductDto> getAll(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     @Override
-    public List<StoreProductDto> getAllSortedByQuantity() {
-        return repository.findAllSortedByQuantity()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+    public List<StoreProductDto> getAllNoPagination() {
+        return repository.findAllNoPagination();
     }
 
     @Override
-    public List<StoreProductWithNameDto> getAllSortedByName() {
-        return repository.findAllSortedByName();
+    public Page<StoreProductDto> getAllSortedByQuantity(Pageable pageable) {
+        return repository.findAllSortedByQuantity(pageable);
     }
 
     @Override
-    public List<StoreProductDto> getPromotionalSortedByQuantity() {
-        return repository.findPromotionalSortedByQuantity()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+    public Page<StoreProductWithNameDto> getAllSortedByName(Pageable pageable) {
+        return repository.findAllSortedByName(pageable);
     }
 
     @Override
-    public List<StoreProductDto> getNonPromotionalSortedByQuantity() {
-        return repository.findNonPromotionalSortedByQuantity()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+    public Page<StoreProductDto> getPromotionalSortedByQuantity(Pageable pageable) {
+        return repository.findPromotionalSortedByQuantity(pageable);
     }
 
     @Override
-    public List<StoreProductWithNameDto> getPromotionalSortedByName() {
-        return repository.findPromotionalSortedByName();
+    public Page<StoreProductDto> getNonPromotionalSortedByQuantity(Pageable pageable) {
+        return repository.findNonPromotionalSortedByQuantity(pageable);
     }
 
     @Override
-    public List<StoreProductWithNameDto> getNonPromotionalSortedByName() {
-        return repository.findNonPromotionalSortedByName();
+    public Page<StoreProductWithNameDto> getPromotionalSortedByName(Pageable pageable) {
+        return repository.findPromotionalSortedByName(pageable);
+    }
+
+    @Override
+    public Page<StoreProductWithNameDto> getNonPromotionalSortedByName(Pageable pageable) {
+        return repository.findNonPromotionalSortedByName(pageable);
     }
 
     @Override

@@ -14,6 +14,9 @@ import org.example.model.employee.Employee;
 import org.example.model.employee.Role;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -25,8 +28,32 @@ public class EmployeeRepository {
     private final EmployeeRowMapper employeeRowMapper;
     private final EmployeeMapper employeeMapper;
 
-    public List<EmployeeResponseDto> findAll() {
-        return jdbcTemplate.query("SELECT * FROM employee ORDER BY empl_surname", employeeRowMapper)
+    public Page<EmployeeResponseDto> findAll(Pageable pageable) {
+        List<EmployeeResponseDto> employees = jdbcTemplate.query(
+                        """
+                        SELECT *
+                        FROM employee
+                        ORDER BY empl_surname
+                        LIMIT ?
+                        OFFSET ?
+                        """,
+                        employeeRowMapper,
+                        pageable.getPageSize(),
+                        pageable.getOffset()
+                ).stream()
+                .map(employeeMapper::toEmployeeResponseDto)
+                .toList();
+        long total = getTotalCount();
+        return new PageImpl<>(employees, pageable, total);
+    }
+
+    public List<EmployeeResponseDto> findAllNoPagination() {
+        return jdbcTemplate.query("""
+                        SELECT *
+                        FROM employee
+                        ORDER BY empl_surname
+                        """,
+                        employeeRowMapper)
                 .stream()
                 .map(employeeMapper::toEmployeeResponseDto)
                 .toList();
@@ -85,8 +112,8 @@ public class EmployeeRepository {
         try {
             int updated = jdbcTemplate.update(
                     """
-                    UPDATE employee SET
-                        empl_surname = ?,
+                    UPDATE employee
+                    SET empl_surname = ?,
                         empl_name = ?,
                         empl_patronymic = ?,
                         empl_role = ?,
@@ -130,12 +157,20 @@ public class EmployeeRepository {
         if (!existsByIdEmployee(id)) {
             throw new EntityNotFoundException("Employee not found: " + id);
         }
-        jdbcTemplate.update("DELETE FROM employee WHERE id_employee = ?", id);
+        jdbcTemplate.update("""
+                                DELETE
+                                FROM employee
+                                WHERE id_employee = ?
+                                """, id);
     }
 
     public boolean existsByIdEmployee(String idEmployee) {
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM employee WHERE id_employee = ?",
+                """
+                    SELECT COUNT(*)
+                    FROM employee
+                    WHERE id_employee = ?
+                    """,
                 Integer.class,
                 idEmployee
         );
@@ -146,7 +181,11 @@ public class EmployeeRepository {
         try {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
-                            "SELECT * FROM employee WHERE id_employee = ?",
+                            """
+                            SELECT *
+                            FROM employee
+                            WHERE id_employee = ?
+                            """,
                             employeeRowMapper,
                             id
                     )
@@ -156,16 +195,28 @@ public class EmployeeRepository {
         }
     }
 
-    public List<EmployeeResponseDto> findAllCashiers() {
-        return jdbcTemplate.query("""
-                        SELECT * FROM employee
-                        WHERE empl_role = 'CASHIER'
-                        ORDER BY empl_surname
-                        """,
-                        employeeRowMapper)
-                .stream()
+    public Page<EmployeeResponseDto> findAllCashiers(Pageable pageable) {
+        String sql = """
+                SELECT *
+                FROM employee
+                WHERE empl_role = 'CASHIER'
+                ORDER BY empl_surname
+                LIMIT ?
+                OFFSET ?
+                """;
+
+        List<EmployeeResponseDto> cashiers = jdbcTemplate.query(
+                        sql,
+                        employeeRowMapper,
+                        pageable.getPageSize(),
+                        pageable.getOffset()
+                ).stream()
                 .map(employeeMapper::toEmployeeResponseDto)
                 .toList();
+
+        long total = getCashierCount();
+
+        return new PageImpl<>(cashiers, pageable, total);
     }
 
     public Optional<EmployeeContactDto> findPhoneAndAddressBySurname(String surname) {
@@ -191,5 +242,28 @@ public class EmployeeRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    private long getTotalCount() {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM employee
+                """,
+                Integer.class
+        );
+        return count != null ? count : 0;
+    }
+
+    private long getCashierCount() {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM employee
+                WHERE empl_role = 'CASHIER'
+                """,
+                Integer.class
+        );
+        return count != null ? count : 0;
     }
 }

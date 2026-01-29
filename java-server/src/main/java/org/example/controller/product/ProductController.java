@@ -14,6 +14,8 @@ import org.example.exception.AuthorizationException;
 import org.example.exception.InvalidParameterException;
 import org.example.service.product.ProductService;
 import org.example.service.report.PdfReportGeneratorService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,8 +48,9 @@ public class ProductController {
             summary = "Get all products",
             description = "Get all products sorted by their names"
     )
-    public List<ProductDto> getAll() {
-        return productService.getAll();
+    public Page<ProductDto> getAll(@RequestParam(defaultValue = "0") int page,
+                                   @RequestParam(defaultValue = "10") int size) {
+        return productService.getAll(PageRequest.of(page, size));
     }
 
     @GetMapping(value = "/search")
@@ -55,8 +58,10 @@ public class ProductController {
             summary = "Search products",
             description = "Search products by their name or category"
     )
-    public List<ProductDto> search(@RequestParam(required = false) String name,
-                                       @RequestParam(required = false) Integer categoryId) {
+    public Page<ProductDto> search(@RequestParam(required = false) String name,
+                                   @RequestParam(required = false) Integer categoryId,
+                                   @RequestParam(defaultValue = "0") int page,
+                                   @RequestParam(defaultValue = "10") int size) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CASHIER"));
@@ -64,10 +69,10 @@ public class ProductController {
             if (!isCashier) {
                 throw new AuthorizationException("Only Cashier can search products by name");
             }
-            return productService.findByName(name);
+            return productService.findByName(name, PageRequest.of(page, size));
         }
         if (categoryId != null) {
-            return productService.findByCategoryId(categoryId);
+            return productService.findByCategoryId(categoryId, PageRequest.of(page, size));
         }
         throw new InvalidParameterException("Provide an appropriate parameter");
     }
@@ -116,7 +121,7 @@ public class ProductController {
     )
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<byte[]> productPdf() throws DocumentException, IOException {
-        List<ProductDto> products = productService.getAll();
+        List<ProductDto> products = productService.getAllNoPagination();
         byte[] pdf = pdfReportGeneratorService.productToPdf(products);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=products.pdf")

@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS category (
      category_name VARCHAR(50) NOT NULL
     );
 
-MERGE INTO category (category_number, category_name)
-    KEY (category_number) VALUES
+INSERT INTO category (category_number, category_name)
+VALUES
     (1, 'Dairy'),
     (2, 'Beverages'),
     (3, 'Snacks');

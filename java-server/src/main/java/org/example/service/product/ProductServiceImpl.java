@@ -7,6 +7,8 @@ import org.example.mapper.product.ProductMapper;
 import org.example.model.product.Product;
 import org.example.repository.product.ProductRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -19,11 +21,13 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper mapper;
 
     @Override
-    public List<ProductDto> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+    public List<ProductDto> getAllNoPagination() {
+        return repository.findAllNoPagination();
+    }
+
+    @Override
+    public Page<ProductDto> getAll(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     @Override
@@ -38,19 +42,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDto> findByName(String name) {
-        List<Product> products = repository.findByName(name);
-        return products.stream()
-                .map(mapper::toDto)
-                .toList();
+    public Page<ProductDto> findByName(String name, Pageable pageable) {
+        return repository.findByName(name, pageable);
     }
 
     @Override
-    public List<ProductDto> findByCategoryId(int category_number) {
-        List<Product> products = repository.findByCategoryId(category_number);
-        return products.stream()
-                .map(mapper::toDto)
-                .toList();
+    public Page<ProductDto> findByCategoryId(int category_number, Pageable pageable) {
+        return repository.findByCategoryId(category_number, pageable);
     }
 
     @Override

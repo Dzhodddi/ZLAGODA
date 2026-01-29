@@ -1,28 +1,31 @@
 package org.example.service.store_product;
 
 import java.util.List;
-
 import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
 import org.example.dto.store_product.product.StoreProductWithNameDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface StoreProductService {
 
-    List<StoreProductDto> getAll();
+    Page<StoreProductDto> getAll(Pageable pageable);
 
-    List<StoreProductDto> getAllSortedByQuantity();
+    List<StoreProductDto> getAllNoPagination();
 
-    List<StoreProductWithNameDto> getAllSortedByName();
+    Page<StoreProductDto> getAllSortedByQuantity(Pageable pageable);
 
-    List<StoreProductDto> getPromotionalSortedByQuantity();
+    Page<StoreProductWithNameDto> getAllSortedByName(Pageable pageable);
 
-    List<StoreProductDto> getNonPromotionalSortedByQuantity();
+    Page<StoreProductDto> getPromotionalSortedByQuantity(Pageable pageable);
 
-    List<StoreProductWithNameDto> getPromotionalSortedByName();
+    Page<StoreProductDto> getNonPromotionalSortedByQuantity(Pageable pageable);
 
-    List<StoreProductWithNameDto> getNonPromotionalSortedByName();
+    Page<StoreProductWithNameDto> getPromotionalSortedByName(Pageable pageable);
+
+    Page<StoreProductWithNameDto> getNonPromotionalSortedByName(Pageable pageable);
 
     StoreProductDto save(StoreProductRequestDto requestDto);
 
@@ -34,5 +37,5 @@ public interface StoreProductService {
 
     StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(String upc);
 
-    List<?> getAll(String sortedBy, Boolean prom);
+    Page<?> getAll(String sortedBy, Boolean prom, Pageable pageable);
 }

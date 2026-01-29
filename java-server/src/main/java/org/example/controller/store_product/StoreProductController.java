@@ -16,6 +16,8 @@ import org.example.exception.InvalidParameterException;
 import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -53,9 +55,11 @@ public class StoreProductController {
     - prom: true | false
     """
     )
-    public List<?> getStoreProducts(
+    public Page<?> getStoreProducts(
             @RequestParam String sortedBy,
-            @RequestParam(required = false) Boolean prom
+            @RequestParam(required = false) Boolean prom,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
@@ -68,7 +72,7 @@ public class StoreProductController {
         if ("quantity".equals(sortedBy) && !isManager) {
             throw new AuthorizationException("Only Manager can sort by quantity");
         }
-        return storeProductService.getAll(sortedBy, prom);
+        return storeProductService.getAll(sortedBy, prom, PageRequest.of(page, size));
     }
 
     @PostMapping
@@ -182,7 +186,7 @@ public class StoreProductController {
     )
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<byte[]> storeProductPdf() throws DocumentException, IOException {
-        List<StoreProductDto> storeProduct = storeProductService.getAllSortedByQuantity();
+        List<StoreProductDto> storeProduct = storeProductService.getAllNoPagination();
         byte[] pdf = pdfReportGeneratorService.storeProductToPdf(storeProduct);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=store_products.pdf")

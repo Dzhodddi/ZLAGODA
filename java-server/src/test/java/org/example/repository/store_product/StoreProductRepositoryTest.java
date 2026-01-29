@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -36,6 +37,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,9 +61,12 @@ class StoreProductRepositoryTest {
     private StoreProduct storeProduct;
     private StoreProductRequestDto requestDto;
     private StoreProductDto storeProductDto;
+    private Pageable pageable;
 
     @BeforeEach
     void setUp() {
+        pageable = PageRequest.of(0, 10);
+
         storeProduct = new StoreProduct();
         storeProduct.setUPC("123456789012");
         storeProduct.setUPC_prom(null);
@@ -82,77 +89,164 @@ class StoreProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("findAll should return list of store products")
+    @DisplayName("findAll should return page of store products")
     void findAll_shouldReturnStoreProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt(), anyLong()))
+                .thenReturn(List.of(storeProduct));
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
+                .thenReturn(1);
+        when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
+
+        Page<StoreProductDto> result = repository.findAll(pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals("123456789012", result.getContent().get(0).getUPC());
+    }
+
+    @Test
+    @DisplayName("findAllNoPagination should return list of store products")
+    void findAllNoPagination_shouldReturnStoreProducts() {
         when(jdbcTemplate.query(anyString(), eq(rowMapper)))
                 .thenReturn(List.of(storeProduct));
+        when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
 
-        List<StoreProduct> result = repository.findAll();
+        List<StoreProductDto> result = repository.findAllNoPagination();
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("123456789012", result.get(0).getUPC());
-        verify(jdbcTemplate, times(1)).query(anyString(), eq(rowMapper));
     }
 
     @Test
-    @DisplayName("findAllSortedByName should return products with names")
+    @DisplayName("findAllSortedByName should return page of products with names")
     void findAllSortedByName_shouldReturnProductsWithNames() {
         StoreProductWithNameDto dto = new StoreProductWithNameDto();
         dto.setUPC("123456789012");
         dto.setProduct_name("Test Product");
 
-        when(jdbcTemplate.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class)))
+        when(jdbcTemplate.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class), anyInt(), anyLong()))
                 .thenReturn(List.of(dto));
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
+                .thenReturn(1);
 
-        List<StoreProductWithNameDto> result = repository.findAllSortedByName();
+        Page<StoreProductWithNameDto> result = repository.findAllSortedByName(pageable);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Test Product", result.get(0).getProduct_name());
-        verify(jdbcTemplate, times(1)).query(anyString(), any(org.springframework.jdbc.core.RowMapper.class));
+        assertEquals(1, result.getContent().size());
+        assertEquals("Test Product", result.getContent().get(0).getProduct_name());
     }
 
     @Test
-    @DisplayName("findAllSortedByQuantity should return products sorted by quantity")
+    @DisplayName("findAllSortedByQuantity should return page of products sorted by quantity")
     void findAllSortedByQuantity_shouldReturnProductsSortedByQuantity() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper)))
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt(), anyLong()))
                 .thenReturn(List.of(storeProduct));
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
+                .thenReturn(1);
+        when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
 
-        List<StoreProduct> result = repository.findAllSortedByQuantity();
+        Page<StoreProductDto> result = repository.findAllSortedByQuantity(pageable);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(jdbcTemplate, times(1)).query(anyString(), eq(rowMapper));
+        assertEquals(1, result.getContent().size());
     }
 
     @Test
     @DisplayName("findPromotionalSortedByQuantity should return only promotional products")
     void findPromotionalSortedByQuantity_shouldReturnPromotionalProducts() {
         storeProduct.setPromotional_product(true);
-        when(jdbcTemplate.query(anyString(), eq(rowMapper)))
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt(), anyLong()))
                 .thenReturn(List.of(storeProduct));
+        when(jdbcTemplate.queryForObject(
+                eq("""
+                SELECT COUNT(*)
+                FROM store_product
+                WHERE promotional_product = true AND is_deleted = false
+                """),
+                eq(Integer.class)))
+                .thenReturn(1);
+        when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
 
-        List<StoreProduct> result = repository.findPromotionalSortedByQuantity();
+        Page<StoreProductDto> result = repository.findPromotionalSortedByQuantity(pageable);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertTrue(result.get(0).isPromotional_product());
-        verify(jdbcTemplate, times(1)).query(anyString(), eq(rowMapper));
+        assertEquals(1, result.getContent().size());
     }
 
     @Test
     @DisplayName("findNonPromotionalSortedByQuantity should return only non-promotional products")
     void findNonPromotionalSortedByQuantity_shouldReturnNonPromotionalProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper)))
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt(), anyLong()))
                 .thenReturn(List.of(storeProduct));
+        when(jdbcTemplate.queryForObject(
+                eq("""
+                SELECT COUNT(*)
+                FROM store_product
+                WHERE promotional_product = false AND is_deleted = false
+                """),
+                eq(Integer.class)))
+                .thenReturn(1);
+        when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
 
-        List<StoreProduct> result = repository.findNonPromotionalSortedByQuantity();
+        Page<StoreProductDto> result = repository.findNonPromotionalSortedByQuantity(pageable);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertFalse(result.get(0).isPromotional_product());
-        verify(jdbcTemplate, times(1)).query(anyString(), eq(rowMapper));
+        assertEquals(1, result.getContent().size());
+    }
+
+    @Test
+    @DisplayName("findPromotionalSortedByName should return promotional products sorted by name")
+    void findPromotionalSortedByName_shouldReturnPromotionalProducts() {
+        StoreProductWithNameDto dto = new StoreProductWithNameDto();
+        dto.setUPC("123456789012");
+        dto.setProduct_name("Test Product");
+        dto.setPromotional_product(true);
+
+        when(jdbcTemplate.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class),
+                anyInt(), anyLong()))
+                .thenReturn(List.of(dto));
+        when(jdbcTemplate.queryForObject(
+                eq("""
+                SELECT COUNT(*)
+                FROM store_product
+                WHERE promotional_product = true AND is_deleted = false
+                """),
+                eq(Integer.class)))
+                .thenReturn(1);
+
+        Page<StoreProductWithNameDto> result = repository.findPromotionalSortedByName(pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertTrue(result.getContent().get(0).isPromotional_product());
+    }
+
+    @Test
+    @DisplayName("findNonPromotionalSortedByName should return non-promotional products sorted by name")
+    void findNonPromotionalSortedByName_shouldReturnNonPromotionalProducts() {
+        StoreProductWithNameDto dto = new StoreProductWithNameDto();
+        dto.setUPC("123456789012");
+        dto.setProduct_name("Test Product");
+        dto.setPromotional_product(false);
+
+        when(jdbcTemplate.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class),
+                anyInt(), anyLong()))
+                .thenReturn(List.of(dto));
+        when(jdbcTemplate.queryForObject(
+                eq("""
+                SELECT COUNT(*)
+                FROM store_product
+                WHERE promotional_product = false AND is_deleted = false
+                """),
+                eq(Integer.class)))
+                .thenReturn(1);
+
+        Page<StoreProductWithNameDto> result = repository.findNonPromotionalSortedByName(pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertFalse(result.getContent().get(0).isPromotional_product());
     }
 
     @Test
@@ -197,7 +291,17 @@ class StoreProductRepositoryTest {
         assertTrue(result.isPresent());
         assertEquals("Test Product", result.get().getProduct_name());
         assertEquals(new BigDecimal("12.00"), result.get().getSelling_price());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq("123456789012"));
+    }
+
+    @Test
+    @DisplayName("findByUPC should return empty when product does not exist")
+    void findByUPC_nonExistingUPC_shouldReturnEmpty() {
+        when(jdbcTemplate.queryForObject(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq("999999999999")))
+                .thenThrow(EmptyResultDataAccessException.class);
+
+        Optional<StoreProductCharacteristicsDto> result = repository.findByUPC("999999999999");
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -215,7 +319,17 @@ class StoreProductRepositoryTest {
         assertTrue(result.isPresent());
         assertEquals(new BigDecimal("12.00"), result.get().getSelling_price());
         assertEquals(50, result.get().getProducts_number());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq("123456789012"));
+    }
+
+    @Test
+    @DisplayName("findPriceAndQuantityByUPC should return empty when product does not exist")
+    void findPriceAndQuantityByUPC_nonExistingUPC_shouldReturnEmpty() {
+        when(jdbcTemplate.queryForObject(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq("999999999999")))
+                .thenThrow(EmptyResultDataAccessException.class);
+
+        Optional<StoreProductPriceAndQuantityDto> result = repository.findPriceAndQuantityByUPC("999999999999");
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -299,6 +413,32 @@ class StoreProductRepositoryTest {
     }
 
     @Test
+    @DisplayName("updateByUPC should throw EntityNotFoundException when update affects 0 rows")
+    void updateByUPC_updateFailed_shouldThrowException() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
+                .thenReturn(1);
+        when(jdbcTemplate.update(anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(), eq("123456789012")))
+                .thenReturn(0);
+
+        assertThrows(EntityNotFoundException.class,
+                () -> repository.updateByUPC("123456789012", requestDto));
+    }
+
+    @Test
+    @DisplayName("updateByUPC should throw EntityNotFoundException when product not found after update")
+    void updateByUPC_notFoundAfterUpdate_shouldThrowException() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
+                .thenReturn(1);
+        when(jdbcTemplate.update(anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(), eq("123456789012")))
+                .thenReturn(1);
+        when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq("123456789012")))
+                .thenThrow(EmptyResultDataAccessException.class);
+
+        assertThrows(EntityNotFoundException.class,
+                () -> repository.updateByUPC("123456789012", requestDto));
+    }
+
+    @Test
     @DisplayName("softDeleteByUPC should mark product as deleted")
     void softDeleteByUPC_shouldMarkAsDeleted() {
         when(jdbcTemplate.update(anyString(), eq("123456789012"))).thenReturn(1);
@@ -327,92 +467,6 @@ class StoreProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("updateProductPriceAndPromotion should update price and promotional status")
-    void updateProductPriceAndPromotion_shouldUpdatePriceAndStatus() {
-        BigDecimal newPrice = new BigDecimal("15.00");
-        when(jdbcTemplate.update(anyString(), eq(newPrice), eq(true), eq("123456789012")))
-                .thenReturn(1);
-
-        repository.updateProductPriceAndPromotion("123456789012", newPrice, true);
-
-        verify(jdbcTemplate, times(1)).update(anyString(), eq(newPrice), eq(true), eq("123456789012"));
-    }
-
-    @Test
-    @DisplayName("findPromotionalSortedByName should return promotional products sorted by name")
-    void findPromotionalSortedByName_shouldReturnPromotionalProducts() {
-        StoreProductWithNameDto dto = new StoreProductWithNameDto();
-        dto.setUPC("123456789012");
-        dto.setProduct_name("Test Product");
-        dto.setPromotional_product(true);
-
-        when(jdbcTemplate.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class)))
-                .thenReturn(List.of(dto));
-
-        List<StoreProductWithNameDto> result = repository.findPromotionalSortedByName();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertTrue(result.get(0).isPromotional_product());
-        verify(jdbcTemplate, times(1)).query(anyString(), any(org.springframework.jdbc.core.RowMapper.class));
-    }
-
-    @Test
-    @DisplayName("findNonPromotionalSortedByName should return non-promotional products sorted by name")
-    void findNonPromotionalSortedByName_shouldReturnNonPromotionalProducts() {
-        StoreProductWithNameDto dto = new StoreProductWithNameDto();
-        dto.setUPC("123456789012");
-        dto.setProduct_name("Test Product");
-        dto.setPromotional_product(false);
-
-        when(jdbcTemplate.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class)))
-                .thenReturn(List.of(dto));
-
-        List<StoreProductWithNameDto> result = repository.findNonPromotionalSortedByName();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertFalse(result.get(0).isPromotional_product());
-        verify(jdbcTemplate, times(1)).query(anyString(), any(org.springframework.jdbc.core.RowMapper.class));
-    }
-
-    @Test
-    @DisplayName("findByUPC should return empty when product does not exist")
-    void findByUPC_nonExistingUPC_shouldReturnEmpty() {
-        when(jdbcTemplate.queryForObject(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq("999999999999")))
-                .thenThrow(EmptyResultDataAccessException.class);
-
-        Optional<StoreProductCharacteristicsDto> result = repository.findByUPC("999999999999");
-
-        assertTrue(result.isEmpty());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq("999999999999"));
-    }
-
-    @Test
-    @DisplayName("findPriceAndQuantityByUPC should return empty when product does not exist")
-    void findPriceAndQuantityByUPC_nonExistingUPC_shouldReturnEmpty() {
-        when(jdbcTemplate.queryForObject(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq("999999999999")))
-                .thenThrow(EmptyResultDataAccessException.class);
-
-        Optional<StoreProductPriceAndQuantityDto> result = repository.findPriceAndQuantityByUPC("999999999999");
-
-        assertTrue(result.isEmpty());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq("999999999999"));
-    }
-
-    @Test
-    @DisplayName("updateByUPC should throw EntityNotFoundException when update affects 0 rows")
-    void updateByUPC_updateFailed_shouldThrowException() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
-                .thenReturn(1);
-        when(jdbcTemplate.update(anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(), eq("123456789012")))
-                .thenReturn(0);
-
-        assertThrows(EntityNotFoundException.class,
-                () -> repository.updateByUPC("123456789012", requestDto));
-    }
-
-    @Test
     @DisplayName("existsByUPC should return false when count is null")
     void existsByUPC_nullCount_shouldReturnFalse() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
@@ -422,160 +476,15 @@ class StoreProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("save should calculate price with VAT for non-promotional product")
-    void save_nonPromotionalProduct_shouldCalculatePriceWithVAT() {
-        requestDto.setPrice(new BigDecimal("10.00"));
-        requestDto.setPromotional_product(false);
-
-        when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                anyString(), any(), anyInt(), eq(new BigDecimal("12.00")), anyInt(), eq(false), eq(false)))
-                .thenReturn(storeProduct);
-
-        StoreProduct result = repository.save(requestDto);
-
-        assertNotNull(result);
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), eq(rowMapper),
-                eq("123456789012"), any(), eq(1), eq(new BigDecimal("12.00")), eq(50), eq(false), eq(false));
-    }
-
-    @Test
-    @DisplayName("save should calculate promotional price with 20% discount and VAT")
-    void save_promotionalProduct_shouldCalculatePromotionalPriceWithVAT() {
-        requestDto.setPrice(new BigDecimal("10.00"));
-        requestDto.setPromotional_product(true);
-
-        StoreProduct promotionalProduct = new StoreProduct();
-        promotionalProduct.setUPC("123456789012");
-        promotionalProduct.setPromotional_product(true);
-        promotionalProduct.setSelling_price(new BigDecimal("9.60")); // 10.00 * 0.8 * 1.2
-
-        when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                anyString(), any(), anyInt(), eq(new BigDecimal("9.60")), anyInt(), eq(true), eq(false)))
-                .thenReturn(promotionalProduct);
-
-        StoreProduct result = repository.save(requestDto);
-
-        assertNotNull(result);
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), eq(rowMapper),
-                eq("123456789012"), any(), eq(1), eq(new BigDecimal("9.60")), eq(50), eq(true), eq(false));
-    }
-
-    @Test
-    @DisplayName("updateByUPC should calculate price with VAT for non-promotional product")
-    void updateByUPC_nonPromotionalProduct_shouldCalculatePriceWithVAT() {
-        requestDto.setPrice(new BigDecimal("10.00"));
-        requestDto.setPromotional_product(false);
-
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
-                .thenReturn(1);
-        when(jdbcTemplate.update(anyString(), any(), eq(1), eq(new BigDecimal("12.00")), eq(50), eq(false), eq("123456789012")))
-                .thenReturn(1);
-        when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq("123456789012")))
-                .thenReturn(storeProduct);
-        when(mapper.toDto(storeProduct)).thenReturn(storeProductDto);
-
-        StoreProductDto result = repository.updateByUPC("123456789012", requestDto);
-
-        assertNotNull(result);
-        verify(jdbcTemplate, times(1)).update(anyString(), any(), eq(1), eq(new BigDecimal("12.00")), eq(50), eq(false), eq("123456789012"));
-    }
-
-    @Test
-    @DisplayName("updateByUPC should calculate promotional price with 20% discount and VAT")
-    void updateByUPC_promotionalProduct_shouldCalculatePromotionalPriceWithVAT() {
-        requestDto.setPrice(new BigDecimal("10.00"));
-        requestDto.setPromotional_product(true);
-
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
-                .thenReturn(1);
-        when(jdbcTemplate.update(anyString(), any(), eq(1), eq(new BigDecimal("9.60")), eq(50), eq(true), eq("123456789012")))
-                .thenReturn(1);
-        when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq("123456789012")))
-                .thenReturn(storeProduct);
-        when(mapper.toDto(storeProduct)).thenReturn(storeProductDto);
-
-        StoreProductDto result = repository.updateByUPC("123456789012", requestDto);
-
-        assertNotNull(result);
-        verify(jdbcTemplate, times(1)).update(anyString(), any(), eq(1), eq(new BigDecimal("9.60")), eq(50), eq(true), eq("123456789012"));
-    }
-
-    @Test
-    @DisplayName("updateByUPC should throw EntityNotFoundException when product not found after update")
-    void updateByUPC_notFoundAfterUpdate_shouldThrowException() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
-                .thenReturn(1);
-        when(jdbcTemplate.update(anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(), eq("123456789012")))
-                .thenReturn(1);
-        when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq("123456789012")))
-                .thenThrow(EmptyResultDataAccessException.class);
-
-        assertThrows(EntityNotFoundException.class,
-                () -> repository.updateByUPC("123456789012", requestDto));
-    }
-
-    @Test
-    @DisplayName("softDeleteByUPC should execute SQL update")
-    void softDeleteByUPC_shouldExecuteSQLUpdate() {
-        when(jdbcTemplate.update(eq("UPDATE store_product SET is_deleted = true WHERE UPC = ? AND is_deleted = false"),
-                eq("123456789012")))
+    @DisplayName("updateProductPriceAndPromotion should update price and promotional status")
+    void updateProductPriceAndPromotion_shouldUpdatePriceAndStatus() {
+        BigDecimal newPrice = new BigDecimal("15.00");
+        when(jdbcTemplate.update(anyString(), eq(newPrice), eq(true), eq("123456789012")))
                 .thenReturn(1);
 
-        repository.softDeleteByUPC("123456789012");
+        repository.updateProductPriceAndPromotion("123456789012", newPrice, true);
 
-        verify(jdbcTemplate, times(1)).update(
-                eq("UPDATE store_product SET is_deleted = true WHERE UPC = ? AND is_deleted = false"),
-                eq("123456789012"));
-    }
-
-    @Test
-    @DisplayName("updateProductPriceAndPromotion should set promotional to false")
-    void updateProductPriceAndPromotion_setPromotionalFalse_shouldUpdate() {
-        BigDecimal newPrice = new BigDecimal("10.00");
-        when(jdbcTemplate.update(anyString(), eq(newPrice), eq(false), eq("123456789012")))
-                .thenReturn(1);
-
-        repository.updateProductPriceAndPromotion("123456789012", newPrice, false);
-
-        verify(jdbcTemplate, times(1)).update(anyString(), eq(newPrice), eq(false), eq("123456789012"));
-    }
-
-    @Test
-    @DisplayName("findAll should return empty list when no products")
-    void findAll_noProducts_shouldReturnEmptyList() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper)))
-                .thenReturn(List.of());
-
-        List<StoreProduct> result = repository.findAll();
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(jdbcTemplate, times(1)).query(anyString(), eq(rowMapper));
-    }
-
-    @Test
-    @DisplayName("findAllSortedByName should return empty list when no products")
-    void findAllSortedByName_noProducts_shouldReturnEmptyList() {
-        when(jdbcTemplate.query(anyString(), any(org.springframework.jdbc.core.RowMapper.class)))
-                .thenReturn(List.of());
-
-        List<StoreProductWithNameDto> result = repository.findAllSortedByName();
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(jdbcTemplate, times(1)).query(anyString(), any(org.springframework.jdbc.core.RowMapper.class));
-    }
-
-    @Test
-    @DisplayName("findAllSortedByQuantity should return empty list when no products")
-    void findAllSortedByQuantity_noProducts_shouldReturnEmptyList() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper)))
-                .thenReturn(List.of());
-
-        List<StoreProduct> result = repository.findAllSortedByQuantity();
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(jdbcTemplate, times(1)).query(anyString(), eq(rowMapper));
+        verify(jdbcTemplate, times(1))
+                .update(anyString(), eq(newPrice), eq(true), eq("123456789012"));
     }
 }

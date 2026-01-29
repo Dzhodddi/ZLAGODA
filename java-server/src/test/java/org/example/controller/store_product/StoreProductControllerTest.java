@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import org.example.dto.product.ProductDto;
 import org.example.dto.store_product.batch.BatchRequestDto;
@@ -42,6 +43,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -115,26 +120,6 @@ class StoreProductControllerTest {
         batchRequestDto.setQuantity(20);
     }
 
-    /*@Test
-    @WithMockUser(authorities = "CASHIER")
-    @DisplayName("GET /store-products?sortedBy=name - Cashier should get products sorted by name")
-    void getStoreProducts_sortedByName_asCashier_Ok() throws Exception {
-        StoreProductWithNameDto dtoWithName1 = getStoreProductWithNameDto();
-
-        StoreProductWithNameDto dtoWithName2 = getProductWithNameDto(storeProductDto2, storeProductDto2.isPromotional_product());
-
-        List<?> result = List.of(dtoWithName1, dtoWithName2);
-        when(storeProductService.getAll("name", null))
-                .thenReturn(result);
-
-        mockMvc.perform(get("/store-products")
-                        .param("sortedBy", "name"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
-
-        verify(storeProductService, times(1)).getAll("name", null);
-    }*/
-
     private @NotNull StoreProductWithNameDto getProductWithNameDto(StoreProductDto storeProductDto2, boolean storeProductDto21) {
         StoreProductWithNameDto dtoWithName2 = new StoreProductWithNameDto();
         dtoWithName2.setProduct_name(productDto.getProduct_name());
@@ -147,10 +132,6 @@ class StoreProductControllerTest {
         return dtoWithName2;
     }
 
-    private @NotNull StoreProductWithNameDto getStoreProductWithNameDto() {
-        return getProductWithNameDto(storeProductDto1, storeProductDto1.isPromotional_product());
-    }
-
     @Test
     @WithMockUser(roles = "MANAGER")
     @DisplayName("GET /store-products?sortedBy=name - Manager should get forbidden when sorting by name")
@@ -159,30 +140,53 @@ class StoreProductControllerTest {
                         .param("sortedBy", "name"))
                 .andExpect(status().isForbidden());
 
-        verify(storeProductService, never()).getAll(anyString(), any());
+        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class));
     }
 
-    /*@Test
-    @WithMockUser(roles = "MANAGER")
+    @Test
+    @WithMockUser(authorities = "CASHIER")
+    @DisplayName("GET /store-products?sortedBy=name - Cashier should get products sorted by name")
+    void getStoreProducts_sortedByName_asCashier_Ok() throws Exception {
+        Page<StoreProductWithNameDto> page = new PageImpl<>(
+                new ArrayList<>(List.of(getProductWithNameDto(storeProductDto1, false))),
+                PageRequest.of(0, 10),
+                1
+        );
+        when(storeProductService.getAll(eq("name"), any(), any(Pageable.class)))
+                .thenReturn((Page) page);
+
+        mockMvc.perform(get("/store-products")
+                        .param("sortedBy", "name"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].upc").value("1234567890"));
+
+        verify(storeProductService, times(1))
+                .getAll(eq("name"), any(), any(Pageable.class));
+    }
+
+    @Test
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /store-products?sortedBy=quantity - Manager should get products sorted by quantity")
     void getStoreProducts_sortedByQuantity_asManager_Ok() throws Exception {
-        StoreProductWithNameDto dto1 = getProductWithNameDto(storeProductDto1, false);
-
-        StoreProductWithNameDto dto2 = getProductWithNameDto(storeProductDto2, false);
-
-        List<?> result = List.of(dto1, dto2);
-        when(storeProductService.getAll("quantity", null))
-                .thenReturn(result);
+        Page<StoreProductDto> page = new PageImpl<>(
+                new ArrayList<>(List.of(storeProductDto1, storeProductDto2)),
+                PageRequest.of(0, 10),
+                2
+        );
+        when(storeProductService.getAll(eq("quantity"), any(), any(Pageable.class)))
+                .thenReturn((Page) page);
 
         mockMvc.perform(get("/store-products")
                         .param("sortedBy", "quantity"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content.length()").value(2));
 
-        verify(storeProductService, times(1)).getAll("quantity", null);
-    }*/
+        verify(storeProductService, times(1))
+                .getAll(eq("quantity"), any(), any(Pageable.class));
+    }
 
-   /* @Test
+    @Test
     @WithMockUser(authorities = "CASHIER")
     @DisplayName("GET /store-products?sortedBy=quantity - Cashier should get forbidden when sorting by quantity")
     void getStoreProducts_sortedByQuantity_asCashier_Forbidden() throws Exception {
@@ -190,28 +194,9 @@ class StoreProductControllerTest {
                         .param("sortedBy", "quantity"))
                 .andExpect(status().isForbidden());
 
-        verify(storeProductService, never()).getAll(anyString(), any());
-    }*/
-
-    /*@Test
-    @WithMockUser(authorities = "CASHIER")
-    @DisplayName("GET /store-products?sortedBy=name&prom=true - Cashier should get promotional products sorted by name")
-    void getStoreProducts_sortedByNameWithProm_asCashier_Ok() throws Exception {
-        StoreProductWithNameDto dtoWithName = getStoreProductWithNameDto();
-
-        List<?> result = List.of(dtoWithName);
-        when(storeProductService.getAll("name", true))
-                .thenReturn(result);
-
-        mockMvc.perform(get("/store-products")
-                        .param("sortedBy", "name")
-                        .param("prom", "true"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
-
-        verify(storeProductService, times(1)).getAll("name", true);
+        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class));
     }
-*/
+
     @Test
     @WithMockUser(roles = "MANAGER")
     @DisplayName("POST /store-products - Manager should create store product successfully")
@@ -476,7 +461,7 @@ class StoreProductControllerTest {
     @DisplayName("GET /store-products/report - Manager should download PDF report")
     void storeProductPdf_asManager_Ok() throws Exception {
         byte[] pdfBytes = "PDF content".getBytes();
-        when(storeProductService.getAllSortedByQuantity()).thenReturn(List.of(storeProductDto1, storeProductDto2));
+        when(storeProductService.getAllNoPagination()).thenReturn(List.of(storeProductDto1, storeProductDto2));
         when(pdfReportGeneratorService.storeProductToPdf(anyList())).thenReturn(pdfBytes);
 
         mockMvc.perform(get("/store-products/report"))
@@ -485,7 +470,7 @@ class StoreProductControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF_VALUE))
                 .andExpect(content().bytes(pdfBytes));
 
-        verify(storeProductService, times(1)).getAllSortedByQuantity();
+        verify(storeProductService, times(1)).getAllNoPagination();
         verify(pdfReportGeneratorService, times(1)).storeProductToPdf(anyList());
     }
 
@@ -496,7 +481,7 @@ class StoreProductControllerTest {
         mockMvc.perform(get("/store-products/report"))
                 .andExpect(status().isForbidden());
 
-        verify(storeProductService, never()).getAllSortedByQuantity();
+        verify(storeProductService, never()).getAllNoPagination();
         verify(pdfReportGeneratorService, never()).storeProductToPdf(anyList());
     }
 }

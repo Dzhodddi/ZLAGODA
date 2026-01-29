@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,6 +39,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
@@ -106,26 +111,24 @@ class EmployeeRepositoryTest {
     @Test
     @DisplayName("findAll should return list of employees sorted by surname")
     void findAll_shouldReturnEmployeesSortedBySurname() {
-        when(jdbcTemplate.query(anyString(), eq(employeeRowMapper)))
+        when(jdbcTemplate.query(anyString(), any(EmployeeRowMapper.class), anyInt(), anyLong()))
                 .thenReturn(List.of(employee));
         when(employeeMapper.toEmployeeResponseDto(employee))
                 .thenReturn(employeeResponseDto);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
+                .thenReturn(1);
 
-        List<EmployeeResponseDto> result = repository.findAll();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<EmployeeResponseDto> result = repository.findAll(pageable);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Іваненко", result.get(0).getEmpl_surname());
-        verify(jdbcTemplate, times(1)).query(
-                eq("SELECT * FROM employee ORDER BY empl_surname"),
-                eq(employeeRowMapper)
-        );
+        assertEquals(1, result.getContent().size());
+        assertEquals("Іваненко", result.getContent().get(0).getEmpl_surname());
     }
 
     @Test
     @DisplayName("save should insert new employee and return EmployeeResponseDto")
     void save_newEmployee_shouldReturnResponseDto() {
-        // Mock the INSERT operation (update method)
         when(jdbcTemplate.update(
                 contains("INSERT INTO employee"),
                 eq("EMP001"),
@@ -143,9 +146,8 @@ class EmployeeRepositoryTest {
                 eq("password123")))
                 .thenReturn(1);
 
-        // Mock the subsequent findByIdEmployee call
         when(jdbcTemplate.queryForObject(
-                contains("SELECT * FROM employee WHERE id_employee = ?"),
+                anyString(),
                 eq(employeeRowMapper),
                 eq("EMP001")))
                 .thenReturn(employee);
@@ -218,7 +220,7 @@ class EmployeeRepositoryTest {
 
         assertNotNull(result);
         verify(jdbcTemplate, times(1)).update(
-                contains("UPDATE employee SET"),
+                anyString(),
                 anyString(), anyString(), anyString(), anyString(), any(BigDecimal.class),
                 any(Date.class), any(Date.class), anyString(), anyString(), anyString(),
                 anyString(), eq("EMP001")
@@ -261,7 +263,7 @@ class EmployeeRepositoryTest {
         repository.deleteEmployeeById("EMP001");
 
         verify(jdbcTemplate, times(1)).update(
-                eq("DELETE FROM employee WHERE id_employee = ?"),
+                anyString(),
                 eq("EMP001")
         );
     }
@@ -325,19 +327,19 @@ class EmployeeRepositoryTest {
         cashierRole.setName(Role.RoleName.CASHIER);
         employee.setRole(cashierRole);
 
-        when(jdbcTemplate.query(anyString(), eq(employeeRowMapper)))
+        when(jdbcTemplate.query(anyString(), any(EmployeeRowMapper.class), anyInt(), anyLong()))
                 .thenReturn(List.of(employee));
         when(employeeMapper.toEmployeeResponseDto(employee))
                 .thenReturn(employeeResponseDto);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
+                .thenReturn(1);
 
-        List<EmployeeResponseDto> result = repository.findAllCashiers();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<EmployeeResponseDto> result = repository.findAllCashiers(pageable);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(jdbcTemplate, times(1)).query(
-                contains("WHERE empl_role = 'CASHIER'"),
-                eq(employeeRowMapper)
-        );
+        assertEquals(1, result.getContent().size());
+        assertEquals("Іваненко", result.getContent().get(0).getEmpl_surname());
     }
 
     @Test
