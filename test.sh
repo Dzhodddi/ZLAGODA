@@ -40,6 +40,7 @@ docker build \
 echo "Running go tests..."
 docker run --rm -it \
   --network $NETWORK \
+  -v "$(pwd)/coverage:/coverage" \
   -e DB_HOST=$DB_CONTAINER \
   go-server-test $TEST_TARGET
 
