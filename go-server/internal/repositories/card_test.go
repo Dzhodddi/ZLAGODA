@@ -1,5 +1,5 @@
-// //go:build integration
-package repository
+// // //go:build integration
+package repository_test
 
 //
 //import (
@@ -7,6 +7,7 @@ package repository
 //	"testing"
 //
 //	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
+//	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 //	"github.com/Dzhodddi/ZLAGODA/internal/views"
 //	testutils "github.com/Dzhodddi/ZLAGODA/tests"
 //	"github.com/stretchr/testify/assert"
@@ -15,11 +16,11 @@ package repository
 //
 //type CardRepositorySuite struct {
 //	testutils.IntegrationSuite
-//	repo CardRepository
+//	repo repository.CardRepository
 //}
 //
 //func (s *CardRepositorySuite) SetupTest() {
-//	s.repo = NewCardRepository(s.DB)
+//	s.repo = repository.NewCardRepository(s.DB)
 //}
 //
 //func TestCardRepositorySuite(t *testing.T) {
@@ -46,7 +47,7 @@ package repository
 //				_, err := s.repo.CreateNewCard(context.Background(), validCard)
 //				assert.NoError(s.T(), err)
 //			},
-//			ExpectedError: ErrConflict,
+//			ExpectedError: repository.ErrConflict,
 //		},
 //	}
 //
@@ -80,7 +81,7 @@ package repository
 //		{
 //			Name:          "Fail: Card not found with empty database",
 //			Input:         invalidNumber,
-//			ExpectedError: ErrNotFound,
+//			ExpectedError: repository.ErrNotFound,
 //		},
 //		{
 //			Name: "Fail: Card not found with row in database",
@@ -89,7 +90,7 @@ package repository
 //				assert.NoError(s.T(), err)
 //			},
 //			Input:         invalidNumber,
-//			ExpectedError: ErrNotFound,
+//			ExpectedError: repository.ErrNotFound,
 //		},
 //	}
 //
@@ -136,7 +137,7 @@ package repository
 //				card:       validUpdate,
 //				cardNumber: invalidNumber,
 //			},
-//			ExpectedError: ErrNotFound,
+//			ExpectedError: repository.ErrNotFound,
 //		},
 //	}
 //
@@ -164,13 +165,13 @@ package repository
 //			},
 //			AssertResult: func(t *testing.T, _ any) {
 //				_, err := s.repo.GetCustomerCard(context.Background(), validNumber)
-//				assert.ErrorIs(t, err, ErrNotFound)
+//				assert.ErrorIs(t, err, repository.ErrNotFound)
 //			},
 //		},
 //		{
 //			Name:          "Fail: Card not found",
 //			Input:         invalidNumber,
-//			ExpectedError: ErrNotFound,
+//			ExpectedError: repository.ErrNotFound,
 //		},
 //	}
 //

@@ -31,7 +31,20 @@ docker build \
   -f go-server/deployment/Dockerfile \
   .
 
+docker build \
+  --target test \
+  -t java-server-test \
+  -f java-server/docker/Dockerfile \
+  java-server
+
+echo "Running go tests..."
 docker run --rm -it \
   --network $NETWORK \
   -e DB_HOST=$DB_CONTAINER \
   go-server-test $TEST_TARGET
+
+echo "Running java tests..."
+docker run --rm -it \
+  --network $NETWORK \
+  -e DB_HOST=$DB_CONTAINER \
+  java-server-test $TEST_TARGET

@@ -1,7 +1,6 @@
 package handlers_test
 
 import (
-	"github.com/labstack/gommon/log"
 	"net/http"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/config"

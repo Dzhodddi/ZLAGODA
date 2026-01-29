@@ -8,10 +8,16 @@ sqlc-generate:
 
 test-unit:
 	@echo "Running Unit Tests..."
-	go test -short -race ./...
+	go test -cover -short -race ./...
 
 test-integration:
 	@echo "Running Integration Tests..."
-	go test -race -tags=integration ./internal/...
+	go test -race -tags=integration \
+		-count=1 \
+		-parallel=1 \
+		-covermode=atomic \
+		-coverpkg=./internal/repositories/...,./internal/handlers/... \
+		./internal/repositories/... \
+		./internal/handlers/...
 
 test-all: test-unit test-integration
