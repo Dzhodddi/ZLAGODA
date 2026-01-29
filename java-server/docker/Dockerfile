@@ -21,4 +21,5 @@ CMD ["java", "-jar", "app.jar"]
 
 FROM base AS test
 WORKDIR /app
-CMD ["mvn", "clean", "verify"]
+ENTRYPOINT ["make"]
+CMD ["test-all"]
