@@ -326,6 +326,97 @@ const docTemplate = `{
                 }
             }
         },
+        "/checks/{checkNumber}": {
+            "get": {
+                "description": "Get a check by check number with products list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Get a check by check number with products list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Check number",
+                        "name": "checkNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/views.CheckResponseWithProducts"
+                        }
+                    },
+                    "404": {
+                        "description": "Entity not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an existing check by check number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Delete a check by check number",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Check number",
+                        "name": "checkNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Entity not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/customer-cards": {
             "get": {
                 "description": "Retrieves a list of all customer discount cards",
@@ -668,6 +759,20 @@ const docTemplate = `{
                 }
             }
         },
+        "views.CheckResponseWithProducts": {
+            "type": "object",
+            "properties": {
+                "check_response": {
+                    "$ref": "#/definitions/views.CheckResponse"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/views.ProductResponse"
+                    }
+                }
+            }
+        },
         "views.CreateNewCategory": {
             "type": "object",
             "required": [
@@ -825,6 +930,20 @@ const docTemplate = `{
                 },
                 "zipcode": {
                     "type": "string"
+                }
+            }
+        },
+        "views.ProductResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "selling_price": {
+                    "type": "number"
                 }
             }
         },

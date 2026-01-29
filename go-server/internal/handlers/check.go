@@ -25,6 +25,9 @@ func NewCheckHandler(checkService services.CheckService) *CheckHandler {
 func (h *CheckHandler) RegisterRouts(e *echo.Group) {
 	check := e.Group("/checks")
 	check.POST("", h.createCheck)
+	checkNumberGroup := check.Group("/:checkNumber")
+	checkNumberGroup.DELETE("", h.deleteCheck)
+	checkNumberGroup.GET("", h.getCheckWithProducts)
 }
 
 // createCheck godoc
@@ -57,4 +60,45 @@ func (h *CheckHandler) createCheck(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusCreated, check)
+}
+
+// deleteCheck godoc
+//
+// @Summary      Delete a check by check number
+// @Description  Delete an existing check by check number
+// @Tags         Checks
+// @Accept       json
+// @Produce      json
+// @Param        checkNumber path string true "Check number"
+// @Success      204  {object}  map[string]any
+// @Failure      404  {object}  map[string]any  "Entity not found"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Router       /checks/{checkNumber} [delete]
+func (h *CheckHandler) deleteCheck(c echo.Context) error {
+	checkNumber := c.Param("checkNumber")
+	if err := h.checkService.DeleteCheck(c.Request().Context(), checkNumber); err != nil {
+		return err
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
+// getCheckWithProducts godoc
+//
+// @Summary      Get a check by check number with products list
+// @Description  Get a check by check number with products list
+// @Tags         Checks
+// @Accept       json
+// @Produce      json
+// @Param        checkNumber path string true "Check number"
+// @Success      200  {object}	views.CheckResponseWithProducts
+// @Failure      404  {object}  map[string]any  "Entity not found"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+// @Router       /checks/{checkNumber} [get]
+func (h *CheckHandler) getCheckWithProducts(c echo.Context) error {
+	checkNumber := c.Param("checkNumber")
+	check, err := h.checkService.GetCheck(c.Request().Context(), checkNumber)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, check)
 }

@@ -53,3 +53,91 @@ func (q *Queries) CreateNewCheck(ctx context.Context, arg CreateNewCheckParams) 
 	)
 	return i, err
 }
+
+const deleteCheck = `-- name: DeleteCheck :one
+DELETE FROM checks WHERE check_number=$1
+    RETURNING
+	check_number,
+	id_employee,
+	card_number,
+	print_date,
+	sum_total,
+	vat
+`
+
+func (q *Queries) DeleteCheck(ctx context.Context, checkNumber string) (Check, error) {
+	row := q.db.QueryRowContext(ctx, deleteCheck, checkNumber)
+	var i Check
+	err := row.Scan(
+		&i.CheckNumber,
+		&i.IDEmployee,
+		&i.CardNumber,
+		&i.PrintDate,
+		&i.SumTotal,
+		&i.Vat,
+	)
+	return i, err
+}
+
+const getCheckByNumber = `-- name: GetCheckByNumber :one
+SELECT check_number, id_employee, card_number, print_date, sum_total, vat
+FROM checks
+WHERE check_number=$1
+`
+
+func (q *Queries) GetCheckByNumber(ctx context.Context, checkNumber string) (Check, error) {
+	row := q.db.QueryRowContext(ctx, getCheckByNumber, checkNumber)
+	var i Check
+	err := row.Scan(
+		&i.CheckNumber,
+		&i.IDEmployee,
+		&i.CardNumber,
+		&i.PrintDate,
+		&i.SumTotal,
+		&i.Vat,
+	)
+	return i, err
+}
+
+const getCheckProductsByName = `-- name: GetCheckProductsByName :many
+SELECT
+    p.product_name,
+    cp.selling_price,
+    cp.quantity
+FROM
+    checks c
+        JOIN check_store_product cp ON c.check_number = cp.check_number
+        JOIN store_product sp ON cp.upc = sp.upc
+        JOIN product p ON p.id_product = sp.id_product
+WHERE
+    c.check_number = $1
+`
+
+type GetCheckProductsByNameRow struct {
+	ProductName  string
+	SellingPrice float64
+	Quantity     int32
+}
+
+func (q *Queries) GetCheckProductsByName(ctx context.Context, checkNumber string) ([]GetCheckProductsByNameRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCheckProductsByName, checkNumber)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCheckProductsByNameRow
+	for rows.Next() {
+		var i GetCheckProductsByNameRow
+		if err := rows.Scan(&i.ProductName, &i.SellingPrice, &i.Quantity); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

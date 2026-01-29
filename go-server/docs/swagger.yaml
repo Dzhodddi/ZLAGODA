@@ -22,6 +22,15 @@ definitions:
       vat:
         type: number
     type: object
+  views.CheckResponseWithProducts:
+    properties:
+      check_response:
+        $ref: '#/definitions/views.CheckResponse'
+      products:
+        items:
+          $ref: '#/definitions/views.ProductResponse'
+        type: array
+    type: object
   views.CreateNewCategory:
     properties:
       category_name:
@@ -138,6 +147,15 @@ definitions:
         type: string
       zipcode:
         type: string
+    type: object
+  views.ProductResponse:
+    properties:
+      name:
+        type: string
+      quantity:
+        type: integer
+      selling_price:
+        type: number
     type: object
   views.SaleResponse:
     properties:
@@ -426,6 +444,68 @@ paths:
             additionalProperties: true
             type: object
       summary: Create a new check
+      tags:
+      - Checks
+  /checks/{checkNumber}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing check by check number
+      parameters:
+      - description: Check number
+        in: path
+        name: checkNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a check by check number
+      tags:
+      - Checks
+    get:
+      consumes:
+      - application/json
+      description: Get a check by check number with products list
+      parameters:
+      - description: Check number
+        in: path
+        name: checkNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.CheckResponseWithProducts'
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a check by check number with products list
       tags:
       - Checks
   /customer-cards:

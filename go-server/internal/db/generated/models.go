@@ -23,6 +23,15 @@ type Check struct {
 	Vat         float64
 }
 
+type CheckStoreProduct struct {
+	ID           int64
+	CheckNumber  sql.NullString
+	Upc          sql.NullString
+	SellingPrice float64
+	Quantity     int32
+	CheckDate    time.Time
+}
+
 type CustomerCard struct {
 	CardNumber         string
 	CustomerSurname    string
@@ -35,9 +44,26 @@ type CustomerCard struct {
 	CustomerPercent    int32
 }
 
+type Product struct {
+	IDProduct              int64
+	CategoryNumber         int32
+	ProductName            string
+	ProductCharacteristics string
+}
+
 type Sale struct {
 	ProductNumber int32
 	Upc           string
 	CheckNumber   string
 	SellingPrice  float64
+}
+
+type StoreProduct struct {
+	Upc                string
+	UpcProm            sql.NullString
+	IDProduct          int32
+	SellingPrice       float64
+	ProductsNumber     int32
+	PromotionalProduct bool
+	IsDeleted          bool
 }

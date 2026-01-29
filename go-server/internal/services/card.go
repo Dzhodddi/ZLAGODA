@@ -15,7 +15,7 @@ type CardService interface {
 	GetCustomerCard(ctx context.Context, cardNumber string) (*views.CustomerCardResponse, error)
 	UpdateCustomerCard(ctx context.Context, card views.UpdateCustomerCard, cardNumber string) (*views.CustomerCardResponse, error)
 	DeleteCustomerCard(ctx context.Context, cardNumber string) error
-	ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]*views.CustomerCardResponse, error)
+	ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]views.CustomerCardResponse, error)
 }
 
 type cardService struct {
@@ -58,7 +58,7 @@ func (s *cardService) DeleteCustomerCard(ctx context.Context, cardNumber string)
 	return nil
 }
 
-func (s *cardService) ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]*views.CustomerCardResponse, error) {
+func (s *cardService) ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]views.CustomerCardResponse, error) {
 	var cards []generated.CustomerCard
 	var err error
 	switch {
@@ -73,9 +73,9 @@ func (s *cardService) ListCustomerCards(ctx context.Context, q views.ListCustome
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all cards: %w", err)
 	}
-	var cardList []*views.CustomerCardResponse
+	var cardList []views.CustomerCardResponse
 	for _, card := range cards {
-		cardList = append(cardList, mappers.CardModelToResponse(&card))
+		cardList = append(cardList, *mappers.CardModelToResponse(&card))
 	}
 	return cardList, nil
 }

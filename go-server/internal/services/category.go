@@ -15,7 +15,7 @@ type CategoryService interface {
 	UpdateCategory(ctx context.Context, updateCategory views.UpdateCategory, categoryId int64) (*views.CategoryResponse, error)
 	DeleteCategory(ctx context.Context, id int64) error
 	GetCategoryByID(ctx context.Context, id int64) (*views.CategoryResponse, error)
-	GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]*views.CategoryResponse, error)
+	GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]views.CategoryResponse, error)
 }
 
 type categoryService struct {
@@ -60,7 +60,7 @@ func (s *categoryService) GetCategoryByID(ctx context.Context, id int64) (*views
 	return mappers.CategoryModelToResponse(category), nil
 }
 
-func (s *categoryService) GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]*views.CategoryResponse, error) {
+func (s *categoryService) GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]views.CategoryResponse, error) {
 	var categories []generated.Category
 	var err error
 	switch {
@@ -72,9 +72,9 @@ func (s *categoryService) GetAllCategories(ctx context.Context, q views.ListCate
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch categories: %w", err)
 	}
-	var categoryResponses []*views.CategoryResponse
+	var categoryResponses []views.CategoryResponse
 	for _, category := range categories {
-		categoryResponses = append(categoryResponses, mappers.CategoryModelToResponse(&category))
+		categoryResponses = append(categoryResponses, *mappers.CategoryModelToResponse(&category))
 	}
 	return categoryResponses, nil
 }

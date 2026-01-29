@@ -17,3 +17,8 @@ type CheckResponse struct {
 	SumTotal    float64 `json:"sum_total"`
 	VAT         float64 `json:"vat"`
 }
+
+type CheckResponseWithProducts struct {
+	CheckResponse `json:"check_response"`
+	Products      []ProductResponse `json:"products"`
+}

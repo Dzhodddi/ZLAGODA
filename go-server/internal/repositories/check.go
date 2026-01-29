@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -27,6 +28,11 @@ type CheckStoreProduct struct {
 	CheckDate    time.Time `db:"check_date"`
 }
 
+type Check struct {
+	Check       *generated.Check
+	ProductList []generated.GetCheckProductsByNameRow
+}
+
 type CheckRepository interface {
 	CreateNewCheck(
 		ctx context.Context,
@@ -36,6 +42,8 @@ type CheckRepository interface {
 		payload []interface{},
 		keys []string,
 	) (*generated.Check, error)
+	DeleteCheck(ctx context.Context, checkNumber string) error
+	GetCheckByNumber(ctx context.Context, checkNumber string) (*Check, error)
 	calculateCheckTotalSumIfValid(
 		ctx context.Context,
 		tx *sqlx.Tx,
@@ -65,6 +73,54 @@ func NewCheckRepository(db *sqlx.DB) CheckRepository {
 		db:      db,
 		queries: generated.New(db.DB),
 	}
+}
+
+func (r *checkRepository) GetCheckByNumber(ctx context.Context, checkNumber string) (*Check, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	txQueries := generated.New(tx.Tx)
+	defer func() {
+		_ = tx.Rollback()
+	}()
+	check, err := txQueries.GetCheckByNumber(ctx, checkNumber)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+	}
+	products, err := txQueries.GetCheckProductsByName(ctx, checkNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Check{
+		Check:       &check,
+		ProductList: products,
+	}, nil
+}
+
+func (r *checkRepository) DeleteCheck(ctx context.Context, checkNumber string) error {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+	_, err := r.queries.DeleteCheck(ctx, checkNumber)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNotFound
+		}
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			if pqErr.Code == "23503" {
+				return ErrForeignKey
+			}
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *checkRepository) CreateNewCheck(
