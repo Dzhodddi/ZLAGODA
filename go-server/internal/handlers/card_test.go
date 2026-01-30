@@ -3,10 +3,12 @@ package handlers_test
 import (
 	"context"
 	"fmt"
-	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"net/http"
+	"sort"
 	"strconv"
 	"testing"
+
+	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
@@ -124,6 +126,16 @@ func (s *CardHandlerSuite) TestGetCardByCardNumber() {
 func (s *CardHandlerSuite) TestGetCardList() {
 	validInput := s.createCardPayload()
 	length := 5
+	trueValue := true
+	invalidPercent := -10
+	q := views.ListCustomerCardsQueryParams{
+		Percent: nil,
+		Sorted:  &trueValue,
+	}
+	invalidQ := views.ListCustomerCardsQueryParams{
+		Percent: &invalidPercent,
+		Sorted:  nil,
+	}
 
 	cases := []testutils.APITestCase[*[]views.CustomerCardResponse]{
 		{
@@ -150,6 +162,38 @@ func (s *CardHandlerSuite) TestGetCardList() {
 			},
 		},
 		{
+			Name:   fmt.Sprintf("Success: Get card list with %d items and sorted", length),
+			Method: http.MethodGet,
+			Setup: func() {
+				ctx := context.Background()
+				for i := range length {
+					copyInput := validInput
+					copyInput.CardNumber = validInput.CardNumber + strconv.Itoa(i)
+					_, err := s.CardRepo.CreateNewCard(ctx, copyInput)
+					s.Require().NoError(err)
+				}
+			},
+			URL:          func() string { return fmt.Sprintf("/api/v1/customer-cards?sorted=%v", *q.Sorted) },
+			ExpectedCode: http.StatusOK,
+			AssertResult: func(t *testing.T, res *[]views.CustomerCardResponse) {
+				assert.NotNil(t, res)
+				assert.Len(t, *res, length)
+				sorted := sort.SliceIsSorted(*res, func(i, j int) bool {
+					return (*res)[i].CustomerName < (*res)[j].CustomerName
+				})
+				assert.True(t, sorted)
+			},
+		},
+		{
+			Name:   "Fail: Get card list with negative percent",
+			Method: http.MethodGet,
+			URL: func() string {
+				return fmt.Sprintf("/api/v1/customer-cards?&percent=%v", *invalidQ.Percent)
+			},
+			ExpectedCode: http.StatusUnprocessableEntity,
+			ErrorMessage: constants.ValidationError,
+		},
+		{
 			Name:         "Success: Get empty card list",
 			Method:       http.MethodGet,
 			URL:          func() string { return "/api/v1/customer-cards" },
@@ -173,6 +217,8 @@ func (s *CardHandlerSuite) TestUpdateCard() {
 		PhoneNumber:     "foo",
 		CustomerPercent: 1,
 	}
+	invalidInput := updatedInput
+	invalidInput.CustomerName = ""
 
 	var cardNumber string
 
@@ -193,6 +239,34 @@ func (s *CardHandlerSuite) TestUpdateCard() {
 				assert.NotNil(t, res)
 				assert.Equal(t, updatedInput.CustomerSurname, res.CustomerSurname)
 			},
+		},
+		{
+			Name:   "Fail: Update card with bad payload",
+			Method: http.MethodPut,
+			Setup: func() {
+				ctx := context.Background()
+				card, err := s.CardRepo.CreateNewCard(ctx, validInput)
+				s.Require().NoError(err)
+				cardNumber = card.CardNumber
+			},
+			Body:         invalidInput,
+			URL:          func() string { return fmt.Sprintf("/api/v1/customer-cards/%s", cardNumber) },
+			ExpectedCode: http.StatusUnprocessableEntity,
+			ErrorMessage: constants.ValidationError,
+		},
+		{
+			Name:   "Fail: JSON bind error",
+			Method: http.MethodPut,
+			Setup: func() {
+				ctx := context.Background()
+				card, err := s.CardRepo.CreateNewCard(ctx, validInput)
+				s.Require().NoError(err)
+				cardNumber = card.CardNumber
+			},
+			Body:         "bad payload",
+			URL:          func() string { return fmt.Sprintf("/api/v1/customer-cards/%s", cardNumber) },
+			ExpectedCode: http.StatusBadRequest,
+			ErrorMessage: constants.ValidationError,
 		},
 		{
 			Name:   "Fail: Update non-existing card",
