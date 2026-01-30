@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.login.EmployeeLoginRequestDto;
 import org.example.dto.employee.login.EmployeeLoginResponseDto;
 import org.example.dto.employee.login.RefreshTokenRequestDto;
-import org.example.exception.AuthenticationException;
+import org.example.exception.custom_exception.AuthenticationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

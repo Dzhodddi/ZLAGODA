@@ -17,7 +17,11 @@ public class RoleRepository {
     public Optional<Role> findRoleByName(Role.RoleName name) {
         try {
             Role role = jdbcTemplate.queryForObject(
-                    "SELECT * FROM roles WHERE name = ?",
+                    """
+                    SELECT *
+                    FROM roles
+                    WHERE name = ?
+                    """,
                     roleRowMapper,
                     name.name()
             );
@@ -28,7 +32,9 @@ public class RoleRepository {
     }
 
     public void save(Role role) {
-        String sql = "INSERT INTO roles (name) VALUES (?)";
-        jdbcTemplate.update(sql, role.getName().name());
+        jdbcTemplate.update("""
+                            INSERT INTO roles (name) VALUES (?)
+                            """,
+                role.getName().name());
     }
 }

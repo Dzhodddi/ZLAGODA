@@ -1,28 +1,38 @@
 package org.example.service.store_product;
 
 import java.util.List;
-
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
 import org.example.dto.store_product.product.StoreProductWithNameDto;
+import org.springframework.data.domain.Pageable;
 
 public interface StoreProductService {
 
-    List<StoreProductDto> getAll();
+    PageResponseDto<StoreProductDto> getAll(Pageable pageable,
+                                            String lastSeenUPC);
 
-    List<StoreProductDto> getAllSortedByQuantity();
+    List<StoreProductDto> getAllNoPagination();
 
-    List<StoreProductWithNameDto> getAllSortedByName();
+    PageResponseDto<StoreProductDto> getAllSortedByQuantity(
+            Pageable pageable, String lastSeenUPC);
 
-    List<StoreProductDto> getPromotionalSortedByQuantity();
+    PageResponseDto<StoreProductWithNameDto> getAllSortedByName(
+            Pageable pageable, String lastSeenUPC);
 
-    List<StoreProductDto> getNonPromotionalSortedByQuantity();
+    PageResponseDto<StoreProductDto> getPromotionalSortedByQuantity(
+            Pageable pageable, String lastSeenUPC);
 
-    List<StoreProductWithNameDto> getPromotionalSortedByName();
+    PageResponseDto<StoreProductDto> getNonPromotionalSortedByQuantity(
+            Pageable pageable, String lastSeenUPC);
 
-    List<StoreProductWithNameDto> getNonPromotionalSortedByName();
+    PageResponseDto<StoreProductWithNameDto> getPromotionalSortedByName(
+            Pageable pageable, String lastSeenUPC);
+
+    PageResponseDto<StoreProductWithNameDto> getNonPromotionalSortedByName(
+            Pageable pageable, String lastSeenUPC);
 
     StoreProductDto save(StoreProductRequestDto requestDto);
 
@@ -34,5 +44,5 @@ public interface StoreProductService {
 
     StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(String upc);
 
-    List<?> getAll(String sortedBy, Boolean prom);
+    PageResponseDto<?> getAll(String sortedBy, Boolean prom, Pageable pageable, String lastSeenUPC);
 }

@@ -9,7 +9,7 @@ import org.example.dto.employee.login.EmployeeLoginResponseDto;
 import org.example.dto.employee.login.RefreshTokenRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
-import org.example.exception.RegistrationException;
+import org.example.exception.custom_exception.RegistrationException;
 import org.example.security.AuthenticationService;
 import org.example.service.employee.EmployeeService;
 import org.springframework.http.HttpStatus;

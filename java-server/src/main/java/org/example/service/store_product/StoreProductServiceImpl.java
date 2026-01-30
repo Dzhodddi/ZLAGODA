@@ -1,15 +1,17 @@
 package org.example.service.store_product;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
-import org.example.dto.store_product.product.*;
-import org.example.exception.EntityNotFoundException;
+import org.example.dto.page.PageResponseDto;
+import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
+import org.example.dto.store_product.product.StoreProductDto;
+import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
+import org.example.dto.store_product.product.StoreProductRequestDto;
+import org.example.dto.store_product.product.StoreProductWithNameDto;
+import org.example.exception.custom_exception.EntityNotFoundException;
 import org.example.mapper.store_product.StoreProductMapper;
-import org.example.model.store_product.StoreProduct;
 import org.example.repository.store_product.StoreProductRepository;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -17,79 +19,81 @@ import org.springframework.stereotype.Service;
 public class StoreProductServiceImpl implements StoreProductService {
 
     private final StoreProductRepository repository;
-    @Qualifier("storeProductMapper")
-    private final StoreProductMapper mapper;
+    private final StoreProductMapper storeProductMapper;
 
-    public List<?> getAll(String sortedBy, Boolean prom) {
+    public PageResponseDto<?> getAll(String sortedBy,
+                                     Boolean prom,
+                                     Pageable pageable,
+                                     String lastSeenUPC) {
         if ("name".equals(sortedBy)) {
             if (prom == null) {
-                return getAllSortedByName();
+                return getAllSortedByName(pageable, lastSeenUPC);
             }
             return prom
-                    ? getPromotionalSortedByName()
-                    : getNonPromotionalSortedByName();
+                    ? getPromotionalSortedByName(pageable, lastSeenUPC)
+                    : getNonPromotionalSortedByName(pageable, lastSeenUPC);
         }
         if ("quantity".equals(sortedBy)) {
             if (prom == null) {
-                return getAllSortedByQuantity();
+                return getAllSortedByQuantity(pageable, lastSeenUPC);
             }
             return prom
-                    ? getPromotionalSortedByQuantity()
-                    : getNonPromotionalSortedByQuantity();
+                    ? getPromotionalSortedByQuantity(pageable, lastSeenUPC)
+                    : getNonPromotionalSortedByQuantity(pageable, lastSeenUPC);
         }
-        return getAll();
+        return getAll(pageable, lastSeenUPC);
     }
 
     @Override
-    public List<StoreProductDto> getAll() {
-        List<StoreProduct> products = repository.findAll();
-        return products.stream()
-                .map(mapper::toDto)
-                .toList();
+    public PageResponseDto<StoreProductDto> getAll(
+            Pageable pageable, String lastSeenUPC) {
+        return repository.findAll(pageable, lastSeenUPC);
     }
 
     @Override
-    public List<StoreProductDto> getAllSortedByQuantity() {
-        return repository.findAllSortedByQuantity()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+    public List<StoreProductDto> getAllNoPagination() {
+        return repository.findAllNoPagination();
     }
 
     @Override
-    public List<StoreProductWithNameDto> getAllSortedByName() {
-        return repository.findAllSortedByName();
+    public PageResponseDto<StoreProductDto> getAllSortedByQuantity(
+            Pageable pageable, String lastSeenUPC) {
+        return repository.findAllSortedByQuantity(pageable, lastSeenUPC);
     }
 
     @Override
-    public List<StoreProductDto> getPromotionalSortedByQuantity() {
-        return repository.findPromotionalSortedByQuantity()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+    public PageResponseDto<StoreProductWithNameDto> getAllSortedByName(
+            Pageable pageable, String lastSeenUPC) {
+        return repository.findAllSortedByName(pageable, lastSeenUPC);
     }
 
     @Override
-    public List<StoreProductDto> getNonPromotionalSortedByQuantity() {
-        return repository.findNonPromotionalSortedByQuantity()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+    public PageResponseDto<StoreProductDto> getPromotionalSortedByQuantity(
+            Pageable pageable, String lastSeenUPC) {
+        return repository.findPromotionalSortedByQuantity(pageable, lastSeenUPC);
     }
 
     @Override
-    public List<StoreProductWithNameDto> getPromotionalSortedByName() {
-        return repository.findPromotionalSortedByName();
+    public PageResponseDto<StoreProductDto> getNonPromotionalSortedByQuantity(
+            Pageable pageable, String lastSeenUPC) {
+        return repository.findNonPromotionalSortedByQuantity(pageable, lastSeenUPC);
     }
 
     @Override
-    public List<StoreProductWithNameDto> getNonPromotionalSortedByName() {
-        return repository.findNonPromotionalSortedByName();
+    public PageResponseDto<StoreProductWithNameDto> getPromotionalSortedByName(
+            Pageable pageable, String lastSeenUPC) {
+        return repository.findPromotionalSortedByName(pageable, lastSeenUPC);
+    }
+
+    @Override
+    public PageResponseDto<StoreProductWithNameDto> getNonPromotionalSortedByName(
+            Pageable pageable, String lastSeenUPC) {
+        return repository.findNonPromotionalSortedByName(pageable, lastSeenUPC);
     }
 
     @Override
     public StoreProductDto save(StoreProductRequestDto requestDto) {
-        return mapper.toDto(repository.save(requestDto));
+        return storeProductMapper.toDto(repository.save(requestDto));
     }
 
     @Override
