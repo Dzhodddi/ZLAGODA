@@ -1,6 +1,7 @@
 package org.example.controller.product;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,9 +20,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
 import org.example.service.product.ProductService;
@@ -33,9 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -89,74 +87,91 @@ class ProductControllerTest {
     @WithMockUser
     @DisplayName("GET /products - should return paged products")
     void getAll_ok() throws Exception {
-        Page<ProductDto> page = new PageImpl<>(
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(productDto1, productDto2)),
-                PageRequest.of(0, 10),
+                0,
+                10,
                 2
         );
-        when(productService.getAll(any(Pageable.class))).thenReturn(page);
+        when(productService.getAll(any(Pageable.class), anyString(), anyInt())).thenReturn(page);
 
-        mockMvc.perform(get("/products"))
+        mockMvc.perform(get("/products")
+                        .param("lastSeenName", "")
+                        .param("lastSeenId", "0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.content[0].product_name").value("Apple"))
                 .andExpect(jsonPath("$.content[1].product_name").value("Banana"));
 
-        verify(productService).getAll(any(Pageable.class));
+        verify(productService).getAll(any(Pageable.class), anyString(), anyInt());
     }
 
     @Test
     @WithMockUser(authorities = "CASHIER")
     @DisplayName("GET /products/search?name - cashier allowed")
     void searchByName_cashier_ok() throws Exception {
-        Page<ProductDto> page = new PageImpl<>(
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(productDto1)),
-                PageRequest.of(0, 10),
-                2
+                0,
+                10,
+                1
         );
-        when(productService.findByName(eq("Apple"), any(Pageable.class))).thenReturn(page);
+        when(productService.findByName(eq("Apple"), any(Pageable.class), anyString(), anyInt()))
+                .thenReturn(page);
 
-        mockMvc.perform(get("/products/search").param("name", "Apple"))
+        mockMvc.perform(get("/products/search")
+                        .param("name", "Apple")
+                        .param("lastSeenName", "")
+                        .param("lastSeenId", "0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].product_name").value("Apple"));
 
-        verify(productService).findByName(eq("Apple"), any(Pageable.class));
+        verify(productService).findByName(eq("Apple"), any(Pageable.class), anyString(), anyInt());
     }
 
     @Test
     @WithMockUser(roles = "MANAGER")
     @DisplayName("GET /products/search?name - manager forbidden")
     void searchByName_manager_forbidden() throws Exception {
-        mockMvc.perform(get("/products/search").param("name", "Apple"))
+        mockMvc.perform(get("/products/search")
+                        .param("name", "Apple")
+                        .param("lastSeenName", "")
+                        .param("lastSeenId", "0"))
                 .andExpect(status().isForbidden());
 
-        verify(productService, never()).findByName(anyString(), any());
+        verify(productService, never()).findByName(anyString(), any(), anyString(), anyInt());
     }
 
     @Test
     @WithMockUser
     @DisplayName("GET /products/search?categoryId - allowed")
     void searchByCategory_ok() throws Exception {
-        Page<ProductDto> page = new PageImpl<>(
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(productDto1, productDto2)),
-                PageRequest.of(0, 10),
+                0,
+                10,
                 2
         );
-        when(productService.findByCategoryId(eq(10), any(Pageable.class))).thenReturn(page);
+        when(productService.findByCategoryId(eq(10), any(Pageable.class), anyString(), anyInt()))
+                .thenReturn(page);
 
-        mockMvc.perform(get("/products/search").param("categoryId", "10"))
+        mockMvc.perform(get("/products/search")
+                        .param("categoryId", "10")
+                        .param("lastSeenName", "")
+                        .param("lastSeenId", "0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2));
 
-        verify(productService).findByCategoryId(eq(10), any(Pageable.class));
+        verify(productService).findByCategoryId(eq(10), any(Pageable.class), anyString(), anyInt());
     }
 
     @Test
     @WithMockUser
     @DisplayName("GET /products/search - no params -> bad request")
     void search_noParams_badRequest() throws Exception {
-        mockMvc.perform(get("/products/search"))
+        mockMvc.perform(get("/products/search")
+                        .param("lastSeenId", "0"))
                 .andExpect(status().isBadRequest());
     }
 

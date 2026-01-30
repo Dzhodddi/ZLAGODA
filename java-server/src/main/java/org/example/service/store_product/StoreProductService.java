@@ -1,31 +1,38 @@
 package org.example.service.store_product;
 
 import java.util.List;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
 import org.example.dto.store_product.product.StoreProductWithNameDto;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface StoreProductService {
 
-    Page<StoreProductDto> getAll(Pageable pageable);
+    PageResponseDto<StoreProductDto> getAll(Pageable pageable,
+                                            String lastSeenUPC);
 
     List<StoreProductDto> getAllNoPagination();
 
-    Page<StoreProductDto> getAllSortedByQuantity(Pageable pageable);
+    PageResponseDto<StoreProductDto> getAllSortedByQuantity(
+            Pageable pageable, String lastSeenUPC);
 
-    Page<StoreProductWithNameDto> getAllSortedByName(Pageable pageable);
+    PageResponseDto<StoreProductWithNameDto> getAllSortedByName(
+            Pageable pageable, String lastSeenUPC);
 
-    Page<StoreProductDto> getPromotionalSortedByQuantity(Pageable pageable);
+    PageResponseDto<StoreProductDto> getPromotionalSortedByQuantity(
+            Pageable pageable, String lastSeenUPC);
 
-    Page<StoreProductDto> getNonPromotionalSortedByQuantity(Pageable pageable);
+    PageResponseDto<StoreProductDto> getNonPromotionalSortedByQuantity(
+            Pageable pageable, String lastSeenUPC);
 
-    Page<StoreProductWithNameDto> getPromotionalSortedByName(Pageable pageable);
+    PageResponseDto<StoreProductWithNameDto> getPromotionalSortedByName(
+            Pageable pageable, String lastSeenUPC);
 
-    Page<StoreProductWithNameDto> getNonPromotionalSortedByName(Pageable pageable);
+    PageResponseDto<StoreProductWithNameDto> getNonPromotionalSortedByName(
+            Pageable pageable, String lastSeenUPC);
 
     StoreProductDto save(StoreProductRequestDto requestDto);
 
@@ -37,5 +44,5 @@ public interface StoreProductService {
 
     StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(String upc);
 
-    Page<?> getAll(String sortedBy, Boolean prom, Pageable pageable);
+    PageResponseDto<?> getAll(String sortedBy, Boolean prom, Pageable pageable, String lastSeenUPC);
 }

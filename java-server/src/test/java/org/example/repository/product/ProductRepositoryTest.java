@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -16,10 +15,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
-import org.example.exception.EntityNotFoundException;
-import org.example.exception.InvalidCategoryException;
+import org.example.exception.custom_exception.EntityNotFoundException;
+import org.example.exception.custom_exception.InvalidCategoryException;
 import org.example.mapper.product.ProductMapper;
 import org.example.mapper.product.ProductRowMapper;
 import org.example.model.product.Product;
@@ -29,13 +29,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Product Repository Tests")
@@ -76,7 +75,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("findAll should return list of products")
     void findAll_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt(), anyLong()))
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any(), any()))
                 .thenReturn(List.of(product));
         when(jdbcTemplate.queryForObject(
                 anyString(),
@@ -85,7 +84,7 @@ class ProductRepositoryTest {
         when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<ProductDto> result = repository.findAll(pageable);
+        PageResponseDto<ProductDto> result = repository.findAll(pageable, "", 0);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
@@ -114,7 +113,8 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("findByName should return products with matching name")
     void findByName_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), eq("TestProduct"), anyInt(), anyLong()))
+        // Виправлено: передаємо 5 any() для відповідності виклику (name, name, name, id, pageSize)
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(product));
         when(jdbcTemplate.queryForObject(
                 anyString(),
@@ -124,7 +124,8 @@ class ProductRepositoryTest {
         when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<ProductDto> result = repository.findByName("TestProduct", pageable);
+        PageResponseDto<ProductDto> result = repository.findByName("TestProduct",
+                pageable, "", 0);
 
         assertEquals(1, result.getContent().size());
         assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
@@ -133,7 +134,7 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("findByCategoryId should return products in category")
     void findByCategoryId_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), eq(10), anyInt(), anyLong()))
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(product));
         when(jdbcTemplate.queryForObject(
                 anyString(),
@@ -143,7 +144,8 @@ class ProductRepositoryTest {
         when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<ProductDto> result = repository.findByCategoryId(10, pageable);
+        PageResponseDto<ProductDto> result = repository.findByCategoryId(10,
+                pageable, "", 0);
 
         assertEquals(1, result.getContent().size());
         assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
@@ -163,7 +165,7 @@ class ProductRepositoryTest {
         savedProduct.setCategory_number(10);
 
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                anyString(), any(), anyInt())).thenReturn(savedProduct);
+                eq("TestProduct"), eq(null), eq(10))).thenReturn(savedProduct);
 
         Product result = repository.save(newProduct);
 
@@ -183,8 +185,10 @@ class ProductRepositoryTest {
 
         assertNotNull(result);
         assertEquals("TestProduct", result.getProduct_name());
-        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), any(), anyInt(), anyInt());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), eq(rowMapper), eq(1));
+        verify(jdbcTemplate, times(1)).update(anyString(),
+                anyString(), any(), anyInt(), anyInt());
+        verify(jdbcTemplate, times(1)).queryForObject(
+                anyString(), eq(rowMapper), eq(1));
     }
 
     @Test
@@ -205,7 +209,7 @@ class ProductRepositoryTest {
         newProduct.setCategory_number(999);
 
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                anyString(), any(), anyInt()))
+                eq("TestProduct"), eq(null), eq(999)))
                 .thenThrow(DataIntegrityViolationException.class);
 
         assertThrows(InvalidCategoryException.class, () -> repository.save(newProduct));
@@ -226,7 +230,8 @@ class ProductRepositoryTest {
 
         assertNotNull(result);
         assertEquals("TestProduct", result.getProduct_name());
-        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), any(), anyInt(), eq(1));
+        verify(jdbcTemplate, times(1)).update(anyString(),
+                anyString(), any(), anyInt(), eq(1));
     }
 
     @Test
@@ -286,7 +291,6 @@ class ProductRepositoryTest {
     void existsByIdProduct_nonExistingProduct_shouldReturnFalse() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(2)))
                 .thenReturn(0);
-
         assertFalse(repository.existsByIdProduct(2));
     }
 }

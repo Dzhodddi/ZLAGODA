@@ -4,20 +4,19 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.store_product.batch.BatchRequestDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
-import org.example.exception.AuthorizationException;
-import org.example.exception.InvalidParameterException;
+import org.example.exception.custom_exception.AuthorizationException;
+import org.example.exception.custom_exception.InvalidParameterException;
 import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -55,11 +54,11 @@ public class StoreProductController {
     - prom: true | false
     """
     )
-    public Page<?> getStoreProducts(
+    public PageResponseDto<?> getStoreProducts(
             @RequestParam String sortedBy,
             @RequestParam(required = false) Boolean prom,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            Pageable pageable,
+            @RequestParam(required = false) String lastSeenUPC
     ) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
@@ -72,7 +71,7 @@ public class StoreProductController {
         if ("quantity".equals(sortedBy) && !isManager) {
             throw new AuthorizationException("Only Manager can sort by quantity");
         }
-        return storeProductService.getAll(sortedBy, prom, PageRequest.of(page, size));
+        return storeProductService.getAll(sortedBy, prom, pageable, lastSeenUPC);
     }
 
     @PostMapping

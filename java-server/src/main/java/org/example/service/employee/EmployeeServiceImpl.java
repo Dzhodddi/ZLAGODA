@@ -5,21 +5,20 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
-import org.example.exception.DeletionException;
-import org.example.exception.EntityNotFoundException;
-import org.example.exception.InvalidRoleException;
-import org.example.exception.RegistrationException;
+import org.example.dto.page.PageResponseDto;
+import org.example.exception.custom_exception.DeletionException;
+import org.example.exception.custom_exception.EntityNotFoundException;
+import org.example.exception.custom_exception.InvalidRoleException;
+import org.example.exception.custom_exception.RegistrationException;
 import org.example.mapper.employee.EmployeeMapper;
 import org.example.model.employee.Role;
 import org.example.model.employee.Employee;
 import org.example.repository.employee.EmployeeRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -72,8 +71,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Page<EmployeeResponseDto> getAll(Pageable pageable) {
-        return employeeRepository.findAll(pageable);
+    public PageResponseDto<EmployeeResponseDto> getAll(Pageable pageable,
+                                                       String lastSeenSurname,
+                                                       String lastSeenId) {
+        return employeeRepository.findAll(pageable, lastSeenSurname, lastSeenId);
     }
 
 
@@ -99,8 +100,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Page<EmployeeResponseDto> getAllCashiers(Pageable pageable) {
-        return employeeRepository.findAllCashiers(pageable);
+    public PageResponseDto<EmployeeResponseDto> getAllCashiers(Pageable pageable,
+                                                               String lastSeenSurname,
+                                                               String lastSeenId) {
+        return employeeRepository.findAllCashiers(pageable, lastSeenSurname, lastSeenId);
     }
 
     @Override

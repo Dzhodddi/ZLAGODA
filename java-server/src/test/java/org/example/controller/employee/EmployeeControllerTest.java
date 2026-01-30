@@ -1,5 +1,6 @@
 package org.example.controller.employee;
 
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyString;
@@ -30,6 +31,7 @@ import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
+import org.example.dto.page.PageResponseDto;
 import org.example.service.employee.EmployeeService;
 import org.example.service.report.PdfReportGeneratorService;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,9 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -144,11 +143,13 @@ class EmployeeControllerTest {
     @WithMockUser(roles = "MANAGER")
     @DisplayName("GET /employees - Manager should get all employees")
     void getAll_asManager_Ok() throws Exception {
-        Page<EmployeeResponseDto> page = new PageImpl<>(new ArrayList<>(
-                List.of(employeeDto1, employeeDto2)),
-                PageRequest.of(0, 10),
-                2);
-        when(employeeService.getAll(any(Pageable.class))).thenReturn(page);
+        PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
+                List.of(employeeDto1, employeeDto2),
+                0,
+                10,
+                2
+        );
+        when(employeeService.getAll(any(Pageable.class), isNull(), isNull())).thenReturn(page);
 
         mockMvc.perform(get("/employees"))
                 .andExpect(status().isOk())
@@ -156,7 +157,8 @@ class EmployeeControllerTest {
                 .andExpect(jsonPath("$.content[1].empl_surname").value("Johnson"))
                 .andExpect(jsonPath("$.content.length()").value(2));
 
-        verify(employeeService, times(1)).getAll(any(Pageable.class));
+        verify(employeeService, times(1))
+                .getAll(any(Pageable.class), isNull(), isNull());
     }
 
     @Test
@@ -165,27 +167,28 @@ class EmployeeControllerTest {
     void getAll_asCashier_Forbidden() throws Exception {
         mockMvc.perform(get("/employees"))
                 .andExpect(status().isForbidden());
-
-        verify(employeeService, never()).getAll(any(Pageable.class));
+        verify(employeeService, never()).getAll(any(Pageable.class), isNull(), isNull());
     }
 
     @Test
     @WithMockUser(roles = "MANAGER")
     @DisplayName("GET /employees - should return empty list when no employees")
     void getAll_noEmployees_Ok() throws Exception {
-        Page<EmployeeResponseDto> emptyPage = new PageImpl<>(
+        PageResponseDto<EmployeeResponseDto> emptyPage = PageResponseDto.of(
                 new ArrayList<>(),
-                PageRequest.of(0, 10),
+                0,
+                10,
                 0
         );
-
-        when(employeeService.getAll(any(Pageable.class))).thenReturn(emptyPage);
+        when(employeeService.getAll(any(Pageable.class), isNull(), isNull()))
+                .thenReturn(emptyPage);
 
         mockMvc.perform(get("/employees"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty());
 
-        verify(employeeService, times(1)).getAll(any(Pageable.class));
+        verify(employeeService, times(1))
+                .getAll(any(Pageable.class), isNull(), isNull());
     }
 
     @Test
@@ -296,7 +299,8 @@ class EmployeeControllerTest {
 
         mockMvc.perform(get("/employees/report"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition", "attachment; filename=employees.pdf"))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename=employees.pdf"))
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF_VALUE))
                 .andExpect(content().bytes(pdfBytes));
 
@@ -319,17 +323,22 @@ class EmployeeControllerTest {
     @WithMockUser(roles = "MANAGER")
     @DisplayName("GET /employees/cashiers - Manager should get all cashiers")
     void getAllCashiers_asManager_Ok() throws Exception {
-        Page<EmployeeResponseDto> page = new PageImpl<>(List.of(employeeDto1),
-                PageRequest.of(0, 10),
-                1);
-        when(employeeService.getAllCashiers(any(Pageable.class))).thenReturn(page);
+        PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
+                List.of(employeeDto1),
+                0,
+                10,
+                1
+        );
+        when(employeeService.getAllCashiers(any(Pageable.class), isNull(), isNull()))
+                .thenReturn(page);
 
         mockMvc.perform(get("/employees/cashiers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].role").value("CASHIER"))
                 .andExpect(jsonPath("$.content.length()").value(1));
 
-        verify(employeeService, times(1)).getAllCashiers(any(Pageable.class));
+        verify(employeeService, times(1))
+                .getAllCashiers(any(Pageable.class), isNull(), isNull());
     }
 
     @Test
@@ -339,26 +348,28 @@ class EmployeeControllerTest {
         mockMvc.perform(get("/employees/cashiers"))
                 .andExpect(status().isForbidden());
 
-        verify(employeeService, never()).getAllCashiers(any(Pageable.class));
+        verify(employeeService, never()).getAllCashiers(any(Pageable.class), isNull(), isNull());
     }
 
     @Test
     @WithMockUser(roles = "MANAGER")
     @DisplayName("GET /employees/cashiers - should return empty list when no cashiers")
     void getAllCashiers_noCashiers_Ok() throws Exception {
-        Page<EmployeeResponseDto> emptyPage = new PageImpl<>(
+        PageResponseDto<EmployeeResponseDto> emptyPage = PageResponseDto.of(
                 new ArrayList<>(),
-                PageRequest.of(0, 10),
+                0,
+                10,
                 0
         );
-
-        when(employeeService.getAllCashiers(any(Pageable.class))).thenReturn(emptyPage);
+        when(employeeService.getAllCashiers(any(Pageable.class), isNull(), isNull()))
+                .thenReturn(emptyPage);
 
         mockMvc.perform(get("/employees/cashiers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty());
 
-        verify(employeeService, times(1)).getAllCashiers(any(Pageable.class));
+        verify(employeeService, times(1))
+                .getAllCashiers(any(Pageable.class), isNull(), isNull());
     }
 
     @Test

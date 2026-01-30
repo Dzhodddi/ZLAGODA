@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,10 +23,11 @@ import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
-import org.example.exception.DeletionException;
-import org.example.exception.EntityNotFoundException;
-import org.example.exception.InvalidRoleException;
-import org.example.exception.RegistrationException;
+import org.example.dto.page.PageResponseDto;
+import org.example.exception.custom_exception.DeletionException;
+import org.example.exception.custom_exception.EntityNotFoundException;
+import org.example.exception.custom_exception.InvalidRoleException;
+import org.example.exception.custom_exception.RegistrationException;
 import org.example.mapper.employee.EmployeeMapper;
 import org.example.model.employee.Employee;
 import org.example.model.employee.Role;
@@ -37,9 +39,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -211,16 +210,22 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("getAll should return list of employees")
     void getAll_shouldReturnList() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<EmployeeResponseDto> page = new PageImpl<>(List.of(employeeResponseDto));
-        when(employeeRepository.findAll(any(Pageable.class))).thenReturn(page);
-
-        Page<EmployeeResponseDto> result = service.getAll(pageable);
-
+        PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
+                List.of(employeeResponseDto),
+                0,
+                10,
+                1
+        );
+        Pageable pageable = Pageable.ofSize(10);
+        when(employeeRepository.findAll(pageable, null, null))
+                .thenReturn(page);
+        PageResponseDto<EmployeeResponseDto> result = service
+                .getAll(pageable, null, null);
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("EMP001", result.getContent().get(0).getId_employee());
-        verify(employeeRepository, times(1)).findAll(any(Pageable.class));
+        verify(employeeRepository, times(1))
+                .findAll(pageable, null, null);
     }
 
     @Test
@@ -234,7 +239,8 @@ class EmployeeServiceTest {
 
         assertNotNull(result);
         assertEquals("EMP001", result.getId_employee());
-        verify(employeeRepository, times(1)).updateEmployeeById("EMP001", updateRequestDto);
+        verify(employeeRepository, times(1))
+                .updateEmployeeById("EMP001", updateRequestDto);
     }
 
     @Test
@@ -286,15 +292,22 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("getAllCashiers should return list of cashiers")
     void getAllCashiers_shouldReturnCashiers() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<EmployeeResponseDto> page = new PageImpl<>(List.of(employeeResponseDto));
-        when(employeeRepository.findAllCashiers(any(Pageable.class))).thenReturn(page);
+        PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
+                List.of(employeeResponseDto),
+                0,
+                10,
+                1
+        );
+        Pageable pageable = Pageable.ofSize(10);
+        when(employeeRepository.findAllCashiers(pageable, null, null))
+                .thenReturn(page);
 
-        Page<EmployeeResponseDto> result = service.getAllCashiers(pageable);
-
+        PageResponseDto<EmployeeResponseDto> result = service
+                .getAllCashiers(pageable, null, null);
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        verify(employeeRepository, times(1)).findAllCashiers(any(Pageable.class));
+        verify(employeeRepository, times(1))
+                .findAllCashiers(pageable, null, null);
     }
 
     @Test

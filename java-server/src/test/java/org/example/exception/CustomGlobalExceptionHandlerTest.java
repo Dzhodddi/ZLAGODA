@@ -7,6 +7,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+
+import org.example.exception.custom_exception.AuthorizationException;
+import org.example.exception.custom_exception.DateFormatException;
+import org.example.exception.custom_exception.DeletionException;
+import org.example.exception.custom_exception.EntityNotFoundException;
+import org.example.exception.custom_exception.InvalidCategoryException;
+import org.example.exception.custom_exception.InvalidParameterException;
+import org.example.exception.custom_exception.InvalidProductException;
+import org.example.exception.custom_exception.InvalidRoleException;
+import org.example.exception.custom_exception.RegistrationException;
+import org.example.exception.handler.CustomGlobalExceptionHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,9 +30,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,86 +49,137 @@ class CustomGlobalExceptionHandlerTest {
     private BindingResult bindingResult;
 
     @Test
-    @DisplayName("handleValidationExceptions should return field and global errors")
-    void handleValidationExceptions_shouldReturnAllErrors() {
-        FieldError fieldError1 = new FieldError("employee", "empl_name", "must not be blank");
-        FieldError fieldError2 = new FieldError("employee", "empl_surname", "must not be blank");
-        ObjectError globalError = new ObjectError("employee", "Invalid employee data");
+    @DisplayName("handleCustomExceptions should return NOT_FOUND for EntityNotFoundException")
+    void handleCustomExceptions_EntityNotFound_shouldReturnNotFound() {
+        EntityNotFoundException exception = new EntityNotFoundException("Entity not found");
+
+        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Entity not found", response.getBody());
+    }
+
+    @Test
+    @DisplayName("handleCustomExceptions should return CONFLICT for RegistrationException")
+    void handleCustomExceptions_Registration_shouldReturnConflict() {
+        RegistrationException exception = new RegistrationException("User exists");
+
+        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("User exists", response.getBody());
+    }
+
+    @Test
+    @DisplayName("handleCustomExceptions should return CONFLICT for DeletionException")
+    void handleCustomExceptions_Deletion_shouldReturnConflict() {
+        DeletionException exception = new DeletionException("Cannot delete");
+
+        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("Cannot delete", response.getBody());
+    }
+
+    @Test
+    @DisplayName("handleCustomExceptions should return UNPROCESSABLE_ENTITY for InvalidCategoryException")
+    void handleCustomExceptions_InvalidCategory_shouldReturnUnprocessableEntity() {
+        InvalidCategoryException exception = new InvalidCategoryException("Invalid category");
+
+        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals("Invalid category", response.getBody());
+    }
+
+    @Test
+    @DisplayName("handleCustomExceptions should return UNPROCESSABLE_ENTITY for InvalidRoleException")
+    void handleCustomExceptions_InvalidRole_shouldReturnUnprocessableEntity() {
+        InvalidRoleException exception = new InvalidRoleException("Invalid role");
+
+        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals("Invalid role", response.getBody());
+    }
+
+    @Test
+    @DisplayName("handleCustomExceptions should return UNPROCESSABLE_ENTITY for InvalidProductException")
+    void handleCustomExceptions_InvalidProduct_shouldReturnUnprocessableEntity() {
+        InvalidProductException exception = new InvalidProductException("Invalid product");
+
+        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals("Invalid product", response.getBody());
+    }
+
+    @Test
+    @DisplayName("handleCustomExceptions should return BAD_REQUEST for InvalidParameterException")
+    void handleCustomExceptions_InvalidParameter_shouldReturnBadRequest() {
+        InvalidParameterException exception = new InvalidParameterException("Invalid param");
+
+        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Invalid param", response.getBody());
+    }
+
+    @Test
+    @DisplayName("handleCustomExceptions should return BAD_REQUEST for DateFormatException")
+    void handleCustomExceptions_DateFormat_shouldReturnBadRequest() {
+        DateFormatException exception = new DateFormatException("Bad date");
+
+        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Bad date", response.getBody());
+    }
+
+    @Test
+    @DisplayName("handleCustomExceptions should return FORBIDDEN for AuthorizationException")
+    void handleCustomExceptions_Authorization_shouldReturnForbidden() {
+        AuthorizationException exception = new AuthorizationException("Not allowed");
+
+        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals("Not allowed", response.getBody());
+    }
+
+    @Test
+    @DisplayName("handleValidationExceptions should return field errors")
+    void handleValidationExceptions_shouldReturnErrors() {
+        FieldError fieldError1 = new FieldError("employee", "name", "cannot be empty");
+        FieldError fieldError2 = new FieldError("employee", "age", "must be positive");
 
         when(methodArgumentNotValidException.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError1, fieldError2));
-        when(bindingResult.getGlobalErrors()).thenReturn(List.of(globalError));
 
         ResponseEntity<List<String>> response = exceptionHandler
                 .handleValidationExceptions(methodArgumentNotValidException);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(3, response.getBody().size());
-        assertTrue(response.getBody().contains("empl_name must not be blank"));
-        assertTrue(response.getBody().contains("empl_surname must not be blank"));
-        assertTrue(response.getBody().contains("Invalid employee data"));
+        assertEquals(2, response.getBody().size());
+        assertTrue(response.getBody().contains("name cannot be empty"));
+        assertTrue(response.getBody().contains("age must be positive"));
     }
 
     @Test
-    @DisplayName("handleValidationExceptions should handle only field errors")
-    void handleValidationExceptions_onlyFieldErrors_shouldReturnFieldErrors() {
-        FieldError fieldError = new FieldError("product", "product_name", "must not be null");
-
-        when(methodArgumentNotValidException.getBindingResult()).thenReturn(bindingResult);
-        when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-        when(bindingResult.getGlobalErrors()).thenReturn(List.of());
-
-        ResponseEntity<List<String>> response = exceptionHandler
-                .handleValidationExceptions(methodArgumentNotValidException);
-
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertTrue(response.getBody().contains("product_name must not be null"));
-    }
-
-    @Test
-    @DisplayName("handleValidationExceptions should handle empty errors")
-    void handleValidationExceptions_noErrors_shouldReturnEmptyList() {
-        when(methodArgumentNotValidException.getBindingResult()).thenReturn(bindingResult);
-        when(bindingResult.getFieldErrors()).thenReturn(List.of());
-        when(bindingResult.getGlobalErrors()).thenReturn(List.of());
-
-        ResponseEntity<List<String>> response = exceptionHandler
-                .handleValidationExceptions(methodArgumentNotValidException);
-
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isEmpty());
-    }
-
-    @Test
-    @DisplayName("handleIllegalArgumentException should return BAD_REQUEST")
-    void handleIllegalArgumentException_shouldReturnBadRequest() {
-        IllegalArgumentException exception = new IllegalArgumentException("Invalid argument");
-
-        ResponseEntity<String> response = exceptionHandler.handleIllegalArgumentException(exception);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Invalid argument", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleDataIntegrityViolationException should return UNPROCESSABLE_ENTITY")
-    void handleDataIntegrityViolationException_shouldReturnUnprocessableEntity() {
+    @DisplayName("handleDataIntegrityViolation should return UNPROCESSABLE_ENTITY")
+    void handleDataIntegrityViolation_shouldReturnUnprocessableEntity() {
         DataIntegrityViolationException exception = new DataIntegrityViolationException("Constraint violation");
 
-        ResponseEntity<String> response = exceptionHandler
-                .handleDataIntegrityViolationException(exception);
+        ResponseEntity<String> response = exceptionHandler.handleDataIntegrityViolation(exception);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         assertEquals("Data integrity violation", response.getBody());
     }
 
     @Test
-    @DisplayName("handleInvalidJson should return BAD_REQUEST for invalid JSON")
-    void handleInvalidJson_invalidJson_shouldReturnBadRequest() {
+    @DisplayName("handleInvalidJson should return BAD_REQUEST for generic JSON error")
+    void handleInvalidJson_generic_shouldReturnBadRequest() {
         HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
         when(exception.getCause()).thenReturn(null);
 
@@ -128,11 +190,11 @@ class CustomGlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("handleInvalidJson should return specific message for DateFormatException")
-    void handleInvalidJson_dateFormatException_shouldReturnDateFormatMessage() {
-        DateFormatException dateFormatException = new DateFormatException("Invalid date");
+    @DisplayName("handleInvalidJson should return specific message for nested DateFormatException")
+    void handleInvalidJson_withDateFormatException_shouldReturnSpecificMessage() {
+        DateFormatException dateException = new DateFormatException("Invalid Date");
         HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
-        when(exception.getCause()).thenReturn(dateFormatException);
+        when(exception.getCause()).thenReturn(dateException);
 
         ResponseEntity<String> response = exceptionHandler.handleInvalidJson(exception);
 
@@ -143,193 +205,29 @@ class CustomGlobalExceptionHandlerTest {
     @Test
     @DisplayName("handleAuthenticationException should return UNAUTHORIZED")
     void handleAuthenticationException_shouldReturnUnauthorized() {
-        AuthenticationException exception = new AuthenticationException("Authentication failed");
+        AuthenticationException exception = new BadCredentialsException("Bad credentials");
 
         ResponseEntity<String> response = exceptionHandler.handleAuthenticationException(exception);
-
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertEquals("Authentication failed", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleBadCredentialsException should return UNAUTHORIZED")
-    void handleBadCredentialsException_shouldReturnUnauthorized() {
-        BadCredentialsException exception = new BadCredentialsException("Bad credentials");
-
-        ResponseEntity<String> response = exceptionHandler.handleBadCredentialsException(exception);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals("Bad credentials", response.getBody());
     }
 
     @Test
-    @DisplayName("handleEntityNotFoundException should return NOT_FOUND")
-    void handleEntityNotFoundException_shouldReturnNotFound() {
-        EntityNotFoundException exception = new EntityNotFoundException("Entity not found");
+    @DisplayName("handleAccessDenied should return FORBIDDEN")
+    void handleAccessDenied_shouldReturnForbidden() {
+        AccessDeniedException exception = new AccessDeniedException("Access is denied");
 
-        ResponseEntity<String> response = exceptionHandler.handleEntityNotFoundException(exception);
+        ResponseEntity<String> response = exceptionHandler.handleAccessDenied(exception);
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("Entity not found", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleRegistrationException should return CONFLICT")
-    void handleRegistrationException_shouldReturnConflict() {
-        RegistrationException exception = new RegistrationException("Employee already exists");
-
-        ResponseEntity<String> response = exceptionHandler.handleRegistrationException(exception);
-
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("Employee already exists", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleDeletionException should return CONFLICT")
-    void handleDeletionException_shouldReturnConflict() {
-        DeletionException exception = new DeletionException("Cannot delete yourself");
-
-        ResponseEntity<String> response = exceptionHandler.handleDeletionException(exception);
-
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("Cannot delete yourself", response.getBody());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals("Access is denied", response.getBody());
     }
 
     @Test
     @DisplayName("handleAllExceptions should return INTERNAL_SERVER_ERROR")
     void handleAllExceptions_shouldReturnInternalServerError() {
-        Exception exception = new Exception("Unexpected error");
-
-        ResponseEntity<String> response = exceptionHandler.handleAllExceptions(exception);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Unexpected error occurred", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleDateFormatException should return BAD_REQUEST")
-    void handleDateFormatException_shouldReturnBadRequest() {
-        DateFormatException exception = new DateFormatException("Invalid date format");
-
-        ResponseEntity<String> response = exceptionHandler.handleDateFormatException(exception);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Invalid date format", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleInvalidRole should return UNPROCESSABLE_ENTITY")
-    void handleInvalidRole_shouldReturnUnprocessableEntity() {
-        InvalidRoleException exception = new InvalidRoleException("Invalid role");
-
-        ResponseEntity<String> response = exceptionHandler.handleInvalidRole(exception);
-
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Invalid role", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleInvalidCategory should return UNPROCESSABLE_ENTITY")
-    void handleInvalidCategory_shouldReturnUnprocessableEntity() {
-        InvalidCategoryException exception = new InvalidCategoryException("Invalid category");
-
-        ResponseEntity<String> response = exceptionHandler.handleInvalidCategory(exception);
-
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Invalid category", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleInvalidProduct should return UNPROCESSABLE_ENTITY")
-    void handleInvalidProduct_shouldReturnUnprocessableEntity() {
-        InvalidProductException exception = new InvalidProductException("Invalid product");
-
-        ResponseEntity<String> response = exceptionHandler.handleInvalidProduct(exception);
-
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Invalid product", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleAuthorizationException should return FORBIDDEN")
-    void handleAuthorizationException_shouldReturnForbidden() {
-        AuthorizationException exception = new AuthorizationException("Access denied");
-
-        ResponseEntity<String> response = exceptionHandler.handleAuthorizationException(exception);
-
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("Access denied", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleInvalidParameter should return BAD_REQUEST")
-    void handleInvalidParameter_shouldReturnBadRequest() {
-        InvalidParameterException exception = new InvalidParameterException("Invalid parameter");
-
-        ResponseEntity<String> response = exceptionHandler.handleInvalidParameter(exception);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Invalid parameter", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleAccessDeniedException should return FORBIDDEN")
-    void handleAccessDeniedException_shouldReturnForbidden() {
-        AccessDeniedException exception = new AccessDeniedException("Access denied");
-
-        ResponseEntity<String> response = exceptionHandler.handleAccessDeniedException(exception);
-
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("Access denied", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleInvalidJson should handle nested DateFormatException")
-    void handleInvalidJson_nestedDateFormatException_shouldReturnDateFormatMessage() {
-        DateFormatException dateFormatException = new DateFormatException("Invalid date");
-        RuntimeException wrapperException = new RuntimeException("Wrapper", dateFormatException);
-        HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
-        when(exception.getCause()).thenReturn(wrapperException);
-
-        ResponseEntity<String> response = exceptionHandler.handleInvalidJson(exception);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Invalid date format. Expected format: yyyy-MM-dd", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleValidationExceptions should format field errors correctly")
-    void handleValidationExceptions_shouldFormatFieldErrorsCorrectly() {
-        FieldError fieldError = new FieldError("employee", "salary", "must be positive");
-
-        when(methodArgumentNotValidException.getBindingResult()).thenReturn(bindingResult);
-        when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-        when(bindingResult.getGlobalErrors()).thenReturn(List.of());
-
-        ResponseEntity<List<String>> response = exceptionHandler
-                .handleValidationExceptions(methodArgumentNotValidException);
-
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals("salary must be positive", response.getBody().get(0));
-    }
-
-    @Test
-    @DisplayName("handleAllExceptions should handle RuntimeException")
-    void handleAllExceptions_runtimeException_shouldReturnInternalServerError() {
-        RuntimeException exception = new RuntimeException("Runtime error");
-
-        ResponseEntity<String> response = exceptionHandler.handleAllExceptions(exception);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Unexpected error occurred", response.getBody());
-    }
-
-    @Test
-    @DisplayName("handleAllExceptions should handle NullPointerException")
-    void handleAllExceptions_nullPointerException_shouldReturnInternalServerError() {
-        NullPointerException exception = new NullPointerException("Null pointer");
+        Exception exception = new NullPointerException("Something went wrong");
 
         ResponseEntity<String> response = exceptionHandler.handleAllExceptions(exception);
 

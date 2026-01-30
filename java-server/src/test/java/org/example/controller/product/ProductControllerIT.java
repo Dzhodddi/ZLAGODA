@@ -59,7 +59,7 @@ public class ProductControllerIT {
         String token = loginResponse.accessToken();
 
         ResponseEntity<RestPage<ProductDto>> response = restClient.get()
-                .uri("/products/search?categoryId=1")
+                .uri("/products/search?categoryId=1&lastSeenId=0&lastSeenName=")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<RestPage<ProductDto>>() {});

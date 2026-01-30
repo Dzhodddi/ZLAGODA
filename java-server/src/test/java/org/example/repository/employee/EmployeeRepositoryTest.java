@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,8 +23,9 @@ import java.util.Optional;
 import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
-import org.example.exception.EntityNotFoundException;
-import org.example.exception.InvalidRoleException;
+import org.example.dto.page.PageResponseDto;
+import org.example.exception.custom_exception.EntityNotFoundException;
+import org.example.exception.custom_exception.InvalidRoleException;
 import org.example.mapper.employee.EmployeeMapper;
 import org.example.mapper.employee.EmployeeRowMapper;
 import org.example.model.employee.Employee;
@@ -39,8 +39,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -111,16 +109,15 @@ class EmployeeRepositoryTest {
     @Test
     @DisplayName("findAll should return list of employees sorted by surname")
     void findAll_shouldReturnEmployeesSortedBySurname() {
-        when(jdbcTemplate.query(anyString(), any(EmployeeRowMapper.class), anyInt(), anyLong()))
+        when(jdbcTemplate.query(anyString(), any(EmployeeRowMapper.class), anyInt()))
                 .thenReturn(List.of(employee));
         when(employeeMapper.toEmployeeResponseDto(employee))
                 .thenReturn(employeeResponseDto);
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
                 .thenReturn(1);
-
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<EmployeeResponseDto> result = repository.findAll(pageable);
-
+        Pageable pageable = Pageable.ofSize(10);
+        PageResponseDto<EmployeeResponseDto> result = repository
+                .findAllCashiers(pageable, null, null);
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("Іваненко", result.getContent().get(0).getEmpl_surname());
@@ -314,9 +311,7 @@ class EmployeeRepositoryTest {
     void findByIdEmployee_nonExistingEmployee_shouldReturnEmpty() {
         when(jdbcTemplate.queryForObject(anyString(), eq(employeeRowMapper), eq("EMP999")))
                 .thenThrow(EmptyResultDataAccessException.class);
-
         Optional<Employee> result = repository.findByIdEmployee("EMP999");
-
         assertTrue(result.isEmpty());
     }
 
@@ -327,15 +322,16 @@ class EmployeeRepositoryTest {
         cashierRole.setName(Role.RoleName.CASHIER);
         employee.setRole(cashierRole);
 
-        when(jdbcTemplate.query(anyString(), any(EmployeeRowMapper.class), anyInt(), anyLong()))
+        when(jdbcTemplate.query(anyString(), any(EmployeeRowMapper.class), anyInt()))
                 .thenReturn(List.of(employee));
         when(employeeMapper.toEmployeeResponseDto(employee))
                 .thenReturn(employeeResponseDto);
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
                 .thenReturn(1);
 
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<EmployeeResponseDto> result = repository.findAllCashiers(pageable);
+        Pageable pageable = Pageable.ofSize(10);
+        PageResponseDto<EmployeeResponseDto> result = repository
+                .findAll(pageable, null, null);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
@@ -351,7 +347,8 @@ class EmployeeRepositoryTest {
         dto.setStreet("Хрещатик 1");
         dto.setZip_code("01001");
 
-        when(jdbcTemplate.queryForObject(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq("Іваненко")))
+        when(jdbcTemplate.queryForObject(anyString(),
+                any(org.springframework.jdbc.core.RowMapper.class), eq("Іваненко")))
                 .thenReturn(dto);
 
         Optional<EmployeeContactDto> result = repository.findPhoneAndAddressBySurname("Іваненко");
@@ -366,7 +363,8 @@ class EmployeeRepositoryTest {
     @Test
     @DisplayName("findPhoneAndAddressBySurname should return empty when employee does not exist")
     void findPhoneAndAddressBySurname_nonExistingEmployee_shouldReturnEmpty() {
-        when(jdbcTemplate.queryForObject(anyString(), any(org.springframework.jdbc.core.RowMapper.class), eq("Nonexistent")))
+        when(jdbcTemplate.queryForObject(anyString(),
+                any(org.springframework.jdbc.core.RowMapper.class), eq("Nonexistent")))
                 .thenThrow(EmptyResultDataAccessException.class);
 
         Optional<EmployeeContactDto> result = repository.findPhoneAndAddressBySurname("Nonexistent");

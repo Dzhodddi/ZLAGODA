@@ -5,6 +5,7 @@ import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.store_product.batch.BatchRequestDto;
 import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
@@ -43,9 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -120,13 +119,14 @@ class StoreProductControllerTest {
         batchRequestDto.setQuantity(20);
     }
 
-    private @NotNull StoreProductWithNameDto getProductWithNameDto(StoreProductDto storeProductDto2, boolean storeProductDto21) {
+    private @NotNull StoreProductWithNameDto getProductWithNameDto(
+            StoreProductDto storeProductDto2, boolean promotional) {
         StoreProductWithNameDto dtoWithName2 = new StoreProductWithNameDto();
         dtoWithName2.setProduct_name(productDto.getProduct_name());
         dtoWithName2.setId_product(storeProductDto2.getId_product());
         dtoWithName2.setProducts_number(storeProductDto2.getProducts_number());
         dtoWithName2.setSelling_price(storeProductDto2.getSelling_price());
-        dtoWithName2.setPromotional_product(storeProductDto21);
+        dtoWithName2.setPromotional_product(promotional);
         dtoWithName2.setUPC(storeProductDto2.getUPC());
         dtoWithName2.setUPC_prom(storeProductDto2.getUPC_prom());
         return dtoWithName2;
@@ -140,20 +140,23 @@ class StoreProductControllerTest {
                         .param("sortedBy", "name"))
                 .andExpect(status().isForbidden());
 
-        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class));
+        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class), any());
     }
 
     @Test
     @WithMockUser(authorities = "CASHIER")
     @DisplayName("GET /store-products?sortedBy=name - Cashier should get products sorted by name")
     void getStoreProducts_sortedByName_asCashier_Ok() throws Exception {
-        Page<StoreProductWithNameDto> page = new PageImpl<>(
+        PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(getProductWithNameDto(storeProductDto1, false))),
-                PageRequest.of(0, 10),
+                0,
+                10,
                 1
         );
-        when(storeProductService.getAll(eq("name"), any(), any(Pageable.class)))
-                .thenReturn((Page) page);
+        when(storeProductService.getAll(eq("name"), any(),
+                any(Pageable.class),
+                isNull()))
+                .thenReturn((PageResponseDto) page);
 
         mockMvc.perform(get("/store-products")
                         .param("sortedBy", "name"))
@@ -162,20 +165,23 @@ class StoreProductControllerTest {
                 .andExpect(jsonPath("$.content[0].upc").value("1234567890"));
 
         verify(storeProductService, times(1))
-                .getAll(eq("name"), any(), any(Pageable.class));
+                .getAll(eq("name"), any(), any(Pageable.class), isNull());
     }
 
     @Test
     @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /store-products?sortedBy=quantity - Manager should get products sorted by quantity")
     void getStoreProducts_sortedByQuantity_asManager_Ok() throws Exception {
-        Page<StoreProductDto> page = new PageImpl<>(
+        PageResponseDto<StoreProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(storeProductDto1, storeProductDto2)),
-                PageRequest.of(0, 10),
+                0,
+                10,
                 2
         );
-        when(storeProductService.getAll(eq("quantity"), any(), any(Pageable.class)))
-                .thenReturn((Page) page);
+        when(storeProductService.getAll(eq("quantity"), any(),
+                any(Pageable.class),
+                isNull()))
+                .thenReturn((PageResponseDto) page);
 
         mockMvc.perform(get("/store-products")
                         .param("sortedBy", "quantity"))
@@ -183,7 +189,7 @@ class StoreProductControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(2));
 
         verify(storeProductService, times(1))
-                .getAll(eq("quantity"), any(), any(Pageable.class));
+                .getAll(eq("quantity"), any(), any(Pageable.class), isNull());
     }
 
     @Test
@@ -194,7 +200,7 @@ class StoreProductControllerTest {
                         .param("sortedBy", "quantity"))
                 .andExpect(status().isForbidden());
 
-        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class));
+        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class), any());
     }
 
     @Test
@@ -262,7 +268,8 @@ class StoreProductControllerTest {
                 .andExpect(jsonPath("$.upc").value("1234567890"))
                 .andExpect(jsonPath("$.selling_price").value(110.0));
 
-        verify(storeProductService, times(1)).updateByUPC(eq("1234567890"), any(StoreProductRequestDto.class));
+        verify(storeProductService, times(1)).updateByUPC(eq("1234567890"),
+                any(StoreProductRequestDto.class));
     }
 
     @Test
@@ -345,7 +352,8 @@ class StoreProductControllerTest {
 
     @Test
     @WithMockUser(authorities = "CASHIER")
-    @DisplayName("GET /store-products/{upc}?selling_price=true&quantity=true - Cashier should get price and quantity")
+    @DisplayName("GET /store-products/{upc}?selling_price=true&quantity=true"
+            + " - Cashier should get price and quantity")
     void findByUpc_priceAndQuantity_asCashier_Ok() throws Exception {
         StoreProductPriceAndQuantityDto dto = new StoreProductPriceAndQuantityDto();
         dto.setSelling_price(BigDecimal.valueOf(100.0));
@@ -365,7 +373,8 @@ class StoreProductControllerTest {
 
     @Test
     @WithMockUser(roles = "MANAGER")
-    @DisplayName("GET /store-products/{upc}?selling_price=true&quantity=true - Manager should get forbidden for price and quantity only")
+    @DisplayName("GET /store-products/{upc}?selling_price=true&quantity=true"
+            + " - Manager should get forbidden for price and quantity only")
     void findByUpc_priceAndQuantity_asManager_Forbidden() throws Exception {
         mockMvc.perform(get("/store-products/1234567890")
                         .param("selling_price", "true")
@@ -466,7 +475,8 @@ class StoreProductControllerTest {
 
         mockMvc.perform(get("/store-products/report"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition", "attachment; filename=store_products.pdf"))
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename=store_products.pdf"))
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF_VALUE))
                 .andExpect(content().bytes(pdfBytes));
 

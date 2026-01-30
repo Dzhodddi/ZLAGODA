@@ -1,13 +1,13 @@
 package org.example.service.product;
 
 import lombok.RequiredArgsConstructor;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
 import org.example.mapper.product.ProductMapper;
 import org.example.model.product.Product;
 import org.example.repository.product.ProductRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -26,8 +26,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductDto> getAll(Pageable pageable) {
-        return repository.findAll(pageable);
+    public PageResponseDto<ProductDto> getAll(Pageable pageable,
+                                              String lastSeenName,
+                                              int lastSeenId) {
+        return repository.findAll(pageable, lastSeenName, lastSeenId);
     }
 
     @Override
@@ -42,13 +44,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductDto> findByName(String name, Pageable pageable) {
-        return repository.findByName(name, pageable);
+    public PageResponseDto<ProductDto> findByName(String name,
+                                                  Pageable pageable,
+                                                  String lastSeenName,
+                                                  int lastSeenId) {
+        return repository.findByName(name, pageable, lastSeenName, lastSeenId);
     }
 
     @Override
-    public Page<ProductDto> findByCategoryId(int category_number, Pageable pageable) {
-        return repository.findByCategoryId(category_number, pageable);
+    public PageResponseDto<ProductDto> findByCategoryId(int category_number,
+                                             Pageable pageable,
+                                             String lastSeenName,
+                                             int lastSeenId) {
+        return repository.findByCategoryId(category_number, pageable, lastSeenName, lastSeenId);
     }
 
     @Override

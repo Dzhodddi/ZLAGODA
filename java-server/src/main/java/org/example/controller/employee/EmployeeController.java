@@ -4,7 +4,6 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,12 +11,12 @@ import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
-import org.example.exception.AuthorizationException;
-import org.example.exception.RegistrationException;
+import org.example.dto.page.PageResponseDto;
+import org.example.exception.custom_exception.AuthorizationException;
+import org.example.exception.custom_exception.RegistrationException;
 import org.example.service.employee.EmployeeService;
 import org.example.service.report.PdfReportGeneratorService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -50,9 +49,10 @@ public class EmployeeController {
             description = "Get all employees sorted by their surnames"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public Page<EmployeeResponseDto> getAll(@RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(defaultValue = "10") int size) {
-        return employeeService.getAll(PageRequest.of(page, size));
+    public PageResponseDto<EmployeeResponseDto> getAll(Pageable pageable,
+                                            @RequestParam(required = false) String lastSeenSurname,
+                                            @RequestParam(required = false) String lastSeenId) {
+        return employeeService.getAll(pageable, lastSeenSurname, lastSeenId);
     }
 
     @PostMapping
@@ -112,9 +112,11 @@ public class EmployeeController {
             description = "Get all cashiers sorted by their surnames"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public Page<EmployeeResponseDto> getAllCashiers(@RequestParam(defaultValue = "0") int page,
-                                                    @RequestParam(defaultValue = "10") int size) {
-        return employeeService.getAllCashiers(PageRequest.of(page, size));
+    public PageResponseDto<EmployeeResponseDto> getAllCashiers(
+            Pageable pageable,
+            @RequestParam(required = false) String lastSeenSurname,
+            @RequestParam(required = false) String lastSeenId) {
+        return employeeService.getAllCashiers(pageable, lastSeenSurname, lastSeenId);
     }
 
     @GetMapping("/me")
