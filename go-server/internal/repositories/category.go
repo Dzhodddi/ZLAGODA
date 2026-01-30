@@ -19,7 +19,7 @@ type CategoryRepository interface {
 	DeleteCategory(ctx context.Context, id int64) error
 	GetCategoryByID(ctx context.Context, id int64) (*generated.Category, error)
 	GetAllCategories(ctx context.Context, lastCategoryNumber int64) ([]generated.Category, error)
-	GetAllCategoriesSortedByName(ctx context.Context) ([]generated.Category, error)
+	GetAllCategoriesSortedByName(ctx context.Context, lastCategoryName string) ([]generated.Category, error)
 }
 
 type categoryRepository struct {
@@ -113,11 +113,14 @@ func (r *categoryRepository) GetAllCategories(ctx context.Context, lastCategoryN
 	return categories, nil
 }
 
-func (r *categoryRepository) GetAllCategoriesSortedByName(ctx context.Context) ([]generated.Category, error) {
+func (r *categoryRepository) GetAllCategoriesSortedByName(ctx context.Context, lastCategoryName string) ([]generated.Category, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
-	categories, err := r.queries.GetAllCategoriesSortedByName(ctx, constants.PaginationStep)
+	categories, err := r.queries.GetAllCategoriesSortedByName(ctx, generated.GetAllCategoriesSortedByNameParams{
+		CategoryName: lastCategoryName,
+		Limit:        constants.PaginationStep,
+	})
 	if err != nil {
 		return nil, err
 	}

@@ -31,5 +31,6 @@ RETURNING category_number;
 -- name: GetAllCategoriesSortedByName :many
 SELECT category_number, category_name
 FROM category
+WHERE category_name > $1
 ORDER BY category_name
-FETCH FIRST $1 ROWS ONLY;
+FETCH FIRST $2 ROWS ONLY;

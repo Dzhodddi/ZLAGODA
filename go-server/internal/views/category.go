@@ -14,6 +14,7 @@ type UpdateCategory struct {
 }
 
 type ListCategoryQueryParams struct {
-	Sorted             *bool  `query:"sorted"`
-	LastCategoryNumber *int64 `query:"category_number"`
+	Sorted             *bool   `query:"sorted"`
+	LastCategoryNumber *int64  `query:"category_number"`
+	LastCategoryName   *string `query:"category_name"`
 }
