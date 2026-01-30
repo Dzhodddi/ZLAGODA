@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: org.example.repository.product.ProductRepositoryTest
--------------------------------------------------------------------------------
-Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.126 s -- in org.example.repository.product.ProductRepositoryTest
