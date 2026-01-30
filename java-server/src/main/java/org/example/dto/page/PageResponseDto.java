@@ -24,7 +24,7 @@ public class PageResponseDto<T> {
         int totalPages = (int) Math.ceil((double) totalElements / pageSize);
 
         return new PageResponseDto<>(content,
-                pageNumber,
+                pageNumber + 1,
                 pageSize,
                 totalElements,
                 totalPages);

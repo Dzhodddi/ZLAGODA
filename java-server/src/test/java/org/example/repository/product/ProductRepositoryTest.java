@@ -73,8 +73,27 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("findAll should return list of products")
-    void findAll_shouldReturnProducts() {
+    @DisplayName("findAll should return list of products (No pagination params)")
+    void findAll_noParams_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt()))
+                .thenReturn(List.of(product));
+        when(jdbcTemplate.queryForObject(
+                anyString(),
+                eq(Integer.class)
+        )).thenReturn(1);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> result = repository.findAll(pageable, null, null);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
+    }
+
+    @Test
+    @DisplayName("findAll should return list of products (With lastSeen params)")
+    void findAll_withLastSeenParams_shouldReturnProducts() {
         when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any(), any()))
                 .thenReturn(List.of(product));
         when(jdbcTemplate.queryForObject(
@@ -84,11 +103,28 @@ class ProductRepositoryTest {
         when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> result = repository.findAll(pageable, "", 0);
+        PageResponseDto<ProductDto> result = repository.findAll(pageable,
+                "PrevProduct", 5);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
+        verify(jdbcTemplate).query(anyString(), eq(rowMapper),
+                eq("PrevProduct"), eq("PrevProduct"), eq(5), eq(10));
+    }
+
+    @Test
+    @DisplayName("findAll should handle offset pagination (Page > 0)")
+    void findAll_offsetPagination_shouldReturnSubset() {
+        List<Product> products = java.util.Collections.nCopies(15, product);
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), eq(20)))
+                .thenReturn(products);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(15);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
+
+        Pageable pageable = PageRequest.of(1, 10);
+        PageResponseDto<ProductDto> result = repository.findAll(pageable, null, null);
+
+        assertEquals(5, result.getContent().size());
     }
 
     @Test
@@ -111,10 +147,9 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByName should return products with matching name")
-    void findByName_shouldReturnProducts() {
-        // Виправлено: передаємо 5 any() для відповідності виклику (name, name, name, id, pageSize)
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any(), any(), any()))
+    @DisplayName("findByName should return products with matching name (No pagination params)")
+    void findByName_noParams_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any()))
                 .thenReturn(List.of(product));
         when(jdbcTemplate.queryForObject(
                 anyString(),
@@ -125,16 +160,33 @@ class ProductRepositoryTest {
 
         Pageable pageable = PageRequest.of(0, 10);
         PageResponseDto<ProductDto> result = repository.findByName("TestProduct",
-                pageable, "", 0);
+                pageable, null, null);
 
         assertEquals(1, result.getContent().size());
         assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
     }
 
     @Test
-    @DisplayName("findByCategoryId should return products in category")
-    void findByCategoryId_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any(), any(), any()))
+    @DisplayName("findByName should return products (With lastSeen params)")
+    void findByName_withLastSeenParams_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any()))
+                .thenReturn(List.of(product));
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), any())).thenReturn(1);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> result = repository.findByName("TestProduct",
+                pageable, "TestProduct", 5);
+
+        assertEquals(1, result.getContent().size());
+        verify(jdbcTemplate).query(anyString(), eq(rowMapper),
+                eq("TestProduct"), eq(5), eq(10));
+    }
+
+    @Test
+    @DisplayName("findByCategoryId should return products in category (No pagination params)")
+    void findByCategoryId_noParams_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any()))
                 .thenReturn(List.of(product));
         when(jdbcTemplate.queryForObject(
                 anyString(),
@@ -145,10 +197,26 @@ class ProductRepositoryTest {
 
         Pageable pageable = PageRequest.of(0, 10);
         PageResponseDto<ProductDto> result = repository.findByCategoryId(10,
-                pageable, "", 0);
+                pageable, null, null);
 
         assertEquals(1, result.getContent().size());
         assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
+    }
+
+    @Test
+    @DisplayName("findByCategoryId should return products (With lastSeen params)")
+    void findByCategoryId_withLastSeenParams_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(product));
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), any())).thenReturn(1);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> result = repository.findByCategoryId(10,
+                pageable, "Prev", 5);
+
+        assertEquals(1, result.getContent().size());
+        verify(jdbcTemplate).query(anyString(), eq(rowMapper), eq(10), eq("Prev"), eq("Prev"), eq(5), eq(10));
     }
 
     @Test
@@ -292,5 +360,18 @@ class ProductRepositoryTest {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(2)))
                 .thenReturn(0);
         assertFalse(repository.existsByIdProduct(2));
+    }
+
+    @Test
+    @DisplayName("findAllNoPagination should return list of all products")
+    void findAllNoPagination_shouldReturnAllProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper))).thenReturn(List.of(product));
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
+
+        List<ProductDto> result = repository.findAllNoPagination();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("TestProduct", result.get(0).getProduct_name());
     }
 }

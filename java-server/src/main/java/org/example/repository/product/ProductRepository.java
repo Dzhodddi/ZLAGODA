@@ -16,7 +16,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Repository
@@ -28,28 +27,15 @@ public class ProductRepository {
 
     public PageResponseDto<ProductDto> findAll(Pageable pageable,
                                                String lastSeenName,
-                                               int lastSeenId) {
+                                               Integer lastSeenId) {
         List<ProductDto> products;
-        if (lastSeenId == 0 && !lastSeenName.isEmpty()) {
-            products = jdbcTemplate.query(
-                            """
-                                SELECT *
-                                FROM product
-                                ORDER BY product_name, id_product
-                                FETCH FIRST ? ROWS ONLY
-                                """,
-                            rowMapper,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        } else {
+        if (lastSeenName != null && lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
                                  SELECT *
                                  FROM product
                                  WHERE (product_name > ?)
-                                    OR (product_name = ? AND id_product = ?)
+                                    OR (product_name = ? AND id_product > ?)
                                  ORDER BY product_name, id_product
                                  FETCH FIRST ? ROWS ONLY
                                  """,
@@ -61,8 +47,209 @@ public class ProductRepository {
                     ).stream()
                     .map(productMapper::toDto)
                     .toList();
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+            if (pageNumber == 0) {
+                products = jdbcTemplate.query(
+                                """
+                                    SELECT *
+                                    FROM product
+                                    ORDER BY product_name, id_product
+                                    FETCH FIRST ? ROWS ONLY
+                                    """,
+                                rowMapper,
+                                pageSize
+                        ).stream()
+                        .map(productMapper::toDto)
+                        .toList();
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+                List<Product> allProducts = jdbcTemplate.query(
+                        """
+                            SELECT *
+                            FROM product
+                            ORDER BY product_name, id_product
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                        rowMapper,
+                        totalToFetch
+                );
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allProducts.size()) {
+                    products = allProducts.subList(startIndex, allProducts.size())
+                            .stream()
+                            .map(productMapper::toDto)
+                            .toList();
+                } else {
+                    products = List.of();
+                }
+            }
         }
+
         long total = getTotalCount();
+        return PageResponseDto.of(
+                products,
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                total
+        );
+    }
+
+    public PageResponseDto<ProductDto> findByName(String name,
+                                                  Pageable pageable,
+                                                  String lastSeenName,
+                                                  Integer lastSeenId) {
+        List<ProductDto> products;
+
+        if (lastSeenName != null && lastSeenId != null && lastSeenId > 0) {
+            products = jdbcTemplate.query(
+                            """
+                                 SELECT *
+                                 FROM product
+                                 WHERE product_name = ?
+                                   AND id_product > ?
+                                 ORDER BY product_name, id_product
+                                 FETCH FIRST ? ROWS ONLY
+                                 """,
+                            rowMapper,
+                            name,
+                            lastSeenId,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(productMapper::toDto)
+                    .toList();
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                products = jdbcTemplate.query(
+                                """
+                                    SELECT *
+                                    FROM product
+                                    WHERE product_name = ?
+                                    ORDER BY product_name, id_product
+                                    FETCH FIRST ? ROWS ONLY
+                                    """,
+                                rowMapper,
+                                name,
+                                pageSize
+                        ).stream()
+                        .map(productMapper::toDto)
+                        .toList();
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<Product> allProducts = jdbcTemplate.query(
+                        """
+                            SELECT *
+                            FROM product
+                            WHERE product_name = ?
+                            ORDER BY product_name, id_product
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                        rowMapper,
+                        name,
+                        totalToFetch
+                );
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allProducts.size()) {
+                    products = allProducts.subList(startIndex, allProducts.size())
+                            .stream()
+                            .map(productMapper::toDto)
+                            .toList();
+                } else {
+                    products = List.of();
+                }
+            }
+        }
+
+        long total = getNameCount(name);
+        return PageResponseDto.of(
+                products,
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                total
+        );
+    }
+
+    public PageResponseDto<ProductDto> findByCategoryId(int category_number,
+                                                        Pageable pageable,
+                                                        String lastSeenName,
+                                                        Integer lastSeenId) {
+        List<ProductDto> products;
+
+        if (lastSeenName != null && lastSeenId != null && lastSeenId > 0) {
+            products = jdbcTemplate.query(
+                            """
+                                 SELECT *
+                                 FROM product
+                                 WHERE category_number = ?
+                                   AND ((product_name > ?)
+                                    OR (product_name = ? AND id_product > ?))
+                                 ORDER BY product_name, id_product
+                                 FETCH FIRST ? ROWS ONLY
+                                 """,
+                            rowMapper,
+                            category_number,
+                            lastSeenName,
+                            lastSeenName,
+                            lastSeenId,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(productMapper::toDto)
+                    .toList();
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                products = jdbcTemplate.query(
+                                """
+                                    SELECT *
+                                    FROM product
+                                    WHERE category_number = ?
+                                    ORDER BY product_name, id_product
+                                    FETCH FIRST ? ROWS ONLY
+                                    """,
+                                rowMapper,
+                                category_number,
+                                pageSize
+                        ).stream()
+                        .map(productMapper::toDto)
+                        .toList();
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<Product> allProducts = jdbcTemplate.query(
+                        """
+                            SELECT *
+                            FROM product
+                            WHERE category_number = ?
+                            ORDER BY product_name, id_product
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                        rowMapper,
+                        category_number,
+                        totalToFetch
+                );
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allProducts.size()) {
+                    products = allProducts.subList(startIndex, allProducts.size())
+                            .stream()
+                            .map(productMapper::toDto)
+                            .toList();
+                } else {
+                    products = List.of();
+                }
+            }
+        }
+
+        long total = getCategoryIdCount(category_number);
         return PageResponseDto.of(
                 products,
                 pageable.getPageNumber(),
@@ -87,106 +274,6 @@ public class ProductRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
-    }
-
-    public PageResponseDto<ProductDto> findByName(String name,
-                                                  Pageable pageable,
-                                                  String lastSeenName,
-                                                  int lastSeenId) {
-        List<ProductDto> products;
-        if (lastSeenId == 0 && !lastSeenName.isEmpty()) {
-            products = jdbcTemplate.query(
-                            """
-                                SELECT *
-                                FROM product
-                                WHERE product_name = ?
-                                ORDER BY product_name, id_product
-                                FETCH FIRST ? ROWS ONLY
-                                """,
-                            rowMapper,
-                            name,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        } else {
-            products = jdbcTemplate.query(
-                            """
-                                 SELECT *
-                                 FROM product
-                                 WHERE product_name = ?
-                                           AND (product_name > ?)
-                                    OR (product_name = ? AND id_product = ?)
-                                 ORDER BY product_name, id_product
-                                 FETCH FIRST ? ROWS ONLY
-                                 """,
-                            rowMapper,
-                            name,
-                            lastSeenName,
-                            lastSeenName,
-                            lastSeenId,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        }
-        long total = getNameCount(name);
-        return PageResponseDto.of(
-                products,
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                total
-        );
-    }
-
-    public PageResponseDto<ProductDto> findByCategoryId(int category_number,
-                                                        Pageable pageable,
-                                                        String lastSeenName,
-                                                        int lastSeenId) {
-        List<ProductDto> products;
-        if (lastSeenId == 0 && !lastSeenName.isEmpty()) {
-            products = jdbcTemplate.query(
-                            """
-                                SELECT *
-                                FROM product
-                                WHERE category_number = ?
-                                ORDER BY product_name, id_product
-                                FETCH FIRST ? ROWS ONLY
-                                """,
-                            rowMapper,
-                            category_number,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        } else {
-            products = jdbcTemplate.query(
-                            """
-                                 SELECT *
-                                 FROM product
-                                 WHERE category_number = ?
-                                           AND (product_name > ?)
-                                    OR (product_name = ? AND id_product = ?)
-                                 ORDER BY product_name, id_product
-                                 FETCH FIRST ? ROWS ONLY
-                                 """,
-                            rowMapper,
-                            category_number,
-                            lastSeenName,
-                            lastSeenName,
-                            lastSeenId,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        }
-        long total = getCategoryIdCount(category_number);
-        return PageResponseDto.of(
-                products,
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                total
-        );
     }
 
     public Product save(Product product) {
@@ -301,7 +388,7 @@ public class ProductRepository {
                         rowMapper)
                 .stream()
                 .map(productMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private long getTotalCount() {

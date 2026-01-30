@@ -31,20 +31,8 @@ public class EmployeeRepository {
                                                         String lastSeenSurname,
                                                         String lastSeenId) {
         List<EmployeeResponseDto> employees;
-        if (lastSeenSurname == null || lastSeenId == null) {
-            employees = jdbcTemplate.query(
-                            """
-                            SELECT *
-                            FROM employee
-                            ORDER BY empl_surname, id_employee
-                            FETCH FIRST ? ROWS ONLY
-                            """,
-                            employeeRowMapper,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(employeeMapper::toEmployeeResponseDto)
-                    .toList();
-        } else {
+
+        if (lastSeenSurname != null && lastSeenId != null) {
             employees = jdbcTemplate.query(
                             """
                             SELECT *
@@ -62,7 +50,49 @@ public class EmployeeRepository {
                     ).stream()
                     .map(employeeMapper::toEmployeeResponseDto)
                     .toList();
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                employees = jdbcTemplate.query(
+                                """
+                                SELECT *
+                                FROM employee
+                                ORDER BY empl_surname, id_employee
+                                FETCH FIRST ? ROWS ONLY
+                                """,
+                                employeeRowMapper,
+                                pageSize
+                        ).stream()
+                        .map(employeeMapper::toEmployeeResponseDto)
+                        .toList();
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<Employee> allEmployees = jdbcTemplate.query(
+                        """
+                        SELECT *
+                        FROM employee
+                        ORDER BY empl_surname, id_employee
+                        FETCH FIRST ? ROWS ONLY
+                        """,
+                        employeeRowMapper,
+                        totalToFetch
+                );
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allEmployees.size()) {
+                    employees = allEmployees.subList(startIndex, allEmployees.size())
+                            .stream()
+                            .map(employeeMapper::toEmployeeResponseDto)
+                            .toList();
+                } else {
+                    employees = List.of();
+                }
+            }
         }
+
         long total = getTotalCount();
         return PageResponseDto.of(
                 employees,
@@ -221,24 +251,11 @@ public class EmployeeRepository {
     }
 
     public PageResponseDto<EmployeeResponseDto> findAllCashiers(Pageable pageable,
-                                                     String lastSeenSurname,
-                                                     String lastSeenId) {
+                                                                String lastSeenSurname,
+                                                                String lastSeenId) {
         List<EmployeeResponseDto> employees;
-        if (lastSeenSurname == null || lastSeenId == null) {
-            employees = jdbcTemplate.query(
-                            """
-                            SELECT *
-                            FROM employee
-                            WHERE empl_role = 'CASHIER'
-                            ORDER BY empl_surname, id_employee
-                            FETCH FIRST ? ROWS ONLY
-                            """,
-                            employeeRowMapper,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(employeeMapper::toEmployeeResponseDto)
-                    .toList();
-        } else {
+
+        if (lastSeenSurname != null && lastSeenId != null) {
             employees = jdbcTemplate.query(
                             """
                             SELECT *
@@ -257,7 +274,51 @@ public class EmployeeRepository {
                     ).stream()
                     .map(employeeMapper::toEmployeeResponseDto)
                     .toList();
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                employees = jdbcTemplate.query(
+                                """
+                                SELECT *
+                                FROM employee
+                                WHERE empl_role = 'CASHIER'
+                                ORDER BY empl_surname, id_employee
+                                FETCH FIRST ? ROWS ONLY
+                                """,
+                                employeeRowMapper,
+                                pageSize
+                        ).stream()
+                        .map(employeeMapper::toEmployeeResponseDto)
+                        .toList();
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<Employee> allEmployees = jdbcTemplate.query(
+                        """
+                        SELECT *
+                        FROM employee
+                        WHERE empl_role = 'CASHIER'
+                        ORDER BY empl_surname, id_employee
+                        FETCH FIRST ? ROWS ONLY
+                        """,
+                        employeeRowMapper,
+                        totalToFetch
+                );
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allEmployees.size()) {
+                    employees = allEmployees.subList(startIndex, allEmployees.size())
+                            .stream()
+                            .map(employeeMapper::toEmployeeResponseDto)
+                            .toList();
+                } else {
+                    employees = List.of();
+                }
+            }
         }
+
         long total = getCashierCount();
         return PageResponseDto.of(
                 employees,

@@ -17,19 +17,25 @@ public class RoleRepository {
     public Optional&lt;Role&gt; findRoleByName(Role.RoleName name) {
         try {
 <span class="fc" id="L19">            Role role = jdbcTemplate.queryForObject(</span>
-                    &quot;SELECT * FROM roles WHERE name = ?&quot;,
+                    &quot;&quot;&quot;
+                    SELECT *
+                    FROM roles
+                    WHERE name = ?
+                    &quot;&quot;&quot;,
                     roleRowMapper,
-<span class="fc" id="L22">                    name.name()</span>
+<span class="fc" id="L26">                    name.name()</span>
             );
-<span class="fc" id="L24">            return Optional.ofNullable(role);</span>
-<span class="fc" id="L25">        } catch (EmptyResultDataAccessException e) {</span>
-<span class="fc" id="L26">            return Optional.empty();</span>
+<span class="fc" id="L28">            return Optional.ofNullable(role);</span>
+<span class="fc" id="L29">        } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L30">            return Optional.empty();</span>
         }
     }
 
     public void save(Role role) {
-<span class="fc" id="L31">        String sql = &quot;INSERT INTO roles (name) VALUES (?)&quot;;</span>
-<span class="fc" id="L32">        jdbcTemplate.update(sql, role.getName().name());</span>
-<span class="fc" id="L33">    }</span>
+<span class="fc" id="L35">        jdbcTemplate.update(&quot;&quot;&quot;</span>
+                            INSERT INTO roles (name) VALUES (?)
+                            &quot;&quot;&quot;,
+<span class="fc" id="L38">                role.getName().name());</span>
+<span class="fc" id="L39">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

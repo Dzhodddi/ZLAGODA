@@ -16,7 +16,9 @@ import org.example.exception.custom_exception.InvalidParameterException;
 import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -55,9 +57,10 @@ public class StoreProductController {
     """
     )
     public PageResponseDto<?> getStoreProducts(
-            @RequestParam String sortedBy,
+            @RequestParam(required = false) String sortedBy,
             @RequestParam(required = false) Boolean prom,
-            Pageable pageable,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String lastSeenUPC
     ) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -70,6 +73,14 @@ public class StoreProductController {
         }
         if ("quantity".equals(sortedBy) && !isManager) {
             throw new AuthorizationException("Only Manager can sort by quantity");
+        }
+        Pageable pageable = null;
+        if ("name".equals(sortedBy)) {
+            pageable = PageRequest.of(page - 1, size, Sort.by("product_name"));
+        } else if ("quantity".equals(sortedBy)) {
+            pageable = PageRequest.of(page - 1, size, Sort.by("products_number"));
+        } else {
+            pageable = PageRequest.of(page - 1, size);
         }
         return storeProductService.getAll(sortedBy, prom, pageable, lastSeenUPC);
     }

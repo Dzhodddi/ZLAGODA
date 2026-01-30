@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: org.example.dto.employee.registration.annotation.date.CustomDateDeserializerTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.296 s -- in org.example.dto.employee.registration.annotation.date.CustomDateDeserializerTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.259 s -- in org.example.dto.employee.registration.annotation.date.CustomDateDeserializerTest

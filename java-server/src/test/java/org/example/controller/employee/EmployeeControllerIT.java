@@ -63,7 +63,7 @@ public class EmployeeControllerIT {
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<RestPage<EmployeeResponseDto>>() {});
 
-        assertEquals(0, response.getBody().getNumber());
-        assertTrue(response.getBody().getTotalElements() > 0);
+        assertEquals(1, response.getBody().getNumber());
+        assertTrue(response.getBody().getContent().size() > 0);
     }
 }

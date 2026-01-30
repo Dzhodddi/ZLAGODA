@@ -22,9 +22,12 @@ import org.springframework.web.client.RestClient;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Sql(scripts = "classpath:database/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@Sql(scripts = "classpath:database/add-test-users.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@Sql(scripts = "classpath:database/add-products.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {
+        "classpath:database/clear.sql",
+        "classpath:database/schema.sql",
+        "classpath:database/add-test-users.sql",
+        "classpath:database/add-products.sql"
+}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @Sql(scripts = "classpath:database/clear.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
 public class ProductControllerIT {
 
@@ -59,12 +62,11 @@ public class ProductControllerIT {
         String token = loginResponse.accessToken();
 
         ResponseEntity<RestPage<ProductDto>> response = restClient.get()
-                .uri("/products/search?categoryId=1&lastSeenId=0&lastSeenName=")
+                .uri("/products/search?categoryId=1")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<RestPage<ProductDto>>() {});
 
-        assertEquals(0, response.getBody().getNumber());
-        assertEquals(2, response.getBody().getTotalElements());
+        assertEquals(2, response.getBody().getContent().size());
     }
 }

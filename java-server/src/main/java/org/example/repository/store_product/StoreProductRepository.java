@@ -2,10 +2,8 @@ package org.example.repository.store_product;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
@@ -18,11 +16,11 @@ import org.example.exception.custom_exception.InvalidProductException;
 import org.example.mapper.store_product.StoreProductMapper;
 import org.example.mapper.store_product.StoreProductRowMapper;
 import org.example.model.store_product.StoreProduct;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
@@ -33,36 +31,27 @@ public class StoreProductRepository {
     private static final BigDecimal PROM_RATE = new BigDecimal("0.80");
     private final JdbcTemplate jdbcTemplate;
     private final StoreProductRowMapper rowMapper;
-    @Qualifier("storeProductMapper")
-    private final StoreProductMapper mapper;
+    private final StoreProductMapper storeProductMapper;
+
+    private final RowMapper<StoreProductWithNameDto> withNameRowMapper
+            = (rs, rowNum) -> {
+        StoreProductWithNameDto dto = new StoreProductWithNameDto();
+        dto.setUPC(rs.getString("UPC"));
+        dto.setUPC_prom(rs.getString("UPC_prom"));
+        dto.setId_product(rs.getInt("id_product"));
+        dto.setSelling_price(rs.getBigDecimal("selling_price"));
+        dto.setProducts_number(rs.getInt("products_number"));
+        dto.setPromotional_product(rs.getBoolean("promotional_product"));
+        dto.setProduct_name(rs.getString("product_name"));
+        return dto;
+    };
 
     public PageResponseDto<StoreProductWithNameDto> findAllSortedByName(
             Pageable pageable, String lastSeenUPC) {
         List<StoreProductWithNameDto> storeProducts;
-        if (lastSeenUPC == null) {
-            storeProducts = new ArrayList<>(jdbcTemplate.query(
-                    """
-                    SELECT sp.*, p.product_name
-                    FROM store_product sp
-                    JOIN product p ON sp.id_product = p.id_product
-                    WHERE sp.is_deleted = false
-                    ORDER BY p.product_name, sp.UPC
-                    FETCH FIRST ? ROWS ONLY
-                    """,
-                    (rs, rowNum) -> {
-                        StoreProductWithNameDto dto = new StoreProductWithNameDto();
-                        dto.setUPC(rs.getString("UPC"));
-                        dto.setUPC_prom(rs.getString("UPC_prom"));
-                        dto.setId_product(rs.getInt("id_product"));
-                        dto.setSelling_price(rs.getBigDecimal("selling_price"));
-                        dto.setProducts_number(rs.getInt("products_number"));
-                        dto.setPromotional_product(rs.getBoolean("promotional_product"));
-                        dto.setProduct_name(rs.getString("product_name"));
-                        return dto;
-                    },
-                    pageable.getPageSize()));
-        } else {
-            storeProducts = new ArrayList<>(jdbcTemplate.query(
+
+        if (lastSeenUPC != null) {
+            storeProducts = jdbcTemplate.query(
                     """
                     SELECT sp.*, p.product_name
                     FROM store_product sp
@@ -76,20 +65,49 @@ public class StoreProductRepository {
                     ORDER BY p.product_name, sp.UPC
                     FETCH FIRST ? ROWS ONLY
                     """,
-                    (rs, rowNum) -> {
-                        StoreProductWithNameDto dto = new StoreProductWithNameDto();
-                        dto.setUPC(rs.getString("UPC"));
-                        dto.setUPC_prom(rs.getString("UPC_prom"));
-                        dto.setId_product(rs.getInt("id_product"));
-                        dto.setSelling_price(rs.getBigDecimal("selling_price"));
-                        dto.setProducts_number(rs.getInt("products_number"));
-                        dto.setPromotional_product(rs.getBoolean("promotional_product"));
-                        dto.setProduct_name(rs.getString("product_name"));
-                        return dto;
-                    },
+                    withNameRowMapper,
                     lastSeenUPC,
-                    pageable.getPageSize()));
+                    pageable.getPageSize());
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                storeProducts = jdbcTemplate.query(
+                        """
+                        SELECT sp.*, p.product_name
+                        FROM store_product sp
+                        JOIN product p ON sp.id_product = p.id_product
+                        WHERE sp.is_deleted = false
+                        ORDER BY p.product_name, sp.UPC
+                        FETCH FIRST ? ROWS ONLY
+                        """,
+                        withNameRowMapper,
+                        pageSize);
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<StoreProductWithNameDto> allProducts = jdbcTemplate.query(
+                        """
+                        SELECT sp.*, p.product_name
+                        FROM store_product sp
+                        JOIN product p ON sp.id_product = p.id_product
+                        WHERE sp.is_deleted = false
+                        ORDER BY p.product_name, sp.UPC
+                        FETCH FIRST ? ROWS ONLY
+                        """,
+                        withNameRowMapper,
+                        totalToFetch);
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allProducts.size()) {
+                    storeProducts = allProducts.subList(startIndex, allProducts.size());
+                } else {
+                    storeProducts = List.of();
+                }
+            }
         }
+
         long total = getTotalCount();
         return PageResponseDto.of(
                 storeProducts,
@@ -102,21 +120,8 @@ public class StoreProductRepository {
     public PageResponseDto<StoreProductDto> findAllSortedByQuantity(
             Pageable pageable, String lastSeenUPC) {
         List<StoreProductDto> storeProducts;
-        if (lastSeenUPC == null) {
-            storeProducts = jdbcTemplate.query(
-                            """
-                                SELECT *
-                                FROM store_product
-                                WHERE is_deleted = false
-                                ORDER BY products_number
-                                FETCH FIRST ? ROWS ONLY
-                                """,
-                            rowMapper,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(mapper::toDto)
-                    .toList();
-        } else {
+
+        if (lastSeenUPC != null) {
             storeProducts = jdbcTemplate.query(
                             """
                                 SELECT *
@@ -129,9 +134,52 @@ public class StoreProductRepository {
                             lastSeenUPC,
                             pageable.getPageSize()
                     ).stream()
-                    .map(mapper::toDto)
+                    .map(storeProductMapper::toDto)
                     .toList();
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                storeProducts = jdbcTemplate.query(
+                                """
+                                    SELECT *
+                                    FROM store_product
+                                    WHERE is_deleted = false
+                                    ORDER BY products_number
+                                    FETCH FIRST ? ROWS ONLY
+                                    """,
+                                rowMapper,
+                                pageSize
+                        ).stream()
+                        .map(storeProductMapper::toDto)
+                        .toList();
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<StoreProduct> allProducts = jdbcTemplate.query(
+                        """
+                            SELECT *
+                            FROM store_product
+                            WHERE is_deleted = false
+                            ORDER BY products_number
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                        rowMapper,
+                        totalToFetch);
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allProducts.size()) {
+                    storeProducts = allProducts.subList(startIndex, allProducts.size())
+                            .stream()
+                            .map(storeProductMapper::toDto)
+                            .toList();
+                } else {
+                    storeProducts = List.of();
+                }
+            }
         }
+
         long total = getTotalCount();
         return PageResponseDto.of(
                 storeProducts,
@@ -144,21 +192,8 @@ public class StoreProductRepository {
     public PageResponseDto<StoreProductDto> findPromotionalSortedByQuantity(
             Pageable pageable, String lastSeenUPC) {
         List<StoreProductDto> storeProducts;
-        if (lastSeenUPC == null) {
-            storeProducts = jdbcTemplate.query(
-                            """
-                                SELECT *
-                                FROM store_product
-                                WHERE is_deleted = false AND promotional_product = true
-                                ORDER BY products_number
-                                FETCH FIRST ? ROWS ONLY
-                                """,
-                            rowMapper,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(mapper::toDto)
-                    .toList();
-        } else {
+
+        if (lastSeenUPC != null) {
             storeProducts = jdbcTemplate.query(
                             """
                                 SELECT *
@@ -173,9 +208,52 @@ public class StoreProductRepository {
                             lastSeenUPC,
                             pageable.getPageSize()
                     ).stream()
-                    .map(mapper::toDto)
+                    .map(storeProductMapper::toDto)
                     .toList();
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                storeProducts = jdbcTemplate.query(
+                                """
+                                    SELECT *
+                                    FROM store_product
+                                    WHERE is_deleted = false AND promotional_product = true
+                                    ORDER BY products_number
+                                    FETCH FIRST ? ROWS ONLY
+                                    """,
+                                rowMapper,
+                                pageSize
+                        ).stream()
+                        .map(storeProductMapper::toDto)
+                        .toList();
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<StoreProduct> allProducts = jdbcTemplate.query(
+                        """
+                            SELECT *
+                            FROM store_product
+                            WHERE is_deleted = false AND promotional_product = true
+                            ORDER BY products_number
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                        rowMapper,
+                        totalToFetch);
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allProducts.size()) {
+                    storeProducts = allProducts.subList(startIndex, allProducts.size())
+                            .stream()
+                            .map(storeProductMapper::toDto)
+                            .toList();
+                } else {
+                    storeProducts = List.of();
+                }
+            }
         }
+
         long total = getPromCount();
         return PageResponseDto.of(
                 storeProducts,
@@ -188,21 +266,8 @@ public class StoreProductRepository {
     public PageResponseDto<StoreProductDto> findNonPromotionalSortedByQuantity(
             Pageable pageable, String lastSeenUPC) {
         List<StoreProductDto> storeProducts;
-        if (lastSeenUPC == null) {
-            storeProducts = jdbcTemplate.query(
-                            """
-                                SELECT *
-                                FROM store_product
-                                WHERE is_deleted = false AND promotional_product = false
-                                ORDER BY products_number
-                                FETCH FIRST ? ROWS ONLY
-                                """,
-                            rowMapper,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(mapper::toDto)
-                    .toList();
-        } else {
+
+        if (lastSeenUPC != null) {
             storeProducts = jdbcTemplate.query(
                             """
                                 SELECT *
@@ -217,9 +282,52 @@ public class StoreProductRepository {
                             lastSeenUPC,
                             pageable.getPageSize()
                     ).stream()
-                    .map(mapper::toDto)
+                    .map(storeProductMapper::toDto)
                     .toList();
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                storeProducts = jdbcTemplate.query(
+                                """
+                                    SELECT *
+                                    FROM store_product
+                                    WHERE is_deleted = false AND promotional_product = false
+                                    ORDER BY products_number
+                                    FETCH FIRST ? ROWS ONLY
+                                    """,
+                                rowMapper,
+                                pageSize
+                        ).stream()
+                        .map(storeProductMapper::toDto)
+                        .toList();
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<StoreProduct> allProducts = jdbcTemplate.query(
+                        """
+                            SELECT *
+                            FROM store_product
+                            WHERE is_deleted = false AND promotional_product = false
+                            ORDER BY products_number
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                        rowMapper,
+                        totalToFetch);
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allProducts.size()) {
+                    storeProducts = allProducts.subList(startIndex, allProducts.size())
+                            .stream()
+                            .map(storeProductMapper::toDto)
+                            .toList();
+                } else {
+                    storeProducts = List.of();
+                }
+            }
         }
+
         long total = getNonPromCount();
         return PageResponseDto.of(
                 storeProducts,
@@ -232,30 +340,8 @@ public class StoreProductRepository {
     public PageResponseDto<StoreProductWithNameDto> findPromotionalSortedByName(
             Pageable pageable, String lastSeenUPC) {
         List<StoreProductWithNameDto> storeProducts;
-        if (lastSeenUPC == null) {
-            storeProducts = jdbcTemplate.query(
-                    """
-                    SELECT sp.*, p.product_name
-                    FROM store_product sp
-                    JOIN product p ON sp.id_product = p.id_product
-                    WHERE sp.is_deleted = false AND sp.promotional_product = true
-                    ORDER BY p.product_name, sp.UPC
-                    FETCH FIRST ? ROWS ONLY
-                    """,
-                    (rs, rowNum) -> {
-                        StoreProductWithNameDto dto = new StoreProductWithNameDto();
-                        dto.setUPC(rs.getString("UPC"));
-                        dto.setUPC_prom(rs.getString("UPC_prom"));
-                        dto.setId_product(rs.getInt("id_product"));
-                        dto.setSelling_price(rs.getBigDecimal("selling_price"));
-                        dto.setProducts_number(rs.getInt("products_number"));
-                        dto.setPromotional_product(rs.getBoolean("promotional_product"));
-                        dto.setProduct_name(rs.getString("product_name"));
-                        return dto;
-                    },
-                    pageable.getPageSize()
-            );
-        } else {
+
+        if (lastSeenUPC != null) {
             storeProducts = jdbcTemplate.query(
                     """
                     SELECT sp.*, p.product_name
@@ -272,21 +358,52 @@ public class StoreProductRepository {
                     ORDER BY p.product_name, sp.UPC
                     FETCH FIRST ? ROWS ONLY
                     """,
-                    (rs, rowNum) -> {
-                        StoreProductWithNameDto dto = new StoreProductWithNameDto();
-                        dto.setUPC(rs.getString("UPC"));
-                        dto.setUPC_prom(rs.getString("UPC_prom"));
-                        dto.setId_product(rs.getInt("id_product"));
-                        dto.setSelling_price(rs.getBigDecimal("selling_price"));
-                        dto.setProducts_number(rs.getInt("products_number"));
-                        dto.setPromotional_product(rs.getBoolean("promotional_product"));
-                        dto.setProduct_name(rs.getString("product_name"));
-                        return dto;
-                    },
+                    withNameRowMapper,
                     lastSeenUPC,
                     pageable.getPageSize()
             );
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                storeProducts = jdbcTemplate.query(
+                        """
+                        SELECT sp.*, p.product_name
+                        FROM store_product sp
+                        JOIN product p ON sp.id_product = p.id_product
+                        WHERE sp.is_deleted = false AND sp.promotional_product = true
+                        ORDER BY p.product_name, sp.UPC
+                        FETCH FIRST ? ROWS ONLY
+                        """,
+                        withNameRowMapper,
+                        pageSize
+                );
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<StoreProductWithNameDto> allProducts = jdbcTemplate.query(
+                        """
+                        SELECT sp.*, p.product_name
+                        FROM store_product sp
+                        JOIN product p ON sp.id_product = p.id_product
+                        WHERE sp.is_deleted = false AND sp.promotional_product = true
+                        ORDER BY p.product_name, sp.UPC
+                        FETCH FIRST ? ROWS ONLY
+                        """,
+                        withNameRowMapper,
+                        totalToFetch
+                );
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allProducts.size()) {
+                    storeProducts = allProducts.subList(startIndex, allProducts.size());
+                } else {
+                    storeProducts = List.of();
+                }
+            }
         }
+
         long total = getPromCount();
         return PageResponseDto.of(storeProducts, pageable.getPageNumber(), pageable.getPageSize(), total);
     }
@@ -294,30 +411,8 @@ public class StoreProductRepository {
     public PageResponseDto<StoreProductWithNameDto> findNonPromotionalSortedByName(
             Pageable pageable, String lastSeenUPC) {
         List<StoreProductWithNameDto> storeProducts;
-        if (lastSeenUPC == null) {
-            storeProducts = jdbcTemplate.query(
-                    """
-                    SELECT sp.*, p.product_name
-                    FROM store_product sp
-                    JOIN product p ON sp.id_product = p.id_product
-                    WHERE sp.is_deleted = false AND sp.promotional_product = false
-                    ORDER BY p.product_name, sp.UPC
-                    FETCH FIRST ? ROWS ONLY
-                    """,
-                    (rs, rowNum) -> {
-                        StoreProductWithNameDto dto = new StoreProductWithNameDto();
-                        dto.setUPC(rs.getString("UPC"));
-                        dto.setUPC_prom(rs.getString("UPC_prom"));
-                        dto.setId_product(rs.getInt("id_product"));
-                        dto.setSelling_price(rs.getBigDecimal("selling_price"));
-                        dto.setProducts_number(rs.getInt("products_number"));
-                        dto.setPromotional_product(rs.getBoolean("promotional_product"));
-                        dto.setProduct_name(rs.getString("product_name"));
-                        return dto;
-                    },
-                    pageable.getPageSize()
-            );
-        } else {
+
+        if (lastSeenUPC != null) {
             storeProducts = jdbcTemplate.query(
                     """
                     SELECT sp.*, p.product_name
@@ -334,21 +429,52 @@ public class StoreProductRepository {
                     ORDER BY p.product_name, sp.UPC
                     FETCH FIRST ? ROWS ONLY
                     """,
-                    (rs, rowNum) -> {
-                        StoreProductWithNameDto dto = new StoreProductWithNameDto();
-                        dto.setUPC(rs.getString("UPC"));
-                        dto.setUPC_prom(rs.getString("UPC_prom"));
-                        dto.setId_product(rs.getInt("id_product"));
-                        dto.setSelling_price(rs.getBigDecimal("selling_price"));
-                        dto.setProducts_number(rs.getInt("products_number"));
-                        dto.setPromotional_product(rs.getBoolean("promotional_product"));
-                        dto.setProduct_name(rs.getString("product_name"));
-                        return dto;
-                    },
+                    withNameRowMapper,
                     lastSeenUPC,
                     pageable.getPageSize()
             );
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                storeProducts = jdbcTemplate.query(
+                        """
+                        SELECT sp.*, p.product_name
+                        FROM store_product sp
+                        JOIN product p ON sp.id_product = p.id_product
+                        WHERE sp.is_deleted = false AND sp.promotional_product = false
+                        ORDER BY p.product_name, sp.UPC
+                        FETCH FIRST ? ROWS ONLY
+                        """,
+                        withNameRowMapper,
+                        pageSize
+                );
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<StoreProductWithNameDto> allProducts = jdbcTemplate.query(
+                        """
+                        SELECT sp.*, p.product_name
+                        FROM store_product sp
+                        JOIN product p ON sp.id_product = p.id_product
+                        WHERE sp.is_deleted = false AND sp.promotional_product = false
+                        ORDER BY p.product_name, sp.UPC
+                        FETCH FIRST ? ROWS ONLY
+                        """,
+                        withNameRowMapper,
+                        totalToFetch
+                );
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allProducts.size()) {
+                    storeProducts = allProducts.subList(startIndex, allProducts.size());
+                } else {
+                    storeProducts = List.of();
+                }
+            }
         }
+
         long total = getNonPromCount();
         return PageResponseDto.of(storeProducts, pageable.getPageNumber(), pageable.getPageSize(), total);
     }
@@ -499,8 +625,9 @@ public class StoreProductRepository {
             }
 
             return findAllInfoByUPC(upc)
-                    .map(mapper::toDto)
-                    .orElseThrow(() -> new EntityNotFoundException("Store product not found after update: " + upc));
+                    .map(storeProductMapper::toDto)
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Store product not found after update: " + upc));
 
         } catch (DataIntegrityViolationException e) {
             throw new InvalidProductException("Invalid product or UPC reference: " + requestDto.getId_product());
@@ -544,20 +671,8 @@ public class StoreProductRepository {
     public PageResponseDto<StoreProductDto> findAll(
             Pageable pageable, String lastSeenUPC) {
         List<StoreProductDto> storeProducts;
-        if (lastSeenUPC == null) {
-            storeProducts = jdbcTemplate.query(
-                            """
-                                 SELECT *
-                                 FROM store_product
-                                 WHERE is_deleted = false
-                                 FETCH FIRST ? ROWS ONLY
-                                 """,
-                            rowMapper,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(mapper::toDto)
-                    .toList();
-        } else {
+
+        if (lastSeenUPC != null) {
             storeProducts = jdbcTemplate.query(
                             """
                                  SELECT *
@@ -569,9 +684,50 @@ public class StoreProductRepository {
                             lastSeenUPC,
                             pageable.getPageSize()
                     ).stream()
-                    .map(mapper::toDto)
+                    .map(storeProductMapper::toDto)
                     .toList();
+        } else {
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+
+            if (pageNumber == 0) {
+                storeProducts = jdbcTemplate.query(
+                                """
+                                     SELECT *
+                                     FROM store_product
+                                     WHERE is_deleted = false
+                                     FETCH FIRST ? ROWS ONLY
+                                     """,
+                                rowMapper,
+                                pageSize
+                        ).stream()
+                        .map(storeProductMapper::toDto)
+                        .toList();
+            } else {
+                int totalToFetch = (pageNumber + 1) * pageSize;
+
+                List<StoreProduct> allProducts = jdbcTemplate.query(
+                        """
+                             SELECT *
+                             FROM store_product
+                             WHERE is_deleted = false
+                             FETCH FIRST ? ROWS ONLY
+                             """,
+                        rowMapper,
+                        totalToFetch);
+
+                int startIndex = pageNumber * pageSize;
+                if (startIndex < allProducts.size()) {
+                    storeProducts = allProducts.subList(startIndex, allProducts.size())
+                            .stream()
+                            .map(storeProductMapper::toDto)
+                            .toList();
+                } else {
+                    storeProducts = List.of();
+                }
+            }
         }
+
         long total = getTotalCount();
         return PageResponseDto.of(
                 storeProducts,
@@ -587,10 +743,10 @@ public class StoreProductRepository {
              FROM store_product
              WHERE is_deleted = false
              """,
-                rowMapper)
+                        rowMapper)
                 .stream()
-                .map(mapper::toDto)
-                .collect(Collectors.toList());
+                .map(storeProductMapper::toDto)
+                .toList();
     }
 
     private long getTotalCount() {

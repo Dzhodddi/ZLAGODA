@@ -11,7 +11,6 @@ import org.example.dto.store_product.product.StoreProductWithNameDto;
 import org.example.exception.custom_exception.EntityNotFoundException;
 import org.example.mapper.store_product.StoreProductMapper;
 import org.example.repository.store_product.StoreProductRepository;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +19,7 @@ import org.springframework.stereotype.Service;
 public class StoreProductServiceImpl implements StoreProductService {
 
     private final StoreProductRepository repository;
-    @Qualifier("storeProductMapper")
-    private final StoreProductMapper mapper;
+    private final StoreProductMapper storeProductMapper;
 
     public PageResponseDto<?> getAll(String sortedBy,
                                      Boolean prom,
@@ -95,7 +93,7 @@ public class StoreProductServiceImpl implements StoreProductService {
 
     @Override
     public StoreProductDto save(StoreProductRequestDto requestDto) {
-        return mapper.toDto(repository.save(requestDto));
+        return storeProductMapper.toDto(repository.save(requestDto));
     }
 
     @Override

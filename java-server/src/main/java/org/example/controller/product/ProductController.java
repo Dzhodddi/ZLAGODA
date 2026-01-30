@@ -4,7 +4,6 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,9 @@ import org.example.exception.custom_exception.AuthorizationException;
 import org.example.exception.custom_exception.InvalidParameterException;
 import org.example.service.product.ProductService;
 import org.example.service.report.PdfReportGeneratorService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,9 +49,11 @@ public class ProductController {
             summary = "Get all products",
             description = "Get all products sorted by their names"
     )
-    public PageResponseDto<ProductDto> getAll(Pageable pageable,
+    public PageResponseDto<ProductDto> getAll(@RequestParam(defaultValue = "1") int page,
+                                              @RequestParam(defaultValue = "10") int size,
                                               @RequestParam(required = false) String lastSeenName,
-                                              @RequestParam(required = false) int lastSeenId) {
+                                              @RequestParam(required = false) Integer lastSeenId) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("product_name"));
         return productService.getAll(pageable, lastSeenName, lastSeenId);
     }
 
@@ -61,12 +64,14 @@ public class ProductController {
     )
     public PageResponseDto<ProductDto> search(@RequestParam(required = false) String name,
                                               @RequestParam(required = false) Integer categoryId,
-                                              Pageable pageable,
+                                              @RequestParam(defaultValue = "1") int page,
+                                              @RequestParam(defaultValue = "10") int size,
                                               @RequestParam(required = false) String lastSeenName,
-                                              @RequestParam(required = false) int lastSeenId) {
+                                              @RequestParam(required = false) Integer lastSeenId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CASHIER"));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("product_name"));
         if (name != null && !name.isEmpty()) {
             if (!isCashier) {
                 throw new AuthorizationException("Only Cashier can search products by name");
@@ -126,7 +131,8 @@ public class ProductController {
         List<ProductDto> products = productService.getAllNoPagination();
         byte[] pdf = pdfReportGeneratorService.productToPdf(products);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=products.pdf")
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=products.pdf")
                 .body(pdf);
     }
 }

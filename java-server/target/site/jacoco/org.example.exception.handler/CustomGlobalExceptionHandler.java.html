@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomGlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spring-boot-first-project</a> &gt; <a href="index.source.html" class="el_package">org.example.exception.handler</a> &gt; <span class="el_source">CustomGlobalExceptionHandler.java</span></div><h1>CustomGlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package org.example.exception.handler;
+
+import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+<span class="fc" id="L15">public class CustomGlobalExceptionHandler {</span>
+
+    @ExceptionHandler(BaseServiceException.class)
+    public ResponseEntity&lt;String&gt; handleCustomExceptions(BaseServiceException ex) {
+<span class="fc" id="L19">        return ResponseEntity.status(ex.getHttpStatus()).body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;List&lt;String&gt;&gt; handleValidationExceptions(MethodArgumentNotValidException ex) {
+<span class="fc" id="L24">        List&lt;String&gt; errors = ex.getBindingResult().getFieldErrors().stream()</span>
+<span class="fc" id="L25">                .map(error -&gt; error.getField() + &quot; &quot; + error.getDefaultMessage())</span>
+<span class="fc" id="L26">                .toList();</span>
+<span class="fc" id="L27">        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errors);</span>
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity&lt;String&gt; handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+<span class="fc" id="L32">        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(&quot;Data integrity violation&quot;);</span>
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity&lt;String&gt; handleInvalidJson(HttpMessageNotReadableException ex) {
+<span class="fc" id="L37">        Throwable cause = ex.getCause();</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        while (cause != null) {</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">            if (cause.getClass().getSimpleName().equals(&quot;DateFormatException&quot;)) {</span>
+<span class="fc" id="L40">                return ResponseEntity.badRequest()</span>
+<span class="fc" id="L41">                        .body(&quot;Invalid date format. Expected format: yyyy-MM-dd&quot;);</span>
+            }
+<span class="nc" id="L43">            cause = cause.getCause();</span>
+        }
+<span class="fc" id="L45">        return ResponseEntity.badRequest().body(&quot;Invalid JSON format&quot;);</span>
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity&lt;String&gt; handleAuthenticationException(AuthenticationException ex) {
+<span class="fc" id="L50">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity&lt;String&gt; handleAccessDenied(AccessDeniedException ex) {
+<span class="fc" id="L55">        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;String&gt; handleAllExceptions(Exception ex) {
+<span class="fc" id="L60">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="fc" id="L61">                .body(&quot;Unexpected error occurred&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
