@@ -1,5 +1,5 @@
 .PHONY: gen-docs sqlc-generate
-
+COVERAGE_DIR ?= /coverage
 gen-docs:
 	swag init -g internal/server/server.go
 
@@ -17,6 +17,7 @@ test-integration:
 		-parallel=1 \
 		-covermode=atomic \
 		-coverpkg=./internal/repositories/...,./internal/handlers/... \
+		-coverprofile=$(COVERAGE_DIR)/coverage.integration.out \
 		./internal/repositories/... \
 		./internal/handlers/...
 
