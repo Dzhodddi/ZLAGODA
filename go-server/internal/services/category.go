@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
@@ -63,11 +62,14 @@ func (s *categoryService) GetCategoryByID(ctx context.Context, id int64) (*views
 func (s *categoryService) GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]views.CategoryResponse, error) {
 	var categories []generated.Category
 	var err error
+	if q.LastCategoryNumber == nil {
+		q.LastCategoryNumber = new(int64)
+	}
 	switch {
 	case q.Sorted != nil && *q.Sorted:
 		categories, err = s.categoryRepository.GetAllCategoriesSortedByName(ctx)
 	default:
-		categories, err = s.categoryRepository.GetAllCategories(ctx)
+		categories, err = s.categoryRepository.GetAllCategories(ctx, *q.LastCategoryNumber)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch categories: %w", err)

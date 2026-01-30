@@ -35,6 +35,13 @@ const docTemplate = `{
                         "description": "sorted",
                         "name": "sorted",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "category_number",
+                        "name": "category_number",
+                        "in": "query"
                     }
                 ],
                 "responses": {

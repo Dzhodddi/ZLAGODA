@@ -4,4 +4,5 @@ import "time"
 
 const (
 	DatabaseTimeOut = 5 * time.Second
+	PaginationStep  = 10
 )

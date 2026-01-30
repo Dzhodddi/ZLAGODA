@@ -40,11 +40,20 @@ func (q *Queries) DeleteCategoryByID(ctx context.Context, categoryNumber int64) 
 }
 
 const getAllCategories = `-- name: GetAllCategories :many
-SELECT category_number, category_name FROM category ORDER BY category_number
+SELECT category_number, category_name
+FROM category
+WHERE category_number > $1
+ORDER BY category_number
+FETCH FIRST $2 ROWS ONLY
 `
 
-func (q *Queries) GetAllCategories(ctx context.Context) ([]Category, error) {
-	rows, err := q.db.QueryContext(ctx, getAllCategories)
+type GetAllCategoriesParams struct {
+	CategoryNumber int64
+	Limit          int32
+}
+
+func (q *Queries) GetAllCategories(ctx context.Context, arg GetAllCategoriesParams) ([]Category, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCategories, arg.CategoryNumber, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -67,11 +76,14 @@ func (q *Queries) GetAllCategories(ctx context.Context) ([]Category, error) {
 }
 
 const getAllCategoriesSortedByName = `-- name: GetAllCategoriesSortedByName :many
-SELECT category_number, category_name FROM category ORDER BY category_name
+SELECT category_number, category_name
+FROM category
+ORDER BY category_name
+FETCH FIRST $1 ROWS ONLY
 `
 
-func (q *Queries) GetAllCategoriesSortedByName(ctx context.Context) ([]Category, error) {
-	rows, err := q.db.QueryContext(ctx, getAllCategoriesSortedByName)
+func (q *Queries) GetAllCategoriesSortedByName(ctx context.Context, limit int32) ([]Category, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCategoriesSortedByName, limit)
 	if err != nil {
 		return nil, err
 	}

@@ -245,6 +245,11 @@ paths:
         in: query
         name: sorted
         type: boolean
+      - description: category_number
+        format: int64
+        in: query
+        name: category_number
+        type: integer
       produces:
       - application/json
       responses:

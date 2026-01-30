@@ -194,7 +194,7 @@ func (s *CategoryRepositorySuite) TestGetAllCategories() {
 		&s.IntegrationSuite,
 		cases,
 		func(ctx context.Context, _ struct{}) ([]generated.Category, error) {
-			return s.repo.GetAllCategories(ctx)
+			return s.repo.GetAllCategories(ctx, 0)
 		},
 	)
 }

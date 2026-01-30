@@ -155,6 +155,8 @@ func (h *CategoryHandler) getCategoryByID(c echo.Context) error {
 //
 //	@Param			sorted 	query		bool	false	"sorted"
 //
+//	@Param			category_number 	query		int64	false	"category_number"
+//
 // @Success      200  {array}  views.CategoryResponse
 // @Failure      500  {object}  map[string]any
 // @Router       /categories [get]
