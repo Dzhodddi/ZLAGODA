@@ -115,9 +115,9 @@ func (h *CheckHandler) getCheckWithProducts(c echo.Context) error {
 //
 //	@Param			employee_id 	query		string	false	"sorted"
 //
-//	@Param			start_date 	query		string	true	"category_number"
+//	@Param			start_date 	query		string	true	"start_date"
 //
-//	@Param			end_date 	query		string	true	"category_name"
+//	@Param			end_date 	query		string	true	"end_date"
 //
 // @Success      200  {array}  views.CheckListResponse
 // @Failure 400	{object}  map[string]any
@@ -149,9 +149,9 @@ func (h *CheckHandler) getCheckList(c echo.Context) error {
 //
 //	@Param			employee_id 	query		string	false	"sorted"
 //
-//	@Param			start_date 	query		string	true	"category_number"
+//	@Param			start_date 	query		string	true	"start_date"
 //
-//	@Param			end_date 	query		string	true	"category_name"
+//	@Param			end_date 	query		string	true	"end_date"
 //
 // @Success      200  {array}  map[string]float64
 // @Failure 400	{object}  map[string]any

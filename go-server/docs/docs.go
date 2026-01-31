@@ -306,14 +306,14 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "category_number",
+                        "description": "start_date",
                         "name": "start_date",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "category_name",
+                        "description": "end_date",
                         "name": "end_date",
                         "in": "query",
                         "required": true
@@ -421,14 +421,14 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "category_number",
+                        "description": "start_date",
                         "name": "start_date",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "category_name",
+                        "description": "end_date",
                         "name": "end_date",
                         "in": "query",
                         "required": true
@@ -806,6 +806,55 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/sales": {
+            "get": {
+                "description": "Retrieves all sales",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sale"
+                ],
+                "summary": "Get all sales",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "start_date",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "end_date",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/views.SaleResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1020,6 +1069,25 @@ const docTemplate = `{
                 },
                 "selling_price": {
                     "type": "number"
+                }
+            }
+        },
+        "views.SaleResponse": {
+            "type": "object",
+            "properties": {
+                "checkNumber": {
+                    "type": "string"
+                },
+                "productNumber": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "sellingPrice": {
+                    "type": "number",
+                    "format": "float64"
+                },
+                "upc": {
+                    "type": "string"
                 }
             }
         },

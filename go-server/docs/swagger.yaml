@@ -151,6 +151,19 @@ definitions:
       selling_price:
         type: number
     type: object
+  views.SaleResponse:
+    properties:
+      checkNumber:
+        type: string
+      productNumber:
+        format: int32
+        type: integer
+      sellingPrice:
+        format: float64
+        type: number
+      upc:
+        type: string
+    type: object
   views.StoreProduct:
     properties:
       quantity:
@@ -409,12 +422,12 @@ paths:
         in: query
         name: employee_id
         type: string
-      - description: category_number
+      - description: start_date
         in: query
         name: start_date
         required: true
         type: string
-      - description: category_name
+      - description: end_date
         in: query
         name: end_date
         required: true
@@ -550,12 +563,12 @@ paths:
         in: query
         name: employee_id
         type: string
-      - description: category_number
+      - description: start_date
         in: query
         name: start_date
         required: true
         type: string
-      - description: category_name
+      - description: end_date
         in: query
         name: end_date
         required: true
@@ -755,4 +768,37 @@ paths:
       summary: Update a customer card
       tags:
       - CustomerCard
+  /sales:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all sales
+      parameters:
+      - description: start_date
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: end_date
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/views.SaleResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all sales
+      tags:
+      - Sale
 swagger: "2.0"
