@@ -7,6 +7,13 @@ definitions:
       category_number:
         type: integer
     type: object
+  views.CheckListResponse:
+    properties:
+      check_response:
+        $ref: '#/definitions/views.CheckResponse'
+      product:
+        $ref: '#/definitions/views.ProductResponse'
+    type: object
   views.CheckResponse:
     properties:
       card_number:
@@ -114,19 +121,6 @@ definitions:
     - customer_surname
     - phone_number
     type: object
-  views.CreateNewSale:
-    properties:
-      checkNumber:
-        type: string
-      productNumber:
-        format: int32
-        type: integer
-      sellingPrice:
-        format: float64
-        type: number
-      upc:
-        type: string
-    type: object
   views.CustomerCardResponse:
     properties:
       card_number:
@@ -156,19 +150,6 @@ definitions:
         type: integer
       selling_price:
         type: number
-    type: object
-  views.SaleResponse:
-    properties:
-      checkNumber:
-        type: string
-      productNumber:
-        format: int32
-        type: integer
-      sellingPrice:
-        format: float64
-        type: number
-      upc:
-        type: string
     type: object
   views.StoreProduct:
     properties:
@@ -419,6 +400,47 @@ paths:
       tags:
       - Category
   /checks:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all checks
+      parameters:
+      - description: sorted
+        in: query
+        name: employee_id
+        type: string
+      - description: category_number
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: category_name
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/views.CheckListResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all checks
+      tags:
+      - Checks
     post:
       consumes:
       - application/json
@@ -515,6 +537,52 @@ paths:
             additionalProperties: true
             type: object
       summary: Get a check by check number with products list
+      tags:
+      - Checks
+  /checks/price:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves total price of checks of all or specific cashier within
+        date rage
+      parameters:
+      - description: sorted
+        in: query
+        name: employee_id
+        type: string
+      - description: category_number
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: category_name
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties:
+                format: float64
+                type: number
+              type: object
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get total price of checks of all or specific cashier within date rage
       tags:
       - Checks
   /customer-cards:
@@ -687,41 +755,4 @@ paths:
       summary: Update a customer card
       tags:
       - CustomerCard
-  /sales:
-    post:
-      consumes:
-      - application/json
-      description: Creates a new sale
-      parameters:
-      - description: Sale data
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/views.CreateNewSale'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/views.SaleResponse'
-        "400":
-          description: Invalid request payload
-          schema:
-            additionalProperties: true
-            type: object
-        "422":
-          description: Validation error
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Create a new createNewSale
-      tags:
-      - Sales
 swagger: "2.0"

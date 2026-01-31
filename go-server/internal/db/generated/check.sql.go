@@ -79,6 +79,53 @@ func (q *Queries) DeleteCheck(ctx context.Context, checkNumber string) (Check, e
 	return i, err
 }
 
+const getAllChecksWithProductsWithinDate = `-- name: GetAllChecksWithProductsWithinDate :many
+SELECT
+    check_number, id_employee, card_number, print_date, sum_total, vat, product_name, selling_price, product_number
+FROM
+    check_list_view
+WHERE
+    print_date BETWEEN $1 AND $2
+`
+
+type GetAllChecksWithProductsWithinDateParams struct {
+	PrintDate   time.Time
+	PrintDate_2 time.Time
+}
+
+func (q *Queries) GetAllChecksWithProductsWithinDate(ctx context.Context, arg GetAllChecksWithProductsWithinDateParams) ([]CheckListView, error) {
+	rows, err := q.db.QueryContext(ctx, getAllChecksWithProductsWithinDate, arg.PrintDate, arg.PrintDate_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CheckListView
+	for rows.Next() {
+		var i CheckListView
+		if err := rows.Scan(
+			&i.CheckNumber,
+			&i.IDEmployee,
+			&i.CardNumber,
+			&i.PrintDate,
+			&i.SumTotal,
+			&i.Vat,
+			&i.ProductName,
+			&i.SellingPrice,
+			&i.ProductNumber,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCheckByNumber = `-- name: GetCheckByNumber :one
 SELECT check_number, id_employee, card_number, print_date, sum_total, vat
 FROM checks
@@ -102,21 +149,21 @@ func (q *Queries) GetCheckByNumber(ctx context.Context, checkNumber string) (Che
 const getCheckProductsByName = `-- name: GetCheckProductsByName :many
 SELECT
     p.product_name,
-    cp.selling_price,
-    cp.quantity
+    s.selling_price,
+    s.product_number
 FROM
     checks c
-        JOIN check_store_product cp ON c.check_number = cp.check_number
-        JOIN store_product sp ON cp.upc = sp.upc
+        JOIN sale s ON c.check_number = s.check_number
+        JOIN store_product sp ON s.upc = sp.upc
         JOIN product p ON p.id_product = sp.id_product
 WHERE
     c.check_number = $1
 `
 
 type GetCheckProductsByNameRow struct {
-	ProductName  string
-	SellingPrice float64
-	Quantity     int32
+	ProductName   string
+	SellingPrice  float64
+	ProductNumber int32
 }
 
 func (q *Queries) GetCheckProductsByName(ctx context.Context, checkNumber string) ([]GetCheckProductsByNameRow, error) {
@@ -128,7 +175,7 @@ func (q *Queries) GetCheckProductsByName(ctx context.Context, checkNumber string
 	var items []GetCheckProductsByNameRow
 	for rows.Next() {
 		var i GetCheckProductsByNameRow
-		if err := rows.Scan(&i.ProductName, &i.SellingPrice, &i.Quantity); err != nil {
+		if err := rows.Scan(&i.ProductName, &i.SellingPrice, &i.ProductNumber); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -140,4 +187,97 @@ func (q *Queries) GetCheckProductsByName(ctx context.Context, checkNumber string
 		return nil, err
 	}
 	return items, nil
+}
+
+const getChecksWithProductsByCashierWithinDate = `-- name: GetChecksWithProductsByCashierWithinDate :many
+SELECT
+    check_number, id_employee, card_number, print_date, sum_total, vat, product_name, selling_price, product_number
+FROM
+    check_list_view
+WHERE
+    id_employee = $1
+    AND print_date BETWEEN $2 AND $3
+`
+
+type GetChecksWithProductsByCashierWithinDateParams struct {
+	IDEmployee  string
+	PrintDate   time.Time
+	PrintDate_2 time.Time
+}
+
+func (q *Queries) GetChecksWithProductsByCashierWithinDate(ctx context.Context, arg GetChecksWithProductsByCashierWithinDateParams) ([]CheckListView, error) {
+	rows, err := q.db.QueryContext(ctx, getChecksWithProductsByCashierWithinDate, arg.IDEmployee, arg.PrintDate, arg.PrintDate_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CheckListView
+	for rows.Next() {
+		var i CheckListView
+		if err := rows.Scan(
+			&i.CheckNumber,
+			&i.IDEmployee,
+			&i.CardNumber,
+			&i.PrintDate,
+			&i.SumTotal,
+			&i.Vat,
+			&i.ProductName,
+			&i.SellingPrice,
+			&i.ProductNumber,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTotalPriceByAllCashiersWithinDate = `-- name: GetTotalPriceByAllCashiersWithinDate :one
+SELECT
+    sum(selling_price * product_number)::DOUBLE PRECISION as total_price
+FROM
+    check_list_view
+WHERE
+    print_date BETWEEN $1 AND $2
+`
+
+type GetTotalPriceByAllCashiersWithinDateParams struct {
+	PrintDate   time.Time
+	PrintDate_2 time.Time
+}
+
+func (q *Queries) GetTotalPriceByAllCashiersWithinDate(ctx context.Context, arg GetTotalPriceByAllCashiersWithinDateParams) (float64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalPriceByAllCashiersWithinDate, arg.PrintDate, arg.PrintDate_2)
+	var total_price float64
+	err := row.Scan(&total_price)
+	return total_price, err
+}
+
+const getTotalPriceByCashierWithinDate = `-- name: GetTotalPriceByCashierWithinDate :one
+SELECT
+    sum(selling_price * product_number)::DOUBLE PRECISION as total_price
+FROM
+    check_list_view
+WHERE
+    id_employee = $1
+    AND print_date BETWEEN $2 AND $3
+`
+
+type GetTotalPriceByCashierWithinDateParams struct {
+	IDEmployee  string
+	PrintDate   time.Time
+	PrintDate_2 time.Time
+}
+
+func (q *Queries) GetTotalPriceByCashierWithinDate(ctx context.Context, arg GetTotalPriceByCashierWithinDateParams) (float64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalPriceByCashierWithinDate, arg.IDEmployee, arg.PrintDate, arg.PrintDate_2)
+	var total_price float64
+	err := row.Scan(&total_price)
+	return total_price, err
 }

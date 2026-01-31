@@ -8,7 +8,7 @@ import (
 func ProductModelToResponse(product *generated.GetCheckProductsByNameRow) *views.ProductResponse {
 	return &views.ProductResponse{
 		Name:         product.ProductName,
-		Quantity:     int(product.Quantity),
+		Quantity:     int(product.ProductNumber),
 		SellingPrice: product.SellingPrice,
 	}
 }

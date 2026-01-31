@@ -25,6 +25,8 @@ func NewCheckHandler(checkService services.CheckService) *CheckHandler {
 func (h *CheckHandler) RegisterRouts(e *echo.Group) {
 	check := e.Group("/checks")
 	check.POST("", h.createCheck)
+	check.GET("", h.getCheckList)
+	check.GET("/price", h.getTotalPrice)
 	checkNumberGroup := check.Group("/:checkNumber")
 	checkNumberGroup.DELETE("", h.deleteCheck)
 	checkNumberGroup.GET("", h.getCheckWithProducts)
@@ -101,4 +103,90 @@ func (h *CheckHandler) getCheckWithProducts(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, check)
+}
+
+// getCheckList godoc
+//
+// @Summary      Get all checks
+// @Description  Retrieves all checks
+// @Tags         Checks
+// @Accept       json
+// @Produce      json
+//
+//	@Param			employee_id 	query		string	false	"sorted"
+//
+//	@Param			start_date 	query		string	true	"category_number"
+//
+//	@Param			end_date 	query		string	true	"category_name"
+//
+// @Success      200  {array}  views.CheckListResponse
+// @Failure 400	{object}  map[string]any
+// @Failure      500  {object}  map[string]any
+// @Router       /checks [get]
+func (h *CheckHandler) getCheckList(c echo.Context) error {
+	var q views.CheckListQueryParams
+	if err := c.Bind(&q); err != nil {
+		return errorResponse.BadRequest(constants.ValidationError, err)
+	}
+	startDate, endDate, err := h.validateQueryParams(&q)
+	if err != nil {
+		return err
+	}
+	checkList, err := h.checkService.GetCheckList(c.Request().Context(), q, *startDate, *endDate)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, checkList)
+}
+
+// getTotalPrice godoc
+//
+// @Summary      Get total price of checks of all or specific cashier within date rage
+// @Description  Retrieves total price of checks of all or specific cashier within date rage
+// @Tags         Checks
+// @Accept       json
+// @Produce      json
+//
+//	@Param			employee_id 	query		string	false	"sorted"
+//
+//	@Param			start_date 	query		string	true	"category_number"
+//
+//	@Param			end_date 	query		string	true	"category_name"
+//
+// @Success      200  {array}  map[string]float64
+// @Failure 400	{object}  map[string]any
+// @Failure      500  {object}  map[string]any
+// @Router       /checks/price [get]
+func (h *CheckHandler) getTotalPrice(c echo.Context) error {
+	var q views.CheckListQueryParams
+	if err := c.Bind(&q); err != nil {
+		return errorResponse.BadRequest(constants.ValidationError, err)
+	}
+	startDate, endDate, err := h.validateQueryParams(&q)
+	if err != nil {
+		return err
+	}
+	totalPrice, err := h.checkService.GetTotalCheckPrice(c.Request().Context(), q, *startDate, *endDate)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{"total_price": totalPrice})
+}
+
+func (h *CheckHandler) validateQueryParams(q *views.CheckListQueryParams) (*time.Time, *time.Time, error) {
+	if err := validation.ValidateStruct(q); err != nil {
+		return nil, nil, errorResponse.ValidationError(constants.ValidationError, err)
+	}
+	startDate, err := time.Parse(constants.DateLayout, q.StartDate)
+	if err != nil {
+		return nil, nil, errorResponse.BadRequest(constants.InvalidTimeFormat, err)
+	}
+	endDate, err := time.Parse(constants.DateLayout, q.EndDate)
+	if err != nil {
+		return nil, nil, errorResponse.BadRequest(constants.InvalidTimeFormat, err)
+	}
+	if startDate.After(endDate) {
+		return nil, nil, errorResponse.BadRequest(constants.InvalidTimeFormat, err)
+	}
+	return &startDate, &endDate, nil
 }

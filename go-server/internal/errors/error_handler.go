@@ -31,6 +31,9 @@ func GlobalHTTPErrorHandler(env config.Env) func(error, echo.Context) {
 		case errors.Is(err, repository.ErrForeignKey):
 			code = http.StatusBadRequest
 			msg = err.Error()
+		case errors.Is(err, repository.CashierDoesNotExist):
+			code = http.StatusBadRequest
+			msg = err.Error()
 
 		case errors.As(err, &appErr):
 			code = appErr.Code

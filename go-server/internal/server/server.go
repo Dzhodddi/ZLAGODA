@@ -55,7 +55,6 @@ func setupAllRoutes(db *sqlx.DB, router *echo.Group) {
 	setupCategoryRouts(db, router)
 	setupCustomerCardRouts(db, router)
 	setupChecksRouts(db, router)
-	setupSaleRouts(db, router)
 }
 
 func setupCategoryRouts(db *sqlx.DB, router *echo.Group) {
@@ -77,11 +76,4 @@ func setupChecksRouts(db *sqlx.DB, router *echo.Group) {
 	service := services.NewCheckService(repo)
 	handler := handlers.NewCheckHandler(service)
 	handler.RegisterRouts(router)
-}
-
-func setupSaleRouts(db *sqlx.DB, router *echo.Group) {
-	repo := repository.NewSaleRepository(db)
-	service := services.NewSaleService(repo)
-	handler := handlers.NewSaleHandler(service)
-	handler.RegisterRoutes(router)
 }

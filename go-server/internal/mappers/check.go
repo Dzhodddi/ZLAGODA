@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
@@ -25,5 +26,23 @@ func CheckModelWithProductsToResponse(check *repository.Check) *views.CheckRespo
 	return &views.CheckResponseWithProducts{
 		CheckResponse: *CheckModelToResponse(check.Check),
 		Products:      products,
+	}
+}
+
+func CheckListViewToResponse(check *generated.CheckListView) *views.CheckListResponse {
+	return &views.CheckListResponse{
+		CheckResponse: views.CheckResponse{
+			CheckNumber: check.CheckNumber,
+			IDEmployee:  check.IDEmployee,
+			CardNumber:  check.CardNumber,
+			PrintDate:   check.PrintDate.Format(constants.DateLayout),
+			SumTotal:    check.SumTotal,
+			VAT:         check.Vat,
+		},
+		ProductResponse: views.ProductResponse{
+			Name:         check.ProductName,
+			Quantity:     int(check.ProductNumber),
+			SellingPrice: check.SellingPrice,
+		},
 	}
 }

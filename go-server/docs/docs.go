@@ -285,6 +285,66 @@ const docTemplate = `{
             }
         },
         "/checks": {
+            "get": {
+                "description": "Retrieves all checks",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Get all checks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "sorted",
+                        "name": "employee_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "category_number",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "category_name",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/views.CheckListResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Creates a new check",
                 "consumes": [
@@ -331,6 +391,72 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/checks/price": {
+            "get": {
+                "description": "Retrieves total price of checks of all or specific cashier within date rage",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Get total price of checks of all or specific cashier within date rage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "sorted",
+                        "name": "employee_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "category_number",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "category_name",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "type": "number",
+                                    "format": "float64"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -680,61 +806,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/sales": {
-            "post": {
-                "description": "Creates a new sale",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sales"
-                ],
-                "summary": "Create a new createNewSale",
-                "parameters": [
-                    {
-                        "description": "Sale data",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/views.CreateNewSale"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/views.SaleResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request payload",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -746,6 +817,17 @@ const docTemplate = `{
                 },
                 "category_number": {
                     "type": "integer"
+                }
+            }
+        },
+        "views.CheckListResponse": {
+            "type": "object",
+            "properties": {
+                "check_response": {
+                    "$ref": "#/definitions/views.CheckResponse"
+                },
+                "product": {
+                    "$ref": "#/definitions/views.ProductResponse"
                 }
             }
         },
@@ -895,25 +977,6 @@ const docTemplate = `{
                 }
             }
         },
-        "views.CreateNewSale": {
-            "type": "object",
-            "properties": {
-                "checkNumber": {
-                    "type": "string"
-                },
-                "productNumber": {
-                    "type": "integer",
-                    "format": "int32"
-                },
-                "sellingPrice": {
-                    "type": "number",
-                    "format": "float64"
-                },
-                "upc": {
-                    "type": "string"
-                }
-            }
-        },
         "views.CustomerCardResponse": {
             "type": "object",
             "properties": {
@@ -957,25 +1020,6 @@ const docTemplate = `{
                 },
                 "selling_price": {
                     "type": "number"
-                }
-            }
-        },
-        "views.SaleResponse": {
-            "type": "object",
-            "properties": {
-                "checkNumber": {
-                    "type": "string"
-                },
-                "productNumber": {
-                    "type": "integer",
-                    "format": "int32"
-                },
-                "sellingPrice": {
-                    "type": "number",
-                    "format": "float64"
-                },
-                "upc": {
-                    "type": "string"
                 }
             }
         },

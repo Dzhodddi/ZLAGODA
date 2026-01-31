@@ -78,8 +78,8 @@ func (s *categoryService) GetAllCategories(ctx context.Context, q views.ListCate
 		return nil, fmt.Errorf("failed to fetch categories: %w", err)
 	}
 	var categoryResponses []views.CategoryResponse
-	for _, category := range categories {
-		categoryResponses = append(categoryResponses, *mappers.CategoryModelToResponse(&category))
+	for i := range categories {
+		categoryResponses = append(categoryResponses, *mappers.CategoryModelToResponse(&categories[i]))
 	}
 	return categoryResponses, nil
 }

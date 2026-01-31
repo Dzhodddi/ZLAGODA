@@ -22,3 +22,14 @@ type CheckResponseWithProducts struct {
 	CheckResponse `json:"check_response"`
 	Products      []ProductResponse `json:"products"`
 }
+
+type CheckListQueryParams struct {
+	EmployeeID *string `query:"employee_id" validate:"omitempty,min=1,max=10"`
+	StartDate  string  `query:"start_date" validate:"required,datetime=2006-01-02"`
+	EndDate    string  `query:"end_date" validate:"required,datetime=2006-01-02"`
+}
+
+type CheckListResponse struct {
+	CheckResponse   `json:"check_response"`
+	ProductResponse `json:"product"`
+}

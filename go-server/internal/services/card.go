@@ -74,8 +74,8 @@ func (s *cardService) ListCustomerCards(ctx context.Context, q views.ListCustome
 		return nil, fmt.Errorf("failed to fetch all cards: %w", err)
 	}
 	var cardList []views.CustomerCardResponse
-	for _, card := range cards {
-		cardList = append(cardList, *mappers.CardModelToResponse(&card))
+	for i := range cards {
+		cardList = append(cardList, *mappers.CardModelToResponse(&cards[i]))
 	}
 	return cardList, nil
 }

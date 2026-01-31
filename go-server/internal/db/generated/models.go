@@ -9,6 +9,15 @@ import (
 	"time"
 )
 
+type Batch struct {
+	ID           int32
+	Upc          string
+	DeliveryDate time.Time
+	ExpiringDate time.Time
+	Quantity     int32
+	SellingPrice float64
+}
+
 type Category struct {
 	CategoryNumber int64
 	CategoryName   string
@@ -23,13 +32,16 @@ type Check struct {
 	Vat         float64
 }
 
-type CheckStoreProduct struct {
-	ID           int64
-	CheckNumber  sql.NullString
-	Upc          sql.NullString
-	SellingPrice float64
-	Quantity     int32
-	CheckDate    time.Time
+type CheckListView struct {
+	CheckNumber   string
+	IDEmployee    string
+	CardNumber    string
+	PrintDate     time.Time
+	SumTotal      float64
+	Vat           float64
+	ProductName   string
+	SellingPrice  float64
+	ProductNumber int32
 }
 
 type CustomerCard struct {
@@ -44,11 +56,31 @@ type CustomerCard struct {
 	CustomerPercent    int32
 }
 
+type Employee struct {
+	IDEmployee     string
+	EmplSurname    string
+	EmplName       string
+	EmplPatronymic sql.NullString
+	EmplRole       string
+	EmplSalary     float64
+	DateOfBirth    time.Time
+	DateOfStart    time.Time
+	PhoneNumber    string
+	City           string
+	Street         string
+	ZipCode        string
+	Password       string
+}
+
 type Product struct {
 	IDProduct              int64
 	CategoryNumber         int32
 	ProductName            string
 	ProductCharacteristics string
+}
+
+type Role struct {
+	Name string
 }
 
 type Sale struct {

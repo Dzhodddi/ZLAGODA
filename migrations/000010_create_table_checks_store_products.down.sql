@@ -1,1 +1,0 @@
-DROP TABLE IF EXISTS check_store_product;
