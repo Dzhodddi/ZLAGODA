@@ -7,5 +7,5 @@ SELECT
             employee
         WHERE
             id_employee = $1
-          AND empl_role = 'Cashier'
+          AND empl_role = 'CASHIER'
     );
