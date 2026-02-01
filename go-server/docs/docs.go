@@ -630,6 +630,12 @@ const docTemplate = `{
                         "description": "sorted",
                         "name": "sorted",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "surname",
+                        "name": "surname",
+                        "in": "query"
                     }
                 ],
                 "responses": {

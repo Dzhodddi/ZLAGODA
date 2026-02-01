@@ -643,6 +643,10 @@ paths:
         in: query
         name: sorted
         type: boolean
+      - description: surname
+        in: query
+        name: surname
+        type: string
       produces:
       - application/json
       responses:

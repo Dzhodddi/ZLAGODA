@@ -62,6 +62,8 @@ func (s *cardService) ListCustomerCards(ctx context.Context, q views.ListCustome
 	var cards []generated.CustomerCard
 	var err error
 	switch {
+	case q.Surname != nil:
+		cards, err = s.cardRepository.SearchCustomerCartBySurname(ctx, *q.Surname)
 	case q.Percent != nil:
 		cards, err = s.cardRepository.ListCustomerCardsSortedByPercent(ctx, *q.Percent)
 	case q.Sorted != nil && *q.Sorted:
