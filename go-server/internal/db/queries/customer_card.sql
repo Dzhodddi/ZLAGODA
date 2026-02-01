@@ -97,3 +97,17 @@ SELECT
 FROM customer_card
 WHERE customer_percent = $1
 ORDER BY customer_surname;
+
+-- name: SearchCustomerCardBySurname :many
+SELECT
+    card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+FROM customer_card
+WHERE customer_surname ILIKE $1;

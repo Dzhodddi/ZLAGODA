@@ -1,56 +1,78 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
+	"time"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/services"
 	validation "github.com/Dzhodddi/ZLAGODA/internal/validator"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
+	"github.com/labstack/echo/v4"
 )
 
 type SaleHandler struct {
-	service services.SaleService
+	saleService services.SaleService
 }
 
 func NewSaleHandler(service services.SaleService) *SaleHandler {
-	return &SaleHandler{service: service}
+	return &SaleHandler{
+		saleService: service,
+	}
 }
 
-func (h *SaleHandler) RegisterRoutes(e *echo.Group) {
-	sale := e.Group("/sales")
-	sale.POST("", h.createNewSale)
+func (h *SaleHandler) RegisterRouts(e *echo.Group) {
+	sales := e.Group("/sales")
+	sales.GET("", h.getAllSales)
+
 }
 
-// createNewSale godoc
+// getAllSales godoc
 //
-// @Summary      Create a new createNewSale
-// @Description  Creates a new sale
-// @Tags         Sales
+// @Summary      Get all sales
+// @Description  Retrieves all sales
+// @Tags         Sale
 // @Accept       json
 // @Produce      json
-// @Param        payload  body      views.CreateNewSale  true  "Sale data"
-// @Success      201  {object}  views.SaleResponse
-// @Failure      400  {object}  map[string]any  "Invalid request payload"
-// @Failure      422  {object}  map[string]any  "Validation error"
-// @Failure      500  {object}  map[string]any  "Internal server error"
-// @Router       /sales [post]
-func (h *SaleHandler) createNewSale(c echo.Context) error {
-	var sale views.CreateNewSale
-	if err := c.Bind(&sale); err != nil {
+//
+//	@Param			start_date 	query		string	true	"start_date"
+//
+//	@Param			end_date 	query		string	true	"end_date"
+//
+// @Success      200  {array}  views.SaleResponse
+// @Failure      500  {object}  map[string]any
+// @Router       /sales [get]
+func (h *SaleHandler) getAllSales(c echo.Context) error {
+	var q views.SaleListQueryParams
+	if err := c.Bind(&q); err != nil {
 		return errorResponse.BadRequest(constants.ValidationError, err)
 	}
-	if err := validation.ValidateStruct(&sale); err != nil {
-		return errorResponse.ValidationError(constants.ValidationError, err)
-	}
-
-	newSale, err := h.service.CreateNewSale(context.Background(), sale)
+	startDate, endDate, err := h.validateQueryParams(&q)
 	if err != nil {
-		return err
+		return nil
 	}
-	return c.JSON(http.StatusCreated, newSale)
+	sales, err := h.saleService.GetAllSalesWithinDate(c.Request().Context(), *startDate, *endDate)
+	if err != nil {
+		return nil
+	}
+	return c.JSON(http.StatusOK, sales)
+}
+
+func (h *SaleHandler) validateQueryParams(q *views.SaleListQueryParams) (*time.Time, *time.Time, error) {
+	if err := validation.ValidateStruct(q); err != nil {
+		return nil, nil, errorResponse.ValidationError(constants.ValidationError, err)
+	}
+	startDate, err := time.Parse(constants.DateLayout, q.StartDate)
+	if err != nil {
+		return nil, nil, errorResponse.BadRequest(constants.InvalidTimeFormat, err)
+	}
+	endDate, err := time.Parse(constants.DateLayout, q.EndDate)
+	if err != nil {
+		return nil, nil, errorResponse.BadRequest(constants.InvalidTimeFormat, err)
+	}
+	if startDate.After(endDate) {
+		return nil, nil, errorResponse.BadRequest(constants.InvalidTimeFormat, err)
+	}
+	return &startDate, &endDate, nil
 }

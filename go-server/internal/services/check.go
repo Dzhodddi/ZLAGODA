@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
@@ -13,6 +14,18 @@ import (
 
 type CheckService interface {
 	CreateCheck(ctx context.Context, check views.CreateNewCheck, printTime time.Time) (*views.CheckResponse, error)
+	DeleteCheck(ctx context.Context, checkNumber string) error
+	GetCheck(ctx context.Context, checkNumber string) (*views.CheckResponseWithProducts, error)
+	GetCheckList(
+		ctx context.Context,
+		employeeID *string,
+		startDate, endDate time.Time,
+	) ([]views.CheckListResponse, error)
+	GetTotalCheckPrice(
+		ctx context.Context,
+		q views.CheckListQueryParams,
+		startDate, endDate time.Time,
+	) (float64, error)
 }
 
 type checkService struct {
@@ -49,4 +62,77 @@ func (s *checkService) CreateCheck(ctx context.Context, check views.CreateNewChe
 		return nil, fmt.Errorf("failed to create check: %w", err)
 	}
 	return mappers.CheckModelToResponse(newCheck), nil
+}
+
+func (s *checkService) DeleteCheck(ctx context.Context, checkNumber string) error {
+	err := s.checkRepository.DeleteCheck(ctx, checkNumber)
+	if err != nil {
+		return fmt.Errorf("failed to delete category: %w", err)
+	}
+	return nil
+}
+
+func (s *checkService) GetCheck(ctx context.Context, checkNumber string) (*views.CheckResponseWithProducts, error) {
+	check, err := s.checkRepository.GetCheckByNumber(ctx, checkNumber)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get check: %w", err)
+	}
+	return mappers.CheckModelWithProductsToResponse(check), nil
+}
+
+func (s *checkService) GetCheckList(
+	ctx context.Context,
+	employeeID *string,
+	startDate, endDate time.Time,
+) ([]views.CheckListResponse, error) {
+	var checkList []generated.CheckListView
+	var err error
+
+	switch {
+	case employeeID != nil:
+		checkList, err = s.checkRepository.GetChecksWithProductsByCashierWithinDate(
+			ctx,
+			*employeeID,
+			startDate,
+			endDate,
+		)
+	default:
+		checkList, err = s.checkRepository.GetAllChecksWithProductsWithinDate(
+			ctx,
+			startDate,
+			endDate,
+		)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get checks: %w", err)
+	}
+	result := make([]views.CheckListResponse, 0, len(checkList))
+	for i := range checkList {
+		result = append(result, *mappers.CheckListViewToResponse(&checkList[i]))
+	}
+	return result, nil
+}
+
+func (s *checkService) GetTotalCheckPrice(
+	ctx context.Context,
+	q views.CheckListQueryParams,
+	startDate, endDate time.Time,
+) (float64, error) {
+	var totalPrice float64
+	var err error
+	switch {
+	case q.EmployeeID != nil:
+		totalPrice, err = s.checkRepository.GetTotalPriceByCashierWithinDate(
+			ctx,
+			*q.EmployeeID,
+			startDate, endDate)
+	default:
+		totalPrice, err = s.checkRepository.GetTotalPriceByAllCashiersWithinDate(
+			ctx,
+			startDate, endDate)
+	}
+	if err != nil {
+		return 0, fmt.Errorf("failed to get total price: %w", err)
+	}
+	return totalPrice, nil
 }

@@ -1,20 +1,16 @@
 package repository
 
 import (
-	"errors"
-
-	"github.com/lib/pq"
-
 	"context"
+	"time"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
-	"github.com/Dzhodddi/ZLAGODA/internal/views"
 	"github.com/jmoiron/sqlx"
 )
 
 type SaleRepository interface {
-	CreateNewSale(ctx context.Context, sale views.CreateNewSale) (*generated.Sale, error)
+	GetAllSalesWithinDate(ctx context.Context, startDate, endDate time.Time) ([]generated.Sale, error)
 }
 
 type saleRepository struct {
@@ -25,34 +21,16 @@ type saleRepository struct {
 func NewSaleRepository(db *sqlx.DB) SaleRepository {
 	return &saleRepository{
 		db:      db,
-		queries: generated.New(db.DB),
+		queries: generated.New(db),
 	}
 }
 
-func (r *saleRepository) CreateNewSale(ctx context.Context, sale views.CreateNewSale) (*generated.Sale, error) {
+func (s *saleRepository) GetAllSalesWithinDate(ctx context.Context, startDate, endDate time.Time) ([]generated.Sale, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
-	newSale, err := r.queries.CreateNewSale(
-		ctx,
-		generated.CreateNewSaleParams{
-			ProductNumber: sale.ProductNumber,
-			Upc:           sale.Upc,
-			CheckNumber:   sale.CheckNumber,
-			SellingPrice:  sale.SellingPrice,
-		},
-	)
-	if err != nil {
-		var pgErr *pq.Error
-		if errors.As(err, &pgErr) {
-			switch pgErr.Code {
-			case "23503": // Foreign key constraint violation
-				return nil, ErrForeignKey
-			case "23505": // Unique constraint violation
-				return nil, ErrConflict
-			}
-		}
-		return nil, err
-	}
-	return &newSale, nil
+	return s.queries.GetSalesWithinDate(ctx, generated.GetSalesWithinDateParams{
+		PrintDate:   startDate,
+		PrintDate_2: endDate,
+	})
 }

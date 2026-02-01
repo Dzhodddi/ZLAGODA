@@ -255,6 +255,54 @@ func (q *Queries) GetCustomerCardsByPercentSorted(ctx context.Context, customerP
 	return items, nil
 }
 
+const searchCustomerCardBySurname = `-- name: SearchCustomerCardBySurname :many
+SELECT
+    card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+FROM customer_card
+WHERE customer_surname ILIKE $1
+`
+
+func (q *Queries) SearchCustomerCardBySurname(ctx context.Context, customerSurname string) ([]CustomerCard, error) {
+	rows, err := q.db.QueryContext(ctx, searchCustomerCardBySurname, customerSurname)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CustomerCard
+	for rows.Next() {
+		var i CustomerCard
+		if err := rows.Scan(
+			&i.CardNumber,
+			&i.CustomerSurname,
+			&i.CustomerName,
+			&i.CustomerPatronymic,
+			&i.PhoneNumber,
+			&i.City,
+			&i.Street,
+			&i.ZipCode,
+			&i.CustomerPercent,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateCustomerCard = `-- name: UpdateCustomerCard :one
 UPDATE customer_card
 SET

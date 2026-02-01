@@ -18,8 +18,8 @@ type CategoryRepository interface {
 	UpdateCategory(ctx context.Context, category views.UpdateCategory, categoryId int64) (*generated.Category, error)
 	DeleteCategory(ctx context.Context, id int64) error
 	GetCategoryByID(ctx context.Context, id int64) (*generated.Category, error)
-	GetAllCategories(ctx context.Context) ([]generated.Category, error)
-	GetAllCategoriesSortedByName(ctx context.Context) ([]generated.Category, error)
+	GetAllCategories(ctx context.Context, lastCategoryNumber int64) ([]generated.Category, error)
+	GetAllCategoriesSortedByName(ctx context.Context, lastCategoryName string) ([]generated.Category, error)
 }
 
 type categoryRepository struct {
@@ -99,19 +99,28 @@ func (r *categoryRepository) GetCategoryByID(ctx context.Context, id int64) (*ge
 	return &category, nil
 }
 
-func (r *categoryRepository) GetAllCategories(ctx context.Context) ([]generated.Category, error) {
-	return r.getListHelper(ctx, r.queries.GetAllCategories)
-}
-
-func (r *categoryRepository) GetAllCategoriesSortedByName(ctx context.Context) ([]generated.Category, error) {
-	return r.getListHelper(ctx, r.queries.GetAllCategoriesSortedByName)
-}
-
-func (r *categoryRepository) getListHelper(ctx context.Context, queryFunc func(ctx context.Context) ([]generated.Category, error)) ([]generated.Category, error) {
+func (r *categoryRepository) GetAllCategories(ctx context.Context, lastCategoryNumber int64) ([]generated.Category, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
-	categories, err := queryFunc(ctx)
+	categories, err := r.queries.GetAllCategories(ctx, generated.GetAllCategoriesParams{
+		CategoryNumber: lastCategoryNumber,
+		Limit:          constants.PaginationStep,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return categories, nil
+}
+
+func (r *categoryRepository) GetAllCategoriesSortedByName(ctx context.Context, lastCategoryName string) ([]generated.Category, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	categories, err := r.queries.GetAllCategoriesSortedByName(ctx, generated.GetAllCategoriesSortedByNameParams{
+		CategoryName: lastCategoryName,
+		Limit:        constants.PaginationStep,
+	})
 	if err != nil {
 		return nil, err
 	}

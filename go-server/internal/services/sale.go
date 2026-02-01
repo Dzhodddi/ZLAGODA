@@ -3,29 +3,35 @@ package services
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
-
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
 )
 
 type SaleService interface {
-	CreateNewSale(ctx context.Context, sale views.CreateNewSale) (*views.SaleResponse, error)
+	GetAllSalesWithinDate(ctx context.Context, startDate, endDate time.Time) ([]views.SaleResponse, error)
 }
 
 type saleService struct {
-	saleRepository repository.SaleRepository
+	repository repository.SaleRepository
 }
 
-func NewSaleService(saleRepository repository.SaleRepository) SaleService {
-	return &saleService{saleRepository: saleRepository}
-}
-
-func (s *saleService) CreateNewSale(ctx context.Context, sale views.CreateNewSale) (*views.SaleResponse, error) {
-	newSale, err := s.saleRepository.CreateNewSale(ctx, sale)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create sale: %w", err)
+func NewSaleService(repository repository.SaleRepository) SaleService {
+	return &saleService{
+		repository: repository,
 	}
-	return mappers.SaleModelToResponse(newSale), nil
+}
+
+func (s *saleService) GetAllSalesWithinDate(ctx context.Context, startDate, endDate time.Time) ([]views.SaleResponse, error) {
+	sales, err := s.repository.GetAllSalesWithinDate(ctx, startDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get sales: %w", err)
+	}
+	salesResponseList := make([]views.SaleResponse, 0, len(sales))
+	for i := range sales {
+		salesResponseList = append(salesResponseList, *mappers.SaleModelToResponse(&sales[i]))
+	}
+	return salesResponseList, nil
 }
