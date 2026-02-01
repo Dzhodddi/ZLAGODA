@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -27,6 +28,11 @@ type CheckStoreProduct struct {
 	CheckDate    time.Time `db:"check_date"`
 }
 
+type Check struct {
+	Check       *generated.Check
+	ProductList []generated.GetCheckProductsByNameRow
+}
+
 type CheckRepository interface {
 	CreateNewCheck(
 		ctx context.Context,
@@ -36,23 +42,26 @@ type CheckRepository interface {
 		payload []interface{},
 		keys []string,
 	) (*generated.Check, error)
-	calculateCheckTotalSumIfValid(
+	DeleteCheck(ctx context.Context, checkNumber string) error
+	GetCheckByNumber(ctx context.Context, checkNumber string) (*Check, error)
+	GetChecksWithProductsByCashierWithinDate(
 		ctx context.Context,
-		tx *sqlx.Tx,
-		formattedSqlPayload string,
-		resultLen int,
-		args []any,
-	) (*[]Product, float64, error)
-	saveProducts(
+		employeeID string,
+		startDate, endDate time.Time,
+	) ([]generated.CheckListView, error)
+	GetAllChecksWithProductsWithinDate(
 		ctx context.Context,
-		tx *sqlx.Tx,
-		productPayload []CheckStoreProduct,
-	) error
-	reduceStoreProductQuantity(
+		startDate, endDate time.Time,
+	) ([]generated.CheckListView, error)
+	GetTotalPriceByCashierWithinDate(
 		ctx context.Context,
-		tx *sqlx.Tx,
-		storeProducts []CheckStoreProduct,
-	) error
+		employeeID string,
+		startDate, endDate time.Time,
+	) (float64, error)
+	GetTotalPriceByAllCashiersWithinDate(
+		ctx context.Context,
+		startDate, endDate time.Time,
+	) (float64, error)
 }
 
 type checkRepository struct {
@@ -65,6 +74,124 @@ func NewCheckRepository(db *sqlx.DB) CheckRepository {
 		db:      db,
 		queries: generated.New(db.DB),
 	}
+}
+
+func (r *checkRepository) GetTotalPriceByCashierWithinDate(
+	ctx context.Context,
+	employeeID string,
+	startDate, endDate time.Time,
+) (float64, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	err := r.isCashierExists(ctx, employeeID)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.queries.GetTotalPriceByCashierWithinDate(
+		ctx,
+		generated.GetTotalPriceByCashierWithinDateParams{
+			IDEmployee:  employeeID,
+			PrintDate:   startDate,
+			PrintDate_2: endDate,
+		},
+	)
+}
+
+func (r *checkRepository) GetTotalPriceByAllCashiersWithinDate(
+	ctx context.Context,
+	startDate, endDate time.Time,
+) (float64, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	return r.queries.GetTotalPriceByAllCashiersWithinDate(
+		ctx,
+		generated.GetTotalPriceByAllCashiersWithinDateParams{
+			PrintDate:   startDate,
+			PrintDate_2: endDate,
+		},
+	)
+}
+
+func (r *checkRepository) GetChecksWithProductsByCashierWithinDate(
+	ctx context.Context,
+	employeeID string,
+	startDate, endDate time.Time,
+) ([]generated.CheckListView, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	err := r.isCashierExists(ctx, employeeID)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.queries.GetChecksWithProductsByCashierWithinDate(
+		ctx,
+		generated.GetChecksWithProductsByCashierWithinDateParams{
+			IDEmployee:  employeeID,
+			PrintDate:   startDate,
+			PrintDate_2: endDate,
+		},
+	)
+}
+
+func (r *checkRepository) GetAllChecksWithProductsWithinDate(
+	ctx context.Context,
+	startDate, endDate time.Time,
+) ([]generated.CheckListView, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	return r.queries.GetAllChecksWithProductsWithinDate(
+		ctx,
+		generated.GetAllChecksWithProductsWithinDateParams{
+			PrintDate:   startDate,
+			PrintDate_2: endDate,
+		},
+	)
+}
+
+func (r *checkRepository) GetCheckByNumber(ctx context.Context, checkNumber string) (*Check, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	check, err := r.queries.GetCheckByNumber(ctx, checkNumber)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+	}
+	products, err := r.queries.GetCheckProductsByName(ctx, checkNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Check{
+		Check:       &check,
+		ProductList: products,
+	}, nil
+}
+
+func (r *checkRepository) DeleteCheck(ctx context.Context, checkNumber string) error {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+	_, err := r.queries.DeleteCheck(ctx, checkNumber)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNotFound
+		}
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			if pqErr.Code == "23503" {
+				return ErrForeignKey
+			}
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *checkRepository) CreateNewCheck(
@@ -174,7 +301,7 @@ func (r *checkRepository) calculateCheckTotalSumIfValid(ctx context.Context, tx 
 }
 
 func (r *checkRepository) saveProducts(ctx context.Context, tx *sqlx.Tx, productPayload []CheckStoreProduct) error {
-	query := `INSERT INTO check_store_product (check_number, UPC, selling_price, quantity, check_date) VALUES (:check_number, :upc, :selling_price, :quantity, :check_date)`
+	query := `INSERT INTO sale (check_number, UPC, selling_price, product_number) VALUES (:check_number, :upc, :selling_price, :quantity)`
 	_, err := tx.NamedExecContext(ctx, query, productPayload)
 	return err
 }
@@ -193,6 +320,17 @@ func (r *checkRepository) reduceStoreProductQuantity(ctx context.Context, tx *sq
 		if _, err = stmt.ExecContext(ctx, product); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (r *checkRepository) isCashierExists(ctx context.Context, employeeID string) error {
+	exists, err := r.queries.EmployeeExistsByID(ctx, employeeID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return CashierDoesNotExist
 	}
 	return nil
 }

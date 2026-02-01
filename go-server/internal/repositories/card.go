@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
@@ -21,6 +22,7 @@ type CardRepository interface {
 	ListCustomerCards(ctx context.Context) ([]generated.CustomerCard, error)
 	ListCustomerCardsSortedBySurname(ctx context.Context) ([]generated.CustomerCard, error)
 	ListCustomerCardsSortedByPercent(ctx context.Context, percent int) ([]generated.CustomerCard, error)
+	SearchCustomerCartBySurname(ctx context.Context, surname string) ([]generated.CustomerCard, error)
 }
 
 type cardRepository struct {
@@ -145,6 +147,12 @@ func (r *cardRepository) ListCustomerCardsSortedByPercent(ctx context.Context, p
 		return nil, err
 	}
 	return rows, nil
+}
+
+func (r *cardRepository) SearchCustomerCartBySurname(ctx context.Context, surname string) ([]generated.CustomerCard, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+	return r.queries.SearchCustomerCardBySurname(ctx, fmt.Sprintf("%%%s%%", surname))
 }
 
 func (r *cardRepository) getListHelper(ctx context.Context, queryList func(ctx context.Context) ([]generated.CustomerCard, error)) ([]generated.CustomerCard, error) {

@@ -3,8 +3,6 @@ package error_response
 import (
 	"fmt"
 	"net/http"
-
-	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 )
 
 type HTTPErrorResponse struct {
@@ -38,20 +36,4 @@ func BadRequest(msg string, err error) *HTTPErrorResponse {
 
 func ValidationError(msg string, err error) *HTTPErrorResponse {
 	return NewError(http.StatusUnprocessableEntity, msg, err)
-}
-
-func Internal(err error) *HTTPErrorResponse {
-	return NewError(http.StatusInternalServerError, "Internal Server Error", err)
-}
-
-func Conflict() *HTTPErrorResponse {
-	return NewError(http.StatusUnprocessableEntity, constants.EntityAlreadyExists, nil)
-}
-
-func BadForeignKey() *HTTPErrorResponse {
-	return NewError(http.StatusUnprocessableEntity, constants.ViolateForeignKey, nil)
-}
-
-func EntityNotFound() *HTTPErrorResponse {
-	return NewError(http.StatusNotFound, constants.EntityDoesNotExist, nil)
 }

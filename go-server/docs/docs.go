@@ -35,6 +35,19 @@ const docTemplate = `{
                         "description": "sorted",
                         "name": "sorted",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "category_number",
+                        "name": "category_number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "category_name",
+                        "name": "category_name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -272,6 +285,66 @@ const docTemplate = `{
             }
         },
         "/checks": {
+            "get": {
+                "description": "Retrieves all checks",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Get all checks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "employee_id",
+                        "name": "employee_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "start_date",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "end_date",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/views.CheckListResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Creates a new check",
                 "consumes": [
@@ -326,6 +399,212 @@ const docTemplate = `{
                 }
             }
         },
+        "/checks/price": {
+            "get": {
+                "description": "Retrieves total price of checks of all or specific cashier within date rage",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Get total price of checks of all or specific cashier within date rage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "employee_id",
+                        "name": "employee_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "start_date",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "end_date",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "type": "number",
+                                    "format": "float64"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/checks/today": {
+            "get": {
+                "description": "Retrieves all checks by specific cashier within today",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Get all checks by specific cashier within today",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "employee_id",
+                        "name": "employee_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/views.CheckListResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/checks/{checkNumber}": {
+            "get": {
+                "description": "Get a check by check number with products list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Get a check by check number with products list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Check number",
+                        "name": "checkNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/views.CheckResponseWithProducts"
+                        }
+                    },
+                    "404": {
+                        "description": "Entity not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an existing check by check number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Delete a check by check number",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Check number",
+                        "name": "checkNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Entity not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/customer-cards": {
             "get": {
                 "description": "Retrieves a list of all customer discount cards",
@@ -350,6 +629,12 @@ const docTemplate = `{
                         "type": "boolean",
                         "description": "sorted",
                         "name": "sorted",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "surname",
+                        "name": "surname",
                         "in": "query"
                     }
                 ],
@@ -578,8 +863,8 @@ const docTemplate = `{
             }
         },
         "/sales": {
-            "post": {
-                "description": "Creates a new sale",
+            "get": {
+                "description": "Retrieves all sales",
                 "consumes": [
                     "application/json"
                 ],
@@ -587,43 +872,37 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Sales"
+                    "Sale"
                 ],
-                "summary": "Create a new createNewSale",
+                "summary": "Get all sales",
                 "parameters": [
                     {
-                        "description": "Sale data",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/views.CreateNewSale"
-                        }
+                        "type": "string",
+                        "description": "start_date",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "end_date",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/views.SaleResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request payload",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/views.SaleResponse"
+                            }
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -642,6 +921,17 @@ const docTemplate = `{
                 },
                 "category_number": {
                     "type": "integer"
+                }
+            }
+        },
+        "views.CheckListResponse": {
+            "type": "object",
+            "properties": {
+                "check": {
+                    "$ref": "#/definitions/views.CheckResponse"
+                },
+                "product": {
+                    "$ref": "#/definitions/views.ProductResponse"
                 }
             }
         },
@@ -665,6 +955,20 @@ const docTemplate = `{
                 },
                 "vat": {
                     "type": "number"
+                }
+            }
+        },
+        "views.CheckResponseWithProducts": {
+            "type": "object",
+            "properties": {
+                "check": {
+                    "$ref": "#/definitions/views.CheckResponse"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/views.ProductResponse"
+                    }
                 }
             }
         },
@@ -777,25 +1081,6 @@ const docTemplate = `{
                 }
             }
         },
-        "views.CreateNewSale": {
-            "type": "object",
-            "properties": {
-                "checkNumber": {
-                    "type": "string"
-                },
-                "productNumber": {
-                    "type": "integer",
-                    "format": "int32"
-                },
-                "sellingPrice": {
-                    "type": "number",
-                    "format": "float64"
-                },
-                "upc": {
-                    "type": "string"
-                }
-            }
-        },
         "views.CustomerCardResponse": {
             "type": "object",
             "properties": {
@@ -828,19 +1113,31 @@ const docTemplate = `{
                 }
             }
         },
+        "views.ProductResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "selling_price": {
+                    "type": "number"
+                }
+            }
+        },
         "views.SaleResponse": {
             "type": "object",
             "properties": {
-                "checkNumber": {
+                "check_number": {
                     "type": "string"
                 },
-                "productNumber": {
-                    "type": "integer",
-                    "format": "int32"
+                "product_number": {
+                    "type": "integer"
                 },
-                "sellingPrice": {
-                    "type": "number",
-                    "format": "float64"
+                "selling_price": {
+                    "type": "number"
                 },
                 "upc": {
                     "type": "string"

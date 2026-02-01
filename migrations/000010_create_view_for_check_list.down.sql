@@ -1,0 +1,1 @@
+DROP VIEW IF EXISTS check_list_view;

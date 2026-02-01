@@ -1,7 +1,6 @@
--- name: CreateNewSale :one
-INSERT INTO
-    sale (product_number, upc, check_number, selling_price)
-VALUES
-    ($1, $2, $3, $4)
-    RETURNING
-	product_number, upc, check_number, selling_price;
+-- name: GetSalesWithinDate :many
+SELECT s.*
+FROM sale s
+JOIN checks c
+ON c.check_number = s.check_number
+WHERE c.print_date BETWEEN $1 AND $2;

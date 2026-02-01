@@ -7,6 +7,13 @@ definitions:
       category_number:
         type: integer
     type: object
+  views.CheckListResponse:
+    properties:
+      check:
+        $ref: '#/definitions/views.CheckResponse'
+      product:
+        $ref: '#/definitions/views.ProductResponse'
+    type: object
   views.CheckResponse:
     properties:
       card_number:
@@ -21,6 +28,15 @@ definitions:
         type: number
       vat:
         type: number
+    type: object
+  views.CheckResponseWithProducts:
+    properties:
+      check:
+        $ref: '#/definitions/views.CheckResponse'
+      products:
+        items:
+          $ref: '#/definitions/views.ProductResponse'
+        type: array
     type: object
   views.CreateNewCategory:
     properties:
@@ -105,19 +121,6 @@ definitions:
     - customer_surname
     - phone_number
     type: object
-  views.CreateNewSale:
-    properties:
-      checkNumber:
-        type: string
-      productNumber:
-        format: int32
-        type: integer
-      sellingPrice:
-        format: float64
-        type: number
-      upc:
-        type: string
-    type: object
   views.CustomerCardResponse:
     properties:
       card_number:
@@ -139,15 +142,22 @@ definitions:
       zipcode:
         type: string
     type: object
+  views.ProductResponse:
+    properties:
+      name:
+        type: string
+      quantity:
+        type: integer
+      selling_price:
+        type: number
+    type: object
   views.SaleResponse:
     properties:
-      checkNumber:
+      check_number:
         type: string
-      productNumber:
-        format: int32
+      product_number:
         type: integer
-      sellingPrice:
-        format: float64
+      selling_price:
         type: number
       upc:
         type: string
@@ -227,6 +237,15 @@ paths:
         in: query
         name: sorted
         type: boolean
+      - description: category_number
+        format: int64
+        in: query
+        name: category_number
+        type: integer
+      - description: category_name
+        in: query
+        name: category_name
+        type: string
       produces:
       - application/json
       responses:
@@ -392,6 +411,47 @@ paths:
       tags:
       - Category
   /checks:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all checks
+      parameters:
+      - description: employee_id
+        in: query
+        name: employee_id
+        type: string
+      - description: start_date
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: end_date
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/views.CheckListResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all checks
+      tags:
+      - Checks
     post:
       consumes:
       - application/json
@@ -428,6 +488,147 @@ paths:
       summary: Create a new check
       tags:
       - Checks
+  /checks/{checkNumber}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing check by check number
+      parameters:
+      - description: Check number
+        in: path
+        name: checkNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a check by check number
+      tags:
+      - Checks
+    get:
+      consumes:
+      - application/json
+      description: Get a check by check number with products list
+      parameters:
+      - description: Check number
+        in: path
+        name: checkNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.CheckResponseWithProducts'
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a check by check number with products list
+      tags:
+      - Checks
+  /checks/price:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves total price of checks of all or specific cashier within
+        date rage
+      parameters:
+      - description: employee_id
+        in: query
+        name: employee_id
+        type: string
+      - description: start_date
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: end_date
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties:
+                format: float64
+                type: number
+              type: object
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get total price of checks of all or specific cashier within date rage
+      tags:
+      - Checks
+  /checks/today:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all checks by specific cashier within today
+      parameters:
+      - description: employee_id
+        in: query
+        name: employee_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/views.CheckListResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all checks by specific cashier within today
+      tags:
+      - Checks
   /customer-cards:
     get:
       consumes:
@@ -442,6 +643,10 @@ paths:
         in: query
         name: sorted
         type: boolean
+      - description: surname
+        in: query
+        name: surname
+        type: string
       produces:
       - application/json
       responses:
@@ -599,40 +804,36 @@ paths:
       tags:
       - CustomerCard
   /sales:
-    post:
+    get:
       consumes:
       - application/json
-      description: Creates a new sale
+      description: Retrieves all sales
       parameters:
-      - description: Sale data
-        in: body
-        name: payload
+      - description: start_date
+        in: query
+        name: start_date
         required: true
-        schema:
-          $ref: '#/definitions/views.CreateNewSale'
+        type: string
+      - description: end_date
+        in: query
+        name: end_date
+        required: true
+        type: string
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/views.SaleResponse'
-        "400":
-          description: Invalid request payload
-          schema:
-            additionalProperties: true
-            type: object
-        "422":
-          description: Validation error
-          schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/views.SaleResponse'
+            type: array
         "500":
-          description: Internal server error
+          description: Internal Server Error
           schema:
             additionalProperties: true
             type: object
-      summary: Create a new createNewSale
+      summary: Get all sales
       tags:
-      - Sales
+      - Sale
 swagger: "2.0"
