@@ -19,7 +19,7 @@ type CheckResponse struct {
 }
 
 type CheckResponseWithProducts struct {
-	CheckResponse `json:"check_response"`
+	CheckResponse `json:"check"`
 	Products      []ProductResponse `json:"products"`
 }
 
@@ -30,6 +30,10 @@ type CheckListQueryParams struct {
 }
 
 type CheckListResponse struct {
-	CheckResponse   `json:"check_response"`
+	CheckResponse   `json:"check"`
 	ProductResponse `json:"product"`
+}
+
+type CheckListQueryWithThisDayParams struct {
+	EmployeeID string `query:"employee_id" validate:"required,min=1,max=10"`
 }

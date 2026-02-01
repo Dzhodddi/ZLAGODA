@@ -9,7 +9,7 @@ definitions:
     type: object
   views.CheckListResponse:
     properties:
-      check_response:
+      check:
         $ref: '#/definitions/views.CheckResponse'
       product:
         $ref: '#/definitions/views.ProductResponse'
@@ -31,7 +31,7 @@ definitions:
     type: object
   views.CheckResponseWithProducts:
     properties:
-      check_response:
+      check:
         $ref: '#/definitions/views.CheckResponse'
       products:
         items:
@@ -153,13 +153,11 @@ definitions:
     type: object
   views.SaleResponse:
     properties:
-      checkNumber:
+      check_number:
         type: string
-      productNumber:
-        format: int32
+      product_number:
         type: integer
-      sellingPrice:
-        format: float64
+      selling_price:
         type: number
       upc:
         type: string
@@ -418,7 +416,7 @@ paths:
       - application/json
       description: Retrieves all checks
       parameters:
-      - description: sorted
+      - description: employee_id
         in: query
         name: employee_id
         type: string
@@ -559,7 +557,7 @@ paths:
       description: Retrieves total price of checks of all or specific cashier within
         date rage
       parameters:
-      - description: sorted
+      - description: employee_id
         in: query
         name: employee_id
         type: string
@@ -596,6 +594,39 @@ paths:
             additionalProperties: true
             type: object
       summary: Get total price of checks of all or specific cashier within date rage
+      tags:
+      - Checks
+  /checks/today:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all checks by specific cashier within today
+      parameters:
+      - description: employee_id
+        in: query
+        name: employee_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/views.CheckListResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all checks by specific cashier within today
       tags:
       - Checks
   /customer-cards:

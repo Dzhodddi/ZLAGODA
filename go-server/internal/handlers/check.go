@@ -10,6 +10,7 @@ import (
 	validation "github.com/Dzhodddi/ZLAGODA/internal/validator"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 )
 
 type CheckHandler struct {
@@ -26,6 +27,7 @@ func (h *CheckHandler) RegisterRouts(e *echo.Group) {
 	check := e.Group("/checks")
 	check.POST("", h.createCheck)
 	check.GET("", h.getCheckList)
+	check.GET("/today", h.getCheckListWithinToday)
 	check.GET("/price", h.getTotalPrice)
 	checkNumberGroup := check.Group("/:checkNumber")
 	checkNumberGroup.DELETE("", h.deleteCheck)
@@ -113,7 +115,7 @@ func (h *CheckHandler) getCheckWithProducts(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 //
-//	@Param			employee_id 	query		string	false	"sorted"
+//	@Param			employee_id 	query		string	false	"employee_id"
 //
 //	@Param			start_date 	query		string	true	"start_date"
 //
@@ -132,7 +134,39 @@ func (h *CheckHandler) getCheckList(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	checkList, err := h.checkService.GetCheckList(c.Request().Context(), q, *startDate, *endDate)
+	checkList, err := h.checkService.GetCheckList(c.Request().Context(), q.EmployeeID, *startDate, *endDate)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, checkList)
+}
+
+// getCheckList godoc
+//
+// @Summary      Get all checks by specific cashier within today
+// @Description  Retrieves all checks by specific cashier within today
+// @Tags         Checks
+// @Accept       json
+// @Produce      json
+//
+//	@Param			employee_id 	query		string	true	"employee_id"
+//
+// @Success      200  {array}  views.CheckListResponse
+// @Failure 400	{object}  map[string]any
+// @Failure      500  {object}  map[string]any
+// @Router       /checks/today [get]
+func (h *CheckHandler) getCheckListWithinToday(c echo.Context) error {
+	var q views.CheckListQueryWithThisDayParams
+	if err := c.Bind(&q); err != nil {
+		return errorResponse.BadRequest(constants.ValidationError, err)
+	}
+	if err := validation.ValidateStruct(q); err != nil {
+		return errorResponse.ValidationError(constants.ValidationError, err)
+	}
+	timeNow := time.Now()
+	today := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 0, 0, 0, 0, timeNow.Location())
+	log.Info(q.EmployeeID)
+	checkList, err := h.checkService.GetCheckList(c.Request().Context(), &q.EmployeeID, today, today.Add(24*time.Hour-time.Nanosecond))
 	if err != nil {
 		return err
 	}
@@ -147,7 +181,7 @@ func (h *CheckHandler) getCheckList(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 //
-//	@Param			employee_id 	query		string	false	"sorted"
+//	@Param			employee_id 	query		string	false	"employee_id"
 //
 //	@Param			start_date 	query		string	true	"start_date"
 //

@@ -3,10 +3,10 @@ package services
 import (
 	"context"
 	"fmt"
-	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"strings"
 	"time"
 
+	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
@@ -18,7 +18,7 @@ type CheckService interface {
 	GetCheck(ctx context.Context, checkNumber string) (*views.CheckResponseWithProducts, error)
 	GetCheckList(
 		ctx context.Context,
-		q views.CheckListQueryParams,
+		employeeID *string,
 		startDate, endDate time.Time,
 	) ([]views.CheckListResponse, error)
 	GetTotalCheckPrice(
@@ -82,17 +82,17 @@ func (s *checkService) GetCheck(ctx context.Context, checkNumber string) (*views
 
 func (s *checkService) GetCheckList(
 	ctx context.Context,
-	q views.CheckListQueryParams,
+	employeeID *string,
 	startDate, endDate time.Time,
 ) ([]views.CheckListResponse, error) {
 	var checkList []generated.CheckListView
 	var err error
 
 	switch {
-	case q.EmployeeID != nil:
+	case employeeID != nil:
 		checkList, err = s.checkRepository.GetChecksWithProductsByCashierWithinDate(
 			ctx,
-			*q.EmployeeID,
+			*employeeID,
 			startDate,
 			endDate,
 		)

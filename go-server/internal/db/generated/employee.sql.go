@@ -18,7 +18,7 @@ SELECT
             employee
         WHERE
             id_employee = $1
-          AND empl_role = 'CASHIER'
+          AND empl_role = 'Cashier'
     )
 `
 

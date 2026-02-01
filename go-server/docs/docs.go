@@ -300,7 +300,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "sorted",
+                        "description": "employee_id",
                         "name": "employee_id",
                         "in": "query"
                     },
@@ -415,7 +415,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "sorted",
+                        "description": "employee_id",
                         "name": "employee_id",
                         "in": "query"
                     },
@@ -445,6 +445,55 @@ const docTemplate = `{
                                     "type": "number",
                                     "format": "float64"
                                 }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/checks/today": {
+            "get": {
+                "description": "Retrieves all checks by specific cashier within today",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Checks"
+                ],
+                "summary": "Get all checks by specific cashier within today",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "employee_id",
+                        "name": "employee_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/views.CheckListResponse"
                             }
                         }
                     },
@@ -872,7 +921,7 @@ const docTemplate = `{
         "views.CheckListResponse": {
             "type": "object",
             "properties": {
-                "check_response": {
+                "check": {
                     "$ref": "#/definitions/views.CheckResponse"
                 },
                 "product": {
@@ -906,7 +955,7 @@ const docTemplate = `{
         "views.CheckResponseWithProducts": {
             "type": "object",
             "properties": {
-                "check_response": {
+                "check": {
                     "$ref": "#/definitions/views.CheckResponse"
                 },
                 "products": {
@@ -1075,16 +1124,14 @@ const docTemplate = `{
         "views.SaleResponse": {
             "type": "object",
             "properties": {
-                "checkNumber": {
+                "check_number": {
                     "type": "string"
                 },
-                "productNumber": {
-                    "type": "integer",
-                    "format": "int32"
+                "product_number": {
+                    "type": "integer"
                 },
-                "sellingPrice": {
-                    "type": "number",
-                    "format": "float64"
+                "selling_price": {
+                    "type": "number"
                 },
                 "upc": {
                     "type": "string"
