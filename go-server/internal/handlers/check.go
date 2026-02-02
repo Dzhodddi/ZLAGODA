@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/Dzhodddi/ZLAGODA/internal/auth"
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/services"
@@ -15,23 +17,25 @@ import (
 
 type CheckHandler struct {
 	checkService services.CheckService
+	auth         auth.Authenticator
 }
 
-func NewCheckHandler(checkService services.CheckService) *CheckHandler {
+func NewCheckHandler(checkService services.CheckService, auth auth.Authenticator) *CheckHandler {
 	return &CheckHandler{
 		checkService: checkService,
+		auth:         auth,
 	}
 }
 
 func (h *CheckHandler) RegisterRouts(e *echo.Group) {
 	check := e.Group("/checks")
-	check.POST("", h.createCheck)
-	check.GET("", h.getCheckList)
-	check.GET("/today", h.getCheckListWithinToday)
-	check.GET("/price", h.getTotalPrice)
+	check.POST("", h.createCheck, h.auth.CheckRole(auth.Cashier))
+	check.GET("", h.getCheckList, h.auth.CheckRole(auth.Manager, auth.Cashier))
+	check.GET("/today", h.getCheckListWithinToday, h.auth.CheckRole(auth.Cashier))
+	check.GET("/price", h.getTotalPrice, h.auth.CheckRole(auth.Manager))
 	checkNumberGroup := check.Group("/:checkNumber")
-	checkNumberGroup.DELETE("", h.deleteCheck)
-	checkNumberGroup.GET("", h.getCheckWithProducts)
+	checkNumberGroup.DELETE("", h.deleteCheck, h.auth.CheckRole(auth.Manager))
+	checkNumberGroup.GET("", h.getCheckWithProducts, h.auth.CheckRole(auth.Cashier))
 }
 
 // createCheck godoc
@@ -44,8 +48,13 @@ func (h *CheckHandler) RegisterRouts(e *echo.Group) {
 // @Param        payload  body      views.CreateNewCheck  true  "Check data"
 // @Success      201  {object}  views.CheckResponse
 // @Failure      400  {object}  map[string]any  "Invalid request payload"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      422  {object}  map[string]any  "Validation error"
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /checks [post]
 func (h *CheckHandler) createCheck(c echo.Context) error {
 	var payload views.CreateNewCheck
@@ -75,8 +84,13 @@ func (h *CheckHandler) createCheck(c echo.Context) error {
 // @Produce      json
 // @Param        checkNumber path string true "Check number"
 // @Success      204  {object}  map[string]any
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      404  {object}  map[string]any  "Entity not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /checks/{checkNumber} [delete]
 func (h *CheckHandler) deleteCheck(c echo.Context) error {
 	checkNumber := c.Param("checkNumber")
@@ -95,8 +109,13 @@ func (h *CheckHandler) deleteCheck(c echo.Context) error {
 // @Produce      json
 // @Param        checkNumber path string true "Check number"
 // @Success      200  {object}	views.CheckResponseWithProducts
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      404  {object}  map[string]any  "Entity not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /checks/{checkNumber} [get]
 func (h *CheckHandler) getCheckWithProducts(c echo.Context) error {
 	checkNumber := c.Param("checkNumber")
@@ -122,13 +141,22 @@ func (h *CheckHandler) getCheckWithProducts(c echo.Context) error {
 //	@Param			end_date 	query		string	true	"end_date"
 //
 // @Success      200  {array}  views.CheckListResponse
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure 400	{object}  map[string]any
 // @Failure      500  {object}  map[string]any
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /checks [get]
 func (h *CheckHandler) getCheckList(c echo.Context) error {
 	var q views.CheckListQueryParams
 	if err := c.Bind(&q); err != nil {
 		return errorResponse.BadRequest(constants.ValidationError, err)
+	}
+	role, _ := c.Get("role").(string)
+	if role == string(auth.Cashier) && q.EmployeeID == nil {
+		return errorResponse.Forbidden(fmt.Errorf("employee_id query param can't be nil for cashier"))
 	}
 	startDate, endDate, err := h.validateQueryParams(&q)
 	if err != nil {
@@ -152,8 +180,13 @@ func (h *CheckHandler) getCheckList(c echo.Context) error {
 //	@Param			employee_id 	query		string	true	"employee_id"
 //
 // @Success      200  {array}  views.CheckListResponse
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure 400	{object}  map[string]any
 // @Failure      500  {object}  map[string]any
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /checks/today [get]
 func (h *CheckHandler) getCheckListWithinToday(c echo.Context) error {
 	var q views.CheckListQueryWithThisDayParams
@@ -188,8 +221,13 @@ func (h *CheckHandler) getCheckListWithinToday(c echo.Context) error {
 //	@Param			end_date 	query		string	true	"end_date"
 //
 // @Success      200  {array}  map[string]float64
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure 400	{object}  map[string]any
 // @Failure      500  {object}  map[string]any
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /checks/price [get]
 func (h *CheckHandler) getTotalPrice(c echo.Context) error {
 	var q views.CheckListQueryParams

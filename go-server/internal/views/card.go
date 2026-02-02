@@ -36,7 +36,8 @@ type UpdateCustomerCard struct {
 }
 
 type ListCustomerCardsQueryParams struct {
-	Percent *int    `query:"percent" validate:"omitempty,min=1,max=100"`
-	Sorted  *bool   `query:"sorted"`
-	Surname *string `query:"surname" validate:"omitempty,min=1,max=50"`
+	Percent        *int    `query:"percent" validate:"omitempty,min=1,max=100"`
+	Sorted         *bool   `query:"sorted"`
+	Surname        *string `query:"surname" validate:"omitempty,min=1,max=50"`
+	LastCardNumber *string `query:"card_number" validate:"omitempty,max=50,min=1"`
 }

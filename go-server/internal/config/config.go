@@ -16,8 +16,11 @@ const (
 )
 
 type Config struct {
-	Env  Env    `mapstructure:"env"`
-	Port string `mapstructure:"port"`
+	Env       Env    `mapstructure:"env"`
+	Port      string `mapstructure:"port"`
+	JWTSecret string `mapstructure:"jwt_secret"`
+	JWTAud    string `mapstructure:"jwt_aud"`
+	JWTIssuer string `mapstructure:"jwt_issuer"`
 
 	PostgresDSN        string        `mapstructure:"postgres_dsn"`
 	MaxOpenConnections int           `mapstructure:"db_max_open_connections"`

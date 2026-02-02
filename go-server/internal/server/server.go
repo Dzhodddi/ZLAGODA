@@ -1,6 +1,8 @@
 package app
 
 import (
+	"github.com/Dzhodddi/ZLAGODA/internal/auth"
+	"github.com/Dzhodddi/ZLAGODA/internal/db"
 	"net/http"
 
 	_ "github.com/Dzhodddi/ZLAGODA/docs"
@@ -18,69 +20,122 @@ import (
 
 type Server struct {
 	*echo.Echo
-	Config *config.Config
-	DB     *sqlx.DB
+	Config        *config.Config
+	DB            *sqlx.DB
+	authenticator auth.Authenticator
 }
 
-// @title Go server API
+// Setup @title Go server API
 // @version 1.0
 // @termsOfService http://swagger.io/terms/
 // @host localhost:8080
 // @BasePath /api/v1
-func Setup(cfg *config.Config, database *sqlx.DB) (*Server, error) {
+// @securityDefinitions.apikey ApiKeyAuth
+// @in							header
+// @name						Authorization
+func Setup(withConfig bool) (*Server, error) {
 	e := echo.New()
-	setupMiddlewares(e, cfg)
-	v1 := e.Group("/api/v1")
+	s := &Server{
+		Echo: e,
+	}
+	if !withConfig {
+		return s, nil
+	}
+	err := s.setConfig()
+	if err != nil {
+		return nil, err
+	}
+	// make sure to set up config first!
+	err = s.setDB()
+	if err != nil {
+		return nil, err
+	}
+	s.setAuth()
 
+	v1 := e.Group("/api/v1", s.authenticator.AuthMiddleware(repository.NewEmployeeRepository(s.DB)))
 	v1.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "ok")
 	})
-	setupAllRoutes(database, v1)
-	return &Server{
-		Echo:   e,
-		Config: cfg,
-		DB:     database,
-	}, nil
+	s.setupMiddlewares()
+	s.setupAllRoutes(v1)
+	return s, nil
 }
 
-func setupMiddlewares(e *echo.Echo, cfg *config.Config) {
-	e.GET("/swagger/*", swaggerDocs.WrapHandler)
-	e.HTTPErrorHandler = errorResponse.GlobalHTTPErrorHandler(cfg.Env)
-	e.Use(echoMiddleware.RequestLogger())
-	e.Use(echoMiddleware.Recover())
-	e.Debug = true
+func (s *Server) setConfig() error {
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	s.Config = cfg
+	return nil
 }
 
-func setupAllRoutes(db *sqlx.DB, router *echo.Group) {
-	setupCategoryRouts(db, router)
-	setupCustomerCardRouts(db, router)
-	setupChecksRouts(db, router)
-	setupSaleRouts(db, router)
+func (s *Server) setDB() error {
+	database, err := getDatabase(s.Config)
+	if err != nil {
+		return err
+	}
+	s.DB = database
+	return nil
 }
 
-func setupCategoryRouts(db *sqlx.DB, router *echo.Group) {
-	repo := repository.NewCategoryRepository(db)
+func (s *Server) setAuth() {
+	authenticator := auth.NewJWTAuth(s.Config)
+	s.authenticator = authenticator
+}
+
+func (s *Server) setupMiddlewares() {
+	s.Echo.GET("/swagger/*", swaggerDocs.WrapHandler)
+	s.Echo.HTTPErrorHandler = errorResponse.GlobalHTTPErrorHandler(s.Config.Env)
+	s.Echo.Use(echoMiddleware.RequestLogger())
+	s.Echo.Use(echoMiddleware.Recover())
+	s.Echo.Debug = true
+}
+
+func (s *Server) setupAllRoutes(router *echo.Group) {
+	s.setupCategoryRouts(router)
+	s.setupCustomerCardRouts(router)
+	s.setupChecksRouts(router)
+	s.setupSaleRouts(router)
+}
+
+func (s *Server) setupCategoryRouts(router *echo.Group) {
+	repo := repository.NewCategoryRepository(s.DB)
 	service := services.NewCategoryService(repo)
-	handler := handlers.NewCategoryHandler(service)
+	handler := handlers.NewCategoryHandler(service, s.authenticator)
 	handler.RegisterRouts(router)
 }
 
-func setupCustomerCardRouts(db *sqlx.DB, router *echo.Group) {
-	repo := repository.NewCardRepository(db)
+func (s *Server) setupCustomerCardRouts(router *echo.Group) {
+	repo := repository.NewCardRepository(s.DB)
 	service := services.NewCardService(repo)
-	handler := handlers.NewCardHandler(service)
+	handler := handlers.NewCardHandler(service, s.authenticator)
 	handler.RegisterRouts(router)
 }
 
-func setupChecksRouts(db *sqlx.DB, router *echo.Group) {
-	repo := repository.NewCheckRepository(db)
+func (s *Server) setupChecksRouts(router *echo.Group) {
+	repo := repository.NewCheckRepository(s.DB)
 	service := services.NewCheckService(repo)
-	handler := handlers.NewCheckHandler(service)
+	handler := handlers.NewCheckHandler(service, s.authenticator)
 	handler.RegisterRouts(router)
 }
-func setupSaleRouts(db *sqlx.DB, router *echo.Group) {
-	repo := repository.NewSaleRepository(db)
+
+func (s *Server) setupSaleRouts(router *echo.Group) {
+	repo := repository.NewSaleRepository(s.DB)
 	service := services.NewSaleService(repo)
-	handler := handlers.NewSaleHandler(service)
+	handler := handlers.NewSaleHandler(service, s.authenticator)
 	handler.RegisterRouts(router)
+}
+
+func getDatabase(cfg *config.Config) (*sqlx.DB, error) {
+	dbConfig := db.DatabaseConfig{
+		Driver: "postgres",
+		DSN:    cfg.PostgresDSN,
+		Pool: &db.PoolConfig{
+			MaxOpenConnections: cfg.MaxOpenConnections,
+			MaxIdleConnections: cfg.MaxIdleConnections,
+			ConnMaxLifetime:    cfg.ConnMaxLifetime,
+		},
+	}
+	return db.NewPostgresConnection(dbConfig)
 }

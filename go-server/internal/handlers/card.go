@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+
+	"github.com/Dzhodddi/ZLAGODA/internal/auth"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
@@ -13,20 +16,24 @@ import (
 
 type CardHandler struct {
 	service services.CardService
+	auth    auth.Authenticator
 }
 
-func NewCardHandler(service services.CardService) *CardHandler {
-	return &CardHandler{service: service}
+func NewCardHandler(service services.CardService, auth auth.Authenticator) *CardHandler {
+	return &CardHandler{
+		service: service,
+		auth:    auth,
+	}
 }
 
 func (h *CardHandler) RegisterRouts(route *echo.Group) {
 	card := route.Group("/customer-cards")
-	card.POST("", h.createNewCustomerCard)
-	card.GET("", h.listCustomerCards)
+	card.POST("", h.createNewCustomerCard, h.auth.CheckRole(auth.Manager, auth.Cashier))
+	card.GET("", h.listCustomerCards, h.auth.CheckRole(auth.Manager, auth.Cashier))
 	cardNumber := card.Group("/:cardNumber")
-	cardNumber.GET("", h.getCustomerCard)
-	cardNumber.PUT("", h.updateCustomerCard)
-	cardNumber.DELETE("", h.deleteCustomerCard)
+	cardNumber.GET("", h.getCustomerCard, h.auth.CheckRole(auth.Manager))
+	cardNumber.PUT("", h.updateCustomerCard, h.auth.CheckRole(auth.Manager, auth.Cashier))
+	cardNumber.DELETE("", h.deleteCustomerCard, h.auth.CheckRole(auth.Manager))
 }
 
 // createNewCustomerCard godoc
@@ -39,8 +46,13 @@ func (h *CardHandler) RegisterRouts(route *echo.Group) {
 // @Param        payload  body      views.CreateNewCustomerCard  true  "Customer card data"
 // @Success      201  {object}  views.CustomerCardResponse
 // @Failure      400  {object}  map[string]any  "Validation error"
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      422  {object}  map[string]any  "Validation error"
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /customer-cards [post]
 func (h *CardHandler) createNewCustomerCard(c echo.Context) error {
 	var payload views.CreateNewCustomerCard
@@ -66,8 +78,13 @@ func (h *CardHandler) createNewCustomerCard(c echo.Context) error {
 // @Produce      json
 // @Param        cardNumber path string true "Customer card number"
 // @Success      200  {object}  views.CustomerCardResponse
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      404  {object}  map[string]any  "Entity not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /customer-cards/{cardNumber} [get]
 func (h *CardHandler) getCustomerCard(c echo.Context) error {
 	cardNumber := c.Param("cardNumber")
@@ -88,9 +105,14 @@ func (h *CardHandler) getCustomerCard(c echo.Context) error {
 // @Param        cardNumber path string true "Customer card number"
 // @Param        payload  body      views.UpdateCustomerCard  true  "Customer card data"
 // @Success      200  {object}  views.CustomerCardResponse
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      400  {object}  map[string]any  "Validation error"
 // @Failure      404  {object}  map[string]any  "Entity not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /customer-cards/{cardNumber} [put]
 func (h *CardHandler) updateCustomerCard(c echo.Context) error {
 	cardNumber := c.Param("cardNumber")
@@ -117,6 +139,8 @@ func (h *CardHandler) updateCustomerCard(c echo.Context) error {
 // @Produce      json
 // @Param        cardNumber path string true "Customer card number"
 // @Success      204  {object}  map[string]any
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      404  {object}  map[string]any  "Entity not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
 // @Router       /customer-cards/{cardNumber} [delete]
@@ -142,7 +166,12 @@ func (h *CardHandler) deleteCustomerCard(c echo.Context) error {
 //	@Param			surname 	query		string	false	"surname"
 //
 // @Success      200  {array}  views.CustomerCardResponse
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /customer-cards [get]
 func (h *CardHandler) listCustomerCards(c echo.Context) error {
 	var q views.ListCustomerCardsQueryParams
@@ -151,6 +180,13 @@ func (h *CardHandler) listCustomerCards(c echo.Context) error {
 	}
 	if err := validation.ValidateStruct(q); err != nil {
 		return errorResponse.ValidationError(constants.ValidationError, err)
+	}
+	role, _ := c.Get("role").(string)
+	if role == string(auth.Cashier) && q.Percent != nil {
+		return errorResponse.Forbidden(fmt.Errorf("percent query param is not allowed for cashier"))
+	}
+	if role == string(auth.Manager) && q.Surname != nil {
+		return errorResponse.Forbidden(fmt.Errorf("surname query param is not allowed for manager"))
 	}
 	cards, err := h.service.ListCustomerCards(c.Request().Context(), q)
 	if err != nil {
