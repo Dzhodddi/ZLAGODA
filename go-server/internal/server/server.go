@@ -1,8 +1,9 @@
 package app
 
 import (
-	"github.com/Dzhodddi/ZLAGODA/internal/auth"
 	"net/http"
+
+	"github.com/Dzhodddi/ZLAGODA/internal/auth"
 
 	_ "github.com/Dzhodddi/ZLAGODA/docs"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
@@ -40,7 +41,7 @@ func Setup(cfg *config.Config, database *sqlx.DB) (*Server, error) {
 	v1.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "ok")
 	})
-	setupAllRoutes(database, v1)
+	setupAllRoutes(database, v1, jwtAuth)
 	return &Server{
 		Echo:          e,
 		Config:        cfg,
@@ -57,37 +58,37 @@ func setupMiddlewares(e *echo.Echo, cfg *config.Config) {
 	e.Debug = true
 }
 
-func setupAllRoutes(db *sqlx.DB, router *echo.Group) {
-	setupCategoryRouts(db, router)
-	setupCustomerCardRouts(db, router)
-	setupChecksRouts(db, router)
-	setupSaleRouts(db, router)
+func setupAllRoutes(db *sqlx.DB, router *echo.Group, auth auth.Authenticator) {
+	setupCategoryRouts(db, router, auth)
+	setupCustomerCardRouts(db, router, auth)
+	setupChecksRouts(db, router, auth)
+	setupSaleRouts(db, router, auth)
 }
 
-func setupCategoryRouts(db *sqlx.DB, router *echo.Group) {
+func setupCategoryRouts(db *sqlx.DB, router *echo.Group, auth auth.Authenticator) {
 	repo := repository.NewCategoryRepository(db)
 	service := services.NewCategoryService(repo)
-	handler := handlers.NewCategoryHandler(service)
+	handler := handlers.NewCategoryHandler(service, auth)
 	handler.RegisterRouts(router)
 }
 
-func setupCustomerCardRouts(db *sqlx.DB, router *echo.Group) {
+func setupCustomerCardRouts(db *sqlx.DB, router *echo.Group, auth auth.Authenticator) {
 	repo := repository.NewCardRepository(db)
 	service := services.NewCardService(repo)
-	handler := handlers.NewCardHandler(service)
+	handler := handlers.NewCardHandler(service, auth)
 	handler.RegisterRouts(router)
 }
 
-func setupChecksRouts(db *sqlx.DB, router *echo.Group) {
+func setupChecksRouts(db *sqlx.DB, router *echo.Group, auth auth.Authenticator) {
 	repo := repository.NewCheckRepository(db)
 	service := services.NewCheckService(repo)
-	handler := handlers.NewCheckHandler(service)
+	handler := handlers.NewCheckHandler(service, auth)
 	handler.RegisterRouts(router)
 }
 
-func setupSaleRouts(db *sqlx.DB, router *echo.Group) {
+func setupSaleRouts(db *sqlx.DB, router *echo.Group, auth auth.Authenticator) {
 	repo := repository.NewSaleRepository(db)
 	service := services.NewSaleService(repo)
-	handler := handlers.NewSaleHandler(service)
+	handler := handlers.NewSaleHandler(service, auth)
 	handler.RegisterRouts(router)
 }

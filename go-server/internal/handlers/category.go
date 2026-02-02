@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/Dzhodddi/ZLAGODA/internal/auth"
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/services"
@@ -14,23 +15,25 @@ import (
 
 type CategoryHandler struct {
 	categoryService services.CategoryService
+	auth            auth.Authenticator
 }
 
-func NewCategoryHandler(categoryService services.CategoryService) *CategoryHandler {
+func NewCategoryHandler(categoryService services.CategoryService, auth auth.Authenticator) *CategoryHandler {
 	return &CategoryHandler{
 		categoryService: categoryService,
+		auth:            auth,
 	}
 }
 
 func (h *CategoryHandler) RegisterRouts(e *echo.Group) {
 	category := e.Group("/categories")
-	category.POST("", h.createCategory)
-	category.GET("", h.getAllCategories)
+	category.POST("", h.createCategory, h.auth.CheckRole(auth.Manager))
+	category.GET("", h.getAllCategories, h.auth.CheckRole(auth.Manager))
 
 	id := category.Group("/:id")
-	id.PUT("", h.updateCategory)
-	id.DELETE("", h.deleteCategory)
-	id.GET("", h.getCategoryByID)
+	id.PUT("", h.updateCategory, h.auth.CheckRole(auth.Manager))
+	id.DELETE("", h.deleteCategory, h.auth.CheckRole(auth.Manager))
+	id.GET("", h.getCategoryByID, h.auth.CheckRole(auth.Manager))
 }
 
 // createCategory godoc
@@ -43,8 +46,13 @@ func (h *CategoryHandler) RegisterRouts(e *echo.Group) {
 // @Param        payload  body      views.CreateNewCategory  true  "Category data"
 // @Success      201  {object}  views.CategoryResponse "Payload of category"
 // @Failure      400  {object}  map[string]any
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      422  {object}  map[string]any
 // @Failure      500  {object}  map[string]any
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /categories [post]
 func (h *CategoryHandler) createCategory(c echo.Context) error {
 	var payload views.CreateNewCategory
@@ -72,9 +80,14 @@ func (h *CategoryHandler) createCategory(c echo.Context) error {
 // @Param        payload  body      views.UpdateCategory  true	"Payload of category"
 // @Success      200  {object}  views.CategoryResponse
 // @Failure      400  {object}  map[string]any
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      422  {object}  map[string]any
 // @Failure      404  {object}  map[string]any
 // @Failure      500  {object}  map[string]any
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /categories/{id} [put]
 func (h *CategoryHandler) updateCategory(c echo.Context) error {
 	id, err := utils.ParseStringToInt(c.Param("id"))
@@ -105,8 +118,13 @@ func (h *CategoryHandler) updateCategory(c echo.Context) error {
 // @Produce      json
 // @Param        id       path      int64     true  "Category ID"
 // @Success      204  {object}  map[string]any
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      404  {object}  map[string]any
 // @Failure      500  {object}  map[string]any
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /categories/{id} [delete]
 func (h *CategoryHandler) deleteCategory(c echo.Context) error {
 	id, err := utils.ParseStringToInt(c.Param("id"))
@@ -129,8 +147,13 @@ func (h *CategoryHandler) deleteCategory(c echo.Context) error {
 // @Produce      json
 // @Param        id       path      int64     true  "Category ID"
 // @Success      200  {object}  views.CategoryResponse
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      404  {object}  map[string]any
 // @Failure      500  {object}  map[string]any
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /categories/{id} [get]
 func (h *CategoryHandler) getCategoryByID(c echo.Context) error {
 	id, err := utils.ParseStringToInt(c.Param("id"))
@@ -160,7 +183,12 @@ func (h *CategoryHandler) getCategoryByID(c echo.Context) error {
 //	@Param			category_name 	query		string	false	"category_name"
 //
 // @Success      200  {array}  views.CategoryResponse
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      500  {object}  map[string]any
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /categories [get]
 func (h *CategoryHandler) getAllCategories(c echo.Context) error {
 	var q views.ListCategoryQueryParams

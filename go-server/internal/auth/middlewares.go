@@ -3,14 +3,15 @@ package auth
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
-	"net/http"
-	"strings"
 )
 
 type employeeKey string
@@ -40,11 +41,10 @@ func (auth *JWTAuth) AuthMiddleware(employeeRepo repository.EmployeeRepository) 
 			}
 			jwtToken, err := auth.ValidateToken(parts[1])
 			if err != nil {
-				log.Info("here?")
 				return errorResponse.UnAuthorized(err)
 			}
-			employeeID := jwtToken.Claims.(jwt.MapClaims)["sub"].(string)
-			if err != nil {
+			employeeID, ok := jwtToken.Claims.(jwt.MapClaims)["sub"].(string)
+			if !ok || err != nil {
 				return errorResponse.UnAuthorized(err)
 			}
 			employee, err := employeeRepo.GetEmployeeByID(context.Background(), employeeID)
@@ -76,6 +76,6 @@ func (auth *JWTAuth) CheckRole(requiredRoles ...roleKey) echo.MiddlewareFunc {
 }
 
 func getRoleFromCtx(r *http.Request) string {
-	role := r.Context().Value(roleCtx).(string)
+	role, _ := r.Context().Value(roleCtx).(string)
 	return role
 }

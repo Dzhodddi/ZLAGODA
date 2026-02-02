@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Dzhodddi/ZLAGODA/internal/auth"
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/services"
@@ -14,18 +15,19 @@ import (
 
 type SaleHandler struct {
 	saleService services.SaleService
+	auth        auth.Authenticator
 }
 
-func NewSaleHandler(service services.SaleService) *SaleHandler {
+func NewSaleHandler(service services.SaleService, auth auth.Authenticator) *SaleHandler {
 	return &SaleHandler{
 		saleService: service,
+		auth:        auth,
 	}
 }
 
 func (h *SaleHandler) RegisterRouts(e *echo.Group) {
 	sales := e.Group("/sales")
-	sales.GET("", h.getAllSales)
-
+	sales.GET("", h.getAllSales, h.auth.CheckRole(auth.Manager))
 }
 
 // getAllSales godoc
@@ -41,7 +43,12 @@ func (h *SaleHandler) RegisterRouts(e *echo.Group) {
 //	@Param			end_date 	query		string	true	"end_date"
 //
 // @Success      200  {array}  views.SaleResponse
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      500  {object}  map[string]any
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /sales [get]
 func (h *SaleHandler) getAllSales(c echo.Context) error {
 	var q views.SaleListQueryParams
