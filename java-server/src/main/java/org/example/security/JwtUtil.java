@@ -22,6 +22,12 @@ public class JwtUtil {
     @Value("${jwt.refresh.expiration}")
     private long refreshExpiration;
 
+    @Value("${jwt.issuer}")
+    private String issuer;
+
+    @Value("${jwt.audience}")
+    private String audience;
+
     public JwtUtil(@Value("${jwt.secret}") String secret) {
         secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
@@ -37,6 +43,8 @@ public class JwtUtil {
     private String generateToken(String username, long expirationTime) {
         return Jwts.builder()
                 .subject(username)
+                .issuer(issuer)
+                .audience().add(audience).and()
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(secretKey)
@@ -47,6 +55,8 @@ public class JwtUtil {
         try {
             Jws<Claims> claimsJws = Jwts.parser()
                     .verifyWith(secretKey)
+                    .requireIssuer(issuer)
+                    .requireAudience(audience)
                     .build()
                     .parseSignedClaims(token);
             return !claimsJws.getPayload().getExpiration().before(new Date());
@@ -62,6 +72,8 @@ public class JwtUtil {
     private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = Jwts.parser()
                 .verifyWith(secretKey)
+                .requireIssuer(issuer)
+                .requireAudience(audience)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
