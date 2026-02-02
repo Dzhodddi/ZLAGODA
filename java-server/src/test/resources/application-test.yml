@@ -12,3 +12,5 @@ spring:
 jwt:
   secret: test-secret-key-for-testing-purposes-only-minimum-256-bits-long
   expiration: 3600000
+  issuer: test-issuer
+  audience: test-audience

@@ -1,5 +1,10 @@
 package org.example.controller.employee;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.example.RestPage;
 import org.example.dto.employee.login.EmployeeLoginRequestDto;
 import org.example.dto.employee.login.EmployeeLoginResponseDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
@@ -8,21 +13,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.web.client.RestClient;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Sql(scripts = "classpath:schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = "classpath:database/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @Sql(scripts = "classpath:database/add-test-users.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Sql(scripts = "classpath:database/clear.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
 public class EmployeeControllerIT {
 
     @LocalServerPort
@@ -54,13 +57,13 @@ public class EmployeeControllerIT {
         assertNotNull(loginResponse);
         String token = loginResponse.accessToken();
 
-        EmployeeResponseDto[] employees = restClient.get()
+        ResponseEntity<RestPage<EmployeeResponseDto>> response = restClient.get()
                 .uri("/employees")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
-                .body(EmployeeResponseDto[].class);
+                .toEntity(new ParameterizedTypeReference<RestPage<EmployeeResponseDto>>() {});
 
-        assertNotNull(employees);
-        assertTrue(employees.length > 0);
+        assertEquals(0, response.getBody().getNumber());
+        assertTrue(response.getBody().getContent().size() > 0);
     }
 }
