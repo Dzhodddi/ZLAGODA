@@ -8,8 +8,13 @@ type CreateNewSale struct {
 }
 
 type SaleResponse struct {
-	ProductNumber int32
-	Upc           string
-	CheckNumber   string
-	SellingPrice  float64
+	ProductNumber int32   `json:"product_number"`
+	Upc           string  `json:"upc"`
+	CheckNumber   string  `json:"check_number"`
+	SellingPrice  float64 `json:"selling_price"`
+}
+
+type SaleListQueryParams struct {
+	StartDate string `query:"start_date" validate:"required,datetime=2006-01-02"`
+	EndDate   string `query:"end_date" validate:"required,datetime=2006-01-02"`
 }

@@ -4,7 +4,6 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +11,14 @@ import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
-import org.example.exception.AuthorizationException;
-import org.example.exception.RegistrationException;
+import org.example.dto.page.PageResponseDto;
+import org.example.exception.custom_exception.AuthorizationException;
+import org.example.exception.custom_exception.RegistrationException;
 import org.example.service.employee.EmployeeService;
 import org.example.service.report.PdfReportGeneratorService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/employees")
 public class EmployeeController {
 
+    private final static int PAGE_SIZE = 10;
     private final EmployeeService employeeService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
 
@@ -48,8 +52,10 @@ public class EmployeeController {
             description = "Get all employees sorted by their surnames"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public List<EmployeeResponseDto> getAll() {
-        return employeeService.getAll();
+    public PageResponseDto<EmployeeResponseDto> getAll(@RequestParam(required = false)
+                                                       String lastSeenId) {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("empl_surname"));
+        return employeeService.getAll(pageable, lastSeenId);
     }
 
     @PostMapping
@@ -96,7 +102,7 @@ public class EmployeeController {
     )
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<byte[]> employeePdf() throws DocumentException, IOException {
-        List<EmployeeResponseDto> employees = employeeService.getAll();
+        List<EmployeeResponseDto> employees = employeeService.findAllNoPagination();
         byte[] pdf = pdfReportGeneratorService.employeeToPdf(employees);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=employees.pdf")
@@ -109,8 +115,10 @@ public class EmployeeController {
             description = "Get all cashiers sorted by their surnames"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public List<EmployeeResponseDto> getAllCashiers() {
-        return employeeService.getAllCashiers();
+    public PageResponseDto<EmployeeResponseDto> getAllCashiers(
+            @RequestParam(required = false) String lastSeenId) {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("empl_surname"));
+        return employeeService.getAllCashiers(pageable, lastSeenId);
     }
 
     @GetMapping("/me")

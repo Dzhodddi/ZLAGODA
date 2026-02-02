@@ -67,7 +67,7 @@ func (s *CardHandlerSuite) TestCreateCard() {
 			Method:       http.MethodPost,
 			URL:          func() string { return "/api/v1/customer-cards" },
 			Body:         validInput,
-			ExpectedCode: http.StatusUnprocessableEntity,
+			ExpectedCode: http.StatusBadRequest,
 			ErrorMessage: repository.ErrConflict.Error(),
 		},
 	}

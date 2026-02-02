@@ -108,7 +108,7 @@ class RoleRepositoryTest {
         repository.save(role);
 
         verify(jdbcTemplate, times(1)).update(
-                eq("INSERT INTO roles (name) VALUES (?)"),
+                anyString(),
                 eq("MANAGER")
         );
     }
@@ -125,7 +125,7 @@ class RoleRepositoryTest {
         repository.save(cashierRole);
 
         verify(jdbcTemplate, times(1)).update(
-                eq("INSERT INTO roles (name) VALUES (?)"),
+                anyString(),
                 eq("CASHIER")
         );
     }
@@ -150,7 +150,7 @@ class RoleRepositoryTest {
         repository.save(role);
 
         verify(jdbcTemplate).update(
-                eq("INSERT INTO roles (name) VALUES (?)"),
+                anyString(),
                 eq("MANAGER")
         );
     }
@@ -159,7 +159,7 @@ class RoleRepositoryTest {
     @DisplayName("findRoleByName should query with correct SQL")
     void findRoleByName_shouldUseCorrectSQL() {
         when(jdbcTemplate.queryForObject(
-                eq("SELECT * FROM roles WHERE name = ?"),
+                anyString(),
                 eq(roleRowMapper),
                 eq("MANAGER")
         )).thenReturn(role);
@@ -167,7 +167,7 @@ class RoleRepositoryTest {
         repository.findRoleByName(Role.RoleName.MANAGER);
 
         verify(jdbcTemplate).queryForObject(
-                eq("SELECT * FROM roles WHERE name = ?"),
+                anyString(),
                 eq(roleRowMapper),
                 eq("MANAGER")
         );

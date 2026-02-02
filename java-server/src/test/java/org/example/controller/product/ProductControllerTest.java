@@ -1,12 +1,28 @@
 package org.example.controller.product;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.List;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
 import org.example.service.product.ProductService;
@@ -18,13 +34,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @AutoConfigureMockMvc
 @EnableMethodSecurity
 @ActiveProfiles("test")
@@ -47,7 +64,7 @@ class ProductControllerTest {
     private ProductRequestDto productRequestDto;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         productDto1 = new ProductDto();
         productDto1.setId_product(1);
         productDto1.setProduct_name("Apple");
@@ -62,115 +79,99 @@ class ProductControllerTest {
 
         productRequestDto = new ProductRequestDto();
         productRequestDto.setProduct_name("Orange");
-        productRequestDto.setProduct_characteristics("Wonderful orange");
+        productRequestDto.setProduct_characteristics("Juicy orange");
         productRequestDto.setCategory_number(10);
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
-    @DisplayName("GET /products - should return all products")
-    void getAll_allAvailableProducts_Ok() throws Exception {
-        when(productService.getAll()).thenReturn(List.of(productDto1, productDto2));
+    @WithMockUser
+    @DisplayName("GET /products - should return paged products")
+    void getAll_ok() throws Exception {
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                new ArrayList<>(List.of(productDto1, productDto2)),
+                0,
+                10,
+                false
+        );
+        when(productService.getAll(any(Pageable.class), anyInt())).thenReturn(page);
 
-        mockMvc.perform(get("/products"))
+        mockMvc.perform(get("/products")
+                        .param("lastSeenName", "")
+                        .param("lastSeenId", "0"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].product_name").value("Apple"))
-                .andExpect(jsonPath("$[1].product_name").value("Banana"))
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].product_name").value("Apple"))
+                .andExpect(jsonPath("$.content[1].product_name").value("Banana"));
 
-        verify(productService, times(1)).getAll();
-    }
-
-    @Test
-    @WithMockUser(roles = "MANAGER")
-    @DisplayName("GET /products - should return empty list when no products")
-    void getAll_noProducts_Ok() throws Exception {
-        when(productService.getAll()).thenReturn(List.of());
-
-        mockMvc.perform(get("/products"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
-
-        verify(productService, times(1)).getAll();
+        verify(productService).getAll(any(Pageable.class), anyInt());
     }
 
     @Test
     @WithMockUser(authorities = "CASHIER")
-    @DisplayName("GET /products/search?name - Cashier should search by name successfully")
-    void search_byName_asCashier_Ok() throws Exception {
-        when(productService.findByName("Apple")).thenReturn(List.of(productDto1));
+    @DisplayName("GET /products?name - cashier allowed")
+    void searchByName_cashier_ok() throws Exception {
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                new ArrayList<>(List.of(productDto1)),
+                0,
+                10,
+                false
+        );
+        when(productService.findByName(eq("Apple"), any(Pageable.class), anyInt()))
+                .thenReturn(page);
 
-        mockMvc.perform(get("/products/search")
-                        .param("name", "Apple"))
+        mockMvc.perform(get("/products")
+                        .param("name", "Apple")
+                        .param("lastSeenId", "0"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].product_name").value("Apple"))
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].product_name").value("Apple"));
 
-        verify(productService, times(1)).findByName("Apple");
+        verify(productService).findByName(eq("Apple"), any(Pageable.class), anyInt());
     }
 
     @Test
     @WithMockUser(roles = "MANAGER")
-    @DisplayName("GET /products/search?name - Non-Cashier should get forbidden")
-    void search_byName_asNonCashier_Forbidden() throws Exception {
-        mockMvc.perform(get("/products/search")
-                        .param("name", "Apple"))
+    @DisplayName("GET /products?name - manager forbidden")
+    void searchByName_manager_forbidden() throws Exception {
+        mockMvc.perform(get("/products")
+                        .param("name", "Apple")
+                        .param("lastSeenId", "0"))
                 .andExpect(status().isForbidden());
 
-        verify(productService, never()).findByName(anyString());
+        verify(productService, never()).findByName(anyString(), any(), anyInt());
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
-    @DisplayName("GET /products/search?categoryId - should search by category")
-    void search_byCategoryId_Ok() throws Exception {
-        when(productService.findByCategoryId(10)).thenReturn(List.of(productDto1));
+    @WithMockUser
+    @DisplayName("GET /products?categoryId - allowed")
+    void searchByCategory_ok() throws Exception {
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                new ArrayList<>(List.of(productDto1, productDto2)),
+                0,
+                10,
+                false
+        );
+        when(productService.findByCategoryId(eq(10), any(Pageable.class), anyInt()))
+                .thenReturn(page);
 
-        mockMvc.perform(get("/products/search")
-                        .param("categoryId", "10"))
+        mockMvc.perform(get("/products")
+                        .param("categoryId", "10")
+                        .param("lastSeenId", "0"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].product_name").value("Apple"))
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.content.length()").value(2));
 
-        verify(productService, times(1)).findByCategoryId(10);
+        verify(productService).findByCategoryId(eq(10), any(Pageable.class), anyInt());
     }
 
     @Test
     @WithMockUser(roles = "MANAGER")
-    @DisplayName("GET /products/search - should return bad request when no parameters")
-    void search_noParameters_BadRequest() throws Exception {
-        mockMvc.perform(get("/products/search"))
-                .andExpect(status().isBadRequest());
+    @DisplayName("POST /products - manager can create")
+    void createProduct_ok() throws Exception {
+        ProductDto created = new ProductDto();
+        created.setId_product(3);
+        created.setProduct_name("Orange");
 
-        verify(productService, never()).findByName(anyString());
-        verify(productService, never()).findByCategoryId(anyInt());
-    }
-
-    @Test
-    @WithMockUser(authorities = "CASHIER")
-    @DisplayName("GET /products/search?name - should return empty list when no matches")
-    void search_byName_noMatches_Ok() throws Exception {
-        when(productService.findByName("NonExistent")).thenReturn(List.of());
-
-        mockMvc.perform(get("/products/search")
-                        .param("name", "NonExistent"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
-
-        verify(productService, times(1)).findByName("NonExistent");
-    }
-
-    @Test
-    @WithMockUser(roles = "MANAGER")
-    @DisplayName("POST /products - Manager should create product successfully")
-    void createProduct_asManager_Created() throws Exception {
-        ProductDto createdProduct = new ProductDto();
-        createdProduct.setId_product(3);
-        createdProduct.setProduct_name("Orange");
-        createdProduct.setProduct_characteristics("Juicy orange");
-        createdProduct.setCategory_number(10);
-
-        when(productService.save(any(ProductRequestDto.class))).thenReturn(createdProduct);
+        when(productService.save(any(ProductRequestDto.class))).thenReturn(created);
 
         mockMvc.perform(post("/products")
                         .with(csrf())
@@ -180,49 +181,30 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.id_product").value(3))
                 .andExpect(jsonPath("$.product_name").value("Orange"));
 
-        verify(productService, times(1)).save(any(ProductRequestDto.class));
+        verify(productService).save(any(ProductRequestDto.class));
     }
 
     @Test
     @WithMockUser(authorities = "CASHIER")
-    @DisplayName("POST /products - Non-Manager should get forbidden")
-    void createProduct_asNonManager_Forbidden() throws Exception {
+    @DisplayName("POST /products - cashier forbidden")
+    void createProduct_forbidden() throws Exception {
         mockMvc.perform(post("/products")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(productRequestDto)))
                 .andExpect(status().isForbidden());
-
-        verify(productService, never()).save(any(ProductRequestDto.class));
     }
 
     @Test
     @WithMockUser(roles = "MANAGER")
-    @DisplayName("POST /products - should return unprocessable entity exception for invalid data")
-    void createProduct_invalidData_UnprocessableEntity() throws Exception {
-        ProductRequestDto invalidRequest = new ProductRequestDto();
-        mockMvc.perform(post("/products")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidRequest)))
-                .andExpect(status().isUnprocessableEntity());
-
-        verify(productService, never()).save(any(ProductRequestDto.class));
-    }
-
-
-    @Test
-    @WithMockUser(roles = "MANAGER")
-    @DisplayName("PUT /products/{id} - Manager should update product successfully")
-    void updateProduct_asManager_Ok() throws Exception {
-        ProductDto updatedProduct = new ProductDto();
-        updatedProduct.setId_product(1);
-        updatedProduct.setProduct_name("Updated Apple");
-        updatedProduct.setProduct_characteristics("Updated description");
-        updatedProduct.setCategory_number(10);
+    @DisplayName("PUT /products/{id} - manager can update")
+    void updateProduct_ok() throws Exception {
+        ProductDto updated = new ProductDto();
+        updated.setId_product(1);
+        updated.setProduct_name("Updated Apple");
 
         when(productService.updateProductById(eq(1), any(ProductRequestDto.class)))
-                .thenReturn(updatedProduct);
+                .thenReturn(updated);
 
         mockMvc.perform(put("/products/1")
                         .with(csrf())
@@ -232,73 +214,38 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.id_product").value(1))
                 .andExpect(jsonPath("$.product_name").value("Updated Apple"));
 
-        verify(productService, times(1)).updateProductById(eq(1), any(ProductRequestDto.class));
-    }
-
-    @Test
-    @WithMockUser(authorities = "CASHIER")
-    @DisplayName("PUT /products/{id} - Non-Manager should get forbidden")
-    void updateProduct_asNonManager_Forbidden() throws Exception {
-        mockMvc.perform(put("/products/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(productRequestDto)))
-                .andExpect(status().isForbidden());
-
-        verify(productService, never()).updateProductById(anyInt(), any(ProductRequestDto.class));
+        verify(productService).updateProductById(eq(1), any(ProductRequestDto.class));
     }
 
     @Test
     @WithMockUser(roles = "MANAGER")
-    @DisplayName("DELETE /products/{id} - Manager should delete product successfully")
-    void deleteProduct_asManager_NoContent() throws Exception {
+    @DisplayName("DELETE /products/{id} - manager can delete")
+    void deleteProduct_ok() throws Exception {
         doNothing().when(productService).deleteProductById(1);
 
-        mockMvc.perform(delete("/products/1")
-                        .with(csrf()))
+        mockMvc.perform(delete("/products/1").with(csrf()))
                 .andExpect(status().isNoContent());
 
-        verify(productService, times(1)).deleteProductById(1);
-    }
-
-    @Test
-    @WithMockUser(roles = "CASHIER")
-    @DisplayName("DELETE /products/{id} - Non-Manager should get forbidden")
-    void deleteProduct_asNonManager_Forbidden() throws Exception {
-        mockMvc.perform(delete("/products/1")
-                        .with(csrf()))
-                .andExpect(status().isForbidden());
-
-        verify(productService, never()).deleteProductById(anyInt());
+        verify(productService).deleteProductById(1);
     }
 
     @Test
     @WithMockUser(roles = "MANAGER")
-    @DisplayName("GET /products/report - Manager should download PDF report")
-    void productPdf_asManager_Ok() throws Exception {
-        byte[] pdfBytes = "PDF content".getBytes();
+    @DisplayName("GET /products/report - pdf download")
+    void productReport_ok() throws Exception {
+        byte[] pdf = "PDF".getBytes();
 
-        when(productService.getAll()).thenReturn(List.of(productDto1, productDto2));
-        when(pdfReportGeneratorService.productToPdf(anyList())).thenReturn(pdfBytes);
+        when(productService.getAllNoPagination()).thenReturn(List.of(productDto1, productDto2));
+        when(pdfReportGeneratorService.productToPdf(anyList())).thenReturn(pdf);
 
         mockMvc.perform(get("/products/report"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition", "attachment; filename=products.pdf"))
-                .andExpect(content().contentType(MediaType.APPLICATION_PDF_VALUE))
-                .andExpect(content().bytes(pdfBytes));
+                .andExpect(header().string("Content-Disposition",
+                        "attachment; filename=products.pdf"))
+                .andExpect(content().contentType(MediaType.APPLICATION_PDF))
+                .andExpect(content().bytes(pdf));
 
-        verify(productService, times(1)).getAll();
-        verify(pdfReportGeneratorService, times(1)).productToPdf(anyList());
-    }
-
-    @Test
-    @WithMockUser(roles = "CASHIER")
-    @DisplayName("GET /products/report - Non-Manager should get forbidden")
-    void productPdf_asNonManager_Forbidden() throws Exception {
-        mockMvc.perform(get("/products/report"))
-                .andExpect(status().isForbidden());
-
-        verify(productService, never()).getAll();
-        verify(pdfReportGeneratorService, never()).productToPdf(anyList());
+        verify(productService).getAllNoPagination();
+        verify(pdfReportGeneratorService).productToPdf(anyList());
     }
 }

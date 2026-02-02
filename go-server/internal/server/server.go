@@ -78,10 +78,9 @@ func setupChecksRouts(db *sqlx.DB, router *echo.Group) {
 	handler := handlers.NewCheckHandler(service)
 	handler.RegisterRouts(router)
 }
-
 func setupSaleRouts(db *sqlx.DB, router *echo.Group) {
 	repo := repository.NewSaleRepository(db)
 	service := services.NewSaleService(repo)
 	handler := handlers.NewSaleHandler(service)
-	handler.RegisterRoutes(router)
+	handler.RegisterRouts(router)
 }

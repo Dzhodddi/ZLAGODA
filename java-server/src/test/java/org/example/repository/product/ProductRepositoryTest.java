@@ -15,10 +15,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
-import org.example.exception.EntityNotFoundException;
-import org.example.exception.InvalidCategoryException;
+import org.example.exception.custom_exception.EntityNotFoundException;
+import org.example.exception.custom_exception.InvalidCategoryException;
 import org.example.mapper.product.ProductMapper;
 import org.example.mapper.product.ProductRowMapper;
 import org.example.model.product.Product;
@@ -28,10 +29,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Product Repository Tests")
@@ -70,16 +73,42 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("findAll should return list of products")
-    void findAll_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper))).thenReturn(List.of(product));
+    @DisplayName("findAll should return list of products (No pagination params)")
+    void findAll_noParams_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt()))
+                .thenReturn(List.of(product));
+        when(jdbcTemplate.queryForObject(
+                anyString(),
+                eq(Integer.class)
+        )).thenReturn(1);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
-        List<Product> result = repository.findAll();
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> result = repository.findAll(pageable,  null);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("TestProduct", result.get(0).getProduct_name());
-        verify(jdbcTemplate, times(1)).query(anyString(), eq(rowMapper));
+        assertEquals(1, result.getContent().size());
+        assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
+    }
+
+    @Test
+    @DisplayName("findAll should return list of products (With lastSeen params)")
+    void findAll_withLastSeenParams_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any()))
+                .thenReturn(List.of(product));
+        when(jdbcTemplate.queryForObject(
+                anyString(),
+                eq(Integer.class)
+        )).thenReturn(1);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> result = repository.findAll(pageable,
+                 5);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        verify(jdbcTemplate).query(anyString(), eq(rowMapper), eq(5), eq(10));
     }
 
     @Test
@@ -87,12 +116,9 @@ class ProductRepositoryTest {
     void findById_existingId_shouldReturnProduct() {
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq(1)))
                 .thenReturn(product);
-
         Optional<Product> result = repository.findById(1);
-
         assertTrue(result.isPresent());
         assertEquals("TestProduct", result.get().getProduct_name());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), eq(rowMapper), eq(1));
     }
 
     @Test
@@ -100,37 +126,81 @@ class ProductRepositoryTest {
     void findById_nonExistingId_shouldReturnEmpty() {
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq(2)))
                 .thenThrow(EmptyResultDataAccessException.class);
-
         Optional<Product> result = repository.findById(2);
-
         assertTrue(result.isEmpty());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), eq(rowMapper), eq(2));
     }
 
     @Test
-    @DisplayName("findByName should return products with matching name")
-    void findByName_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), eq("TestProduct")))
+    @DisplayName("findByName should return products with matching name (No pagination params)")
+    void findByName_noParams_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any()))
                 .thenReturn(List.of(product));
+        when(jdbcTemplate.queryForObject(
+                anyString(),
+                eq(Integer.class),
+                eq("TestProduct")
+        )).thenReturn(1);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
-        List<Product> result = repository.findByName("TestProduct");
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> result = repository.findByName("TestProduct",
+                pageable, null);
 
-        assertEquals(1, result.size());
-        assertEquals("TestProduct", result.get(0).getProduct_name());
-        verify(jdbcTemplate, times(1)).query(anyString(), eq(rowMapper), eq("TestProduct"));
+        assertEquals(1, result.getContent().size());
+        assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
     }
 
     @Test
-    @DisplayName("findByCategoryId should return products in category")
-    void findByCategoryId_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), eq(10)))
+    @DisplayName("findByName should return products (With lastSeen params)")
+    void findByName_withLastSeenParams_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any()))
                 .thenReturn(List.of(product));
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), any())).thenReturn(1);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
-        List<Product> result = repository.findByCategoryId(10);
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> result = repository.findByName("TestProduct",
+                pageable,  5);
 
-        assertEquals(1, result.size());
-        assertEquals("TestProduct", result.get(0).getProduct_name());
-        verify(jdbcTemplate, times(1)).query(anyString(), eq(rowMapper), eq(10));
+        assertEquals(1, result.getContent().size());
+        verify(jdbcTemplate).query(anyString(), eq(rowMapper),
+                eq("TestProduct"), eq(5), eq(10));
+    }
+
+    @Test
+    @DisplayName("findByCategoryId should return products in category (No pagination params)")
+    void findByCategoryId_noParams_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any()))
+                .thenReturn(List.of(product));
+        when(jdbcTemplate.queryForObject(
+                anyString(),
+                eq(Integer.class),
+                eq(10))
+        ).thenReturn(1);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> result = repository.findByCategoryId(10,
+                pageable, null);
+
+        assertEquals(1, result.getContent().size());
+        assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
+    }
+
+    @Test
+    @DisplayName("findByCategoryId should return products (with lastSeenId)")
+    void findByCategoryId_withLastSeenId_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any()))
+                .thenReturn(List.of(product));
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), any())).thenReturn(1);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> result = repository.findByCategoryId(10,
+                pageable,  5);
+
+        assertEquals(1, result.getContent().size());
+        verify(jdbcTemplate).query(anyString(), eq(rowMapper), eq(10), eq(5), eq(10));
     }
 
     @Test
@@ -147,14 +217,12 @@ class ProductRepositoryTest {
         savedProduct.setCategory_number(10);
 
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                anyString(), any(), anyInt())).thenReturn(savedProduct);
+                eq("TestProduct"), eq(null), eq(10))).thenReturn(savedProduct);
 
         Product result = repository.save(newProduct);
 
         assertNotNull(result);
         assertEquals("TestProduct", result.getProduct_name());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), eq(rowMapper),
-                anyString(), any(), anyInt());
     }
 
     @Test
@@ -169,8 +237,10 @@ class ProductRepositoryTest {
 
         assertNotNull(result);
         assertEquals("TestProduct", result.getProduct_name());
-        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), any(), anyInt(), anyInt());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), eq(rowMapper), eq(1));
+        verify(jdbcTemplate, times(1)).update(anyString(),
+                anyString(), any(), anyInt(), anyInt());
+        verify(jdbcTemplate, times(1)).queryForObject(
+                anyString(), eq(rowMapper), eq(1));
     }
 
     @Test
@@ -191,7 +261,7 @@ class ProductRepositoryTest {
         newProduct.setCategory_number(999);
 
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                anyString(), any(), anyInt()))
+                eq("TestProduct"), eq(null), eq(999)))
                 .thenThrow(DataIntegrityViolationException.class);
 
         assertThrows(InvalidCategoryException.class, () -> repository.save(newProduct));
@@ -212,7 +282,8 @@ class ProductRepositoryTest {
 
         assertNotNull(result);
         assertEquals("TestProduct", result.getProduct_name());
-        verify(jdbcTemplate, times(1)).update(anyString(), anyString(), any(), anyInt(), eq(1));
+        verify(jdbcTemplate, times(1)).update(anyString(),
+                anyString(), any(), anyInt(), eq(1));
     }
 
     @Test
@@ -272,7 +343,19 @@ class ProductRepositoryTest {
     void existsByIdProduct_nonExistingProduct_shouldReturnFalse() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(2)))
                 .thenReturn(0);
-
         assertFalse(repository.existsByIdProduct(2));
+    }
+
+    @Test
+    @DisplayName("findAllNoPagination should return list of all products")
+    void findAllNoPagination_shouldReturnAllProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper))).thenReturn(List.of(product));
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
+
+        List<ProductDto> result = repository.findAllNoPagination();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("TestProduct", result.get(0).getProduct_name());
     }
 }

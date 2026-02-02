@@ -139,6 +139,7 @@ func (h *CardHandler) deleteCustomerCard(c echo.Context) error {
 //
 //	@Param			percent	query		int	false	"percent"
 //	@Param			sorted 	query		bool	false	"sorted"
+//	@Param			surname 	query		string	false	"surname"
 //
 // @Success      200  {array}  views.CustomerCardResponse
 // @Failure      500  {object}  map[string]any  "Internal server error"

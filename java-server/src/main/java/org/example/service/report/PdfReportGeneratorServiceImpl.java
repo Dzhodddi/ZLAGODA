@@ -38,6 +38,8 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
                             + "Role: " + e.getRole() + "\n"
                             + "Salary: " + e.getSalary() + "\n"
                             + "Phone: " + e.getPhone_number() + "\n"
+                            + "Date of birth: " + e.getDate_of_birth() + "\n"
+                            + "Date of start: " + e.getDate_of_start() + "\n"
                             + "Address: " + e.getCity() + ", "
                             + e.getStreet() + ", " + e.getZip_code() + "\n\n",
                     font

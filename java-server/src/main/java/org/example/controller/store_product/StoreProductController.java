@@ -4,18 +4,21 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.store_product.batch.BatchRequestDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
-import org.example.exception.AuthorizationException;
-import org.example.exception.InvalidParameterException;
+import org.example.exception.custom_exception.AuthorizationException;
+import org.example.exception.custom_exception.InvalidParameterException;
 import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/store-products")
 public class StoreProductController {
 
+    private final static int PAGE_SIZE = 10;
     private final StoreProductService storeProductService;
     private final BatchService batchService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
@@ -53,9 +57,10 @@ public class StoreProductController {
     - prom: true | false
     """
     )
-    public List<?> getStoreProducts(
-            @RequestParam String sortedBy,
-            @RequestParam(required = false) Boolean prom
+    public PageResponseDto<?> getStoreProducts(
+            @RequestParam(required = false) String sortedBy,
+            @RequestParam(required = false) Boolean prom,
+            @RequestParam(required = false) String lastSeenUPC
     ) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
@@ -68,7 +73,15 @@ public class StoreProductController {
         if ("quantity".equals(sortedBy) && !isManager) {
             throw new AuthorizationException("Only Manager can sort by quantity");
         }
-        return storeProductService.getAll(sortedBy, prom);
+        Pageable pageable = null;
+        if ("name".equals(sortedBy)) {
+            pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("product_name"));
+        } else if ("quantity".equals(sortedBy)) {
+            pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("products_number"));
+        } else {
+            pageable = PageRequest.of(0, PAGE_SIZE);
+        }
+        return storeProductService.getAll(sortedBy, prom, pageable, lastSeenUPC);
     }
 
     @PostMapping
@@ -182,7 +195,7 @@ public class StoreProductController {
     )
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<byte[]> storeProductPdf() throws DocumentException, IOException {
-        List<StoreProductDto> storeProduct = storeProductService.getAllSortedByQuantity();
+        List<StoreProductDto> storeProduct = storeProductService.getAllNoPagination();
         byte[] pdf = pdfReportGeneratorService.storeProductToPdf(storeProduct);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=store_products.pdf")
