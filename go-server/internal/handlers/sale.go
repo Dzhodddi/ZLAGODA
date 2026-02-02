@@ -59,7 +59,7 @@ func (h *SaleHandler) getAllSales(c echo.Context) error {
 	if err != nil {
 		return nil
 	}
-	sales, err := h.saleService.GetAllSalesWithinDate(c.Request().Context(), *startDate, *endDate)
+	sales, err := h.saleService.GetAllSalesWithinDate(c.Request().Context(), *startDate, *endDate, q.LastCheckNumber)
 	if err != nil {
 		return nil
 	}

@@ -3,7 +3,6 @@ package handlers_test
 import (
 	"net/http"
 
-	"github.com/Dzhodddi/ZLAGODA/internal/config"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	app "github.com/Dzhodddi/ZLAGODA/internal/server"
 	testutils "github.com/Dzhodddi/ZLAGODA/tests"
@@ -21,10 +20,7 @@ type HandlerSuite struct {
 
 func (s *HandlerSuite) SetupSuite() {
 	s.IntegrationSuite.SetupSuite()
-	testConfig := &config.Config{
-		Env: "test",
-	}
-	server, err := app.Setup(testConfig, s.DB)
+	server, err := app.Setup(false)
 	s.Require().NoError(err)
 	s.Echo = server.Echo
 	s.CategoryRepo = repository.NewCategoryRepository(s.DB)

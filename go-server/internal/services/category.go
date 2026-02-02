@@ -65,12 +65,9 @@ func (s *categoryService) GetAllCategories(ctx context.Context, q views.ListCate
 	if q.LastCategoryNumber == nil {
 		q.LastCategoryNumber = new(int64)
 	}
-	if q.LastCategoryName == nil {
-		q.LastCategoryName = new(string)
-	}
 	switch {
 	case q.Sorted != nil && *q.Sorted:
-		categories, err = s.categoryRepository.GetAllCategoriesSortedByName(ctx, *q.LastCategoryName)
+		categories, err = s.categoryRepository.GetAllCategoriesSortedByName(ctx, *q.LastCategoryNumber)
 	default:
 		categories, err = s.categoryRepository.GetAllCategories(ctx, *q.LastCategoryNumber)
 	}

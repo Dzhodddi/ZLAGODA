@@ -15,16 +15,25 @@ SELECT s.product_number, s.upc, s.check_number, s.selling_price
 FROM sale s
 JOIN checks c
 ON c.check_number = s.check_number
-WHERE c.print_date BETWEEN $1 AND $2
+WHERE c.print_date BETWEEN $1 AND $2 AND c.check_number > $3
+ORDER BY c.check_number
+FETCH FIRST $4 ROWS ONLY
 `
 
 type GetSalesWithinDateParams struct {
 	PrintDate   time.Time
 	PrintDate_2 time.Time
+	CheckNumber string
+	Limit       int32
 }
 
 func (q *Queries) GetSalesWithinDate(ctx context.Context, arg GetSalesWithinDateParams) ([]Sale, error) {
-	rows, err := q.db.QueryContext(ctx, getSalesWithinDate, arg.PrintDate, arg.PrintDate_2)
+	rows, err := q.db.QueryContext(ctx, getSalesWithinDate,
+		arg.PrintDate,
+		arg.PrintDate_2,
+		arg.CheckNumber,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}
