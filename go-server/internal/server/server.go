@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/Dzhodddi/ZLAGODA/internal/auth"
 	"net/http"
 
 	_ "github.com/Dzhodddi/ZLAGODA/docs"
@@ -18,28 +19,33 @@ import (
 
 type Server struct {
 	*echo.Echo
-	Config *config.Config
-	DB     *sqlx.DB
+	Config        *config.Config
+	DB            *sqlx.DB
+	authenticator auth.Authenticator
 }
 
-// @title Go server API
+// Setup @title Go server API
 // @version 1.0
 // @termsOfService http://swagger.io/terms/
 // @host localhost:8080
 // @BasePath /api/v1
+// @securityDefinitions.apikey ApiKeyAuth
+// @in							header
+// @name						Authorization
 func Setup(cfg *config.Config, database *sqlx.DB) (*Server, error) {
 	e := echo.New()
+	jwtAuth := auth.NewJWTAuth(cfg)
+	v1 := e.Group("/api/v1", jwtAuth.AuthMiddleware(repository.NewEmployeeRepository(database)))
 	setupMiddlewares(e, cfg)
-	v1 := e.Group("/api/v1")
-
 	v1.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "ok")
 	})
 	setupAllRoutes(database, v1)
 	return &Server{
-		Echo:   e,
-		Config: cfg,
-		DB:     database,
+		Echo:          e,
+		Config:        cfg,
+		DB:            database,
+		authenticator: jwtAuth,
 	}, nil
 }
 
@@ -78,6 +84,7 @@ func setupChecksRouts(db *sqlx.DB, router *echo.Group) {
 	handler := handlers.NewCheckHandler(service)
 	handler.RegisterRouts(router)
 }
+
 func setupSaleRouts(db *sqlx.DB, router *echo.Group) {
 	repo := repository.NewSaleRepository(db)
 	service := services.NewSaleService(repo)

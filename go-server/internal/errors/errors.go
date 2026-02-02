@@ -2,6 +2,7 @@ package error_response
 
 import (
 	"fmt"
+	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"net/http"
 )
 
@@ -36,4 +37,12 @@ func BadRequest(msg string, err error) *HTTPErrorResponse {
 
 func ValidationError(msg string, err error) *HTTPErrorResponse {
 	return NewError(http.StatusUnprocessableEntity, msg, err)
+}
+
+func UnAuthorized(err error) *HTTPErrorResponse {
+	return NewError(http.StatusUnauthorized, constants.UnAuthorized, err)
+}
+
+func Forbidden(err error) *HTTPErrorResponse {
+	return NewError(http.StatusForbidden, constants.Forbidden, err)
 }

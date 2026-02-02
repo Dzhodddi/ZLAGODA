@@ -607,6 +607,11 @@ const docTemplate = `{
         },
         "/customer-cards": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a list of all customer discount cards",
                 "consumes": [
                     "application/json"
@@ -658,6 +663,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Creates a new customer discount card and stores it in the database",
                 "consumes": [
                     "application/json"
@@ -713,6 +723,11 @@ const docTemplate = `{
         },
         "/customer-cards/{cardNumber}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a customer discount card by its number",
                 "consumes": [
                     "application/json"
@@ -757,6 +772,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Updates an existing customer discount card",
                 "consumes": [
                     "application/json"
@@ -1222,6 +1242,13 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
@@ -1231,7 +1258,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "Go server API",
+	Title:            "",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

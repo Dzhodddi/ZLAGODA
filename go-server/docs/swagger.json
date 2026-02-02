@@ -1,7 +1,6 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "Go server API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {},
         "version": "1.0"
@@ -600,6 +599,11 @@
         },
         "/customer-cards": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a list of all customer discount cards",
                 "consumes": [
                     "application/json"
@@ -651,6 +655,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Creates a new customer discount card and stores it in the database",
                 "consumes": [
                     "application/json"
@@ -706,6 +715,11 @@
         },
         "/customer-cards/{cardNumber}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a customer discount card by its number",
                 "consumes": [
                     "application/json"
@@ -750,6 +764,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Updates an existing customer discount card",
                 "consumes": [
                     "application/json"
@@ -1214,6 +1233,13 @@
                     "maxLength": 9
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

@@ -224,7 +224,6 @@ host: localhost:8080
 info:
   contact: {}
   termsOfService: http://swagger.io/terms/
-  title: Go server API
   version: "1.0"
 paths:
   /categories:
@@ -661,6 +660,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: List all customer cards
       tags:
       - CustomerCard
@@ -697,6 +698,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create a new customer card
       tags:
       - CustomerCard
@@ -759,6 +762,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get a customer card by number
       tags:
       - CustomerCard
@@ -800,6 +805,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update a customer card
       tags:
       - CustomerCard
@@ -836,4 +843,9 @@ paths:
       summary: Get all sales
       tags:
       - Sale
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

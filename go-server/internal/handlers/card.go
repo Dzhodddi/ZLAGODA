@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/Dzhodddi/ZLAGODA/internal/auth"
 	"net/http"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
@@ -13,6 +14,7 @@ import (
 
 type CardHandler struct {
 	service services.CardService
+	auth    *auth.JWTAuth
 }
 
 func NewCardHandler(service services.CardService) *CardHandler {
@@ -20,7 +22,7 @@ func NewCardHandler(service services.CardService) *CardHandler {
 }
 
 func (h *CardHandler) RegisterRouts(route *echo.Group) {
-	card := route.Group("/customer-cards")
+	card := route.Group("/customer-cards", h.auth.CheckRole(auth.Manager))
 	card.POST("", h.createNewCustomerCard)
 	card.GET("", h.listCustomerCards)
 	cardNumber := card.Group("/:cardNumber")
@@ -41,6 +43,9 @@ func (h *CardHandler) RegisterRouts(route *echo.Group) {
 // @Failure      400  {object}  map[string]any  "Validation error"
 // @Failure      422  {object}  map[string]any  "Validation error"
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /customer-cards [post]
 func (h *CardHandler) createNewCustomerCard(c echo.Context) error {
 	var payload views.CreateNewCustomerCard
@@ -68,6 +73,9 @@ func (h *CardHandler) createNewCustomerCard(c echo.Context) error {
 // @Success      200  {object}  views.CustomerCardResponse
 // @Failure      404  {object}  map[string]any  "Entity not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /customer-cards/{cardNumber} [get]
 func (h *CardHandler) getCustomerCard(c echo.Context) error {
 	cardNumber := c.Param("cardNumber")
@@ -91,6 +99,9 @@ func (h *CardHandler) getCustomerCard(c echo.Context) error {
 // @Failure      400  {object}  map[string]any  "Validation error"
 // @Failure      404  {object}  map[string]any  "Entity not found"
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /customer-cards/{cardNumber} [put]
 func (h *CardHandler) updateCustomerCard(c echo.Context) error {
 	cardNumber := c.Param("cardNumber")
@@ -143,6 +154,9 @@ func (h *CardHandler) deleteCustomerCard(c echo.Context) error {
 //
 // @Success      200  {array}  views.CustomerCardResponse
 // @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
 // @Router       /customer-cards [get]
 func (h *CardHandler) listCustomerCards(c echo.Context) error {
 	var q views.ListCustomerCardsQueryParams
