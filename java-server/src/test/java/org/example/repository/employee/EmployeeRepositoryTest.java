@@ -117,7 +117,7 @@ class EmployeeRepositoryTest {
                 .thenReturn(1);
         Pageable pageable = Pageable.ofSize(10);
         PageResponseDto<EmployeeResponseDto> result = repository
-                .findAllCashiers(pageable, null, null);
+                .findAllCashiers(pageable, null);
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("Іваненко", result.getContent().get(0).getEmpl_surname());
@@ -331,7 +331,7 @@ class EmployeeRepositoryTest {
 
         Pageable pageable = Pageable.ofSize(10);
         PageResponseDto<EmployeeResponseDto> result = repository
-                .findAll(pageable, null, null);
+                .findAll(pageable, null);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());

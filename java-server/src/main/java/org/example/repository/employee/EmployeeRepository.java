@@ -28,11 +28,14 @@ public class EmployeeRepository {
     private final EmployeeMapper employeeMapper;
 
     public PageResponseDto<EmployeeResponseDto> findAll(Pageable pageable,
-                                                        String lastSeenSurname,
                                                         String lastSeenId) {
         List<EmployeeResponseDto> employees;
-
-        if (lastSeenSurname != null && lastSeenId != null) {
+        if (lastSeenId != null) {
+            String lastSeenSurname = jdbcTemplate.queryForObject(
+                    "SELECT empl_surname FROM employee WHERE id_employee = ?",
+                    String.class,
+                    lastSeenId
+            );
             employees = jdbcTemplate.query(
                             """
                             SELECT *
@@ -51,54 +54,27 @@ public class EmployeeRepository {
                     .map(employeeMapper::toEmployeeResponseDto)
                     .toList();
         } else {
-            int pageNumber = pageable.getPageNumber();
-            int pageSize = pageable.getPageSize();
-
-            if (pageNumber == 0) {
-                employees = jdbcTemplate.query(
-                                """
-                                SELECT *
-                                FROM employee
-                                ORDER BY empl_surname, id_employee
-                                FETCH FIRST ? ROWS ONLY
-                                """,
-                                employeeRowMapper,
-                                pageSize
-                        ).stream()
-                        .map(employeeMapper::toEmployeeResponseDto)
-                        .toList();
-            } else {
-                int totalToFetch = (pageNumber + 1) * pageSize;
-
-                List<Employee> allEmployees = jdbcTemplate.query(
-                        """
-                        SELECT *
-                        FROM employee
-                        ORDER BY empl_surname, id_employee
-                        FETCH FIRST ? ROWS ONLY
-                        """,
-                        employeeRowMapper,
-                        totalToFetch
-                );
-
-                int startIndex = pageNumber * pageSize;
-                if (startIndex < allEmployees.size()) {
-                    employees = allEmployees.subList(startIndex, allEmployees.size())
-                            .stream()
-                            .map(employeeMapper::toEmployeeResponseDto)
-                            .toList();
-                } else {
-                    employees = List.of();
-                }
-            }
+            employees = jdbcTemplate.query(
+                            """
+                            SELECT *
+                            FROM employee
+                            ORDER BY empl_surname, id_employee
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                            employeeRowMapper,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(employeeMapper::toEmployeeResponseDto)
+                    .toList();
         }
 
         long total = getTotalCount();
+        boolean hasNext = employees.size() == pageable.getPageSize();
         return PageResponseDto.of(
                 employees,
-                pageable.getPageNumber(),
                 pageable.getPageSize(),
-                total
+                total,
+                hasNext
         );
     }
 
@@ -251,18 +227,21 @@ public class EmployeeRepository {
     }
 
     public PageResponseDto<EmployeeResponseDto> findAllCashiers(Pageable pageable,
-                                                                String lastSeenSurname,
                                                                 String lastSeenId) {
         List<EmployeeResponseDto> employees;
-
-        if (lastSeenSurname != null && lastSeenId != null) {
+        if (lastSeenId != null) {
+            String lastSeenSurname = jdbcTemplate.queryForObject(
+                    "SELECT empl_surname FROM employee WHERE id_employee = ? AND empl_role = 'CASHIER'",
+                    String.class,
+                    lastSeenId
+            );
             employees = jdbcTemplate.query(
                             """
                             SELECT *
                             FROM employee
                             WHERE empl_role = 'CASHIER'
                               AND ((empl_surname > ?)
-                                OR (empl_surname = ? AND id_employee > ?))
+                                   OR (empl_surname = ? AND id_employee > ?))
                             ORDER BY empl_surname, id_employee
                             FETCH FIRST ? ROWS ONLY
                             """,
@@ -275,56 +254,29 @@ public class EmployeeRepository {
                     .map(employeeMapper::toEmployeeResponseDto)
                     .toList();
         } else {
-            int pageNumber = pageable.getPageNumber();
             int pageSize = pageable.getPageSize();
-
-            if (pageNumber == 0) {
-                employees = jdbcTemplate.query(
-                                """
-                                SELECT *
-                                FROM employee
-                                WHERE empl_role = 'CASHIER'
-                                ORDER BY empl_surname, id_employee
-                                FETCH FIRST ? ROWS ONLY
-                                """,
-                                employeeRowMapper,
-                                pageSize
-                        ).stream()
-                        .map(employeeMapper::toEmployeeResponseDto)
-                        .toList();
-            } else {
-                int totalToFetch = (pageNumber + 1) * pageSize;
-
-                List<Employee> allEmployees = jdbcTemplate.query(
-                        """
-                        SELECT *
-                        FROM employee
-                        WHERE empl_role = 'CASHIER'
-                        ORDER BY empl_surname, id_employee
-                        FETCH FIRST ? ROWS ONLY
-                        """,
-                        employeeRowMapper,
-                        totalToFetch
-                );
-
-                int startIndex = pageNumber * pageSize;
-                if (startIndex < allEmployees.size()) {
-                    employees = allEmployees.subList(startIndex, allEmployees.size())
-                            .stream()
-                            .map(employeeMapper::toEmployeeResponseDto)
-                            .toList();
-                } else {
-                    employees = List.of();
-                }
-            }
+            employees = jdbcTemplate.query(
+                            """
+                            SELECT *
+                            FROM employee
+                            WHERE empl_role = 'CASHIER'
+                            ORDER BY empl_surname, id_employee
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                            employeeRowMapper,
+                            pageSize
+                    ).stream()
+                    .map(employeeMapper::toEmployeeResponseDto)
+                    .toList();
         }
 
-        long total = getCashierCount();
+        long total = getTotalCount();
+        boolean hasNext = employees.size() == pageable.getPageSize();
         return PageResponseDto.of(
                 employees,
-                pageable.getPageNumber(),
                 pageable.getPageSize(),
-                total
+                total,
+                hasNext
         );
     }
 

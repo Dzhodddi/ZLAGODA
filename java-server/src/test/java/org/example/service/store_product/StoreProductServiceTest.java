@@ -98,7 +98,7 @@ class StoreProductServiceTest {
     void getAll_withPageable_shouldReturnAllProducts() {
         PageResponseDto<StoreProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(storeProductDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findAll(eq(pageable), isNull())).thenReturn(page);
 
@@ -127,7 +127,7 @@ class StoreProductServiceTest {
     void getAllSortedByQuantity_shouldReturnSortedProducts() {
         PageResponseDto<StoreProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(storeProductDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findAllSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
 
@@ -143,7 +143,7 @@ class StoreProductServiceTest {
     void getAllSortedByName_shouldReturnSortedProducts() {
         PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(withNameDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findAllSortedByName(eq(pageable), isNull())).thenReturn(page);
 
@@ -161,7 +161,7 @@ class StoreProductServiceTest {
         storeProduct.setPromotional_product(true);
         PageResponseDto<StoreProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(storeProductDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findPromotionalSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
 
@@ -177,7 +177,7 @@ class StoreProductServiceTest {
     void getNonPromotionalSortedByQuantity_shouldReturnNonPromotionalProducts() {
         PageResponseDto<StoreProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(storeProductDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findNonPromotionalSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
 
@@ -193,7 +193,7 @@ class StoreProductServiceTest {
     void getPromotionalSortedByName_shouldReturnPromotionalProducts() {
         PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(withNameDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findPromotionalSortedByName(eq(pageable), isNull())).thenReturn(page);
 
@@ -209,7 +209,7 @@ class StoreProductServiceTest {
     void getNonPromotionalSortedByName_shouldReturnNonPromotionalProducts() {
         PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(withNameDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findNonPromotionalSortedByName(eq(pageable), isNull())).thenReturn(page);
 
@@ -225,7 +225,7 @@ class StoreProductServiceTest {
     void getAll_sortByName_promNull_shouldReturnAllSortedByName() {
         PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(withNameDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findAllSortedByName(eq(pageable), isNull())).thenReturn(page);
 
@@ -241,7 +241,7 @@ class StoreProductServiceTest {
     void getAll_sortByName_promTrue_shouldReturnPromotionalSortedByName() {
         PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(withNameDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findPromotionalSortedByName(eq(pageable), isNull())).thenReturn(page);
 
@@ -257,7 +257,7 @@ class StoreProductServiceTest {
     void getAll_sortByName_promFalse_shouldReturnNonPromotionalSortedByName() {
         PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(withNameDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findNonPromotionalSortedByName(eq(pageable), isNull())).thenReturn(page);
 
@@ -273,7 +273,7 @@ class StoreProductServiceTest {
     void getAll_sortByQuantity_promNull_shouldReturnAllSortedByQuantity() {
         PageResponseDto<StoreProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(storeProductDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findAllSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
 
@@ -289,7 +289,7 @@ class StoreProductServiceTest {
     void getAll_sortByQuantity_promTrue_shouldReturnPromotionalSortedByQuantity() {
         PageResponseDto<StoreProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(storeProductDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findPromotionalSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
 
@@ -305,7 +305,7 @@ class StoreProductServiceTest {
     void getAll_sortByQuantity_promFalse_shouldReturnNonPromotionalSortedByQuantity() {
         PageResponseDto<StoreProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(storeProductDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findNonPromotionalSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
 
@@ -321,7 +321,7 @@ class StoreProductServiceTest {
     void getAll_invalidSortedBy_shouldReturnAll() {
         PageResponseDto<StoreProductDto> page = PageResponseDto.of(
                 new ArrayList<>(List.of(storeProductDto)),
-                0, 10, 1
+                0, 10, false
         );
         when(repository.findAll(eq(pageable), isNull())).thenReturn(page);
 

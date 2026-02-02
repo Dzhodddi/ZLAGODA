@@ -25,9 +25,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageResponseDto<ProductDto> getAll(Pageable pageable,
-                                              String lastSeenName,
                                               Integer lastSeenId) {
-        return repository.findAll(pageable, lastSeenName, lastSeenId);
+        return repository.findAll(pageable, lastSeenId);
     }
 
     @Override
@@ -44,17 +43,15 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageResponseDto<ProductDto> findByName(String name,
                                                   Pageable pageable,
-                                                  String lastSeenName,
                                                   Integer lastSeenId) {
-        return repository.findByName(name, pageable, lastSeenName, lastSeenId);
+        return repository.findByName(name, pageable, lastSeenId);
     }
 
     @Override
     public PageResponseDto<ProductDto> findByCategoryId(int category_number,
-                                             Pageable pageable,
-                                             String lastSeenName,
+                                                        Pageable pageable,
                                                         Integer lastSeenId) {
-        return repository.findByCategoryId(category_number, pageable, lastSeenName, lastSeenId);
+        return repository.findByCategoryId(category_number, pageable, lastSeenId);
     }
 
     @Override

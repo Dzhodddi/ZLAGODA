@@ -14,7 +14,6 @@ public interface EmployeeService {
     EmployeeResponseDto register(EmployeeRegistrationRequestDto request) throws RegistrationException;
 
     PageResponseDto<EmployeeResponseDto> getAll(Pageable pageable,
-                                                String lastSeenSurname,
                                                 String lastSeenId);
 
     EmployeeResponseDto updateEmployeeById(String id, EmployeeUpdateRequestDto requestDto);
@@ -22,7 +21,6 @@ public interface EmployeeService {
     void deleteEmployeeById(String id);
 
     PageResponseDto<EmployeeResponseDto> getAllCashiers(Pageable pageable,
-                                             String lastSeenSurname,
                                              String lastSeenId);
 
     EmployeeResponseDto getMe();

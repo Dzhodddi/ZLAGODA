@@ -151,7 +151,7 @@ class StoreProductControllerTest {
                 new ArrayList<>(List.of(getProductWithNameDto(storeProductDto1, false))),
                 0,
                 10,
-                1
+                false
         );
         when(storeProductService.getAll(eq("name"), any(),
                 any(Pageable.class),
@@ -176,7 +176,7 @@ class StoreProductControllerTest {
                 new ArrayList<>(List.of(storeProductDto1, storeProductDto2)),
                 0,
                 10,
-                2
+                false
         );
         when(storeProductService.getAll(eq("quantity"), any(),
                 any(Pageable.class),

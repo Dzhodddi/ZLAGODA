@@ -43,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/store-products")
 public class StoreProductController {
 
+    private final static int PAGE_SIZE = 10;
     private final StoreProductService storeProductService;
     private final BatchService batchService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
@@ -59,8 +60,6 @@ public class StoreProductController {
     public PageResponseDto<?> getStoreProducts(
             @RequestParam(required = false) String sortedBy,
             @RequestParam(required = false) Boolean prom,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String lastSeenUPC
     ) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -76,11 +75,11 @@ public class StoreProductController {
         }
         Pageable pageable = null;
         if ("name".equals(sortedBy)) {
-            pageable = PageRequest.of(page - 1, size, Sort.by("product_name"));
+            pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("product_name"));
         } else if ("quantity".equals(sortedBy)) {
-            pageable = PageRequest.of(page - 1, size, Sort.by("products_number"));
+            pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("products_number"));
         } else {
-            pageable = PageRequest.of(page - 1, size);
+            pageable = PageRequest.of(0, PAGE_SIZE);
         }
         return storeProductService.getAll(sortedBy, prom, pageable, lastSeenUPC);
     }

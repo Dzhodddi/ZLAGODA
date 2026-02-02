@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/employees")
 public class EmployeeController {
 
+    private final static int PAGE_SIZE = 10;
     private final EmployeeService employeeService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
 
@@ -51,12 +52,10 @@ public class EmployeeController {
             description = "Get all employees sorted by their surnames"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public PageResponseDto<EmployeeResponseDto> getAll(@RequestParam(defaultValue = "1") int page,
-                                                       @RequestParam(defaultValue = "10") int size,
-                                            @RequestParam(required = false) String lastSeenSurname,
-                                            @RequestParam(required = false) String lastSeenId) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("empl_surname"));
-        return employeeService.getAll(pageable, lastSeenSurname, lastSeenId);
+    public PageResponseDto<EmployeeResponseDto> getAll(@RequestParam(required = false)
+                                                       String lastSeenId) {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("empl_surname"));
+        return employeeService.getAll(pageable, lastSeenId);
     }
 
     @PostMapping
@@ -117,12 +116,9 @@ public class EmployeeController {
     )
     @PreAuthorize("hasRole('MANAGER')")
     public PageResponseDto<EmployeeResponseDto> getAllCashiers(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String lastSeenSurname,
             @RequestParam(required = false) String lastSeenId) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("empl_surname"));
-        return employeeService.getAllCashiers(pageable, lastSeenSurname, lastSeenId);
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("empl_surname"));
+        return employeeService.getAllCashiers(pageable, lastSeenId);
     }
 
     @GetMapping("/me")

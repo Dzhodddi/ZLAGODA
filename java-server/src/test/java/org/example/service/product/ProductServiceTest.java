@@ -58,17 +58,18 @@ class ProductServiceTest {
     @DisplayName("getAll should return page of ProductDto")
     void getAll_ok() {
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> page = PageResponseDto.of(List.of(productDto), 0, 10, 1);
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                List.of(productDto), 0, 10, false);
 
-        when(repository.findAll(pageable, "", 0)).thenReturn(page);
+        when(repository.findAll(pageable, 0)).thenReturn(page);
 
-        PageResponseDto<ProductDto> result = service.getAll(pageable, "", 0);
+        PageResponseDto<ProductDto> result = service.getAll(pageable,  0);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
 
-        verify(repository).findAll(pageable, "", 0);
+        verify(repository).findAll(pageable, 0);
         verifyNoInteractions(mapper);
     }
 
@@ -108,14 +109,15 @@ class ProductServiceTest {
     @DisplayName("findByName should return page of ProductDto")
     void findByName_ok() {
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> page = PageResponseDto.of(List.of(productDto), 0, 10, 1);
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                List.of(productDto), 0, 10, false);
 
-        when(repository.findByName("TestProduct", pageable, "", 0)).thenReturn(page);
+        when(repository.findByName("TestProduct", pageable, 0)).thenReturn(page);
 
-        PageResponseDto<ProductDto> result = service.findByName("TestProduct", pageable, "", 0);
+        PageResponseDto<ProductDto> result = service.findByName("TestProduct", pageable,  0);
 
         assertEquals(1, result.getContent().size());
-        verify(repository).findByName("TestProduct", pageable, "", 0);
+        verify(repository).findByName("TestProduct", pageable,  0);
         verifyNoInteractions(mapper);
     }
 
@@ -123,14 +125,15 @@ class ProductServiceTest {
     @DisplayName("findByCategoryId should return page of ProductDto")
     void findByCategory_ok() {
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> page = PageResponseDto.of(List.of(productDto), 0, 10, 1);
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                List.of(productDto), 0, 10, false);
 
-        when(repository.findByCategoryId(10, pageable, "", 0)).thenReturn(page);
+        when(repository.findByCategoryId(10, pageable,  0)).thenReturn(page);
 
-        PageResponseDto<ProductDto> result = service.findByCategoryId(10, pageable, "", 0);
+        PageResponseDto<ProductDto> result = service.findByCategoryId(10, pageable, 0);
 
         assertEquals(1, result.getContent().size());
-        verify(repository).findByCategoryId(10, pageable, "", 0);
+        verify(repository).findByCategoryId(10, pageable,  0);
         verifyNoInteractions(mapper);
     }
 

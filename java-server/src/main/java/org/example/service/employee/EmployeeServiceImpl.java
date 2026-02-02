@@ -72,9 +72,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public PageResponseDto<EmployeeResponseDto> getAll(Pageable pageable,
-                                                       String lastSeenSurname,
                                                        String lastSeenId) {
-        return employeeRepository.findAll(pageable, lastSeenSurname, lastSeenId);
+        return employeeRepository.findAll(pageable, lastSeenId);
     }
 
 
@@ -101,9 +100,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public PageResponseDto<EmployeeResponseDto> getAllCashiers(Pageable pageable,
-                                                               String lastSeenSurname,
                                                                String lastSeenId) {
-        return employeeRepository.findAllCashiers(pageable, lastSeenSurname, lastSeenId);
+        return employeeRepository.findAllCashiers(pageable, lastSeenId);
     }
 
     @Override

@@ -11,7 +11,6 @@ public interface ProductService {
     List<ProductDto> getAllNoPagination();
 
     PageResponseDto<ProductDto> getAll(Pageable pageable,
-                                       String lastSeenName,
                                        Integer lastSeenId);
 
     ProductDto save(ProductRequestDto requestDto);
@@ -20,12 +19,10 @@ public interface ProductService {
 
     PageResponseDto<ProductDto> findByName(String name,
                                            Pageable pageable,
-                                           String lastSeenName,
                                            Integer lastSeenId);
 
     PageResponseDto<ProductDto> findByCategoryId(int category_number,
                                                  Pageable pageable,
-                                                 String lastSeenName,
                                                  Integer lastSeenId);
 
     void deleteProductById(int id);

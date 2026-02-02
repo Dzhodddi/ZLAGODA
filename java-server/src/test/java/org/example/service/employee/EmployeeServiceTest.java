@@ -214,18 +214,18 @@ class EmployeeServiceTest {
                 List.of(employeeResponseDto),
                 0,
                 10,
-                1
+                false
         );
         Pageable pageable = Pageable.ofSize(10);
-        when(employeeRepository.findAll(pageable, null, null))
+        when(employeeRepository.findAll(pageable, null))
                 .thenReturn(page);
         PageResponseDto<EmployeeResponseDto> result = service
-                .getAll(pageable, null, null);
+                .getAll(pageable, null);
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("EMP001", result.getContent().get(0).getId_employee());
         verify(employeeRepository, times(1))
-                .findAll(pageable, null, null);
+                .findAll(pageable, null);
     }
 
     @Test
@@ -296,18 +296,18 @@ class EmployeeServiceTest {
                 List.of(employeeResponseDto),
                 0,
                 10,
-                1
+                false
         );
         Pageable pageable = Pageable.ofSize(10);
-        when(employeeRepository.findAllCashiers(pageable, null, null))
+        when(employeeRepository.findAllCashiers(pageable, null))
                 .thenReturn(page);
 
         PageResponseDto<EmployeeResponseDto> result = service
-                .getAllCashiers(pageable, null, null);
+                .getAllCashiers(pageable, null);
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         verify(employeeRepository, times(1))
-                .findAllCashiers(pageable, null, null);
+                .findAllCashiers(pageable, null);
     }
 
     @Test

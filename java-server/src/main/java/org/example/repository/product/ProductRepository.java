@@ -25,94 +25,60 @@ public class ProductRepository {
     private final ProductRowMapper rowMapper;
     private final ProductMapper productMapper;
 
-    public PageResponseDto<ProductDto> findAll(Pageable pageable,
-                                               String lastSeenName,
-                                               Integer lastSeenId) {
+    public PageResponseDto<ProductDto> findAll(Pageable pageable, Integer lastSeenId) {
         List<ProductDto> products;
-        if (lastSeenName != null && lastSeenId != null && lastSeenId > 0) {
+
+        if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                                 SELECT *
-                                 FROM product
-                                 WHERE (product_name > ?)
-                                    OR (product_name = ? AND id_product > ?)
-                                 ORDER BY product_name, id_product
-                                 FETCH FIRST ? ROWS ONLY
-                                 """,
+                            SELECT *
+                            FROM product
+                            WHERE id_product > ?
+                            ORDER BY id_product
+                            FETCH FIRST ? ROWS ONLY
+                            """,
                             rowMapper,
-                            lastSeenName,
-                            lastSeenName,
                             lastSeenId,
                             pageable.getPageSize()
                     ).stream()
                     .map(productMapper::toDto)
                     .toList();
         } else {
-            int pageNumber = pageable.getPageNumber();
-            int pageSize = pageable.getPageSize();
-            if (pageNumber == 0) {
-                products = jdbcTemplate.query(
-                                """
-                                    SELECT *
-                                    FROM product
-                                    ORDER BY product_name, id_product
-                                    FETCH FIRST ? ROWS ONLY
-                                    """,
-                                rowMapper,
-                                pageSize
-                        ).stream()
-                        .map(productMapper::toDto)
-                        .toList();
-            } else {
-                int totalToFetch = (pageNumber + 1) * pageSize;
-                List<Product> allProducts = jdbcTemplate.query(
-                        """
+            products = jdbcTemplate.query(
+                            """
                             SELECT *
                             FROM product
-                            ORDER BY product_name, id_product
+                            ORDER BY id_product
                             FETCH FIRST ? ROWS ONLY
                             """,
-                        rowMapper,
-                        totalToFetch
-                );
-
-                int startIndex = pageNumber * pageSize;
-                if (startIndex < allProducts.size()) {
-                    products = allProducts.subList(startIndex, allProducts.size())
-                            .stream()
-                            .map(productMapper::toDto)
-                            .toList();
-                } else {
-                    products = List.of();
-                }
-            }
+                            rowMapper,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(productMapper::toDto)
+                    .toList();
         }
 
         long total = getTotalCount();
-        return PageResponseDto.of(
-                products,
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                total
-        );
+        boolean hasNext = products.size() == pageable.getPageSize();
+
+        return PageResponseDto.of(products, pageable.getPageSize(), total, hasNext);
     }
 
-    public PageResponseDto<ProductDto> findByName(String name,
-                                                  Pageable pageable,
-                                                  String lastSeenName,
-                                                  Integer lastSeenId) {
+    public PageResponseDto<ProductDto> findByName(
+            String name, Pageable pageable, Integer lastSeenId) {
+
         List<ProductDto> products;
 
-        if (lastSeenName != null && lastSeenId != null && lastSeenId > 0) {
+        if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                                 SELECT *
-                                 FROM product
-                                 WHERE product_name = ?
-                                   AND id_product > ?
-                                 ORDER BY product_name, id_product
-                                 FETCH FIRST ? ROWS ONLY
-                                 """,
+                            SELECT *
+                            FROM product
+                            WHERE product_name = ?
+                              AND id_product > ?
+                            ORDER BY id_product
+                            FETCH FIRST ? ROWS ONLY
+                            """,
                             rowMapper,
                             name,
                             lastSeenId,
@@ -121,141 +87,71 @@ public class ProductRepository {
                     .map(productMapper::toDto)
                     .toList();
         } else {
-            int pageNumber = pageable.getPageNumber();
-            int pageSize = pageable.getPageSize();
-
-            if (pageNumber == 0) {
-                products = jdbcTemplate.query(
-                                """
-                                    SELECT *
-                                    FROM product
-                                    WHERE product_name = ?
-                                    ORDER BY product_name, id_product
-                                    FETCH FIRST ? ROWS ONLY
-                                    """,
-                                rowMapper,
-                                name,
-                                pageSize
-                        ).stream()
-                        .map(productMapper::toDto)
-                        .toList();
-            } else {
-                int totalToFetch = (pageNumber + 1) * pageSize;
-
-                List<Product> allProducts = jdbcTemplate.query(
-                        """
+            products = jdbcTemplate.query(
+                            """
                             SELECT *
                             FROM product
                             WHERE product_name = ?
-                            ORDER BY product_name, id_product
+                            ORDER BY id_product
                             FETCH FIRST ? ROWS ONLY
                             """,
-                        rowMapper,
-                        name,
-                        totalToFetch
-                );
-
-                int startIndex = pageNumber * pageSize;
-                if (startIndex < allProducts.size()) {
-                    products = allProducts.subList(startIndex, allProducts.size())
-                            .stream()
-                            .map(productMapper::toDto)
-                            .toList();
-                } else {
-                    products = List.of();
-                }
-            }
+                            rowMapper,
+                            name,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(productMapper::toDto)
+                    .toList();
         }
 
         long total = getNameCount(name);
-        return PageResponseDto.of(
-                products,
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                total
-        );
+        boolean hasNext = products.size() == pageable.getPageSize();
+
+        return PageResponseDto.of(products, pageable.getPageSize(), total, hasNext);
     }
 
-    public PageResponseDto<ProductDto> findByCategoryId(int category_number,
-                                                        Pageable pageable,
-                                                        String lastSeenName,
-                                                        Integer lastSeenId) {
+    public PageResponseDto<ProductDto> findByCategoryId(
+            int categoryNumber, Pageable pageable, Integer lastSeenId) {
+
         List<ProductDto> products;
 
-        if (lastSeenName != null && lastSeenId != null && lastSeenId > 0) {
+        if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                                 SELECT *
-                                 FROM product
-                                 WHERE category_number = ?
-                                   AND ((product_name > ?)
-                                    OR (product_name = ? AND id_product > ?))
-                                 ORDER BY product_name, id_product
-                                 FETCH FIRST ? ROWS ONLY
-                                 """,
+                            SELECT *
+                            FROM product
+                            WHERE category_number = ?
+                              AND id_product > ?
+                            ORDER BY id_product
+                            FETCH FIRST ? ROWS ONLY
+                            """,
                             rowMapper,
-                            category_number,
-                            lastSeenName,
-                            lastSeenName,
+                            categoryNumber,
                             lastSeenId,
                             pageable.getPageSize()
                     ).stream()
                     .map(productMapper::toDto)
                     .toList();
         } else {
-            int pageNumber = pageable.getPageNumber();
-            int pageSize = pageable.getPageSize();
-
-            if (pageNumber == 0) {
-                products = jdbcTemplate.query(
-                                """
-                                    SELECT *
-                                    FROM product
-                                    WHERE category_number = ?
-                                    ORDER BY product_name, id_product
-                                    FETCH FIRST ? ROWS ONLY
-                                    """,
-                                rowMapper,
-                                category_number,
-                                pageSize
-                        ).stream()
-                        .map(productMapper::toDto)
-                        .toList();
-            } else {
-                int totalToFetch = (pageNumber + 1) * pageSize;
-
-                List<Product> allProducts = jdbcTemplate.query(
-                        """
+            products = jdbcTemplate.query(
+                            """
                             SELECT *
                             FROM product
                             WHERE category_number = ?
-                            ORDER BY product_name, id_product
+                            ORDER BY id_product
                             FETCH FIRST ? ROWS ONLY
                             """,
-                        rowMapper,
-                        category_number,
-                        totalToFetch
-                );
-
-                int startIndex = pageNumber * pageSize;
-                if (startIndex < allProducts.size()) {
-                    products = allProducts.subList(startIndex, allProducts.size())
-                            .stream()
-                            .map(productMapper::toDto)
-                            .toList();
-                } else {
-                    products = List.of();
-                }
-            }
+                            rowMapper,
+                            categoryNumber,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(productMapper::toDto)
+                    .toList();
         }
 
-        long total = getCategoryIdCount(category_number);
-        return PageResponseDto.of(
-                products,
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                total
-        );
+        long total = getCategoryIdCount(categoryNumber);
+        boolean hasNext = products.size() == pageable.getPageSize();
+
+        return PageResponseDto.of(products, pageable.getPageSize(), total, hasNext);
     }
 
     public Optional<Product> findById(int id) {

@@ -147,9 +147,9 @@ class EmployeeControllerTest {
                 List.of(employeeDto1, employeeDto2),
                 0,
                 10,
-                2
+                false
         );
-        when(employeeService.getAll(any(Pageable.class), isNull(), isNull())).thenReturn(page);
+        when(employeeService.getAll(any(Pageable.class), isNull())).thenReturn(page);
 
         mockMvc.perform(get("/employees"))
                 .andExpect(status().isOk())
@@ -158,7 +158,7 @@ class EmployeeControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(2));
 
         verify(employeeService, times(1))
-                .getAll(any(Pageable.class), isNull(), isNull());
+                .getAll(any(Pageable.class), isNull());
     }
 
     @Test
@@ -167,7 +167,7 @@ class EmployeeControllerTest {
     void getAll_asCashier_Forbidden() throws Exception {
         mockMvc.perform(get("/employees"))
                 .andExpect(status().isForbidden());
-        verify(employeeService, never()).getAll(any(Pageable.class), isNull(), isNull());
+        verify(employeeService, never()).getAll(any(Pageable.class), isNull());
     }
 
     @Test
@@ -178,9 +178,9 @@ class EmployeeControllerTest {
                 new ArrayList<>(),
                 0,
                 10,
-                0
+                false
         );
-        when(employeeService.getAll(any(Pageable.class), isNull(), isNull()))
+        when(employeeService.getAll(any(Pageable.class), isNull()))
                 .thenReturn(emptyPage);
 
         mockMvc.perform(get("/employees"))
@@ -188,7 +188,7 @@ class EmployeeControllerTest {
                 .andExpect(jsonPath("$.content").isEmpty());
 
         verify(employeeService, times(1))
-                .getAll(any(Pageable.class), isNull(), isNull());
+                .getAll(any(Pageable.class), isNull());
     }
 
     @Test
@@ -327,9 +327,9 @@ class EmployeeControllerTest {
                 List.of(employeeDto1),
                 0,
                 10,
-                1
+                false
         );
-        when(employeeService.getAllCashiers(any(Pageable.class), isNull(), isNull()))
+        when(employeeService.getAllCashiers(any(Pageable.class), isNull()))
                 .thenReturn(page);
 
         mockMvc.perform(get("/employees/cashiers"))
@@ -338,7 +338,7 @@ class EmployeeControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(1));
 
         verify(employeeService, times(1))
-                .getAllCashiers(any(Pageable.class), isNull(), isNull());
+                .getAllCashiers(any(Pageable.class), isNull());
     }
 
     @Test
@@ -348,7 +348,7 @@ class EmployeeControllerTest {
         mockMvc.perform(get("/employees/cashiers"))
                 .andExpect(status().isForbidden());
 
-        verify(employeeService, never()).getAllCashiers(any(Pageable.class), isNull(), isNull());
+        verify(employeeService, never()).getAllCashiers(any(Pageable.class), isNull());
     }
 
     @Test
@@ -359,9 +359,9 @@ class EmployeeControllerTest {
                 new ArrayList<>(),
                 0,
                 10,
-                0
+                false
         );
-        when(employeeService.getAllCashiers(any(Pageable.class), isNull(), isNull()))
+        when(employeeService.getAllCashiers(any(Pageable.class), isNull()))
                 .thenReturn(emptyPage);
 
         mockMvc.perform(get("/employees/cashiers"))
@@ -369,7 +369,7 @@ class EmployeeControllerTest {
                 .andExpect(jsonPath("$.content").isEmpty());
 
         verify(employeeService, times(1))
-                .getAllCashiers(any(Pageable.class), isNull(), isNull());
+                .getAllCashiers(any(Pageable.class), isNull());
     }
 
     @Test

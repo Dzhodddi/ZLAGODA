@@ -11,7 +11,6 @@ import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
 import org.example.exception.custom_exception.AuthorizationException;
-import org.example.exception.custom_exception.InvalidParameterException;
 import org.example.service.product.ProductService;
 import org.example.service.report.PdfReportGeneratorService;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/products")
 public class ProductController {
 
+    private final static int PAGE_SIZE = 10;
     private final ProductService productService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
 
@@ -49,39 +49,23 @@ public class ProductController {
             summary = "Get all products",
             description = "Get all products sorted by their names"
     )
-    public PageResponseDto<ProductDto> getAll(@RequestParam(defaultValue = "1") int page,
-                                              @RequestParam(defaultValue = "10") int size,
-                                              @RequestParam(required = false) String lastSeenName,
-                                              @RequestParam(required = false) Integer lastSeenId) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("product_name"));
-        return productService.getAll(pageable, lastSeenName, lastSeenId);
-    }
-
-    @GetMapping(value = "/search")
-    @Operation(
-            summary = "Search products",
-            description = "Search products by their name or category"
-    )
-    public PageResponseDto<ProductDto> search(@RequestParam(required = false) String name,
-                                              @RequestParam(required = false) Integer categoryId,
-                                              @RequestParam(defaultValue = "1") int page,
-                                              @RequestParam(defaultValue = "10") int size,
-                                              @RequestParam(required = false) String lastSeenName,
-                                              @RequestParam(required = false) Integer lastSeenId) {
+    public PageResponseDto<ProductDto> getAll(@RequestParam(required = false) Integer lastSeenId,
+                                              @RequestParam(required = false) String name,
+                                              @RequestParam(required = false) Integer categoryId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CASHIER"));
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("product_name"));
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("product_name"));
         if (name != null && !name.isEmpty()) {
             if (!isCashier) {
                 throw new AuthorizationException("Only Cashier can search products by name");
             }
-            return productService.findByName(name, pageable, lastSeenName, lastSeenId);
+            return productService.findByName(name, pageable, lastSeenId);
         }
         if (categoryId != null) {
-            return productService.findByCategoryId(categoryId, pageable, lastSeenName, lastSeenId);
+            return productService.findByCategoryId(categoryId, pageable, lastSeenId);
         }
-        throw new InvalidParameterException("Provide an appropriate parameter");
+        return productService.getAll(pageable, lastSeenId);
     }
 
     @PostMapping

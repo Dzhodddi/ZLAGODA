@@ -12,21 +12,17 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PageResponseDto<T> {
     private List<T> content;
-    private int pageNumber;
     private int pageSize;
     private long totalElements;
-    private int totalPages;
+    private boolean hasNext;
 
     public static <T> PageResponseDto<T> of(List<T> content,
-                                            int pageNumber,
                                             int pageSize,
-                                            long totalElements) {
-        int totalPages = (int) Math.ceil((double) totalElements / pageSize);
-
+                                            long totalElements,
+                                            boolean hasNext) {
         return new PageResponseDto<>(content,
-                pageNumber + 1,
                 pageSize,
                 totalElements,
-                totalPages);
+                hasNext);
     }
 }
