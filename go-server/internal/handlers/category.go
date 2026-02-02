@@ -180,8 +180,6 @@ func (h *CategoryHandler) getCategoryByID(c echo.Context) error {
 //
 //	@Param			category_number 	query		int64	false	"category_number"
 //
-//	@Param			category_name 	query		string	false	"category_name"
-//
 // @Success      200  {array}  views.CategoryResponse
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Forbidden"

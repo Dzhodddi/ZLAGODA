@@ -10,7 +10,7 @@ import (
 )
 
 type SaleRepository interface {
-	GetAllSalesWithinDate(ctx context.Context, startDate, endDate time.Time) ([]generated.Sale, error)
+	GetAllSalesWithinDate(ctx context.Context, startDate, endDate time.Time, lastCheckNumber string) ([]generated.Sale, error)
 }
 
 type saleRepository struct {
@@ -25,12 +25,18 @@ func NewSaleRepository(db *sqlx.DB) SaleRepository {
 	}
 }
 
-func (s *saleRepository) GetAllSalesWithinDate(ctx context.Context, startDate, endDate time.Time) ([]generated.Sale, error) {
+func (s *saleRepository) GetAllSalesWithinDate(
+	ctx context.Context,
+	startDate, endDate time.Time,
+	lastCheckNumber string,
+) ([]generated.Sale, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
 	return s.queries.GetSalesWithinDate(ctx, generated.GetSalesWithinDateParams{
 		PrintDate:   startDate,
 		PrintDate_2: endDate,
+		CheckNumber: lastCheckNumber,
+		Limit:       constants.PaginationStep,
 	})
 }

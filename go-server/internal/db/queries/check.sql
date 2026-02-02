@@ -28,16 +28,14 @@ WHERE check_number=$1;
 
 -- name: GetCheckProductsByName :many
 SELECT
-    p.product_name,
-    s.selling_price,
-    s.product_number
+    product_name,
+    selling_price,
+    product_number
 FROM
-    checks c
-        JOIN sale s ON c.check_number = s.check_number
-        JOIN store_product sp ON s.upc = sp.upc
-        JOIN product p ON p.id_product = sp.id_product
+    check_list_view
 WHERE
-    c.check_number = $1;
+    check_number = $1;
+
 
 -- name: GetChecksWithProductsByCashierWithinDate :many
 SELECT
