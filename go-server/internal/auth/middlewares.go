@@ -39,6 +39,7 @@ func (auth *JWTAuth) AuthMiddleware(employeeRepo repository.EmployeeRepository) 
 			if len(parts) != 2 || parts[0] != "Bearer" {
 				return errorResponse.UnAuthorized(fmt.Errorf(constants.InvalidAuthHeader))
 			}
+			log.Infof("token: %v, iss: %v, add: %v, secret: %v", parts[1], auth.iss, auth.aud, auth.secret)
 			jwtToken, err := auth.ValidateToken(parts[1])
 			if err != nil {
 				return errorResponse.UnAuthorized(err)
@@ -65,12 +66,11 @@ func (auth *JWTAuth) CheckRole(requiredRoles ...roleKey) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			employeeRole := getRoleFromCtx(c.Request())
 			for _, role := range requiredRoles {
-				log.Info(role, employeeRole)
 				if employeeRole == string(role) {
 					return next(c)
 				}
 			}
-			return errorResponse.UnAuthorized(fmt.Errorf(constants.Forbidden))
+			return errorResponse.Forbidden(fmt.Errorf(constants.Forbidden))
 		}
 	}
 }
