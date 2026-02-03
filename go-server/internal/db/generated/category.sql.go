@@ -79,7 +79,7 @@ const getAllCategoriesSortedByName = `-- name: GetAllCategoriesSortedByName :man
 SELECT category_number, category_name
 FROM category
 WHERE category_number > $1
-ORDER BY category_number, category_name
+ORDER BY category_name, category_number
 FETCH FIRST $2 ROWS ONLY
 `
 
