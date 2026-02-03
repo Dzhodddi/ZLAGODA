@@ -18,7 +18,7 @@ public class RoleRepository {
         try {
             Role role = jdbcTemplate.queryForObject(
                     """
-                    SELECT *
+                    SELECT name
                     FROM roles
                     WHERE name = ?
                     """,

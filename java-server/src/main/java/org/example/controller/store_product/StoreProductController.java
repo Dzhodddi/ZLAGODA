@@ -90,7 +90,7 @@ public class StoreProductController {
             summary = "Create a new store product",
             description = "Create a new store product"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public StoreProductDto createStoreProduct(
             @RequestBody @Valid StoreProductRequestDto requestDto
     ) {
@@ -102,7 +102,7 @@ public class StoreProductController {
             summary = "Update a store product",
             description = "Update an existing store product by its UPC"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public StoreProductDto updateStoreProduct(
             @PathVariable String upc,
             @RequestBody @Valid StoreProductRequestDto requestDto
@@ -116,7 +116,7 @@ public class StoreProductController {
             summary = "Delete a store product",
             description = "Delete an existing store product by its UPC"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public void deleteStoreProduct(@PathVariable String upc) {
         storeProductService.softDeleteByUPC(upc);
     }
@@ -169,7 +169,7 @@ public class StoreProductController {
                     + "If the product already exists, all units are"
                     + "re-priced to the new selling price."
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public StoreProductDto receiveNewBatch(
             @RequestBody @Valid BatchRequestDto requestDto
     ) {
@@ -183,7 +183,7 @@ public class StoreProductController {
             description = "Deletes all batches whose expiration date has passed"
                     + "and updates store product quantities"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public void deleteExpired() {
         batchService.removeExpired();
     }
@@ -193,7 +193,7 @@ public class StoreProductController {
             summary = "Download store products report",
             description = "Download store products pdf report"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<byte[]> storeProductPdf() throws DocumentException, IOException {
         List<StoreProductDto> storeProduct = storeProductService.getAllNoPagination();
         byte[] pdf = pdfReportGeneratorService.storeProductToPdf(storeProduct);

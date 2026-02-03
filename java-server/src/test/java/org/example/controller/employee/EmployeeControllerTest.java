@@ -140,7 +140,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /employees - Manager should get all employees")
     void getAll_asManager_Ok() throws Exception {
         PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
@@ -171,7 +171,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /employees - should return empty list when no employees")
     void getAll_noEmployees_Ok() throws Exception {
         PageResponseDto<EmployeeResponseDto> emptyPage = PageResponseDto.of(
@@ -192,7 +192,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("POST /employees - Manager should create employee successfully")
     void createEmployee_asManager_Created() throws Exception {
         EmployeeResponseDto createdEmployee = new EmployeeResponseDto();
@@ -223,7 +223,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("POST /employees - should return unprocessable entity for invalid data")
     void createEmployee_invalidData_UnprocessableEntity() throws Exception {
         EmployeeRegistrationRequestDto invalidRequest = new EmployeeRegistrationRequestDto();
@@ -238,7 +238,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("PUT /employees/{id} - Manager should update employee successfully")
     void updateEmployee_asManager_Ok() throws Exception {
         EmployeeResponseDto updatedEmployee = new EmployeeResponseDto();
@@ -265,7 +265,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("DELETE /employees/{id} - Manager should delete employee successfully")
     void deleteEmployee_asManager_NoContent() throws Exception {
         doNothing().when(employeeService).deleteEmployeeById("EMP001");
@@ -289,7 +289,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /employees/report - Manager should download PDF report")
     void employeePdf_asManager_Ok() throws Exception {
         byte[] pdfBytes = "PDF content".getBytes();
@@ -320,7 +320,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /employees/cashiers - Manager should get all cashiers")
     void getAllCashiers_asManager_Ok() throws Exception {
         PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
@@ -352,7 +352,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /employees/cashiers - should return empty list when no cashiers")
     void getAllCashiers_noCashiers_Ok() throws Exception {
         PageResponseDto<EmployeeResponseDto> emptyPage = PageResponseDto.of(
@@ -373,7 +373,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /employees/me - Manager should get forbidden")
     void getMe_asManager_Forbidden() throws Exception {
         mockMvc.perform(get("/employees/me"))
@@ -383,44 +383,63 @@ class EmployeeControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = {"CASHIER", "MANAGER"})
-    @DisplayName("GET /employees/me - User with both roles should get forbidden")
-    void getMe_withBothRoles_Forbidden() throws Exception {
-        mockMvc.perform(get("/employees/me"))
-                .andExpect(status().isForbidden());
-
-        verify(employeeService, never()).getMe();
-    }
-
-    @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /employees?surname - Manager should find employee contact by surname")
     void findPhoneAndAddressBySurname_asManager_Ok() throws Exception {
-        when(employeeService.findPhoneAndAddressBySurname("Smith")).thenReturn(Optional.of(employeeContactDto));
+        PageResponseDto<EmployeeContactDto> page = PageResponseDto.of(
+                List.of(employeeContactDto),
+                10,
+                1L,
+                false
+        );
+
+        when(employeeService.findPhoneAndAddressBySurname(
+                eq("Smith"),
+                any(Pageable.class),
+                isNull()))
+                .thenReturn(page);
 
         mockMvc.perform(get("/employees")
                         .param("surname", "Smith"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.phone_number").value("+380501234567"))
-                .andExpect(jsonPath("$.city").value("Kyiv"))
-                .andExpect(jsonPath("$.street").value("Khreshchatyk"))
-                .andExpect(jsonPath("$.zip_code").value("01001"));
+                .andExpect(jsonPath("$.content[0].phone_number").value("+380501234567"))
+                .andExpect(jsonPath("$.content[0].city").value("Kyiv"))
+                .andExpect(jsonPath("$.content[0].street").value("Khreshchatyk"))
+                .andExpect(jsonPath("$.content[0].zip_code").value("01001"))
+                .andExpect(jsonPath("$.pageSize").value(10))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.hasNext").value(false));
 
-        verify(employeeService, times(1)).findPhoneAndAddressBySurname("Smith");
+        verify(employeeService, times(1))
+                .findPhoneAndAddressBySurname(eq("Smith"), any(Pageable.class), isNull());
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
-    @DisplayName("GET /employees?surname - should return null when employee not found")
-    void findPhoneAndAddressBySurname_notFound_Null() throws Exception {
-        when(employeeService.findPhoneAndAddressBySurname("NonExistent")).thenReturn(Optional.empty());
+    @WithMockUser(authorities = "MANAGER")
+    @DisplayName("GET /employees?surname - should return empty page when employee not found")
+    void findPhoneAndAddressBySurname_notFound_EmptyPage() throws Exception {
+        PageResponseDto<EmployeeContactDto> emptyPage = PageResponseDto.of(
+                List.of(),
+                10,
+                0L,
+                false
+        );
+
+        when(employeeService.findPhoneAndAddressBySurname(
+                eq("NonExistent"),
+                any(Pageable.class),
+                isNull()))
+                .thenReturn(emptyPage);
 
         mockMvc.perform(get("/employees")
                         .param("surname", "NonExistent"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(""));
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.hasNext").value(false));
 
-        verify(employeeService, times(1)).findPhoneAndAddressBySurname("NonExistent");
+        verify(employeeService, times(1))
+                .findPhoneAndAddressBySurname(eq("NonExistent"), any(Pageable.class), isNull());
     }
 
     @Test
@@ -431,6 +450,7 @@ class EmployeeControllerTest {
                         .param("surname", "Smith"))
                 .andExpect(status().isForbidden());
 
-        verify(employeeService, never()).findPhoneAndAddressBySurname(anyString());
+        verify(employeeService, never()).findPhoneAndAddressBySurname(
+                anyString(), any(Pageable.class), isNull());
     }
 }

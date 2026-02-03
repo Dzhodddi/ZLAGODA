@@ -7,7 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-
 import org.example.exception.custom_exception.AuthorizationException;
 import org.example.exception.custom_exception.DateFormatException;
 import org.example.exception.custom_exception.DeletionException;
@@ -18,6 +17,8 @@ import org.example.exception.custom_exception.InvalidProductException;
 import org.example.exception.custom_exception.InvalidRoleException;
 import org.example.exception.custom_exception.RegistrationException;
 import org.example.exception.handler.CustomGlobalExceptionHandler;
+import org.example.exception.handler.CustomGlobalExceptionHandler.ErrorResponse;
+import org.example.exception.handler.CustomGlobalExceptionHandler.ValidationErrorResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,10 +54,13 @@ class CustomGlobalExceptionHandlerTest {
     void handleCustomExceptions_EntityNotFound_shouldReturnNotFound() {
         EntityNotFoundException exception = new EntityNotFoundException("Entity not found");
 
-        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleCustomExceptions(exception);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("Entity not found", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(404, response.getBody().getStatus());
+        assertEquals("Not Found", response.getBody().getError());
+        assertEquals("Entity not found", response.getBody().getMessage());
     }
 
     @Test
@@ -64,10 +68,13 @@ class CustomGlobalExceptionHandlerTest {
     void handleCustomExceptions_Registration_shouldReturnConflict() {
         RegistrationException exception = new RegistrationException("User exists");
 
-        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleCustomExceptions(exception);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("User exists", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(409, response.getBody().getStatus());
+        assertEquals("Conflict", response.getBody().getError());
+        assertEquals("User exists", response.getBody().getMessage());
     }
 
     @Test
@@ -75,10 +82,13 @@ class CustomGlobalExceptionHandlerTest {
     void handleCustomExceptions_Deletion_shouldReturnConflict() {
         DeletionException exception = new DeletionException("Cannot delete");
 
-        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleCustomExceptions(exception);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("Cannot delete", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(409, response.getBody().getStatus());
+        assertEquals("Conflict", response.getBody().getError());
+        assertEquals("Cannot delete", response.getBody().getMessage());
     }
 
     @Test
@@ -86,10 +96,13 @@ class CustomGlobalExceptionHandlerTest {
     void handleCustomExceptions_InvalidCategory_shouldReturnUnprocessableEntity() {
         InvalidCategoryException exception = new InvalidCategoryException("Invalid category");
 
-        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleCustomExceptions(exception);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Invalid category", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(422, response.getBody().getStatus());
+        assertEquals("Unprocessable Entity", response.getBody().getError());
+        assertEquals("Invalid category", response.getBody().getMessage());
     }
 
     @Test
@@ -97,10 +110,13 @@ class CustomGlobalExceptionHandlerTest {
     void handleCustomExceptions_InvalidRole_shouldReturnUnprocessableEntity() {
         InvalidRoleException exception = new InvalidRoleException("Invalid role");
 
-        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleCustomExceptions(exception);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Invalid role", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(422, response.getBody().getStatus());
+        assertEquals("Unprocessable Entity", response.getBody().getError());
+        assertEquals("Invalid role", response.getBody().getMessage());
     }
 
     @Test
@@ -108,10 +124,13 @@ class CustomGlobalExceptionHandlerTest {
     void handleCustomExceptions_InvalidProduct_shouldReturnUnprocessableEntity() {
         InvalidProductException exception = new InvalidProductException("Invalid product");
 
-        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleCustomExceptions(exception);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Invalid product", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(422, response.getBody().getStatus());
+        assertEquals("Unprocessable Entity", response.getBody().getError());
+        assertEquals("Invalid product", response.getBody().getMessage());
     }
 
     @Test
@@ -119,10 +138,13 @@ class CustomGlobalExceptionHandlerTest {
     void handleCustomExceptions_InvalidParameter_shouldReturnBadRequest() {
         InvalidParameterException exception = new InvalidParameterException("Invalid param");
 
-        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleCustomExceptions(exception);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Invalid param", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(400, response.getBody().getStatus());
+        assertEquals("Bad Request", response.getBody().getError());
+        assertEquals("Invalid param", response.getBody().getMessage());
     }
 
     @Test
@@ -130,10 +152,13 @@ class CustomGlobalExceptionHandlerTest {
     void handleCustomExceptions_DateFormat_shouldReturnBadRequest() {
         DateFormatException exception = new DateFormatException("Bad date");
 
-        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleCustomExceptions(exception);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Bad date", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(400, response.getBody().getStatus());
+        assertEquals("Bad Request", response.getBody().getError());
+        assertEquals("Bad date", response.getBody().getMessage());
     }
 
     @Test
@@ -141,10 +166,13 @@ class CustomGlobalExceptionHandlerTest {
     void handleCustomExceptions_Authorization_shouldReturnForbidden() {
         AuthorizationException exception = new AuthorizationException("Not allowed");
 
-        ResponseEntity<String> response = exceptionHandler.handleCustomExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleCustomExceptions(exception);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("Not allowed", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(403, response.getBody().getStatus());
+        assertEquals("Forbidden", response.getBody().getError());
+        assertEquals("Not allowed", response.getBody().getMessage());
     }
 
     @Test
@@ -156,25 +184,33 @@ class CustomGlobalExceptionHandlerTest {
         when(methodArgumentNotValidException.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError1, fieldError2));
 
-        ResponseEntity<List<String>> response = exceptionHandler
+        ResponseEntity<ValidationErrorResponse> response = exceptionHandler
                 .handleValidationExceptions(methodArgumentNotValidException);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(2, response.getBody().size());
-        assertTrue(response.getBody().contains("name cannot be empty"));
-        assertTrue(response.getBody().contains("age must be positive"));
+        assertEquals(422, response.getBody().getStatus());
+        assertEquals("Unprocessable Entity", response.getBody().getError());
+        assertEquals("Validation failed", response.getBody().getMessage());
+        assertEquals(2, response.getBody().getErrors().size());
+        assertTrue(response.getBody().getErrors().contains("name cannot be empty"));
+        assertTrue(response.getBody().getErrors().contains("age must be positive"));
     }
 
     @Test
     @DisplayName("handleDataIntegrityViolation should return UNPROCESSABLE_ENTITY")
     void handleDataIntegrityViolation_shouldReturnUnprocessableEntity() {
-        DataIntegrityViolationException exception = new DataIntegrityViolationException("Constraint violation");
+        DataIntegrityViolationException exception =
+                new DataIntegrityViolationException("Constraint violation");
 
-        ResponseEntity<String> response = exceptionHandler.handleDataIntegrityViolation(exception);
+        ResponseEntity<ErrorResponse> response =
+                exceptionHandler.handleDataIntegrityViolation(exception);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Data integrity violation", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(422, response.getBody().getStatus());
+        assertEquals("Unprocessable Entity", response.getBody().getError());
+        assertEquals("Data integrity violation", response.getBody().getMessage());
     }
 
     @Test
@@ -183,10 +219,13 @@ class CustomGlobalExceptionHandlerTest {
         HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
         when(exception.getCause()).thenReturn(null);
 
-        ResponseEntity<String> response = exceptionHandler.handleInvalidJson(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleInvalidJson(exception);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Invalid JSON format", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(400, response.getBody().getStatus());
+        assertEquals("Bad Request", response.getBody().getError());
+        assertEquals("Invalid JSON format", response.getBody().getMessage());
     }
 
     @Test
@@ -196,10 +235,14 @@ class CustomGlobalExceptionHandlerTest {
         HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
         when(exception.getCause()).thenReturn(dateException);
 
-        ResponseEntity<String> response = exceptionHandler.handleInvalidJson(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleInvalidJson(exception);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Invalid date format. Expected format: yyyy-MM-dd", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(400, response.getBody().getStatus());
+        assertEquals("Bad Request", response.getBody().getError());
+        assertEquals("Invalid date format. Expected format: yyyy-MM-dd",
+                response.getBody().getMessage());
     }
 
     @Test
@@ -207,10 +250,14 @@ class CustomGlobalExceptionHandlerTest {
     void handleAuthenticationException_shouldReturnUnauthorized() {
         AuthenticationException exception = new BadCredentialsException("Bad credentials");
 
-        ResponseEntity<String> response = exceptionHandler.handleAuthenticationException(exception);
+        ResponseEntity<ErrorResponse> response =
+                exceptionHandler.handleAuthenticationException(exception);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertEquals("Bad credentials", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(401, response.getBody().getStatus());
+        assertEquals("Unauthorized", response.getBody().getError());
+        assertEquals("Bad credentials", response.getBody().getMessage());
     }
 
     @Test
@@ -218,10 +265,13 @@ class CustomGlobalExceptionHandlerTest {
     void handleAccessDenied_shouldReturnForbidden() {
         AccessDeniedException exception = new AccessDeniedException("Access is denied");
 
-        ResponseEntity<String> response = exceptionHandler.handleAccessDenied(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleAccessDenied(exception);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("Access is denied", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(403, response.getBody().getStatus());
+        assertEquals("Forbidden", response.getBody().getError());
+        assertEquals("Access Denied", response.getBody().getMessage());
     }
 
     @Test
@@ -229,9 +279,12 @@ class CustomGlobalExceptionHandlerTest {
     void handleAllExceptions_shouldReturnInternalServerError() {
         Exception exception = new NullPointerException("Something went wrong");
 
-        ResponseEntity<String> response = exceptionHandler.handleAllExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleAllExceptions(exception);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Unexpected error occurred", response.getBody());
+        assertNotNull(response.getBody());
+        assertEquals(500, response.getBody().getStatus());
+        assertEquals("Internal Server Error", response.getBody().getError());
+        assertEquals("Unexpected error occurred", response.getBody().getMessage());
     }
 }

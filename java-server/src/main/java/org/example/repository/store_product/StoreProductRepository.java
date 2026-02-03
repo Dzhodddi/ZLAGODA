@@ -54,7 +54,8 @@ public class StoreProductRepository {
         if (lastSeenUPC != null) {
             items = jdbcTemplate.query(
                     """
-                    SELECT sp.*, p.product_name
+                    SELECT sp.UPC, sp.UPC_prom, sp.id_product, sp.selling_price,
+                           sp.products_number, sp.promotional_product, p.product_name
                     FROM store_product sp
                     JOIN product p ON sp.id_product = p.id_product
                     WHERE sp.is_deleted = false
@@ -73,7 +74,8 @@ public class StoreProductRepository {
         } else {
             items = jdbcTemplate.query(
                     """
-                    SELECT sp.*, p.product_name
+                    SELECT sp.UPC, sp.UPC_prom, sp.id_product, sp.selling_price,
+                           sp.products_number, sp.promotional_product, p.product_name
                     FROM store_product sp
                     JOIN product p ON sp.id_product = p.id_product
                     WHERE sp.is_deleted = false
@@ -98,7 +100,8 @@ public class StoreProductRepository {
         if (lastSeenUPC != null) {
             items = jdbcTemplate.query(
                     """
-                    SELECT *
+                    SELECT UPC, UPC_prom, id_product, selling_price,
+                           products_number, promotional_product
                     FROM store_product
                     WHERE is_deleted = false
                       AND (products_number, UPC) >
@@ -115,7 +118,8 @@ public class StoreProductRepository {
         } else {
             items = jdbcTemplate.query(
                     """
-                    SELECT *
+                    SELECT UPC, UPC_prom, id_product, selling_price,
+                           products_number, promotional_product
                     FROM store_product
                     WHERE is_deleted = false
                     ORDER BY products_number, UPC
@@ -139,7 +143,8 @@ public class StoreProductRepository {
         if (lastSeenUPC != null) {
             items = jdbcTemplate.query(
                     """
-                    SELECT *
+                    SELECT UPC, UPC_prom, id_product, selling_price,
+                           products_number, promotional_product
                     FROM store_product
                     WHERE is_deleted = false
                       AND promotional_product = true
@@ -157,7 +162,8 @@ public class StoreProductRepository {
         } else {
             items = jdbcTemplate.query(
                     """
-                    SELECT *
+                    SELECT UPC, UPC_prom, id_product, selling_price,
+                           products_number, promotional_product
                     FROM store_product
                     WHERE is_deleted = false
                       AND promotional_product = true
@@ -182,7 +188,8 @@ public class StoreProductRepository {
         if (lastSeenUPC != null) {
             items = jdbcTemplate.query(
                     """
-                    SELECT *
+                    SELECT UPC, UPC_prom, id_product, selling_price,
+                           products_number, promotional_product
                     FROM store_product
                     WHERE is_deleted = false
                       AND promotional_product = false
@@ -200,7 +207,8 @@ public class StoreProductRepository {
         } else {
             items = jdbcTemplate.query(
                     """
-                    SELECT *
+                    SELECT UPC, UPC_prom, id_product, selling_price,
+                           products_number, promotional_product
                     FROM store_product
                     WHERE is_deleted = false
                       AND promotional_product = false
@@ -225,7 +233,8 @@ public class StoreProductRepository {
         if (lastSeenUPC != null) {
             items = jdbcTemplate.query(
                     """
-                    SELECT sp.*, p.product_name
+                    SELECT sp.UPC, sp.UPC_prom, sp.id_product, sp.selling_price,
+                           sp.products_number, sp.promotional_product, p.product_name
                     FROM store_product sp
                     JOIN product p ON sp.id_product = p.id_product
                     WHERE sp.is_deleted = false
@@ -245,7 +254,8 @@ public class StoreProductRepository {
         } else {
             items = jdbcTemplate.query(
                     """
-                    SELECT sp.*, p.product_name
+                    SELECT sp.UPC, sp.UPC_prom, sp.id_product, sp.selling_price,
+                           sp.products_number, sp.promotional_product, p.product_name
                     FROM store_product sp
                     JOIN product p ON sp.id_product = p.id_product
                     WHERE sp.is_deleted = false
@@ -271,7 +281,8 @@ public class StoreProductRepository {
         if (lastSeenUPC != null) {
             items = jdbcTemplate.query(
                     """
-                    SELECT sp.*, p.product_name
+                    SELECT sp.UPC, sp.UPC_prom, sp.id_product, sp.selling_price,
+                           sp.products_number, sp.promotional_product, p.product_name
                     FROM store_product sp
                     JOIN product p ON sp.id_product = p.id_product
                     WHERE sp.is_deleted = false
@@ -291,7 +302,8 @@ public class StoreProductRepository {
         } else {
             items = jdbcTemplate.query(
                     """
-                    SELECT sp.*, p.product_name
+                    SELECT sp.UPC, sp.UPC_prom, sp.id_product, sp.selling_price,
+                           sp.products_number, sp.promotional_product, p.product_name
                     FROM store_product sp
                     JOIN product p ON sp.id_product = p.id_product
                     WHERE sp.is_deleted = false
@@ -314,7 +326,8 @@ public class StoreProductRepository {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
                             """
-                            SELECT *
+                            SELECT UPC, UPC_prom, id_product, selling_price,
+                                   products_number, promotional_product
                             FROM store_product
                             WHERE UPC = ? AND is_deleted = false
                             """,
@@ -400,7 +413,8 @@ public class StoreProductRepository {
                         promotional_product,
                         is_deleted
                     ) VALUES (?, ?, ?, ?, ?, ?, ?)
-                    RETURNING *
+                    RETURNING UPC, UPC_prom, id_product, selling_price,
+                              products_number, promotional_product, is_deleted
                     """,
                     rowMapper,
                     requestDto.getUPC(),
@@ -460,7 +474,8 @@ public class StoreProductRepository {
                             "Store product not found after update: " + upc));
 
         } catch (DataIntegrityViolationException e) {
-            throw new InvalidProductException("Invalid product or UPC reference: " + requestDto.getId_product());
+            throw new InvalidProductException(
+                    "Invalid product or UPC reference: " + requestDto.getId_product());
         }
     }
 
@@ -506,7 +521,8 @@ public class StoreProductRepository {
         if (lastSeenUPC != null) {
             items = jdbcTemplate.query(
                     """
-                    SELECT *
+                    SELECT UPC, UPC_prom, id_product, selling_price,
+                           products_number, promotional_product
                     FROM store_product
                     WHERE is_deleted = false
                       AND UPC > ?
@@ -520,7 +536,8 @@ public class StoreProductRepository {
         } else {
             items = jdbcTemplate.query(
                     """
-                    SELECT *
+                    SELECT UPC, UPC_prom, id_product, selling_price,
+                           products_number, promotional_product
                     FROM store_product
                     WHERE is_deleted = false
                     ORDER BY UPC
@@ -538,7 +555,8 @@ public class StoreProductRepository {
 
     public List<StoreProductDto> findAllNoPagination() {
         return jdbcTemplate.query("""
-             SELECT *
+             SELECT UPC, UPC_prom, id_product, selling_price,
+                    products_number, promotional_product
              FROM store_product
              WHERE is_deleted = false
              """,
@@ -553,6 +571,7 @@ public class StoreProductRepository {
                 """
                 SELECT COUNT(*)
                 FROM store_product
+                WHERE is_deleted = false
                 """,
                 Integer.class
         );
@@ -565,6 +584,7 @@ public class StoreProductRepository {
                 SELECT COUNT(*)
                 FROM store_product
                 WHERE promotional_product = true
+                  AND is_deleted = false
                 """,
                 Integer.class
         );
@@ -577,6 +597,7 @@ public class StoreProductRepository {
                 SELECT COUNT(*)
                 FROM store_product
                 WHERE promotional_product = false
+                  AND is_deleted = false
                 """,
                 Integer.class
         );

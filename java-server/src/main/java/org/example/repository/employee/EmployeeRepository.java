@@ -32,13 +32,19 @@ public class EmployeeRepository {
         List<EmployeeResponseDto> employees;
         if (lastSeenId != null) {
             String lastSeenSurname = jdbcTemplate.queryForObject(
-                    "SELECT empl_surname FROM employee WHERE id_employee = ?",
+                    """
+                    SELECT empl_surname
+                    FROM employee
+                    WHERE id_employee = ?
+                    """,
                     String.class,
                     lastSeenId
             );
             employees = jdbcTemplate.query(
                             """
-                            SELECT *
+                            SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+                                   empl_role, empl_salary, date_of_birth, date_of_start,
+                                   phone_number, city, street, zip_code, password
                             FROM employee
                             WHERE (empl_surname > ?)
                                OR (empl_surname = ? AND id_employee > ?)
@@ -56,7 +62,9 @@ public class EmployeeRepository {
         } else {
             employees = jdbcTemplate.query(
                             """
-                            SELECT *
+                            SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+                                   empl_role, empl_salary, date_of_birth, date_of_start,
+                                   phone_number, city, street, zip_code, password
                             FROM employee
                             ORDER BY empl_surname, id_employee
                             FETCH FIRST ? ROWS ONLY
@@ -80,7 +88,9 @@ public class EmployeeRepository {
 
     public List<EmployeeResponseDto> findAllNoPagination() {
         return jdbcTemplate.query("""
-                        SELECT *
+                        SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+                               empl_role, empl_salary, date_of_birth, date_of_start,
+                               phone_number, city, street, zip_code, password
                         FROM employee
                         ORDER BY empl_surname
                         """,
@@ -213,7 +223,9 @@ public class EmployeeRepository {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
                             """
-                            SELECT *
+                            SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+                                   empl_role, empl_salary, date_of_birth, date_of_start,
+                                   phone_number, city, street, zip_code, password
                             FROM employee
                             WHERE id_employee = ?
                             """,
@@ -231,13 +243,19 @@ public class EmployeeRepository {
         List<EmployeeResponseDto> employees;
         if (lastSeenId != null) {
             String lastSeenSurname = jdbcTemplate.queryForObject(
-                    "SELECT empl_surname FROM employee WHERE id_employee = ? AND empl_role = 'CASHIER'",
+                    """
+                    SELECT empl_surname
+                    FROM employee
+                    WHERE id_employee = ? AND empl_role = 'CASHIER'
+                    """,
                     String.class,
                     lastSeenId
             );
             employees = jdbcTemplate.query(
                             """
-                            SELECT *
+                            SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+                                   empl_role, empl_salary, date_of_birth, date_of_start,
+                                   phone_number, city, street, zip_code, password
                             FROM employee
                             WHERE empl_role = 'CASHIER'
                               AND ((empl_surname > ?)
@@ -257,7 +275,9 @@ public class EmployeeRepository {
             int pageSize = pageable.getPageSize();
             employees = jdbcTemplate.query(
                             """
-                            SELECT *
+                            SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+                                   empl_role, empl_salary, date_of_birth, date_of_start,
+                                   phone_number, city, street, zip_code, password
                             FROM employee
                             WHERE empl_role = 'CASHIER'
                             ORDER BY empl_surname, id_employee
@@ -270,7 +290,7 @@ public class EmployeeRepository {
                     .toList();
         }
 
-        long total = getTotalCount();
+        long total = getCashierCount();
         boolean hasNext = employees.size() == pageable.getPageSize();
         return PageResponseDto.of(
                 employees,
@@ -280,29 +300,76 @@ public class EmployeeRepository {
         );
     }
 
-    public Optional<EmployeeContactDto> findPhoneAndAddressBySurname(String surname) {
-        try {
-            return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(
-                            """
-                            SELECT phone_number, city, street, zip_code
-                            FROM employee
-                            WHERE empl_surname = ?
-                            """,
-                            (rs, rowNum) -> {
-                                EmployeeContactDto dto = new EmployeeContactDto();
-                                dto.setPhone_number(rs.getString("phone_number"));
-                                dto.setCity(rs.getString("city"));
-                                dto.setStreet(rs.getString("street"));
-                                dto.setZip_code(rs.getString("zip_code"));
-                                return dto;
-                            },
-                            surname
-                    )
+    public PageResponseDto<EmployeeContactDto> findPhoneAndAddressBySurname(String surname,
+                                                                            Pageable pageable,
+                                                                            String lastSeenId) {
+        List<EmployeeContactDto> employees;
+        if (lastSeenId != null) {
+            employees = jdbcTemplate.query(
+                    """
+                    SELECT phone_number, city, street, zip_code
+                    FROM employee
+                    WHERE empl_surname = ?
+                      AND id_employee > ?
+                    ORDER BY id_employee
+                    FETCH FIRST ? ROWS ONLY
+                    """,
+                    (rs, rowNum) -> {
+                        EmployeeContactDto dto = new EmployeeContactDto();
+                        dto.setPhone_number(rs.getString("phone_number"));
+                        dto.setCity(rs.getString("city"));
+                        dto.setStreet(rs.getString("street"));
+                        dto.setZip_code(rs.getString("zip_code"));
+                        return dto;
+                    },
+                    surname,
+                    lastSeenId,
+                    pageable.getPageSize()
             );
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
+        } else {
+            int pageSize = pageable.getPageSize();
+            employees = jdbcTemplate.query(
+                    """
+                    SELECT phone_number, city, street, zip_code
+                    FROM employee
+                    WHERE empl_surname = ?
+                    ORDER BY id_employee
+                    FETCH FIRST ? ROWS ONLY
+                    """,
+                    (rs, rowNum) -> {
+                        EmployeeContactDto dto = new EmployeeContactDto();
+                        dto.setPhone_number(rs.getString("phone_number"));
+                        dto.setCity(rs.getString("city"));
+                        dto.setStreet(rs.getString("street"));
+                        dto.setZip_code(rs.getString("zip_code"));
+                        return dto;
+                    },
+                    surname,
+                    pageSize
+            );
         }
+
+        long total = getSurnameCount(surname);
+        boolean hasNext = employees.size() == pageable.getPageSize();
+        return PageResponseDto.of(
+                employees,
+                pageable.getPageSize(),
+                total,
+                hasNext
+        );
+    }
+
+    private long getSurnameCount(String surname) {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM employee
+                WHERE empl_surname = ?
+                """,
+                Integer.class,
+                surname
+        );
+        return count != null ? count : 0;
     }
 
     private long getTotalCount() {

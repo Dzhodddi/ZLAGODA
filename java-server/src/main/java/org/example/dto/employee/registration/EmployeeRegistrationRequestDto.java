@@ -2,16 +2,14 @@ package org.example.dto.employee.registration;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.dto.employee.registration.annotation.date.CustomDateDeserializer;
 import org.example.dto.employee.registration.annotation.date.MinYear;
+import org.example.dto.employee.registration.annotation.date.StartDateAfterBirth;
 import org.example.dto.employee.registration.annotation.field_match.FieldMatch;
 import org.example.dto.employee.registration.annotation.role.ValidRole;
 import org.hibernate.validator.constraints.Length;
@@ -25,6 +23,9 @@ import java.util.Date;
 @FieldMatch(first = "password",
         second = "repeat_password",
         message = "Password and repeated password do not match")
+@StartDateAfterBirth(first = "date_of_birth",
+        second = "date_of_start",
+        message = "Date of start must be after date of birth")
 public class EmployeeRegistrationRequestDto {
     @NotBlank
     @Length(min = 1, max = 10)
@@ -52,6 +53,10 @@ public class EmployeeRegistrationRequestDto {
     private Date date_of_start;
     @NotBlank
     @Length(min = 8, max = 13)
+    @Pattern(
+            regexp = "^(\\+380|0)\\d{9}$",
+            message = "Phone number must be in format +380XXXXXXXXX or 0XXXXXXXXX"
+    )
     private String phone_number;
     @NotNull
     @DecimalMin("0.0")

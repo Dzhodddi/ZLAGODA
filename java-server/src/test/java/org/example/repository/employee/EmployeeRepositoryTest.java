@@ -39,6 +39,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -341,35 +342,101 @@ class EmployeeRepositoryTest {
     @Test
     @DisplayName("findPhoneAndAddressBySurname should return contact info when employee exists")
     void findPhoneAndAddressBySurname_existingEmployee_shouldReturnContactInfo() {
+        String surname = "Іваненко";
+        Pageable pageable = PageRequest.of(0, 10);
+
         EmployeeContactDto dto = new EmployeeContactDto();
         dto.setPhone_number("+380501234567");
         dto.setCity("Київ");
         dto.setStreet("Хрещатик 1");
         dto.setZip_code("01001");
 
-        when(jdbcTemplate.queryForObject(anyString(),
-                any(org.springframework.jdbc.core.RowMapper.class), eq("Іваненко")))
-                .thenReturn(dto);
+        when(jdbcTemplate.query(
+                anyString(),
+                any(org.springframework.jdbc.core.RowMapper.class),
+                eq(surname),
+                eq(pageable.getPageSize())
+        )).thenReturn(List.of(dto));
 
-        Optional<EmployeeContactDto> result = repository.findPhoneAndAddressBySurname("Іваненко");
+        when(jdbcTemplate.queryForObject(
+                anyString(),
+                eq(Integer.class),
+                eq(surname)
+        )).thenReturn(1);
 
-        assertTrue(result.isPresent());
-        assertEquals("+380501234567", result.get().getPhone_number());
-        assertEquals("Київ", result.get().getCity());
-        assertEquals("Хрещатик 1", result.get().getStreet());
-        assertEquals("01001", result.get().getZip_code());
+        PageResponseDto<EmployeeContactDto> result = repository.findPhoneAndAddressBySurname(
+                surname, pageable, null);
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        EmployeeContactDto resultDto = result.getContent().get(0);
+        assertEquals("+380501234567", resultDto.getPhone_number());
+        assertEquals("Київ", resultDto.getCity());
+        assertEquals("Хрещатик 1", resultDto.getStreet());
+        assertEquals("01001", resultDto.getZip_code());
     }
 
     @Test
-    @DisplayName("findPhoneAndAddressBySurname should return empty when employee does not exist")
-    void findPhoneAndAddressBySurname_nonExistingEmployee_shouldReturnEmpty() {
-        when(jdbcTemplate.queryForObject(anyString(),
-                any(org.springframework.jdbc.core.RowMapper.class), eq("Nonexistent")))
-                .thenThrow(EmptyResultDataAccessException.class);
+    @DisplayName("findPhoneAndAddressBySurname should return empty page when employee does not exist")
+    void findPhoneAndAddressBySurname_nonExistingEmployee_shouldReturnEmptyPage() {
+        // Arrange
+        String surname = "Nonexistent";
+        Pageable pageable = PageRequest.of(0, 10);
 
-        Optional<EmployeeContactDto> result = repository.findPhoneAndAddressBySurname("Nonexistent");
+        when(jdbcTemplate.query(
+                anyString(),
+                any(org.springframework.jdbc.core.RowMapper.class),
+                eq(surname),
+                eq(pageable.getPageSize())
+        )).thenReturn(List.of());
 
-        assertTrue(result.isEmpty());
+        when(jdbcTemplate.queryForObject(
+                anyString(),
+                eq(Integer.class),
+                eq(surname)
+        )).thenReturn(0);
+
+        PageResponseDto<EmployeeContactDto> result = repository.findPhoneAndAddressBySurname(
+                surname, pageable, null);
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalElements());
+        assertFalse(result.isHasNext());
+    }
+
+    @Test
+    @DisplayName("findPhoneAndAddressBySurname with pagination should return correct page")
+    void findPhoneAndAddressBySurname_withPagination_shouldReturnCorrectPage() {
+        String surname = "Іваненко";
+        String lastSeenId = "EMP001";
+        Pageable pageable = PageRequest.of(0, 10);
+        EmployeeContactDto dto1 = new EmployeeContactDto();
+        dto1.setPhone_number("+380501234567");
+        dto1.setCity("Київ");
+        dto1.setStreet("Хрещатик 1");
+        dto1.setZip_code("01001");
+        EmployeeContactDto dto2 = new EmployeeContactDto();
+        dto2.setPhone_number("+380507654321");
+        dto2.setCity("Львів");
+        dto2.setStreet("Проспект Свободи 2");
+        dto2.setZip_code("79000");
+        when(jdbcTemplate.query(
+                anyString(),
+                any(org.springframework.jdbc.core.RowMapper.class),
+                eq(surname),
+                eq(lastSeenId),
+                eq(pageable.getPageSize())
+        )).thenReturn(List.of(dto1, dto2));
+        when(jdbcTemplate.queryForObject(
+                anyString(),
+                eq(Integer.class),
+                eq(surname)
+        )).thenReturn(2);
+
+        PageResponseDto<EmployeeContactDto> result = repository.findPhoneAndAddressBySurname(
+                surname, pageable, lastSeenId);
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertEquals(2, result.getTotalElements());
     }
 
     @Test

@@ -12,7 +12,6 @@ import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.page.PageResponseDto;
-import org.example.exception.custom_exception.AuthorizationException;
 import org.example.exception.custom_exception.RegistrationException;
 import org.example.service.employee.EmployeeService;
 import org.example.service.report.PdfReportGeneratorService;
@@ -24,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,7 +49,7 @@ public class EmployeeController {
             summary = "Get all employees",
             description = "Get all employees sorted by their surnames"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public PageResponseDto<EmployeeResponseDto> getAll(@RequestParam(required = false)
                                                        String lastSeenId) {
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("empl_surname"));
@@ -64,7 +62,7 @@ public class EmployeeController {
             summary = "Create a new employee",
             description = "Create a new employee"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public EmployeeResponseDto createEmployee(
             @RequestBody @Valid EmployeeRegistrationRequestDto employeeRequestDto
     ) throws RegistrationException {
@@ -76,7 +74,7 @@ public class EmployeeController {
             summary = "Update an employee",
             description = "Update an existing employee by its id"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public EmployeeResponseDto updateEmployeeById(
             @PathVariable String id,
             @RequestBody @Valid EmployeeUpdateRequestDto employeeRequestDto
@@ -90,7 +88,7 @@ public class EmployeeController {
             summary = "Delete an employee",
             description = "Delete an existing employee by its id"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public void deleteEmployeeById(@PathVariable String id) {
         employeeService.deleteEmployeeById(id);
     }
@@ -100,7 +98,7 @@ public class EmployeeController {
             summary = "Download employees report",
             description = "Download employees pdf report"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<byte[]> employeePdf() throws DocumentException, IOException {
         List<EmployeeResponseDto> employees = employeeService.findAllNoPagination();
         byte[] pdf = pdfReportGeneratorService.employeeToPdf(employees);
@@ -114,7 +112,7 @@ public class EmployeeController {
             summary = "Get all cashiers",
             description = "Get all cashiers sorted by their surnames"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public PageResponseDto<EmployeeResponseDto> getAllCashiers(
             @RequestParam(required = false) String lastSeenId) {
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("empl_surname"));
@@ -126,15 +124,8 @@ public class EmployeeController {
             summary = "Get information about authorized cashier",
             description = "Get all information about currently authorized cashier"
     )
-    @PreAuthorize("hasRole('CASHIER')")
-    public EmployeeResponseDto getMe(Authentication auth) {
-        boolean isCashier = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("CASHIER"));
-        boolean isManager = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("MANAGER"));
-        if (!isCashier || isManager) {
-            throw new AuthorizationException("Only Cashier can access this endpoint");
-        }
+    @PreAuthorize("hasAuthority('CASHIER')")
+    public EmployeeResponseDto getMe() {
         return employeeService.getMe();
     }
 
@@ -143,9 +134,11 @@ public class EmployeeController {
             summary = "Find employee's phone and address by their surname",
             description = "Find employee's phone and address by their surname"
     )
-    @PreAuthorize("hasRole('MANAGER')")
-    public EmployeeContactDto findPhoneAndAddressBySurname(
-            @RequestParam String surname) {
-        return employeeService.findPhoneAndAddressBySurname(surname).orElse(null);
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public PageResponseDto<EmployeeContactDto> findPhoneAndAddressBySurname(
+            @RequestParam String surname,
+            @RequestParam(required = false) String lastSeenId) {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("empl_surname"));
+        return employeeService.findPhoneAndAddressBySurname(surname, pageable, lastSeenId);
     }
 }

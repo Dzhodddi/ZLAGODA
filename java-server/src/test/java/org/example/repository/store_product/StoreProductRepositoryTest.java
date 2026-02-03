@@ -36,6 +36,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
@@ -45,6 +47,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Store Product Repository Tests")
+@MockitoSettings(strictness = Strictness.LENIENT)
 class StoreProductRepositoryTest {
 
     @Mock

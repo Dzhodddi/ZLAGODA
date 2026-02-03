@@ -133,7 +133,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /store-products?sortedBy=name - Manager should get forbidden when sorting by name")
     void getStoreProducts_sortedByName_asManager_Forbidden() throws Exception {
         mockMvc.perform(get("/store-products")
@@ -204,7 +204,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("POST /store-products - Manager should create store product successfully")
     void createStoreProduct_asManager_Created() throws Exception {
         when(storeProductService.save(any(StoreProductRequestDto.class))).thenReturn(storeProductDto1);
@@ -234,7 +234,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("POST /store-products - should return unprocessable entity for invalid data")
     void createStoreProduct_invalidData_UnprocessableEntity() throws Exception {
         StoreProductRequestDto invalidRequest = new StoreProductRequestDto();
@@ -249,7 +249,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("PUT /store-products/{upc} - Manager should update store product successfully")
     void updateStoreProduct_asManager_Ok() throws Exception {
         StoreProductDto updatedProduct = new StoreProductDto();
@@ -286,7 +286,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("DELETE /store-products/{upc} - Manager should delete store product successfully")
     void deleteStoreProduct_asManager_NoContent() throws Exception {
         doNothing().when(storeProductService).softDeleteByUPC("1234567890");
@@ -372,7 +372,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /store-products/{upc}?selling_price=true&quantity=true"
             + " - Manager should get forbidden for price and quantity only")
     void findByUpc_priceAndQuantity_asManager_Forbidden() throws Exception {
@@ -385,7 +385,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /store-products/{upc} - should return bad request for invalid parameter combination")
     void findByUpc_invalidParameters_BadRequest() throws Exception {
         mockMvc.perform(get("/store-products/1234567890")
@@ -397,7 +397,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("POST /store-products/receive - Manager should receive new batch successfully")
     void receiveNewBatch_asManager_Created() throws Exception {
         when(batchService.save(any(BatchRequestDto.class))).thenReturn(storeProductDto1);
@@ -427,7 +427,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("POST /store-products/receive - should return unprocessable entity for invalid batch data")
     void receiveNewBatch_invalidData_UnprocessableEntity() throws Exception {
         BatchRequestDto invalidRequest = new BatchRequestDto();
@@ -442,7 +442,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("DELETE /store-products/expired - Manager should delete expired batches successfully")
     void deleteExpired_asManager_NoContent() throws Exception {
         doNothing().when(batchService).removeExpired();
@@ -466,7 +466,7 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /store-products/report - Manager should download PDF report")
     void storeProductPdf_asManager_Ok() throws Exception {
         byte[] pdfBytes = "PDF content".getBytes();

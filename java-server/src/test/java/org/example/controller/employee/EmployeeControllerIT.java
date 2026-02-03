@@ -23,9 +23,9 @@ import org.springframework.web.client.RestClient;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Sql(scripts = "classpath:database/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@Sql(scripts = "classpath:database/add-test-users.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@Sql(scripts = "classpath:database/clear.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
+@Sql(scripts = "classpath:database/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "classpath:database/add-test-users.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "classpath:database/clear.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class EmployeeControllerIT {
 
     @LocalServerPort
@@ -57,13 +57,25 @@ public class EmployeeControllerIT {
         assertNotNull(loginResponse);
         String token = loginResponse.accessToken();
 
-        ResponseEntity<RestPage<EmployeeResponseDto>> response = restClient.get()
-                .uri("/employees")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                .retrieve()
-                .toEntity(new ParameterizedTypeReference<RestPage<EmployeeResponseDto>>() {});
+        // DEBUG: Decode token
+        String[] parts = token.split("\\.");
+        String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+        System.out.println("🔍 Token payload: " + payload);
 
-        assertEquals(0, response.getBody().getNumber());
-        assertTrue(response.getBody().getContent().size() > 0);
+        try {
+            ResponseEntity<RestPage<EmployeeResponseDto>> response = restClient.get()
+                    .uri("/employees")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .toEntity(new ParameterizedTypeReference<RestPage<EmployeeResponseDto>>() {});
+
+            assertEquals(0, response.getBody().getNumber());
+            assertTrue(response.getBody().getContent().size() > 0);
+
+        } catch (org.springframework.web.client.HttpClientErrorException.Forbidden e) {
+            System.err.println("❌ 403 Forbidden - Token doesn't have required role");
+            System.err.println("❌ Response: " + e.getResponseBodyAsString());
+            throw e;
+        }
     }
 }

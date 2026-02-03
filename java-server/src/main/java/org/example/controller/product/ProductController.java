@@ -74,7 +74,7 @@ public class ProductController {
             summary = "Create a new product",
             description = "Create a new product"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ProductDto createProduct(
             @RequestBody @Valid ProductRequestDto productRequestDto
     ) {
@@ -86,7 +86,7 @@ public class ProductController {
             summary = "Update a product",
             description = "Update an existing product by its id"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ProductDto updateProductById(
             @PathVariable int id,
             @RequestBody @Valid ProductRequestDto productRequestDto
@@ -100,7 +100,7 @@ public class ProductController {
             summary = "Delete a product",
             description = "Delete an existing product by its id"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public void deleteProductById(@PathVariable int id) {
         productService.deleteProductById(id);
     }
@@ -110,7 +110,7 @@ public class ProductController {
             summary = "Download products report",
             description = "Download products pdf report"
     )
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<byte[]> productPdf() throws DocumentException, IOException {
         List<ProductDto> products = productService.getAllNoPagination();
         byte[] pdf = pdfReportGeneratorService.productToPdf(products);

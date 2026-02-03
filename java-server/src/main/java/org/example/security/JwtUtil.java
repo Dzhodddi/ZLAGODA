@@ -7,14 +7,19 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtUtil {
     private final SecretKey secretKey;
+    private final UserDetailsService userDetailsService;
 
     @Value("${jwt.expiration}")
     private long expiration;
@@ -28,8 +33,10 @@ public class JwtUtil {
     @Value("${jwt.audience}")
     private String audience;
 
-    public JwtUtil(@Value("${jwt.secret}") String secret) {
+    public JwtUtil(@Value("${jwt.secret}") String secret,
+                   UserDetailsService userDetailsService) {
         secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.userDetailsService = userDetailsService;
     }
 
     public String generateAccessToken(String username) {
@@ -41,8 +48,15 @@ public class JwtUtil {
     }
 
     private String generateToken(String username, long expirationTime) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
         return Jwts.builder()
                 .subject(username)
+                .claim("roles", roles)
                 .issuer(issuer)
                 .audience().add(audience).and()
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -67,6 +81,11 @@ public class JwtUtil {
 
     public String getUsername(String token) {
         return getClaimFromToken(token, Claims::getSubject);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getRoles(String token) {
+        return getClaimFromToken(token, claims -> (List<String>) claims.get("roles"));
     }
 
     private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {

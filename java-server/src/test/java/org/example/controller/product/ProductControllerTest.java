@@ -130,7 +130,7 @@ class ProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /products?name - manager forbidden")
     void searchByName_manager_forbidden() throws Exception {
         mockMvc.perform(get("/products")
@@ -164,7 +164,7 @@ class ProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("POST /products - manager can create")
     void createProduct_ok() throws Exception {
         ProductDto created = new ProductDto();
@@ -196,7 +196,7 @@ class ProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("PUT /products/{id} - manager can update")
     void updateProduct_ok() throws Exception {
         ProductDto updated = new ProductDto();
@@ -218,7 +218,7 @@ class ProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("DELETE /products/{id} - manager can delete")
     void deleteProduct_ok() throws Exception {
         doNothing().when(productService).deleteProductById(1);
@@ -230,7 +230,7 @@ class ProductControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(authorities = "MANAGER")
     @DisplayName("GET /products/report - pdf download")
     void productReport_ok() throws Exception {
         byte[] pdf = "PDF".getBytes();

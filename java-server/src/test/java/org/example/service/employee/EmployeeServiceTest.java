@@ -1,9 +1,6 @@
 package org.example.service.employee;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -343,24 +340,26 @@ class EmployeeServiceTest {
         EmployeeContactDto contactDto = new EmployeeContactDto();
         contactDto.setPhone_number("+380501234567");
         contactDto.setCity("Київ");
+        contactDto.setStreet("вул. Хрещатик, 1");
+        contactDto.setZip_code("01001");
+        Pageable pageable = Pageable.ofSize(10);
+        String surname = "Іваненко";
+        PageResponseDto<EmployeeContactDto> expectedPage = PageResponseDto.of(
+                List.of(contactDto),
+                10,
+                1L,
+                false
+        );
+        when(employeeRepository.findPhoneAndAddressBySurname(surname, pageable, null))
+                .thenReturn(expectedPage);
+        PageResponseDto<EmployeeContactDto> result = service
+                .findPhoneAndAddressBySurname(surname, pageable, null);
 
-        when(employeeRepository.findPhoneAndAddressBySurname("Іваненко"))
-                .thenReturn(Optional.of(contactDto));
-
-        Optional<EmployeeContactDto> result = service.findPhoneAndAddressBySurname("Іваненко");
-
-        assertTrue(result.isPresent());
-        assertEquals("+380501234567", result.get().getPhone_number());
-        verify(employeeRepository, times(1)).findPhoneAndAddressBySurname("Іваненко");
-    }
-
-    @Test
-    @DisplayName("findPhoneAndAddressBySurname should throw EntityNotFoundException when not found")
-    void findPhoneAndAddressBySurname_notFound_shouldThrowException() {
-        when(employeeRepository.findPhoneAndAddressBySurname("Nonexistent"))
-                .thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class,
-                () -> service.findPhoneAndAddressBySurname("Nonexistent"));
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals("+380501234567", result.getContent().get(0).getPhone_number());
+        assertEquals("Київ", result.getContent().get(0).getCity());
+        verify(employeeRepository, times(1))
+                .findPhoneAndAddressBySurname(surname, pageable, null);
     }
 }

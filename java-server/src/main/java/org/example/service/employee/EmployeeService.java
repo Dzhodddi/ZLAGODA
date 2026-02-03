@@ -1,7 +1,7 @@
 package org.example.service.employee;
 
 import java.util.List;
-import java.util.Optional;
+
 import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
@@ -25,7 +25,9 @@ public interface EmployeeService {
 
     EmployeeResponseDto getMe();
 
-    Optional<EmployeeContactDto> findPhoneAndAddressBySurname(String surname);
+    PageResponseDto<EmployeeContactDto> findPhoneAndAddressBySurname(String surname,
+                                                                     Pageable pageable,
+                                                                     String lastSeenId);
 
     List<EmployeeResponseDto> findAllNoPagination();
 }
