@@ -29,5 +29,5 @@ func (s *HealthHandlerSuite) TestHealthCheck() {
 			},
 		},
 	}
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }

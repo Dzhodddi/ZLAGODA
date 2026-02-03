@@ -8,6 +8,6 @@ import (
 
 type Authenticator interface {
 	ValidateToken(token string) (*jwt.Token, error)
-	CheckRole(requiredRoles ...roleKey) echo.MiddlewareFunc
+	CheckRole(requiredRoles ...RoleKey) echo.MiddlewareFunc
 	AuthMiddleware(employeeRepo repository.EmployeeRepository) echo.MiddlewareFunc
 }

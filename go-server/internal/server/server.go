@@ -1,9 +1,10 @@
 package app
 
 import (
+	"net/http"
+
 	"github.com/Dzhodddi/ZLAGODA/internal/auth"
 	"github.com/Dzhodddi/ZLAGODA/internal/db"
-	"net/http"
 
 	_ "github.com/Dzhodddi/ZLAGODA/docs"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
@@ -33,70 +34,46 @@ type Server struct {
 // @securityDefinitions.apikey ApiKeyAuth
 // @in							header
 // @name						Authorization
-func Setup(withConfig bool) (*Server, error) {
-	e := echo.New()
-	s := &Server{
-		Echo: e,
+func Setup() *Server {
+	return &Server{
+		Echo: echo.New(),
 	}
-	if !withConfig {
-		return s, nil
-	}
-	err := s.setConfig()
-	if err != nil {
-		return nil, err
-	}
-	// make sure to set up config first!
-	err = s.setDB()
-	if err != nil {
-		return nil, err
-	}
-	s.setAuth()
-
-	v1 := e.Group("/api/v1", s.authenticator.AuthMiddleware(repository.NewEmployeeRepository(s.DB)))
-	v1.GET("/health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, "ok")
-	})
-	s.setupMiddlewares()
-	s.setupAllRoutes(v1)
-	return s, nil
 }
 
-func (s *Server) setConfig() error {
-	cfg, err := config.Load()
-	if err != nil {
-		return err
-	}
+func (s *Server) SetConfig(cfg *config.Config) *Server {
 	s.Config = cfg
-	return nil
+	return s
 }
 
-func (s *Server) setDB() error {
-	database, err := getDatabase(s.Config)
-	if err != nil {
-		return err
-	}
-	s.DB = database
-	return nil
+func (s *Server) SetDB(db *sqlx.DB) *Server {
+	s.DB = db
+	return s
 }
 
-func (s *Server) setAuth() {
-	authenticator := auth.NewJWTAuth(s.Config)
+func (s *Server) SetAuth(authenticator auth.Authenticator) *Server {
 	s.authenticator = authenticator
+	return s
 }
 
-func (s *Server) setupMiddlewares() {
+func (s *Server) SetupMiddlewares() *Server {
 	s.Echo.GET("/swagger/*", swaggerDocs.WrapHandler)
 	s.Echo.HTTPErrorHandler = errorResponse.GlobalHTTPErrorHandler(s.Config.Env)
 	s.Echo.Use(echoMiddleware.RequestLogger())
 	s.Echo.Use(echoMiddleware.Recover())
 	s.Echo.Debug = true
+	return s
 }
 
-func (s *Server) setupAllRoutes(router *echo.Group) {
-	s.setupCategoryRouts(router)
-	s.setupCustomerCardRouts(router)
-	s.setupChecksRouts(router)
-	s.setupSaleRouts(router)
+func (s *Server) SetupAllRoutes() *Server {
+	v1 := s.Echo.Group("/api/v1", s.authenticator.AuthMiddleware(repository.NewEmployeeRepository(s.DB)))
+	v1.GET("/health", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, "ok")
+	})
+	s.setupCategoryRouts(v1)
+	s.setupCustomerCardRouts(v1)
+	s.setupChecksRouts(v1)
+	s.setupSaleRouts(v1)
+	return s
 }
 
 func (s *Server) setupCategoryRouts(router *echo.Group) {
@@ -127,7 +104,7 @@ func (s *Server) setupSaleRouts(router *echo.Group) {
 	handler.RegisterRouts(router)
 }
 
-func getDatabase(cfg *config.Config) (*sqlx.DB, error) {
+func GetDatabase(cfg *config.Config) (*sqlx.DB, error) {
 	dbConfig := db.DatabaseConfig{
 		Driver: "postgres",
 		DSN:    cfg.PostgresDSN,
@@ -138,4 +115,8 @@ func getDatabase(cfg *config.Config) (*sqlx.DB, error) {
 		},
 	}
 	return db.NewPostgresConnection(dbConfig)
+}
+
+func GetAuth(cfg *config.Config) auth.Authenticator {
+	return auth.NewJWTAuth(cfg)
 }

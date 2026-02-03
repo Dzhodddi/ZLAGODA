@@ -3,9 +3,10 @@ package handlers_test
 import (
 	"context"
 	"fmt"
-	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"net/http"
 	"testing"
+
+	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
@@ -57,7 +58,7 @@ func (s *CategoryHandlerSuite) TestCreateCategory() {
 		},
 	}
 
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }
 
 func (s *CategoryHandlerSuite) TestGetCategory() {
@@ -114,7 +115,7 @@ func (s *CategoryHandlerSuite) TestGetCategory() {
 		},
 	}
 
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }
 
 func (s *CategoryHandlerSuite) TestGetCategoryList() {
@@ -158,7 +159,7 @@ func (s *CategoryHandlerSuite) TestGetCategoryList() {
 		},
 	}
 
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }
 
 func (s *CategoryHandlerSuite) TestUpdateCategory() {
@@ -221,7 +222,7 @@ func (s *CategoryHandlerSuite) TestUpdateCategory() {
 		},
 	}
 
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }
 
 func (s *CategoryHandlerSuite) TestDeleteCategory() {
@@ -294,7 +295,7 @@ func (s *CategoryHandlerSuite) TestDeleteCategory() {
 		},
 	}
 
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }
 
 func (s *CategoryHandlerSuite) createCategoryPayload() views.CreateNewCategory {

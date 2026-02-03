@@ -72,7 +72,7 @@ func (s *CardHandlerSuite) TestCreateCard() {
 		},
 	}
 
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }
 
 func (s *CardHandlerSuite) TestGetCardByCardNumber() {
@@ -120,7 +120,7 @@ func (s *CardHandlerSuite) TestGetCardByCardNumber() {
 		},
 	}
 
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }
 
 func (s *CardHandlerSuite) TestGetCardList() {
@@ -204,7 +204,7 @@ func (s *CardHandlerSuite) TestGetCardList() {
 		},
 	}
 
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }
 
 func (s *CardHandlerSuite) TestUpdateCard() {
@@ -292,7 +292,7 @@ func (s *CardHandlerSuite) TestUpdateCard() {
 		},
 	}
 
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }
 
 func (s *CardHandlerSuite) TestDeleteCard() {
@@ -335,7 +335,7 @@ func (s *CardHandlerSuite) TestDeleteCard() {
 		},
 	}
 
-	testutils.RunAPITest(&s.IntegrationSuite, s.Echo, cases)
+	testutils.RunAPITest(&s.IntegrationSuite, s.Server.Echo, cases)
 }
 
 func (s *CardHandlerSuite) createCardPayload() views.CreateNewCustomerCard {

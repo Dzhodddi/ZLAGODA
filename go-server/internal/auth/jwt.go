@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+
 	"github.com/Dzhodddi/ZLAGODA/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -12,7 +13,7 @@ type JWTAuth struct {
 	iss    string
 }
 
-func NewJWTAuth(config *config.Config) *JWTAuth {
+func NewJWTAuth(config *config.Config) Authenticator {
 	return &JWTAuth{
 		secret: config.JWTSecret,
 		aud:    config.JWTAud,

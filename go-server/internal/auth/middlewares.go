@@ -18,13 +18,13 @@ type employeeKey string
 
 const employeeCtx employeeKey = "employee"
 
-type roleKey string
+type RoleKey string
 
-const roleCtx roleKey = "role"
+const roleCtx RoleKey = "role"
 
 const (
-	Manager roleKey = "MANAGER"
-	Cashier roleKey = "CASHIER"
+	Manager RoleKey = "MANAGER"
+	Cashier RoleKey = "CASHIER"
 )
 
 func (auth *JWTAuth) AuthMiddleware(employeeRepo repository.EmployeeRepository) echo.MiddlewareFunc {
@@ -61,7 +61,7 @@ func (auth *JWTAuth) AuthMiddleware(employeeRepo repository.EmployeeRepository) 
 	}
 }
 
-func (auth *JWTAuth) CheckRole(requiredRoles ...roleKey) echo.MiddlewareFunc {
+func (auth *JWTAuth) CheckRole(requiredRoles ...RoleKey) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			employeeRole := getRoleFromCtx(c.Request())
