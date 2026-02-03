@@ -67,7 +67,10 @@ SELECT
 	street,
 	zip_code,
 	customer_percent
-FROM customer_card;
+FROM customer_card
+WHERE card_number > $1
+ORDER BY card_number
+FETCH FIRST $2 ROWS ONLY;
 
 -- name: GetAllCustomerCardsSortedBySurname :many
 SELECT
@@ -81,7 +84,9 @@ SELECT
 	zip_code,
 	customer_percent
 FROM customer_card
-ORDER BY customer_surname;
+WHERE card_number > $1
+ORDER BY customer_surname, card_number
+FETCH FIRST $2 ROWS ONLY;
 
 -- name: GetCustomerCardsByPercentSorted :many
 SELECT
@@ -95,5 +100,22 @@ SELECT
 	zip_code,
 	customer_percent
 FROM customer_card
-WHERE customer_percent = $1
-ORDER BY customer_surname;
+WHERE customer_percent = $1 and card_number > $2
+ORDER BY card_number
+FETCH FIRST $3 ROWS ONLY;
+
+-- name: SearchCustomerCardBySurname :many
+SELECT
+    card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+FROM customer_card
+WHERE card_number > $1 and customer_surname ILIKE $2
+ORDER BY card_number
+FETCH FIRST $3 ROWS ONLY;

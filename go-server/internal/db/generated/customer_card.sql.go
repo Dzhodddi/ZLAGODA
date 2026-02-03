@@ -91,10 +91,18 @@ SELECT
 	zip_code,
 	customer_percent
 FROM customer_card
+WHERE card_number > $1
+ORDER BY card_number
+FETCH FIRST $2 ROWS ONLY
 `
 
-func (q *Queries) GetAllCustomerCards(ctx context.Context) ([]CustomerCard, error) {
-	rows, err := q.db.QueryContext(ctx, getAllCustomerCards)
+type GetAllCustomerCardsParams struct {
+	CardNumber string
+	Limit      int32
+}
+
+func (q *Queries) GetAllCustomerCards(ctx context.Context, arg GetAllCustomerCardsParams) ([]CustomerCard, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCustomerCards, arg.CardNumber, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -138,11 +146,18 @@ SELECT
 	zip_code,
 	customer_percent
 FROM customer_card
-ORDER BY customer_surname
+WHERE card_number > $1
+ORDER BY customer_surname, card_number
+FETCH FIRST $2 ROWS ONLY
 `
 
-func (q *Queries) GetAllCustomerCardsSortedBySurname(ctx context.Context) ([]CustomerCard, error) {
-	rows, err := q.db.QueryContext(ctx, getAllCustomerCardsSortedBySurname)
+type GetAllCustomerCardsSortedBySurnameParams struct {
+	CardNumber string
+	Limit      int32
+}
+
+func (q *Queries) GetAllCustomerCardsSortedBySurname(ctx context.Context, arg GetAllCustomerCardsSortedBySurnameParams) ([]CustomerCard, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCustomerCardsSortedBySurname, arg.CardNumber, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -218,12 +233,75 @@ SELECT
 	zip_code,
 	customer_percent
 FROM customer_card
-WHERE customer_percent = $1
-ORDER BY customer_surname
+WHERE customer_percent = $1 and card_number > $2
+ORDER BY card_number
+FETCH FIRST $3 ROWS ONLY
 `
 
-func (q *Queries) GetCustomerCardsByPercentSorted(ctx context.Context, customerPercent int32) ([]CustomerCard, error) {
-	rows, err := q.db.QueryContext(ctx, getCustomerCardsByPercentSorted, customerPercent)
+type GetCustomerCardsByPercentSortedParams struct {
+	CustomerPercent int32
+	CardNumber      string
+	Limit           int32
+}
+
+func (q *Queries) GetCustomerCardsByPercentSorted(ctx context.Context, arg GetCustomerCardsByPercentSortedParams) ([]CustomerCard, error) {
+	rows, err := q.db.QueryContext(ctx, getCustomerCardsByPercentSorted, arg.CustomerPercent, arg.CardNumber, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CustomerCard
+	for rows.Next() {
+		var i CustomerCard
+		if err := rows.Scan(
+			&i.CardNumber,
+			&i.CustomerSurname,
+			&i.CustomerName,
+			&i.CustomerPatronymic,
+			&i.PhoneNumber,
+			&i.City,
+			&i.Street,
+			&i.ZipCode,
+			&i.CustomerPercent,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchCustomerCardBySurname = `-- name: SearchCustomerCardBySurname :many
+SELECT
+    card_number,
+	customer_surname,
+	customer_name,
+	customer_patronymic,
+	phone_number,
+	city,
+	street,
+	zip_code,
+	customer_percent
+FROM customer_card
+WHERE card_number > $1 and customer_surname ILIKE $2
+ORDER BY card_number
+FETCH FIRST $3 ROWS ONLY
+`
+
+type SearchCustomerCardBySurnameParams struct {
+	CardNumber      string
+	CustomerSurname string
+	Limit           int32
+}
+
+func (q *Queries) SearchCustomerCardBySurname(ctx context.Context, arg SearchCustomerCardBySurnameParams) ([]CustomerCard, error) {
+	rows, err := q.db.QueryContext(ctx, searchCustomerCardBySurname, arg.CardNumber, arg.CustomerSurname, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

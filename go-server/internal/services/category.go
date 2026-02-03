@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
@@ -15,7 +14,7 @@ type CategoryService interface {
 	UpdateCategory(ctx context.Context, updateCategory views.UpdateCategory, categoryId int64) (*views.CategoryResponse, error)
 	DeleteCategory(ctx context.Context, id int64) error
 	GetCategoryByID(ctx context.Context, id int64) (*views.CategoryResponse, error)
-	GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]*views.CategoryResponse, error)
+	GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]views.CategoryResponse, error)
 }
 
 type categoryService struct {
@@ -60,21 +59,24 @@ func (s *categoryService) GetCategoryByID(ctx context.Context, id int64) (*views
 	return mappers.CategoryModelToResponse(category), nil
 }
 
-func (s *categoryService) GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]*views.CategoryResponse, error) {
+func (s *categoryService) GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]views.CategoryResponse, error) {
 	var categories []generated.Category
 	var err error
+	if q.LastCategoryNumber == nil {
+		q.LastCategoryNumber = new(int64)
+	}
 	switch {
 	case q.Sorted != nil && *q.Sorted:
-		categories, err = s.categoryRepository.GetAllCategoriesSortedByName(ctx)
+		categories, err = s.categoryRepository.GetAllCategoriesSortedByName(ctx, *q.LastCategoryNumber)
 	default:
-		categories, err = s.categoryRepository.GetAllCategories(ctx)
+		categories, err = s.categoryRepository.GetAllCategories(ctx, *q.LastCategoryNumber)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch categories: %w", err)
 	}
-	var categoryResponses []*views.CategoryResponse
-	for _, category := range categories {
-		categoryResponses = append(categoryResponses, mappers.CategoryModelToResponse(&category))
+	var categoryResponses []views.CategoryResponse
+	for i := range categories {
+		categoryResponses = append(categoryResponses, *mappers.CategoryModelToResponse(&categories[i]))
 	}
 	return categoryResponses, nil
 }

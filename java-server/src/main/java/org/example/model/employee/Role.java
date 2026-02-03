@@ -17,9 +17,5 @@ public class Role implements GrantedAuthority {
     public enum RoleName {
         MANAGER,
         CASHIER;
-
-        public static RoleName fromString(String value) {
-            return RoleName.valueOf(value.trim().toUpperCase());
-        }
     }
 }

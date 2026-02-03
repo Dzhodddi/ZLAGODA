@@ -4,7 +4,7 @@ type CreateNewCustomerCard struct {
 	CardNumber         string  `json:"card_number" validate:"required,max=13,min=1"`
 	CustomerSurname    string  `json:"customer_surname" validate:"required,max=50,min=1"`
 	CustomerName       string  `json:"customer_name" validate:"required,max=50,min=1"`
-	CustomerPatronymic *string `json:"customer_patronymic" validate:"max=50,min=1,omitempty"`
+	CustomerPatronymic *string `json:"customer_patronymic" validate:"omitempty,max=50,min=1"`
 	PhoneNumber        string  `json:"phone_number" validate:"required,max=13"`
 	City               *string `json:"city" validate:"omitempty,max=50"`
 	Street             *string `json:"street" validate:"omitempty,max=50"`
@@ -27,7 +27,7 @@ type CustomerCardResponse struct {
 type UpdateCustomerCard struct {
 	CustomerSurname    string  `json:"customer_surname" validate:"required,max=50,min=1"`
 	CustomerName       string  `json:"customer_name" validate:"required,max=50,min=1"`
-	CustomerPatronymic *string `json:"customer_patronymic" validate:"max=50,min=1,omitempty"`
+	CustomerPatronymic *string `json:"customer_patronymic" validate:"omitempty,max=50,min=1"`
 	PhoneNumber        string  `json:"phone_number" validate:"required,max=13"`
 	City               *string `json:"city" validate:"omitempty,max=50"`
 	Street             *string `json:"street" validate:"omitempty,max=50"`
@@ -36,6 +36,8 @@ type UpdateCustomerCard struct {
 }
 
 type ListCustomerCardsQueryParams struct {
-	Percent *int  `query:"percent" validate:"omitempty,min=1,max=100"`
-	Sorted  *bool `query:"sorted"`
+	Percent        *int    `query:"percent" validate:"omitempty,min=1,max=100"`
+	Sorted         *bool   `query:"sorted"`
+	Surname        *string `query:"surname" validate:"omitempty,min=1,max=50"`
+	LastCardNumber *string `query:"card_number" validate:"omitempty,max=50,min=1"`
 }

@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EmployeeMapperTest {
 
@@ -87,7 +86,10 @@ class EmployeeMapperTest {
 
     @Test
     void shouldThrowExceptionForInvalidRoleString() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> mapper.map("INVALID_ROLE"));
-        assertTrue(exception.getMessage().contains("Invalid role name"));
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> mapper.map("INVALID_ROLE")
+        );
+        assertNotNull(exception);
     }
 }

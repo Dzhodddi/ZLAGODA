@@ -40,7 +40,7 @@ services:
       zlagoda-db:
         condition: service_healthy
     env_file:
-      - go-server/.env.example
+      - go-server/.env
     volumes:
       - ./go-server:/app/go-server
     ports:

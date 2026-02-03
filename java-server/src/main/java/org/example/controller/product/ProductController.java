@@ -4,14 +4,18 @@ import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
-import org.example.exception.AuthorizationException;
-import org.example.exception.InvalidParameterException;
+import org.example.exception.custom_exception.AuthorizationException;
 import org.example.service.product.ProductService;
 import org.example.service.report.PdfReportGeneratorService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/products")
 public class ProductController {
 
+    private final static int PAGE_SIZE = 10;
     private final ProductService productService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
 
@@ -44,30 +49,23 @@ public class ProductController {
             summary = "Get all products",
             description = "Get all products sorted by their names"
     )
-    public List<ProductDto> getAll() {
-        return productService.getAll();
-    }
-
-    @GetMapping(value = "/search")
-    @Operation(
-            summary = "Search products",
-            description = "Search products by their name or category"
-    )
-    public List<ProductDto> search(@RequestParam(required = false) String name,
-                                       @RequestParam(required = false) Integer categoryId) {
+    public PageResponseDto<ProductDto> getAll(@RequestParam(required = false) Integer lastSeenId,
+                                              @RequestParam(required = false) String name,
+                                              @RequestParam(required = false) Integer categoryId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CASHIER"));
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("product_name"));
         if (name != null && !name.isEmpty()) {
             if (!isCashier) {
                 throw new AuthorizationException("Only Cashier can search products by name");
             }
-            return productService.findByName(name);
+            return productService.findByName(name, pageable, lastSeenId);
         }
         if (categoryId != null) {
-            return productService.findByCategoryId(categoryId);
+            return productService.findByCategoryId(categoryId, pageable, lastSeenId);
         }
-        throw new InvalidParameterException("Provide an appropriate parameter");
+        return productService.getAll(pageable, lastSeenId);
     }
 
     @PostMapping
@@ -113,11 +111,12 @@ public class ProductController {
             description = "Download products pdf report"
     )
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<byte[]> productPdf() throws DocumentException {
-        List<ProductDto> products = productService.getAll();
+    public ResponseEntity<byte[]> productPdf() throws DocumentException, IOException {
+        List<ProductDto> products = productService.getAllNoPagination();
         byte[] pdf = pdfReportGeneratorService.productToPdf(products);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=products.pdf")
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=products.pdf")
                 .body(pdf);
     }
 }

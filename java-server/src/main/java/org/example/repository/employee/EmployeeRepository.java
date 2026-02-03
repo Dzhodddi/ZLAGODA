@@ -6,13 +6,16 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
-import org.example.exception.EntityNotFoundException;
-import org.example.exception.InvalidRoleException;
+import org.example.dto.page.PageResponseDto;
+import org.example.exception.custom_exception.EntityNotFoundException;
+import org.example.exception.custom_exception.InvalidRoleException;
 import org.example.mapper.employee.EmployeeMapper;
 import org.example.mapper.employee.EmployeeRowMapper;
 import org.example.model.employee.Employee;
+import org.example.model.employee.Role;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -24,8 +27,64 @@ public class EmployeeRepository {
     private final EmployeeRowMapper employeeRowMapper;
     private final EmployeeMapper employeeMapper;
 
-    public List<EmployeeResponseDto> findAll() {
-        return jdbcTemplate.query("SELECT * FROM employee ORDER BY empl_surname", employeeRowMapper)
+    public PageResponseDto<EmployeeResponseDto> findAll(Pageable pageable,
+                                                        String lastSeenId) {
+        List<EmployeeResponseDto> employees;
+        if (lastSeenId != null) {
+            String lastSeenSurname = jdbcTemplate.queryForObject(
+                    "SELECT empl_surname FROM employee WHERE id_employee = ?",
+                    String.class,
+                    lastSeenId
+            );
+            employees = jdbcTemplate.query(
+                            """
+                            SELECT *
+                            FROM employee
+                            WHERE (empl_surname > ?)
+                               OR (empl_surname = ? AND id_employee > ?)
+                            ORDER BY empl_surname, id_employee
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                            employeeRowMapper,
+                            lastSeenSurname,
+                            lastSeenSurname,
+                            lastSeenId,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(employeeMapper::toEmployeeResponseDto)
+                    .toList();
+        } else {
+            employees = jdbcTemplate.query(
+                            """
+                            SELECT *
+                            FROM employee
+                            ORDER BY empl_surname, id_employee
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                            employeeRowMapper,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(employeeMapper::toEmployeeResponseDto)
+                    .toList();
+        }
+
+        long total = getTotalCount();
+        boolean hasNext = employees.size() == pageable.getPageSize();
+        return PageResponseDto.of(
+                employees,
+                pageable.getPageSize(),
+                total,
+                hasNext
+        );
+    }
+
+    public List<EmployeeResponseDto> findAllNoPagination() {
+        return jdbcTemplate.query("""
+                        SELECT *
+                        FROM employee
+                        ORDER BY empl_surname
+                        """,
+                        employeeRowMapper)
                 .stream()
                 .map(employeeMapper::toEmployeeResponseDto)
                 .toList();
@@ -47,7 +106,7 @@ public class EmployeeRepository {
                     employee.getEmpl_surname(),
                     employee.getEmpl_name(),
                     employee.getEmpl_patronymic(),
-                    employee.getRole().getName().name(),
+                    employee.getRole().getName().name().toUpperCase().trim(),
                     employee.getSalary(),
                     employee.getDate_of_birth(),
                     employee.getDate_of_start(),
@@ -64,7 +123,7 @@ public class EmployeeRepository {
                             "Employee not found after saving: " + employee.getId_employee()));
 
         } catch (DataIntegrityViolationException e) {
-            throw new InvalidRoleException("Invalid role name: " + employee.getRole());
+            throw new InvalidRoleException("Invalid role name: " + employee.getRole().getName());
         }
     }
 
@@ -75,10 +134,17 @@ public class EmployeeRepository {
         }
 
         try {
+            Role.RoleName.valueOf(requestDto.getRole().toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidRoleException("Invalid role name: " + requestDto.getRole()
+                    + ". Allowed values: MANAGER, CASHIER");
+        }
+
+        try {
             int updated = jdbcTemplate.update(
                     """
-                    UPDATE employee SET
-                        empl_surname = ?,
+                    UPDATE employee
+                    SET empl_surname = ?,
                         empl_name = ?,
                         empl_patronymic = ?,
                         empl_role = ?,
@@ -94,7 +160,7 @@ public class EmployeeRepository {
                     requestDto.getEmpl_surname(),
                     requestDto.getEmpl_name(),
                     requestDto.getEmpl_patronymic(),
-                    requestDto.getRole(),
+                    requestDto.getRole().toUpperCase().trim(),
                     requestDto.getSalary(),
                     requestDto.getDate_of_birth(),
                     requestDto.getDate_of_start(),
@@ -122,12 +188,20 @@ public class EmployeeRepository {
         if (!existsByIdEmployee(id)) {
             throw new EntityNotFoundException("Employee not found: " + id);
         }
-        jdbcTemplate.update("DELETE FROM employee WHERE id_employee = ?", id);
+        jdbcTemplate.update("""
+                                DELETE
+                                FROM employee
+                                WHERE id_employee = ?
+                                """, id);
     }
 
     public boolean existsByIdEmployee(String idEmployee) {
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM employee WHERE id_employee = ?",
+                """
+                    SELECT COUNT(*)
+                    FROM employee
+                    WHERE id_employee = ?
+                    """,
                 Integer.class,
                 idEmployee
         );
@@ -138,7 +212,11 @@ public class EmployeeRepository {
         try {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
-                            "SELECT * FROM employee WHERE id_employee = ?",
+                            """
+                            SELECT *
+                            FROM employee
+                            WHERE id_employee = ?
+                            """,
                             employeeRowMapper,
                             id
                     )
@@ -148,16 +226,58 @@ public class EmployeeRepository {
         }
     }
 
-    public List<EmployeeResponseDto> findAllCashiers() {
-        return jdbcTemplate.query("""
-                        SELECT * FROM employee
-                        WHERE empl_role = 'CASHIER'
-                        ORDER BY empl_surname
-                        """,
-                        employeeRowMapper)
-                .stream()
-                .map(employeeMapper::toEmployeeResponseDto)
-                .toList();
+    public PageResponseDto<EmployeeResponseDto> findAllCashiers(Pageable pageable,
+                                                                String lastSeenId) {
+        List<EmployeeResponseDto> employees;
+        if (lastSeenId != null) {
+            String lastSeenSurname = jdbcTemplate.queryForObject(
+                    "SELECT empl_surname FROM employee WHERE id_employee = ? AND empl_role = 'CASHIER'",
+                    String.class,
+                    lastSeenId
+            );
+            employees = jdbcTemplate.query(
+                            """
+                            SELECT *
+                            FROM employee
+                            WHERE empl_role = 'CASHIER'
+                              AND ((empl_surname > ?)
+                                   OR (empl_surname = ? AND id_employee > ?))
+                            ORDER BY empl_surname, id_employee
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                            employeeRowMapper,
+                            lastSeenSurname,
+                            lastSeenSurname,
+                            lastSeenId,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(employeeMapper::toEmployeeResponseDto)
+                    .toList();
+        } else {
+            int pageSize = pageable.getPageSize();
+            employees = jdbcTemplate.query(
+                            """
+                            SELECT *
+                            FROM employee
+                            WHERE empl_role = 'CASHIER'
+                            ORDER BY empl_surname, id_employee
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                            employeeRowMapper,
+                            pageSize
+                    ).stream()
+                    .map(employeeMapper::toEmployeeResponseDto)
+                    .toList();
+        }
+
+        long total = getTotalCount();
+        boolean hasNext = employees.size() == pageable.getPageSize();
+        return PageResponseDto.of(
+                employees,
+                pageable.getPageSize(),
+                total,
+                hasNext
+        );
     }
 
     public Optional<EmployeeContactDto> findPhoneAndAddressBySurname(String surname) {
@@ -183,5 +303,28 @@ public class EmployeeRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    private long getTotalCount() {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM employee
+                """,
+                Integer.class
+        );
+        return count != null ? count : 0;
+    }
+
+    private long getCashierCount() {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM employee
+                WHERE empl_role = 'CASHIER'
+                """,
+                Integer.class
+        );
+        return count != null ? count : 0;
     }
 }

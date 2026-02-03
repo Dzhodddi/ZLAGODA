@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
@@ -18,9 +19,10 @@ type CardRepository interface {
 	GetCustomerCard(ctx context.Context, cardNumber string) (*generated.CustomerCard, error)
 	UpdateCustomerCard(ctx context.Context, card views.UpdateCustomerCard, cardNumber string) (*generated.CustomerCard, error)
 	DeleteCustomerCard(ctx context.Context, cardNumber string) error
-	ListCustomerCards(ctx context.Context) ([]generated.CustomerCard, error)
-	ListCustomerCardsSortedBySurname(ctx context.Context) ([]generated.CustomerCard, error)
-	ListCustomerCardsSortedByPercent(ctx context.Context, percent int) ([]generated.CustomerCard, error)
+	ListCustomerCards(ctx context.Context, lastCardNumber string) ([]generated.CustomerCard, error)
+	ListCustomerCardsSortedBySurname(ctx context.Context, lastCardNumber string) ([]generated.CustomerCard, error)
+	ListCustomerCardsSortedByPercent(ctx context.Context, percent int, lastCardNumber string) ([]generated.CustomerCard, error)
+	SearchCustomerCartBySurname(ctx context.Context, surname string) ([]generated.CustomerCard, error)
 }
 
 type cardRepository struct {
@@ -51,7 +53,8 @@ func (r *cardRepository) CreateNewCard(ctx context.Context, card views.CreateNew
 		CustomerPercent:    card.CustomerPercent,
 	})
 	if err != nil {
-		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return nil, ErrConflict
 		}
 		return nil, err
@@ -95,7 +98,8 @@ func (r *cardRepository) UpdateCustomerCard(ctx context.Context, card views.Upda
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
-		if pgErr, ok := err.(*pq.Error); ok {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) {
 			switch pgErr.Code {
 			case "23503": // Foreign key constraint violation
 				return nil, ErrForeignKey
@@ -126,32 +130,57 @@ func (r *cardRepository) DeleteCustomerCard(ctx context.Context, cardNumber stri
 	return nil
 }
 
-func (r *cardRepository) ListCustomerCards(ctx context.Context) ([]generated.CustomerCard, error) {
-	return r.getListHelper(ctx, r.queries.GetAllCustomerCards)
-}
-
-func (r *cardRepository) ListCustomerCardsSortedBySurname(ctx context.Context) ([]generated.CustomerCard, error) {
-	return r.getListHelper(ctx, r.queries.GetAllCustomerCardsSortedBySurname)
-}
-
-func (r *cardRepository) ListCustomerCardsSortedByPercent(ctx context.Context, percent int) ([]generated.CustomerCard, error) {
+func (r *cardRepository) ListCustomerCards(
+	ctx context.Context,
+	lastCardNumber string,
+) ([]generated.CustomerCard, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
-	rows, err := r.ListCustomerCardsSortedByPercent(ctx, percent)
+	return r.queries.GetAllCustomerCards(ctx, generated.GetAllCustomerCardsParams{
+		CardNumber: lastCardNumber,
+		Limit:      constants.PaginationStep,
+	})
+}
+
+func (r *cardRepository) ListCustomerCardsSortedBySurname(
+	ctx context.Context,
+	lastCardNumber string,
+) ([]generated.CustomerCard, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	return r.queries.GetAllCustomerCardsSortedBySurname(ctx, generated.GetAllCustomerCardsSortedBySurnameParams{
+		CardNumber: lastCardNumber,
+		Limit:      constants.PaginationStep,
+	})
+}
+
+func (r *cardRepository) ListCustomerCardsSortedByPercent(
+	ctx context.Context,
+	percent int,
+	lastCardNumber string,
+) ([]generated.CustomerCard, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	rows, err := r.queries.GetCustomerCardsByPercentSorted(ctx, generated.GetCustomerCardsByPercentSortedParams{
+		CustomerPercent: int32(percent),
+		CardNumber:      lastCardNumber,
+		Limit:           constants.PaginationStep,
+	})
 	if err != nil {
 		return nil, err
 	}
 	return rows, nil
 }
 
-func (r *cardRepository) getListHelper(ctx context.Context, queryList func(ctx context.Context) ([]generated.CustomerCard, error)) ([]generated.CustomerCard, error) {
+func (r *cardRepository) SearchCustomerCartBySurname(ctx context.Context, surname string) ([]generated.CustomerCard, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
-
-	rows, err := queryList(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return rows, nil
+	return r.queries.SearchCustomerCardBySurname(ctx, generated.SearchCustomerCardBySurnameParams{
+		CardNumber:      "",
+		CustomerSurname: fmt.Sprintf("%%%s%%", surname),
+		Limit:           constants.PaginationStep,
+	})
 }

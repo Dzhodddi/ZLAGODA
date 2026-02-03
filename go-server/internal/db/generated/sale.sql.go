@@ -7,37 +7,55 @@ package generated
 
 import (
 	"context"
+	"time"
 )
 
-const createNewSale = `-- name: CreateNewSale :one
-INSERT INTO
-    sale (product_number, upc, check_number, selling_price)
-VALUES
-    ($1, $2, $3, $4)
-    RETURNING
-	product_number, upc, check_number, selling_price
+const getSalesWithinDate = `-- name: GetSalesWithinDate :many
+SELECT s.product_number, s.upc, s.check_number, s.selling_price
+FROM sale s
+JOIN checks c
+ON c.check_number = s.check_number
+WHERE c.print_date BETWEEN $1 AND $2 AND c.check_number > $3
+ORDER BY c.check_number
+FETCH FIRST $4 ROWS ONLY
 `
 
-type CreateNewSaleParams struct {
-	ProductNumber int32
-	Upc           string
-	CheckNumber   string
-	SellingPrice  float64
+type GetSalesWithinDateParams struct {
+	PrintDate   time.Time
+	PrintDate_2 time.Time
+	CheckNumber string
+	Limit       int32
 }
 
-func (q *Queries) CreateNewSale(ctx context.Context, arg CreateNewSaleParams) (Sale, error) {
-	row := q.db.QueryRowContext(ctx, createNewSale,
-		arg.ProductNumber,
-		arg.Upc,
+func (q *Queries) GetSalesWithinDate(ctx context.Context, arg GetSalesWithinDateParams) ([]Sale, error) {
+	rows, err := q.db.QueryContext(ctx, getSalesWithinDate,
+		arg.PrintDate,
+		arg.PrintDate_2,
 		arg.CheckNumber,
-		arg.SellingPrice,
+		arg.Limit,
 	)
-	var i Sale
-	err := row.Scan(
-		&i.ProductNumber,
-		&i.Upc,
-		&i.CheckNumber,
-		&i.SellingPrice,
-	)
-	return i, err
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Sale
+	for rows.Next() {
+		var i Sale
+		if err := rows.Scan(
+			&i.ProductNumber,
+			&i.Upc,
+			&i.CheckNumber,
+			&i.SellingPrice,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

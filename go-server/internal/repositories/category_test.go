@@ -1,6 +1,4 @@
-//go:build integration
-
-package repository
+package repository_test
 
 import (
 	"context"
@@ -8,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
+	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
 	testutils "github.com/Dzhodddi/ZLAGODA/tests"
 	"github.com/stretchr/testify/assert"
@@ -16,11 +15,11 @@ import (
 
 type CategoryRepositorySuite struct {
 	testutils.IntegrationSuite
-	repo CategoryRepository
+	repo repository.CategoryRepository
 }
 
 func (s *CategoryRepositorySuite) SetupTest() {
-	s.repo = NewCategoryRepository(s.DB)
+	s.repo = repository.NewCategoryRepository(s.DB)
 }
 
 func TestCategoryRepositorySuite(t *testing.T) {
@@ -77,7 +76,7 @@ func (s *CategoryRepositorySuite) TestUpdateCategory() {
 			Setup: func() {
 				targetID = -1
 			},
-			ExpectedError: ErrNotFound,
+			ExpectedError: repository.ErrNotFound,
 		},
 	}
 
@@ -105,7 +104,7 @@ func (s *CategoryRepositorySuite) TestDeleteCategory() {
 			},
 			AssertResult: func(t *testing.T, _ any) {
 				_, err := s.repo.GetCategoryByID(context.Background(), validId)
-				assert.ErrorIs(t, err, ErrNotFound)
+				assert.ErrorIs(t, err, repository.ErrNotFound)
 			},
 		},
 		{
@@ -116,7 +115,7 @@ func (s *CategoryRepositorySuite) TestDeleteCategory() {
 				assert.NoError(s.T(), err)
 				validId = category.CategoryNumber + 1
 			},
-			ExpectedError: ErrNotFound,
+			ExpectedError: repository.ErrNotFound,
 		},
 		{
 			Name:  "Failed: Delete existing category with dependency on product",
@@ -134,7 +133,7 @@ func (s *CategoryRepositorySuite) TestDeleteCategory() {
 				assert.NoError(s.T(), err)
 				validId = category.CategoryNumber
 			},
-			ExpectedError: ErrForeignKey,
+			ExpectedError: repository.ErrForeignKey,
 		},
 	}
 
@@ -195,7 +194,7 @@ func (s *CategoryRepositorySuite) TestGetAllCategories() {
 		&s.IntegrationSuite,
 		cases,
 		func(ctx context.Context, _ struct{}) ([]generated.Category, error) {
-			return s.repo.GetAllCategories(ctx)
+			return s.repo.GetAllCategories(ctx, 0)
 		},
 	)
 }

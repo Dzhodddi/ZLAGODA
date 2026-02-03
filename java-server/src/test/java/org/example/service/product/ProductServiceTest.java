@@ -2,12 +2,12 @@ package org.example.service.product;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
 import org.example.mapper.product.ProductMapper;
@@ -20,8 +20,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Product Service Tests")
 class ProductServiceTest {
 
     @Mock
@@ -44,7 +47,7 @@ class ProductServiceTest {
         product.setProduct_name("TestProduct");
 
         productDto = new ProductDto();
-        productDto.setId_product(2);
+        productDto.setId_product(1);
         productDto.setProduct_name("TestProduct");
 
         productRequestDto = new ProductRequestDto();
@@ -52,23 +55,27 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("getAll should return list of ProductDto")
-    void getAll_shouldReturnList() {
-        when(repository.findAll()).thenReturn(List.of(product));
-        when(mapper.toDto(product)).thenReturn(productDto);
+    @DisplayName("getAll should return page of ProductDto")
+    void getAll_ok() {
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                List.of(productDto), 0, 10, false);
 
-        List<ProductDto> result = service.getAll();
+        when(repository.findAll(pageable, 0)).thenReturn(page);
+
+        PageResponseDto<ProductDto> result = service.getAll(pageable,  0);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("TestProduct", result.get(0).getProduct_name());
-        verify(repository, times(1)).findAll();
-        verify(mapper, times(1)).toDto(product);
+        assertEquals(1, result.getContent().size());
+        assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
+
+        verify(repository).findAll(pageable, 0);
+        verifyNoInteractions(mapper);
     }
 
     @Test
-    @DisplayName("save should save product and return ProductDto")
-    void save_shouldReturnDto() {
+    @DisplayName("save should map, save and return ProductDto")
+    void save_ok() {
         when(mapper.toEntity(productRequestDto)).thenReturn(product);
         when(repository.save(product)).thenReturn(product);
         when(mapper.toDto(product)).thenReturn(productDto);
@@ -77,60 +84,82 @@ class ProductServiceTest {
 
         assertNotNull(result);
         assertEquals("TestProduct", result.getProduct_name());
-        verify(repository, times(1)).save(product);
-        verify(mapper, times(1)).toEntity(productRequestDto);
-        verify(mapper, times(1)).toDto(product);
+
+        verify(mapper).toEntity(productRequestDto);
+        verify(repository).save(product);
+        verify(mapper).toDto(product);
     }
 
     @Test
     @DisplayName("updateProductById should return updated ProductDto")
-    void updateProductById_shouldReturnDto() {
-        when(repository.updateProductById(1, productRequestDto)).thenReturn(productDto);
+    void update_ok() {
+        when(repository.updateProductById(1, productRequestDto))
+                .thenReturn(productDto);
 
         ProductDto result = service.updateProductById(1, productRequestDto);
 
         assertNotNull(result);
         assertEquals("TestProduct", result.getProduct_name());
-        verify(repository, times(1)).updateProductById(1, productRequestDto);
+
+        verify(repository).updateProductById(1, productRequestDto);
+        verifyNoInteractions(mapper);
     }
 
     @Test
-    @DisplayName("findByName should return list of ProductDto")
-    void findByName_shouldReturnList() {
-        when(repository.findByName("TestProduct")).thenReturn(List.of(product));
-        when(mapper.toDto(product)).thenReturn(productDto);
+    @DisplayName("findByName should return page of ProductDto")
+    void findByName_ok() {
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                List.of(productDto), 0, 10, false);
 
-        List<ProductDto> result = service.findByName("TestProduct");
+        when(repository.findByName("TestProduct", pageable, 0)).thenReturn(page);
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("TestProduct", result.get(0).getProduct_name());
-        verify(repository, times(1)).findByName("TestProduct");
-        verify(mapper, times(1)).toDto(product);
+        PageResponseDto<ProductDto> result = service.findByName("TestProduct", pageable,  0);
+
+        assertEquals(1, result.getContent().size());
+        verify(repository).findByName("TestProduct", pageable,  0);
+        verifyNoInteractions(mapper);
     }
 
     @Test
-    @DisplayName("findByCategoryId should return list of ProductDto")
-    void findByCategoryId_shouldReturnList() {
-        when(repository.findByCategoryId(10)).thenReturn(List.of(product));
-        when(mapper.toDto(product)).thenReturn(productDto);
+    @DisplayName("findByCategoryId should return page of ProductDto")
+    void findByCategory_ok() {
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                List.of(productDto), 0, 10, false);
 
-        List<ProductDto> result = service.findByCategoryId(10);
+        when(repository.findByCategoryId(10, pageable,  0)).thenReturn(page);
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("TestProduct", result.get(0).getProduct_name());
-        verify(repository, times(1)).findByCategoryId(10);
-        verify(mapper, times(1)).toDto(product);
+        PageResponseDto<ProductDto> result = service.findByCategoryId(10, pageable, 0);
+
+        assertEquals(1, result.getContent().size());
+        verify(repository).findByCategoryId(10, pageable,  0);
+        verifyNoInteractions(mapper);
     }
 
     @Test
-    @DisplayName("deleteProductById should call repository deleteById")
-    void deleteProductById_shouldCallRepository() {
-        doNothing().when(repository).deleteById(1);
-
+    @DisplayName("deleteProductById should call repository")
+    void delete_ok() {
         service.deleteProductById(1);
 
-        verify(repository, times(1)).deleteById(1);
+        verify(repository).deleteById(1);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    @DisplayName("getAllNoPagination should return list of ProductDto")
+    void getAllNoPagination_ok() {
+        List<ProductDto> products = List.of(productDto);
+
+        when(repository.findAllNoPagination()).thenReturn(products);
+
+        List<ProductDto> result = service.getAllNoPagination();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("TestProduct", result.get(0).getProduct_name());
+
+        verify(repository).findAllNoPagination();
+        verifyNoInteractions(mapper);
     }
 }

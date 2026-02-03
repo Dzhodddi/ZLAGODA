@@ -1,5 +1,6 @@
 FROM maven:3.9.9-eclipse-temurin-17 AS base
 WORKDIR /app
+RUN apt-get update && apt-get install -y make && rm -rf /var/lib/apt/lists/*
 COPY pom.xml .
 COPY src ./src
 COPY Makefile ./

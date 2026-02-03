@@ -20,16 +20,15 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.web.client.RestClient;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Sql(scripts = "classpath:schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = "classpath:database/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @Sql(scripts = "classpath:database/add-test-users.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Sql(scripts = "classpath:database/clear.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
 class RegistrationFlowIT {
 
     @LocalServerPort
@@ -60,10 +59,10 @@ class RegistrationFlowIT {
 
         EmployeeResponseDto registeredEmployee = registrationResponse.getBody();
         assertNotNull(registeredEmployee);
-        assertEquals("EMP0002", registeredEmployee.getId_employee());
+        assertEquals("EMP0003", registeredEmployee.getId_employee());
 
         EmployeeLoginRequestDto loginRequest = new EmployeeLoginRequestDto();
-        loginRequest.setId_employee("EMP0002");
+        loginRequest.setId_employee("EMP0003");
         loginRequest.setPassword("password123");
         ResponseEntity<EmployeeLoginResponseDto> loginResponse =
                 restClient.post()
@@ -101,7 +100,7 @@ class RegistrationFlowIT {
             throws ParseException {
         EmployeeRegistrationRequestDto registrationRequest =
                 new EmployeeRegistrationRequestDto();
-        registrationRequest.setId_employee("EMP0002");
+        registrationRequest.setId_employee("EMP0003");
         registrationRequest.setEmpl_surname("Test");
         registrationRequest.setEmpl_name("User");
         registrationRequest.setRole("MANAGER");
