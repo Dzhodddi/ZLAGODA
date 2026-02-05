@@ -18,7 +18,6 @@ import org.example.exception.custom_exception.InvalidRoleException;
 import org.example.exception.custom_exception.RegistrationException;
 import org.example.exception.handler.CustomGlobalExceptionHandler;
 import org.example.exception.handler.CustomGlobalExceptionHandler.ErrorResponse;
-import org.example.exception.handler.CustomGlobalExceptionHandler.ValidationErrorResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +33,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @ExtendWith(MockitoExtension.class)
@@ -168,7 +166,7 @@ class CustomGlobalExceptionHandlerTest {
         when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError1, fieldError2));
         when(bindingResult.getGlobalErrors()).thenReturn(List.of());
 
-        ResponseEntity<ValidationErrorResponse> response = exceptionHandler
+        ResponseEntity<ErrorResponse> response = exceptionHandler
                 .handleValidationExceptions(methodArgumentNotValidException);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());

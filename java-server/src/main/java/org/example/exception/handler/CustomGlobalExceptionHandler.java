@@ -23,13 +23,14 @@ public class CustomGlobalExceptionHandler {
     @ExceptionHandler(BaseServiceException.class)
     public ResponseEntity<ErrorResponse> handleCustomExceptions(BaseServiceException ex) {
         ErrorResponse error = new ErrorResponse(
-                ex.getHttpStatus().getReasonPhrase()
+                ex.getHttpStatus().getReasonPhrase(),
+                ex.getMessage()
         );
         return ResponseEntity.status(ex.getHttpStatus()).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
         String fieldErrors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + " " + error.getDefaultMessage())
@@ -38,7 +39,7 @@ public class CustomGlobalExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(", "));
         String allErrors = fieldErrors + globalErrors;
-        ValidationErrorResponse error = new ValidationErrorResponse(
+        ErrorResponse error = new ErrorResponse(
                 HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(),
                 allErrors
         );
@@ -49,7 +50,8 @@ public class CustomGlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
             DataIntegrityViolationException ex) {
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase()
+                HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(),
+                ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
     }
@@ -64,7 +66,8 @@ public class CustomGlobalExceptionHandler {
             cause = cause.getCause();
         }
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.getReasonPhrase()
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
@@ -73,7 +76,8 @@ public class CustomGlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAuthenticationException(
             AuthenticationException ex) {
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.UNAUTHORIZED.getReasonPhrase()
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
@@ -81,7 +85,8 @@ public class CustomGlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.FORBIDDEN.getReasonPhrase()
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
@@ -89,7 +94,8 @@ public class CustomGlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
@@ -98,13 +104,6 @@ public class CustomGlobalExceptionHandler {
     @Setter
     @AllArgsConstructor
     public static class ErrorResponse {
-        private String error;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class ValidationErrorResponse {
         private String error;
         private String details;
     }
