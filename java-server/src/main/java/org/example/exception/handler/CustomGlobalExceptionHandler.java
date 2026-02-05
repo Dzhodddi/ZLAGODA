@@ -1,8 +1,6 @@
 package org.example.exception.handler;
 
-import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
