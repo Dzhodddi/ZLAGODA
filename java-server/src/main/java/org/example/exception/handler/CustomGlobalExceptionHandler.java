@@ -1,6 +1,8 @@
 package org.example.exception.handler;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,9 +23,7 @@ public class CustomGlobalExceptionHandler {
     @ExceptionHandler(BaseServiceException.class)
     public ResponseEntity<ErrorResponse> handleCustomExceptions(BaseServiceException ex) {
         ErrorResponse error = new ErrorResponse(
-                ex.getHttpStatus().value(),
-                ex.getHttpStatus().getReasonPhrase(),
-                ex.getMessage()
+                ex.getHttpStatus().getReasonPhrase()
         );
         return ResponseEntity.status(ex.getHttpStatus()).body(error);
     }
@@ -31,21 +31,15 @@ public class CustomGlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
-        List<String> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+        String fieldErrors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + " " + error.getDefaultMessage())
-                .toList();
-
-        List<String> globalErrors = ex.getBindingResult().getGlobalErrors().stream()
+                .collect(Collectors.joining(", "));
+        String globalErrors = ex.getBindingResult().getGlobalErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .toList();
-
-        List<String> allErrors = new java.util.ArrayList<>(fieldErrors);
-        allErrors.addAll(globalErrors);
-
+                .collect(Collectors.joining(", "));
+        String allErrors = fieldErrors + globalErrors;
         ValidationErrorResponse error = new ValidationErrorResponse(
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(),
-                "Validation failed",
                 allErrors
         );
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
@@ -55,9 +49,7 @@ public class CustomGlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
             DataIntegrityViolationException ex) {
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(),
-                "Data integrity violation"
+                HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase()
         );
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
     }
@@ -65,20 +57,14 @@ public class CustomGlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
         Throwable cause = ex.getCause();
-        String message = "Invalid JSON format";
-
         while (cause != null) {
             if (cause.getClass().getSimpleName().equals("DateFormatException")) {
-                message = "Invalid date format. Expected format: yyyy-MM-dd";
                 break;
             }
             cause = cause.getCause();
         }
-
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                message
+                HttpStatus.BAD_REQUEST.getReasonPhrase()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
@@ -87,9 +73,7 @@ public class CustomGlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAuthenticationException(
             AuthenticationException ex) {
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.UNAUTHORIZED.value(),
-                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
-                ex.getMessage()
+                HttpStatus.UNAUTHORIZED.getReasonPhrase()
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
@@ -97,9 +81,7 @@ public class CustomGlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.FORBIDDEN.value(),
-                HttpStatus.FORBIDDEN.getReasonPhrase(),
-                "Access Denied"
+                HttpStatus.FORBIDDEN.getReasonPhrase()
         );
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
@@ -107,9 +89,7 @@ public class CustomGlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                "Unexpected error occurred"
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
@@ -118,18 +98,14 @@ public class CustomGlobalExceptionHandler {
     @Setter
     @AllArgsConstructor
     public static class ErrorResponse {
-        private int status;
         private String error;
-        private String message;
     }
 
     @Getter
     @Setter
     @AllArgsConstructor
     public static class ValidationErrorResponse {
-        private int status;
         private String error;
-        private String message;
-        private List<String> errors;
+        private String details;
     }
 }
