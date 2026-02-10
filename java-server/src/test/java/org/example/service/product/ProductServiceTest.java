@@ -47,7 +47,6 @@ class ProductServiceTest {
         product.setProduct_name("TestProduct");
 
         productDto = new ProductDto();
-        productDto.setId_product(1);
         productDto.setProduct_name("TestProduct");
 
         productRequestDto = new ProductRequestDto();

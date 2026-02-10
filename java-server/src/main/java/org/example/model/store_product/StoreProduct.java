@@ -14,4 +14,11 @@ public class StoreProduct {
     private int products_number;
     private boolean promotional_product;
     private boolean is_deleted = Boolean.FALSE;
+
+    public void setProducts_number(int products_number) {
+        this.products_number = products_number;
+        if (products_number == 0) {
+            this.is_deleted = Boolean.TRUE;
+        }
+    }
 }

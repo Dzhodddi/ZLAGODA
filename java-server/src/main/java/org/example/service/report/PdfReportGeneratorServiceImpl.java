@@ -60,10 +60,8 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         document.add(new Paragraph("PRODUCTS REPORT\n\n", font));
         for (ProductDto p : products) {
             document.add(new Paragraph(
-                    "Product ID: " + p.getId_product() + "\n"
-                            + "Name: " + p.getProduct_name() + "\n"
-                            + "Characteristics: " + p.getProduct_characteristics() + "\n"
-                            + "Category number: " + p.getCategory_number() + "\n\n",
+                            "Name: " + p.getProduct_name() + "\n"
+                            + "Characteristics: " + p.getProduct_characteristics() + "\n\n",
                     font
             ));
         }

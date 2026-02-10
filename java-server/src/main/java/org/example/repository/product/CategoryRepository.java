@@ -1,8 +1,8 @@
-package org.example.repository;
+package org.example.repository.product;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.CategoryResponseDto;
+import org.example.dto.helper.CategoryResponseDto;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;

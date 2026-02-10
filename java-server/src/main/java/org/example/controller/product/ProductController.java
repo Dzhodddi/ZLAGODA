@@ -34,7 +34,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Product management", description = "Endpoints for managing products")
+@Tag(name = "Product management",
+        description = "Endpoints for managing products")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/products")
@@ -44,13 +45,13 @@ public class ProductController {
     private final ProductService productService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
 
-    @GetMapping("/{checkNumber}")
+    @GetMapping("/deleted")
     @Operation(
             summary = "Get deleted products' name existing in some check",
             description = "Get deleted products' name existing in some check"
     )
     @PreAuthorize("hasAuthority('MANAGER')")
-    public PageResponseDto<ProductDto> getDeleted(@PathVariable String checkNumber,
+    public PageResponseDto<ProductDto> getDeleted(@RequestParam String checkNumber,
                                               @RequestParam(required = false) Integer lastSeenId) {
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("product_name"));
         return productService.getDeleted(checkNumber, pageable, lastSeenId);

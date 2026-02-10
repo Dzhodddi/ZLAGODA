@@ -52,10 +52,8 @@ class PdfReportGeneratorServiceTest {
         employeeDto.setZip_code("01001");
 
         productDto = new ProductDto();
-        productDto.setId_product(1);
         productDto.setProduct_name("Test Product");
         productDto.setProduct_characteristics("Test characteristics");
-        productDto.setCategory_number(10);
 
         storeProductDto = new StoreProductDto();
         storeProductDto.setUPC("123456789012");
@@ -120,10 +118,8 @@ class PdfReportGeneratorServiceTest {
     @DisplayName("productToPdf should generate PDF with multiple products")
     void productToPdf_withMultipleProducts_shouldGeneratePdf() throws DocumentException, IOException {
         ProductDto product2 = new ProductDto();
-        product2.setId_product(2);
         product2.setProduct_name("Another Product");
         product2.setProduct_characteristics("Other characteristics");
-        product2.setCategory_number(20);
 
         byte[] result = service.productToPdf(List.of(productDto, product2));
 

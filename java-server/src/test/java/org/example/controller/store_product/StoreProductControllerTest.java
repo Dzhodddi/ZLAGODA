@@ -84,8 +84,6 @@ class StoreProductControllerTest {
         productDto = new ProductDto();
         productDto.setProduct_characteristics("product_characteristics");
         productDto.setProduct_name("product_name");
-        productDto.setId_product(1);
-        productDto.setCategory_number(1);
 
         storeProductDto1 = new StoreProductDto();
         storeProductDto1.setUPC("1234567890");

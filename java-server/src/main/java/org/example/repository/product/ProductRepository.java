@@ -28,11 +28,27 @@ public class ProductRepository {
     public PageResponseDto<ProductDto> findDeleted(String checkNumber,
                                                        Pageable pageable,
                                                        Integer lastSeenId) {
+        Boolean checkExists = jdbcTemplate.queryForObject(
+                """
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM checks
+                    WHERE check_number = ?
+                )
+                """,
+                Boolean.class,
+                checkNumber
+        );
+
+        if (Boolean.FALSE.equals(checkExists)) {
+            throw new EntityNotFoundException("Check not found: " + checkNumber);
+        }
+
         List<ProductDto> products;
         if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                            SELECT p.id_product, p.category_number, p.product_name, p.product_characteristics
+                            SELECT p.product_name, p.product_characteristics
                             FROM product p
                             INNER JOIN store_product sp1
                             ON p.id_product = sp1.id_product
@@ -58,7 +74,7 @@ public class ProductRepository {
         } else {
             products = jdbcTemplate.query(
                             """
-                            SELECT p.id_product, p.category_number, p.product_name, p.product_characteristics
+                            SELECT p.product_name, p.product_characteristics
                             FROM product p
                             INNER JOIN store_product sp1
                             ON p.id_product = sp1.id_product
@@ -93,7 +109,7 @@ public class ProductRepository {
         if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                            SELECT id_product, category_number, product_name, product_characteristics
+                            SELECT product_name, product_characteristics
                             FROM product
                             WHERE id_product > ?
                             ORDER BY id_product
@@ -108,7 +124,7 @@ public class ProductRepository {
         } else {
             products = jdbcTemplate.query(
                             """
-                            SELECT id_product, category_number, product_name, product_characteristics
+                            SELECT product_name, product_characteristics
                             FROM product
                             ORDER BY id_product
                             FETCH FIRST ? ROWS ONLY
@@ -134,7 +150,7 @@ public class ProductRepository {
         if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                            SELECT id_product, category_number, product_name, product_characteristics
+                            SELECT product_name, product_characteristics
                             FROM product
                             WHERE product_name = ?
                               AND id_product > ?
@@ -151,7 +167,7 @@ public class ProductRepository {
         } else {
             products = jdbcTemplate.query(
                             """
-                            SELECT id_product, category_number, product_name, product_characteristics
+                            SELECT product_name, product_characteristics
                             FROM product
                             WHERE product_name = ?
                             ORDER BY id_product
@@ -179,7 +195,7 @@ public class ProductRepository {
         if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                            SELECT id_product, category_number, product_name, product_characteristics
+                            SELECT product_name, product_characteristics
                             FROM product
                             WHERE category_number = ?
                               AND id_product > ?
@@ -196,7 +212,7 @@ public class ProductRepository {
         } else {
             products = jdbcTemplate.query(
                             """
-                            SELECT id_product, category_number, product_name, product_characteristics
+                            SELECT product_name, product_characteristics
                             FROM product
                             WHERE category_number = ?
                             ORDER BY id_product
@@ -221,7 +237,7 @@ public class ProductRepository {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
                             """
-                            SELECT id_product, category_number, product_name, product_characteristics
+                            SELECT product_name, product_characteristics
                             FROM product
                             WHERE id_product = ?
                             """,
@@ -339,7 +355,7 @@ public class ProductRepository {
 
     public List<ProductDto> findAllNoPagination() {
         return jdbcTemplate.query("""
-                            SELECT id_product, category_number, product_name, product_characteristics
+                            SELECT product_name, product_characteristics
                             FROM product
                             ORDER BY product_name
                             """,

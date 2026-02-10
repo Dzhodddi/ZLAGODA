@@ -37,7 +37,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Store product management", description = "Endpoints for managing store products")
+@Tag(name = "Store product management",
+        description = "Endpoints for managing store products")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/store-products")
