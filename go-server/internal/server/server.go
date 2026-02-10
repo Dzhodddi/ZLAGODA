@@ -60,15 +60,22 @@ func (s *Server) SetupMiddlewares() *Server {
 	s.Echo.HTTPErrorHandler = errorResponse.GlobalHTTPErrorHandler(s.Config.Env)
 	s.Echo.Use(echoMiddleware.RequestLogger())
 	s.Echo.Use(echoMiddleware.Recover())
+	corsOptions := echoMiddleware.CORSConfig{
+		AllowOrigins:     s.Config.AllowOrigins,
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}
+	s.Echo.Use(echoMiddleware.CORSWithConfig(corsOptions))
 	s.Echo.Debug = true
 	return s
 }
 
 func (s *Server) SetupAllRoutes() *Server {
-	v1 := s.Echo.Group("/api/v1", s.authenticator.AuthMiddleware(repository.NewEmployeeRepository(s.DB)))
-	v1.GET("/health", func(c echo.Context) error {
+	s.Echo.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "ok")
 	})
+	v1 := s.Echo.Group("/api/v1", s.authenticator.AuthMiddleware(repository.NewEmployeeRepository(s.DB)))
 	s.setupCategoryRouts(v1)
 	s.setupCustomerCardRouts(v1)
 	s.setupChecksRouts(v1)
@@ -115,8 +122,4 @@ func GetDatabase(cfg *config.Config) (*sqlx.DB, error) {
 		},
 	}
 	return db.NewPostgresConnection(dbConfig)
-}
-
-func GetAuth(cfg *config.Config) auth.Authenticator {
-	return auth.NewJWTAuth(cfg)
 }
