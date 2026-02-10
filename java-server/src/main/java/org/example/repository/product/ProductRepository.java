@@ -25,6 +25,68 @@ public class ProductRepository {
     private final ProductRowMapper rowMapper;
     private final ProductMapper productMapper;
 
+    public PageResponseDto<ProductDto> findDeleted(String checkNumber,
+                                                       Pageable pageable,
+                                                       Integer lastSeenId) {
+        List<ProductDto> products;
+        if (lastSeenId != null && lastSeenId > 0) {
+            products = jdbcTemplate.query(
+                            """
+                            SELECT p.id_product, p.category_number, p.product_name, p.product_characteristics
+                            FROM product p
+                            INNER JOIN store_product sp1
+                            ON p.id_product = sp1.id_product
+                            INNER JOIN sale s
+                            ON sp1.UPC = s.UPC
+                            WHERE p.id_product > ?
+                              AND s.check_number = ?
+                              AND NOT EXISTS(
+                                  SELECT 1
+                                  FROM store_product sp2
+                                  WHERE sp1.UPC = sp2.UPC AND is_deleted <> true
+                              )
+                            ORDER BY p.product_name
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                            rowMapper,
+                            lastSeenId,
+                            checkNumber,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(productMapper::toDto)
+                    .toList();
+        } else {
+            products = jdbcTemplate.query(
+                            """
+                            SELECT p.id_product, p.category_number, p.product_name, p.product_characteristics
+                            FROM product p
+                            INNER JOIN store_product sp1
+                            ON p.id_product = sp1.id_product
+                            INNER JOIN sale s
+                            ON sp1.UPC = s.UPC
+                            WHERE s.check_number = ?
+                              AND NOT EXISTS(
+                                  SELECT 1
+                                  FROM store_product sp2
+                                  WHERE sp1.UPC = sp2.UPC AND is_deleted <> true
+                              )
+                            ORDER BY p.product_name
+                            FETCH FIRST ? ROWS ONLY
+                            """,
+                            rowMapper,
+                            checkNumber,
+                            pageable.getPageSize()
+                    ).stream()
+                    .map(productMapper::toDto)
+                    .toList();
+        }
+
+        long total = getDeletedCount(checkNumber);
+        boolean hasNext = products.size() == pageable.getPageSize();
+
+        return PageResponseDto.of(products, pageable.getPageSize(), total, hasNext);
+    }
+
     public PageResponseDto<ProductDto> findAll(Pageable pageable, Integer lastSeenId) {
         List<ProductDto> products;
 
@@ -291,7 +353,8 @@ public class ProductRepository {
         Integer count = jdbcTemplate.queryForObject(
                 """
                 SELECT COUNT(*)
-                FROM product""",
+                FROM product
+                """,
                 Integer.class
         );
         return count != null ? count : 0;
@@ -319,6 +382,24 @@ public class ProductRepository {
                 """,
                 Integer.class,
                 category_number
+        );
+        return count != null ? count : 0;
+    }
+
+    private long getDeletedCount(String checkNumber) {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(DISTINCT p.id_product)
+                FROM product p
+                INNER JOIN store_product sp
+                ON p.id_product = sp.id_product
+                INNER JOIN sale s
+                ON sp.UPC = s.UPC
+                WHERE s.check_number = ?
+                  AND sp.is_deleted = true
+                """,
+                Integer.class,
+                checkNumber
         );
         return count != null ? count : 0;
     }

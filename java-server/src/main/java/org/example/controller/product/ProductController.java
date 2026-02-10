@@ -44,6 +44,18 @@ public class ProductController {
     private final ProductService productService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
 
+    @GetMapping("/{checkNumber}")
+    @Operation(
+            summary = "Get deleted products' name existing in some check",
+            description = "Get deleted products' name existing in some check"
+    )
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public PageResponseDto<ProductDto> getDeleted(@PathVariable String checkNumber,
+                                              @RequestParam(required = false) Integer lastSeenId) {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("product_name"));
+        return productService.getDeleted(checkNumber, pageable, lastSeenId);
+    }
+
     @GetMapping
     @Operation(
             summary = "Get all products",

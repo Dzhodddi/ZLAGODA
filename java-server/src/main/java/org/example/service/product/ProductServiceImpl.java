@@ -19,6 +19,13 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     @Override
+    public PageResponseDto<ProductDto> getDeleted(String checkNumber,
+                                                   Pageable pageable,
+                                                   Integer lastSeenId) {
+        return repository.findDeleted(checkNumber, pageable, lastSeenId);
+    }
+
+    @Override
     public List<ProductDto> getAllNoPagination() {
         return repository.findAllNoPagination();
     }

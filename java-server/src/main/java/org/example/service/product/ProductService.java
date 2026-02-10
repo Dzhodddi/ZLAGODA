@@ -8,6 +8,10 @@ import org.springframework.data.domain.Pageable;
 
 public interface ProductService {
 
+    PageResponseDto<ProductDto> getDeleted(String checkNumber,
+                                           Pageable pageable,
+                                           Integer lastSeenId);
+
     List<ProductDto> getAllNoPagination();
 
     PageResponseDto<ProductDto> getAll(Pageable pageable,
