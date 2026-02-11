@@ -14,4 +14,3 @@ jwt:
   expiration: 3600000
   issuer: test-issuer
   audience: test-audience
-
