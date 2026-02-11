@@ -45,6 +45,11 @@ services:
       - ./go-server:/app/go-server
     ports:
       - "8080:8080"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl http://localhost:8080/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: on-failure
 
   java-server:
@@ -67,6 +72,30 @@ services:
         condition: service_healthy
       migrate-db:
         condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/api/v1/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: on-failure
+
+  frontend:
+    build:
+      context: web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web/src:/app/src
+      - /app/node_modules
+    depends_on:
+      go-server:
+        condition: service_healthy
+      java-server:
+        condition: service_healthy
+    environment:
+      - CHOKIDAR_USEPOLLING=true
 
 volumes:
   zlagoda-db-data:

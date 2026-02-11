@@ -17,8 +17,10 @@ const (
 )
 
 type Config struct {
-	Env       Env    `mapstructure:"env"`
-	Port      string `mapstructure:"port"`
+	Env          Env      `mapstructure:"env"`
+	Port         string   `mapstructure:"port"`
+	AllowOrigins []string `mapstructure:"allowed_origins"`
+
 	JWTSecret string `mapstructure:"jwt_secret"`
 	JWTAud    string `mapstructure:"jwt_aud"`
 	JWTIssuer string `mapstructure:"jwt_issuer"`
