@@ -52,7 +52,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "FRONT_URL=http://localhost:3000")
 @AutoConfigureMockMvc
 @EnableMethodSecurity
 @ActiveProfiles("test")
@@ -84,8 +85,6 @@ class StoreProductControllerTest {
         productDto = new ProductDto();
         productDto.setProduct_characteristics("product_characteristics");
         productDto.setProduct_name("product_name");
-        productDto.setId_product(1);
-        productDto.setCategory_number(1);
 
         storeProductDto1 = new StoreProductDto();
         storeProductDto1.setUPC("1234567890");

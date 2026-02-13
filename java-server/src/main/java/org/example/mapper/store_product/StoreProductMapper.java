@@ -1,7 +1,6 @@
 package org.example.mapper.store_product;
 
 import org.example.dto.store_product.product.StoreProductDto;
-import org.example.dto.store_product.product.StoreProductRequestDto;
 import org.example.model.store_product.StoreProduct;
 import org.mapstruct.Mapper;
 
@@ -9,7 +8,4 @@ import org.mapstruct.Mapper;
 public interface StoreProductMapper {
 
     StoreProductDto toDto(StoreProduct product);
-
-    StoreProduct toEntity(StoreProductRequestDto requestDto);
 }
-

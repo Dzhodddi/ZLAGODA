@@ -41,7 +41,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
+@SpringBootTest(properties = "FRONT_URL=http://localhost:3000")
 @AutoConfigureMockMvc
 @EnableMethodSecurity
 @ActiveProfiles("test")
@@ -66,16 +66,12 @@ class ProductControllerTest {
     @BeforeEach
     void setUp() {
         productDto1 = new ProductDto();
-        productDto1.setId_product(1);
         productDto1.setProduct_name("Apple");
         productDto1.setProduct_characteristics("Tasty apple");
-        productDto1.setCategory_number(10);
 
         productDto2 = new ProductDto();
-        productDto2.setId_product(2);
         productDto2.setProduct_name("Banana");
         productDto2.setProduct_characteristics("Delicious banana");
-        productDto2.setCategory_number(20);
 
         productRequestDto = new ProductRequestDto();
         productRequestDto.setProduct_name("Orange");
@@ -168,7 +164,6 @@ class ProductControllerTest {
     @DisplayName("POST /products - manager can create")
     void createProduct_ok() throws Exception {
         ProductDto created = new ProductDto();
-        created.setId_product(3);
         created.setProduct_name("Orange");
 
         when(productService.save(any(ProductRequestDto.class))).thenReturn(created);
@@ -178,7 +173,6 @@ class ProductControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(productRequestDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id_product").value(3))
                 .andExpect(jsonPath("$.product_name").value("Orange"));
 
         verify(productService).save(any(ProductRequestDto.class));
@@ -200,7 +194,6 @@ class ProductControllerTest {
     @DisplayName("PUT /products/{id} - manager can update")
     void updateProduct_ok() throws Exception {
         ProductDto updated = new ProductDto();
-        updated.setId_product(1);
         updated.setProduct_name("Updated Apple");
 
         when(productService.updateProductById(eq(1), any(ProductRequestDto.class)))
@@ -211,7 +204,6 @@ class ProductControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(productRequestDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id_product").value(1))
                 .andExpect(jsonPath("$.product_name").value("Updated Apple"));
 
         verify(productService).updateProductById(eq(1), any(ProductRequestDto.class));

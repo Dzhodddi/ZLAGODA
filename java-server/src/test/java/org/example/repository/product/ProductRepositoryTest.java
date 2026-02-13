@@ -64,7 +64,6 @@ class ProductRepositoryTest {
         product.setCategory_number(10);
 
         productDto = new ProductDto();
-        productDto.setId_product(1);
         productDto.setProduct_name("TestProduct");
 
         productRequestDto = new ProductRequestDto();
