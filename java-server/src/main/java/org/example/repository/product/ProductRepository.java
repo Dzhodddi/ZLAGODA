@@ -59,7 +59,11 @@ public class ProductRepository {
                               AND NOT EXISTS(
                                   SELECT 1
                                   FROM store_product sp2
-                                  WHERE sp1.UPC = sp2.UPC AND is_deleted <> true
+                                  WHERE sp1.UPC = sp2.UPC AND NOT EXISTS(
+                                      SELECT 1
+                                      FROM store_product sp3
+                                      WHERE sp2.UPC = sp3.UPC AND is_deleted = true
+                                      )
                               )
                             ORDER BY p.product_name
                             FETCH FIRST ? ROWS ONLY
@@ -84,7 +88,11 @@ public class ProductRepository {
                               AND NOT EXISTS(
                                   SELECT 1
                                   FROM store_product sp2
-                                  WHERE sp1.UPC = sp2.UPC AND is_deleted <> true
+                                  WHERE sp1.UPC = sp2.UPC AND NOT EXISTS(
+                                      SELECT 1
+                                      FROM store_product sp3
+                                      WHERE sp2.UPC = sp3.UPC AND is_deleted = true
+                                      )
                               )
                             ORDER BY p.product_name
                             FETCH FIRST ? ROWS ONLY
