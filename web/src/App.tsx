@@ -2,7 +2,7 @@ import "./index.css";
 
 import logo from "./logo.svg";
 import reactLogo from "./react.svg";
-import {CreateCategoryForm} from "@/features/category/components/categoryForm.tsx";
+import {UpsertCategoryForm} from "@/features/category/components/categoryForm.tsx";
 
 export function App() {
   return (
@@ -13,10 +13,7 @@ export function App() {
       </div>
 
       <h1>Bun + React</h1>
-      <p>
-        Edit <code>src/App.tsx</code> and save to test HMR
-      </p>
-       <CreateCategoryForm/>
+       <UpsertCategoryForm/>
     </div>
   );
 }

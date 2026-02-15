@@ -4,7 +4,7 @@ import { type Category, type CreateCategory, CreateCategorySchema } from "@/feat
 import { Form } from "@/components/ui/Form.tsx";
 import { InputField } from "@/components/ui/InputFields.tsx";
 
-export const CreateCategoryForm = () => {
+export const UpsertCategoryForm = () => {
     const resetFormRef = useRef<() => void>(null);
 
     const mutation = useCreateCategory();
