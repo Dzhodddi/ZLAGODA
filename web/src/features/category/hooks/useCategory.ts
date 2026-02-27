@@ -17,10 +17,10 @@ export const useCreateCategory = () => {
     })
 }
 
-export const useCategory = (category_number: string) => {
+export const useCategory = (categoryNumber: string) => {
     return useQuery({
-        queryKey: ['categories', category_number],
-        queryFn: () => getCategory(category_number),
+        queryKey: ['categories', categoryNumber],
+        queryFn: () => getCategory(categoryNumber),
         staleTime: 1000 * 30 // 30 sec
     })
 }

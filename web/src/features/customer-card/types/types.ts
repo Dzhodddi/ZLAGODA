@@ -1,20 +1,59 @@
 import {z} from 'zod';
 
-const phoneRegex = new RegExp(
-    /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
-);
+const phoneRegex = new RegExp(/^([0-9]{10,13})$/);
 
+export const CustomerCardSchema = z.object({
+    cardNumber: z
+        .string()
+        .min(1, "Card number too short")
+        .max(13, "Card number too long"),
+    customerName: z
+        .string()
+        .min(1, "Name too short")
+        .max(50, "Name too long"),
+    customerSurname: z
+        .string()
+        .min(1, "Surname too short")
+        .max(50, "Surname too long"),
+    customerPatronymic: z.
+        string().
+        max(50, "Patronymic too long")
+        .nullable()
+        .optional()
+        .transform((val) => val === "" || val === undefined ? null : val),
 
-export const CreateCustomerCard = z.object({
-    CardNumber: z.string().min(1).max(13),
-    CustomerName: z.string().min(1).max(50),
-    CustomerSurname: z.string().min(1).max(50),
-    CustomerPatronymic: z.optional(z.string().min(1).max(50)),
-    PhoneNumber: z.string().min(1).max(13).regex(phoneRegex, 'Invalid phone number'),
-    City: z.optional(z.string().min(1).max(50)),
-    Street: z.optional(z.string().min(1).max(50)),
-    ZipCode: z.optional(z.string().min(1).max(9)),
-    CustomerPercent: z.number().min(0).max(100),
+    phoneNumber: z
+        .string().
+        min(10, "Phone number too short").
+        max(13, "Phone number too long").
+        regex(phoneRegex, "Invalid phone number"),
+    city: z.
+        string().
+        max(50, "Patronymic too long")
+        .nullable()
+        .optional()
+        .transform((val) => val === "" || val === undefined ? null : val),
+    street: z.
+        string().
+        max(50, "Patronymic too long")
+        .nullable()
+        .optional()
+        .transform((val) => val === "" || val === undefined ? null : val),
+    zipCode: z.
+        string().
+        max(9, "Patronymic too long")
+        .nullable()
+        .optional()
+        .transform((val) => val === "" || val === undefined ? null : val),
+    customerPercent: z
+        .coerce
+        .number("Invalid number")
+        .min(1, "Percent must be between 1 and 100")
+        .max(100, "Percent must be between 1 and 100"),
 });
 
-export type CreateCustomerCard = z.infer<typeof CreateCustomerCard>;
+export type CustomerCard = z.infer<typeof CustomerCardSchema>;
+
+export const CreateCustomerCardSchema = CustomerCardSchema
+
+export type CreateCustomerCard = z.infer<typeof CreateCustomerCardSchema>;

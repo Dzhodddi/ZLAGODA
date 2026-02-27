@@ -1,20 +1,26 @@
 import "./index.css";
 
-import logo from "./logo.svg";
-import reactLogo from "./react.svg";
 import {UpsertCategoryForm} from "@/features/category/components/categoryForm.tsx";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import {UpsertCustomerCardForm} from "@/features/customer-card/components/customerCardForm.tsx";
+import {LoginForm} from "@/features/auth/components/loginForm.tsx";
+import {PublicRoute} from "@/components/publicRoutes.tsx";
+import {ProtectedRoute} from "@/components/protectedRoutes.tsx";
 
 export function App() {
   return (
-    <div className="app">
-      <div className="logo-container">
-        <img src={logo} alt="Bun Logo" className="logo bun-logo" />
-        <img src={reactLogo} alt="React Logo" className="logo react-logo" />
-      </div>
-
-      <h1>Bun + React</h1>
-       <UpsertCategoryForm/>
-    </div>
+    <BrowserRouter>
+        <Routes>
+            <Route element={<PublicRoute/>}>
+                <Route path="/login" element={<LoginForm/>}/>
+            </Route>
+            <Route element={<ProtectedRoute/>}>
+                <Route path="/category" element={<UpsertCategoryForm/>}/>
+                <Route path="/card" element={<UpsertCustomerCardForm/>}/>
+            </Route>
+            <Route path="*" element={<h1>Page Not Found</h1>} />
+        </Routes>
+    </BrowserRouter>
   );
 }
 

@@ -1,15 +1,15 @@
 import { useRef } from "react";
-import { useCreateCategory } from "@/features/category/hooks/useCategory.ts";
-import { type Category, type CreateCategory, CreateCategorySchema } from "@/features/category/types/types.ts";
 import { Form } from "@/components/ui/Form.tsx";
 import { InputField } from "@/components/ui/InputFields.tsx";
+import {type Login, LoginSchema} from "@/features/auth/types/types.ts";
+import {useLogin} from "@/features/auth/hooks/useAuth.ts";
 
-export const UpsertCategoryForm = () => {
+export const LoginForm = () => {
     const resetFormRef = useRef<() => void>(null);
 
-    const mutation = useCreateCategory();
+    const mutation = useLogin();
 
-    const handleSubmit = (data: CreateCategory) => {
+    const handleSubmit = (data: Login) => {
         mutation.mutate(data, {
             onSuccess: () => {
                 if (resetFormRef.current) {
@@ -21,10 +21,10 @@ export const UpsertCategoryForm = () => {
 
     return (
         <div className="p-6 bg-white rounded text-zinc-900 shadow-md max-w-2xl mx-auto">
-            <h2 className="text-xl font-bold mb-4">Create New Category</h2>
+            <h2 className="text-xl font-bold mb-4">Login</h2>
 
-            <Form<Category>
-                schema={CreateCategorySchema}
+            <Form<Login>
+                schema={LoginSchema}
                 onSubmit={handleSubmit}
                 className="grid grid-cols-12 gap-4"
             >
@@ -32,7 +32,8 @@ export const UpsertCategoryForm = () => {
                     resetFormRef.current = reset
                     return (
                         <>
-                            <InputField name="categoryName" label="Category Name" />
+                            <InputField name="idEmployee" label="Employee ID" />
+                            <InputField name="password" label="Password" type="password"/>
 
                             <div className="col-span-12 flex justify-end mt-4">
                                 <button
@@ -40,7 +41,7 @@ export const UpsertCategoryForm = () => {
                                     disabled={isSubmitting}
                                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                                 >
-                                    {isSubmitting ? 'Saving...' : 'Create category'}
+                                    {isSubmitting ? 'Saving...' : 'Login'}
                                 </button>
                             </div>
                         </>
