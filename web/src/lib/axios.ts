@@ -1,25 +1,34 @@
 import axios from 'axios';
 import applyCaseMiddleware from 'axios-case-converter';
-import {useAuthStore} from "@/store/authStore.ts";
+import { useAuthStore } from "@/store/authStore.ts";
 
 export const goApiClient = applyCaseMiddleware(axios.create({
     baseURL: "http://localhost:8080/api/v1",
-    timeout: 1000,
-    headers: {
-        "Content-Type": "application/json",
-    },
+    timeout: 5000,
+    headers: { "Content-Type": "application/json" },
     withCredentials: true,
-}))
+}));
 
 export const javaApiClient = applyCaseMiddleware(axios.create({
     baseURL: "http://localhost:8081/api/v1",
-    timeout: 1000,
-    headers: {
-        "Content-Type": "application/json",
-    },
+    timeout: 5000,
+    headers: { "Content-Type": "application/json" },
     withCredentials: true,
-}))
+}));
 
+// --- Auth request interceptor (для обох клієнтів) ---
+const addAuthToken = (config: any) => {
+    const { accessToken } = useAuthStore.getState();
+    if (accessToken && config.headers) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+};
+
+goApiClient.interceptors.request.use(addAuthToken, (error) => Promise.reject(error));
+javaApiClient.interceptors.request.use(addAuthToken, (error) => Promise.reject(error));
+
+// --- Refresh token логіка ---
 let isRefreshing = false;
 let failedQueue: Array<{
     resolve: (value?: unknown) => void;
@@ -34,18 +43,6 @@ const processQueue = (error: any, token: string | null = null) => {
     failedQueue = [];
 };
 
-goApiClient.interceptors.request.use(
-    (config) => {
-        const { accessToken } = useAuthStore.getState();
-
-        if (accessToken && config.headers) {
-            config.headers.Authorization = `Bearer ${accessToken}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
-
 const authInterceptor = async (error: any) => {
     const originalRequest = error.config;
 
@@ -58,10 +55,10 @@ const authInterceptor = async (error: any) => {
         if (isRefreshing) {
             try {
                 const token = await new Promise((resolve, reject) => {
-                    failedQueue.push({resolve, reject});
+                    failedQueue.push({ resolve, reject });
                 });
                 originalRequest.headers.Authorization = `Bearer ${token}`;
-                return await goApiClient(originalRequest);
+                return goApiClient(originalRequest);
             } catch (err) {
                 return Promise.reject(err);
             }
@@ -71,18 +68,20 @@ const authInterceptor = async (error: any) => {
         isRefreshing = true;
 
         try {
-            const { refreshToken, setTokens, clearTokens } = useAuthStore.getState();
-
-            if (!refreshToken) throw new Error("No refresh token available");
+            const { refreshToken, setTokens, role } = useAuthStore.getState();
+            if (!refreshToken) {
+                throw new Error("No refresh token");
+            }
 
             const response = await axios.post("http://localhost:8081/api/v1/auth/refresh", {
-                refreshToken: refreshToken,
+                refreshToken,
             });
 
-            const newAccessToken = response.data.accessToken;
-            const newRefreshToken = response.data.refreshToken;
-
-            setTokens(newAccessToken, newRefreshToken);
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
+            if (!role) {
+                throw new Error("No role");
+            }
+            setTokens(newAccessToken, newRefreshToken, role);
 
             processQueue(null, newAccessToken);
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
@@ -90,7 +89,6 @@ const authInterceptor = async (error: any) => {
 
         } catch (refreshError) {
             processQueue(refreshError, null);
-
             useAuthStore.getState().clearTokens();
             window.location.href = "/login";
             return Promise.reject(refreshError);
@@ -101,7 +99,7 @@ const authInterceptor = async (error: any) => {
     }
 
     return Promise.reject(error);
-}
+};
 
 goApiClient.interceptors.response.use(
     (response) => response,

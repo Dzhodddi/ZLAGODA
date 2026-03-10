@@ -16,7 +16,7 @@ public class StoreProductRequestDto {
     private String UPC_prom;
     @NotNull
     private int id_product;
-    @DecimalMin(value = "0.01", inclusive = true)
+    @NotNull()
     private BigDecimal price;
     @Min(1)
     private int products_number;
