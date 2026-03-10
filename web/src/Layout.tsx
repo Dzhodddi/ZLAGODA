@@ -3,8 +3,8 @@ import { useAuthStore } from "@/store/authStore";
 import { useRole } from "@/hooks/useRole";
 
 const navItems = [
-    { path: "/store-product", label: "Продукти в магазині" },
-    { path: "/product", label: "Продукти" },
+    { path: "/store-product", label: "Товари в магазині" },
+    { path: "/product", label: "Товари"},
     { path: "/category", label: "Категорії" },
     { path: "/card", label: "Карти клієнтів" },
 ];

@@ -3,7 +3,6 @@ import { type LoginResponse } from "@/features/auth/types/types.ts";
 import { useNavigate } from "react-router-dom";
 import {login, register} from "@/features/auth/api/authApi.ts";
 import { jwtDecode } from "jwt-decode";
-import { useAuthStore } from "@/store/authStore.ts";
 
 interface JwtPayload {
     sub: string;
