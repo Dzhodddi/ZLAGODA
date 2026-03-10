@@ -99,7 +99,7 @@ export const StoreProductList = () => {
             )}
 
             {data?.content && data.content.length === 0 && (
-                <p className="text-zinc-400 text-sm">Товарів не знайдено.</p>
+                <p className="text-zinc-400 text-sm">Товарів не знайдено</p>
             )}
 
             {data?.content && data.content.length > 0 && (

@@ -20,11 +20,11 @@ export const EmployeeList = () => {
     const [surnameInput, setSurnameInput] = useState("");
     const [searchSurname, setSearchSurname] = useState("");
 
-    const allQuery     = useAllEmployees();
+    const allQuery = useAllEmployees();
     const cashierQuery = useAllCashiers();
-    const searchQuery  = useEmployeePhoneAndAddress(searchSurname);
+    const searchQuery = useEmployeePhoneAndAddress(searchSurname);
     const deleteMutation = useDeleteEmployee();
-    const pdfMutation    = useDownloadEmployeePdf();
+    const pdfMutation = useDownloadEmployeePdf();
 
     const activeQuery =
         view === "cashiers" ? cashierQuery

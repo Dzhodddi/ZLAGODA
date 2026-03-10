@@ -39,20 +39,21 @@ export function App() {
                 <Route element={<ProtectedRoute />}>
                     <Route element={<Layout />}>
                         <Route path="/" element={<Home />} />
-                        <Route path="/store-product" element={<StoreProductList />} />
-                        <Route path="/product" element={<ProductList />} />
-                        <Route path="/card" element={<UpsertCustomerCardForm />} />
-                        <Route path="/check" element={<UpsertCheckForm />} />
+                        <Route path="/store-product" element={<StoreProductList/>} />
+                        <Route path="/product" element={<ProductList/>} />
+                        <Route path="/card" element={<UpsertCustomerCardForm/>} />
+                        <Route path="/check" element={<UpsertCheckForm/>} />
+                        <Route path="/category" element={<UpsertCategoryForm/>} />
                         {categoryRoutes}
 
                         <Route element={<ProtectedRoute allowedRoles={["MANAGER"]} />}>
-                            <Route path="/store-product/create" element={<UpsertStoreProductForm />} />
-                            <Route path="/store-product/edit/:upc" element={<UpsertStoreProductForm />} />
-                            <Route path="/product/create" element={<UpsertProductForm />} />
-                            <Route path="/product/edit/:id" element={<UpsertProductForm />} />
-                            <Route path="/employee" element={<EmployeeList />} />
-                            <Route path="/employee/create" element={<UpsertEmployeeForm />} />
-                            <Route path="/employee/edit/:id" element={<UpsertEmployeeForm />} />
+                            <Route path="/store-product/create" element={<UpsertStoreProductForm/>} />
+                            <Route path="/store-product/edit/:upc" element={<UpsertStoreProductForm/>} />
+                            <Route path="/product/create" element={<UpsertProductForm/>} />
+                            <Route path="/product/edit/:id" element={<UpsertProductForm/>} />
+                            <Route path="/employee" element={<EmployeeList/>} />
+                            <Route path="/employee/create" element={<UpsertEmployeeForm/>} />
+                            <Route path="/employee/edit/:id" element={<UpsertEmployeeForm/>} />
                         </Route>
 
                         <Route element={<ProtectedRoute allowedRoles={["CASHIER"]} />}>

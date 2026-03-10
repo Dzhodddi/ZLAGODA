@@ -7,6 +7,7 @@ const navItems = [
     { path: "/product", label: "Товари"},
     { path: "/category", label: "Категорії" },
     { path: "/card", label: "Карти клієнтів" },
+    { path: "/check", label: "Чеки" },
 ];
 
 export const Layout = () => {
@@ -71,7 +72,7 @@ export const Layout = () => {
 
                     {isManager && (
                         <Link
-                            to="/"
+                            to="/employee"
                             className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors
                                 ${isActive("/employee")
                                 ? "bg-blue-600 text-white"
