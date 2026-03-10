@@ -24,6 +24,8 @@ export const useRegister = () => {
         },
     });
 };
+import {useAuthStore} from "@/store/authStore.ts";
+import {toast} from "sonner";
 
 export const useLogin = () => {
     const queryClient = useQueryClient();
@@ -43,9 +45,12 @@ export const useLogin = () => {
             } else {
                 navigate("/employee/me");
             }
+            toast.success("Successfully login")
+            navigate("/");
         },
         onError: (error) => {
-            console.error("Login failed:", error);
+            toast.error("Failed to login")
+            console.error(error)
         },
     });
 };

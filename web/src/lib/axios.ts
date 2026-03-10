@@ -46,6 +46,10 @@ const processQueue = (error: any, token: string | null = null) => {
 const authInterceptor = async (error: any) => {
     const originalRequest = error.config;
 
+    if (originalRequest.url?.includes('/login') || originalRequest.url?.includes('/refresh')) {
+        return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
 
         if (isRefreshing) {
@@ -99,10 +103,14 @@ const authInterceptor = async (error: any) => {
 
 goApiClient.interceptors.response.use(
     (response) => response,
-    (error) => authInterceptor(error)  // ← return прибрано, бо async функція вже повертає Promise
+    (error) => {
+        return authInterceptor(error);
+    }
 );
 
 javaApiClient.interceptors.response.use(
     (response) => response,
-    (error) => authInterceptor(error)
+    (error) => {
+        return authInterceptor(error);
+    }
 );
