@@ -21,7 +21,7 @@ export const LoginForm = () => {
 
     return (
         <div className="p-6 bg-white rounded text-zinc-900 shadow-md max-w-2xl mx-auto">
-            <h2 className="text-xl font-bold mb-4">Login</h2>
+            <h2 className="text-xl font-bold mb-4">Авторизація</h2>
 
             <Form<Login>
                 schema={LoginSchema}
@@ -32,8 +32,8 @@ export const LoginForm = () => {
                     resetFormRef.current = reset
                     return (
                         <>
-                            <InputField name="idEmployee" label="Employee ID" />
-                            <InputField name="password" label="Password" type="password"/>
+                            <InputField name="idEmployee" label="ID" />
+                            <InputField name="password" label="Пароль" type="password"/>
 
                             <div className="col-span-12 flex justify-end mt-4">
                                 <button
@@ -41,7 +41,7 @@ export const LoginForm = () => {
                                     disabled={isSubmitting}
                                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                                 >
-                                    {isSubmitting ? 'Saving...' : 'Login'}
+                                    {isSubmitting ? 'Збереження...' : 'Увійти'}
                                 </button>
                             </div>
                         </>

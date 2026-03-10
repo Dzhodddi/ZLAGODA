@@ -14,6 +14,6 @@ export const login = async (payload: Login): Promise<LoginResponse> => {
     return LoginResponseSchema.parse(response.data);
 }
 
-export const register = async (payload: RegisterEmployee): Promise<void> => {
+export const register  = async (payload: RegisterEmployee): Promise<void> => {
     await javaApiClient.post(prefix + "/registration", payload);
 };

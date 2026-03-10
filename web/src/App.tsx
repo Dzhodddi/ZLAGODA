@@ -1,52 +1,83 @@
 import "./index.css";
 
-import {UpsertCategoryForm} from "@/features/category/components/categoryForm.tsx";
-import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
-import {UpsertCustomerCardForm} from "@/features/customer-card/components/customerCardForm.tsx";
-import {LoginForm} from "@/features/auth/components/loginForm.tsx";
-import {PublicRoute} from "@/components/publicRoutes.tsx";
-import {ProtectedRoute} from "@/components/protectedRoutes.tsx";
-import {UpsertEmployeeForm} from "@/features/employee/components/employeeForm.tsx";
-import {UpsertProductForm} from "@/features/product/components/productForm.tsx";
-import {UpsertStoreProductForm} from "@/features/store_product/components/storeProductForm.tsx";
-import {RegistrationForm} from "@/features/auth/components/registrationForm.tsx";
-import {StoreProductList} from "@/features/store_product/components/storeProductList";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { useAuthStore } from "@/store/authStore";
+import { Layout } from "@/Layout";
+import { Home } from "@/Home";
+import { PublicRoute }
+    from "@/components/publicRoutes";
+import { ProtectedRoute }
+    from "@/components/protectedRoutes";
+import { LoginForm }
+    from "@/features/auth/components/loginForm";
+import { RegistrationForm }
+    from "@/features/auth/components/registrationForm";
+import { UpsertCategoryForm }
+    from "@/features/category/components/categoryForm";
+import { UpsertCustomerCardForm }
+    from "@/features/customer-card/components/customerCardForm";
+import { EmployeeList }
+    from "@/features/employee/components/employeeList";
+import { UpsertEmployeeForm }
+    from "@/features/employee/components/employeeForm";
+import { EmployeeMe }
+    from "@/features/employee/components/employeeMe";
+import { ProductList }
+    from "@/features/product/components/productList";
+import { UpsertProductForm }
+    from "@/features/product/components/productForm";
+import { StoreProductList }
+    from "@/features/store_product/components/storeProductList";
+import { UpsertStoreProductForm }
+    from "@/features/store_product/components/storeProductForm";
 
 export function App() {
-  return (
-    <BrowserRouter>
-        <Routes>
-            <Route element={<PublicRoute/>}>
-                <Route path="/registration" element={<RegistrationForm />} />
-                <Route path="/login" element={<LoginForm/>}/>
-                <Route path="/store-product" element={<UpsertStoreProductForm/>}/>
-            </Route>
+    const { accessToken } = useAuthStore();
 
-            <Route element={<ProtectedRoute allowedRoles={["MANAGER", "CASHIER"]}/>}>
-                <Route path="/store-product" element={<StoreProductList/>} />
-                <Route path="/category" element={<UpsertCategoryForm/>}/>
-                <Route path="/card" element={<UpsertCustomerCardForm/>}/>
-                <Route path="/employee" element={<UpsertEmployeeForm/>}/>
-                <Route path="/product" element={<UpsertProductForm/>}/>
-            </Route>
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route element={<PublicRoute />}>
+                    <Route path="/login" element={<LoginForm />} />
+                    <Route path="/registration" element={<RegistrationForm />} />
+                </Route>
 
-            <Route element={<ProtectedRoute allowedRoles={["MANAGER"]} />}>
-                <Route path="/store-product/create" element={<UpsertStoreProductForm/>} />
-                <Route path="/store-product/edit/:upc" element={<UpsertStoreProductForm/>} />
-            </Route>
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<Layout />}>
+                        <Route path="/" element={<Home/>} />
+                        <Route path="/store-product" element={<StoreProductList/>} />
+                        <Route path="/product" element={<ProductList/>} />
 
-            <Route element={<ProtectedRoute allowedRoles={["CASHIER"]} />}>
-                <Route path="/employee/me" element={<UpsertStoreProductForm/>} />
-            </Route>
+                        <Route path="/category" element={<UpsertCategoryForm/>} />
+                        <Route path="/card" element={<UpsertCustomerCardForm/>} />
 
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/unauthorized" element={<h1>403 Forbidden</h1>} />
-            <Route path="*" element={<h1>404 Page Not Found</h1>} />
+                        <Route element={<ProtectedRoute allowedRoles={["MANAGER"]} />}>
+                            <Route path="/store-product/create" element={<UpsertStoreProductForm/>} />
+                            <Route path="/store-product/edit/:upc" element={<UpsertStoreProductForm/>} />
 
-            <Route path="*" element={<h1>Page Not Found</h1>} />
-        </Routes>
-    </BrowserRouter>
-  );
+                            <Route path="/product/create" element={<UpsertProductForm/>} />
+                            <Route path="/product/edit/:id" element={<UpsertProductForm/>} />
+
+                            <Route path="/employee" element={<EmployeeList/>} />
+                            <Route path="/employee/create" element={<UpsertEmployeeForm/>} />
+                            <Route path="/employee/edit/:id" element={<UpsertEmployeeForm/>} />
+                        </Route>
+
+                        <Route element={<ProtectedRoute allowedRoles={["CASHIER"]} />}>
+                            <Route path="/employee/me" element={<EmployeeMe/>} />
+                        </Route>
+                    </Route>
+                </Route>
+
+                <Route
+                    path="/login"
+                    element={accessToken ? <Navigate to="/" replace /> : <LoginForm />}
+                />
+                <Route path="/unauthorized" element={<h1 className="p-8 text-2xl">403 Forbidden</h1>} />
+                <Route path="*"  element={<h1 className="p-8 text-2xl">404 Not Found</h1>} />
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;

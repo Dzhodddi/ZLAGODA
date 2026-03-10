@@ -28,19 +28,19 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         PdfWriter.getInstance(document, out);
         document.open();
         Font font = getFont();
-        document.add(new Paragraph("EMPLOYEES REPORT\n\n", font));
+        document.add(new Paragraph("ЗВІТ ПРО ПРАЦІВНИКІВ\n\n", font));
         for (EmployeeResponseDto e : employees) {
             document.add(new Paragraph(
                     "ID: " + e.getId_employee() + "\n"
-                            + "Surname: " + e.getEmpl_surname() + "\n"
-                            + "Name: " + e.getEmpl_name() + "\n"
-                            + "Patronymic: " + e.getEmpl_patronymic() + "\n"
-                            + "Role: " + e.getRole() + "\n"
-                            + "Salary: " + e.getSalary() + "\n"
-                            + "Phone: " + e.getPhone_number() + "\n"
-                            + "Date of birth: " + e.getDate_of_birth() + "\n"
-                            + "Date of start: " + e.getDate_of_start() + "\n"
-                            + "Address: " + e.getCity() + ", "
+                            + "Прізвище: " + e.getEmpl_surname() + "\n"
+                            + "Ім'я: " + e.getEmpl_name() + "\n"
+                            + "По батькові: " + e.getEmpl_patronymic() + "\n"
+                            + "Роль: " + e.getRole() + "\n"
+                            + "Заробітна плата: " + e.getSalary() + "\n"
+                            + "Номер телефону: " + e.getPhone_number() + "\n"
+                            + "Дата народження: " + e.getDate_of_birth() + "\n"
+                            + "Дата прийому на роботу: " + e.getDate_of_start() + "\n"
+                            + "Адреса: " + e.getCity() + ", "
                             + e.getStreet() + ", " + e.getZip_code() + "\n\n",
                     font
             ));
@@ -57,11 +57,11 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         PdfWriter.getInstance(document, out);
         document.open();
         Font font = getFont();
-        document.add(new Paragraph("PRODUCTS REPORT\n\n", font));
+        document.add(new Paragraph("ЗВІТ ПРО ПРОДУКТИ\n\n", font));
         for (ProductDto p : products) {
             document.add(new Paragraph(
-                            "Name: " + p.getProduct_name() + "\n"
-                            + "Characteristics: " + p.getProduct_characteristics() + "\n\n",
+                            "Назва: " + p.getProduct_name() + "\n"
+                            + "Характеристики: " + p.getProduct_characteristics() + "\n\n",
                     font
             ));
         }
@@ -81,11 +81,11 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         for (StoreProductDto sp : storeProducts) {
             document.add(new Paragraph(
                     "UPC: " + sp.getUPC() + "\n" +
-                            "Promotional UPC: " + sp.getUPC_prom() + "\n" +
-                            "Product ID: " + sp.getId_product() + "\n" +
-                            "Selling price: " + sp.getSelling_price() + "\n" +
-                            "Quantity: " + sp.getProducts_number() + "\n" +
-                            "Promotional: " + sp.isPromotional_product() + "\n\n",
+                            "UPC промо: " + sp.getUPC_prom() + "\n" +
+                            "ID продукту: " + sp.getId_product() + "\n" +
+                            "Ціна продажу: " + sp.getSelling_price() + "\n" +
+                            "Кількість: " + sp.getProducts_number() + "\n" +
+                            "Акційність: " + sp.isPromotional_product() + "\n\n",
                     font
             ));
         }
