@@ -49,6 +49,10 @@ goApiClient.interceptors.request.use(
 const authInterceptor = async (error: any) => {
     const originalRequest = error.config;
 
+    if (originalRequest.url?.includes('/login') || originalRequest.url?.includes('/refresh')) {
+        return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
 
         if (isRefreshing) {
@@ -59,7 +63,7 @@ const authInterceptor = async (error: any) => {
                 originalRequest.headers.Authorization = `Bearer ${token}`;
                 return await goApiClient(originalRequest);
             } catch (err) {
-                return await Promise.reject(err);
+                return Promise.reject(err);
             }
         }
 
@@ -101,14 +105,14 @@ const authInterceptor = async (error: any) => {
 
 goApiClient.interceptors.response.use(
     (response) => response,
-    async (error) => {
-        await authInterceptor(error)
+    (error) => {
+        return authInterceptor(error);
     }
 );
 
 javaApiClient.interceptors.response.use(
     (response) => response,
-    async (error) => {
-        await authInterceptor(error)
+    (error) => {
+        return authInterceptor(error);
     }
 );

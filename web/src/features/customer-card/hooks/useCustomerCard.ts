@@ -1,5 +1,5 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {createCustomerCard, getCustomerCard} from "@/features/customer-card/api/customerCardApi.ts";
+import {createCustomerCard, getCustomerCard, updateCustomerCard} from "@/features/customer-card/api/customerCardApi.ts";
 
 
 export const useCreateCustomerCard = () => {
@@ -10,6 +10,21 @@ export const useCreateCustomerCard = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['customer_cards']})
             alert("Successfully created customer card!")
+        },
+        onError: (error) => {
+            alert(error)
+        }
+    })
+}
+
+export const useUpdateCustomerCard = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: updateCustomerCard,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['customer_cards']})
+            alert("Successfully updated customer card!")
         },
         onError: (error) => {
             alert(error)

@@ -1,52 +1,52 @@
-import { useRef } from "react";
-import { useCreateCategory } from "@/features/category/hooks/useCategory.ts";
-import { type Category, type CreateCategory, CreateCategorySchema } from "@/features/category/types/types.ts";
-import { Form } from "@/components/ui/Form.tsx";
+import { useCreateCategory, useUpdateCategory } from "@/features/category/hooks/useCategory.ts";
+import { type Category, CreateCategorySchema } from "@/features/category/types/types.ts";
+import { GenericUpsertForm } from "@/components/ui/GenericUpsertForm.tsx";
 import { InputField } from "@/components/ui/InputFields.tsx";
+import {useNavigate} from "react-router-dom";
 
-export const UpsertCategoryForm = () => {
-    const resetFormRef = useRef<() => void>(null);
+interface Props {
+    initialData?: Category;
+}
 
-    const mutation = useCreateCategory();
-
-    const handleSubmit = (data: CreateCategory) => {
-        mutation.mutate(data, {
-            onSuccess: () => {
-                if (resetFormRef.current) {
-                    resetFormRef.current();
-                }
-            }
-        });
-    };
+export const UpsertCategoryForm = ({ initialData }: Props) => {
+    const navigate = useNavigate();
 
     return (
         <div className="p-6 bg-white rounded text-zinc-900 shadow-md max-w-2xl mx-auto">
-            <h2 className="text-xl font-bold mb-4">Create New Category</h2>
 
-            <Form<Category>
+            <GenericUpsertForm
                 schema={CreateCategorySchema}
-                onSubmit={handleSubmit}
+                initialData={initialData}
+                createMutation={useCreateCategory()}
+                updateMutation={useUpdateCategory()}
+                onSuccessAction={() => navigate("/categories")}
+                prepareUpdatePayload={(formData, initial) => ({
+                    ...formData,
+                    categoryNumber: initial.categoryNumber
+                })}
                 className="grid grid-cols-12 gap-4"
             >
-                {({ formState: { isSubmitting }, reset }) => {
-                    resetFormRef.current = reset
-                    return (
-                        <>
-                            <InputField name="categoryName" label="Category Name" />
+                {(_methods, { isEditMode, isSaving }) => (
+                    <>
+                        <h2 className="col-span-12 text-xl font-bold mb-4">
+                            {isEditMode ? "Update Category" : "Create New Category"}
+                        </h2>
 
-                            <div className="col-span-12 flex justify-end mt-4">
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-                                >
-                                    {isSubmitting ? 'Saving...' : 'Create category'}
-                                </button>
-                            </div>
-                        </>
-                    )
-                }}
-            </Form>
+                        <InputField name="categoryName" label="Category Name" />
+
+                        <div className="col-span-12 flex justify-end mt-4">
+                            <button
+                                type="submit"
+                                disabled={isSaving}
+                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                            >
+                                {isSaving ? 'Saving...' : isEditMode ? 'Update Category' : 'Create Category'}
+                            </button>
+                        </div>
+                    </>
+                )}
+            </GenericUpsertForm>
+
         </div>
     );
 };

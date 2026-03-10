@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {login} from "@/features/auth/api/authApi.ts";
 import { jwtDecode } from "jwt-decode";
 import {useAuthStore} from "@/store/authStore.ts";
+import {toast} from "sonner";
 
 export const useLogin = () => {
     const queryClient = useQueryClient();
@@ -16,10 +17,12 @@ export const useLogin = () => {
             setTokens(payload.accessToken, payload.refreshToken);
             const decoded = jwtDecode(payload.accessToken)
             queryClient.setQueryData(["authUser"], decoded);
-            navigate("/card");
+            toast.success("Successfully login")
+            navigate("/");
         },
         onError: (error) => {
-            console.error("Login failed:", error);
+            toast.error("Failed to login")
+            console.error(error)
         },
     });
 };
