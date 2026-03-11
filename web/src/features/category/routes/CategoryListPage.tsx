@@ -7,17 +7,17 @@ export const CategoryListPage = () => {
     const deleteMutation = useDeleteCategory();
 
     const handleDelete = (id: number) => {
-        toast.warning("Delete Category?", {
-            description: "Are you sure you want to delete category?",
+        toast.warning("Видалити цю категорію?", {
+            description: "Ви впевнені, що хочете видалити цю категорію?",
             action: {
-                label: "Yes, Delete",
+                label: "Так, видалити",
                 onClick: () => {
                     deleteMutation.mutate(id)
-                    toast.success("Successfully deleted category")
+                    toast.success("Успішно видалено категорію")
                 }
             },
             cancel: {
-                label: "Cancel",
+                label: "Скасувати",
                 onClick: () => {},
             },
             duration: 6000,
@@ -36,7 +36,7 @@ export const CategoryListPage = () => {
     return (
         <div className="p-6 max-w-5xl mx-auto text-zinc-900">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Categories</h1>
+                <h1 className="text-2xl font-bold">Категорії</h1>
                 <Link
                     to="/categories/new"
                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
@@ -72,7 +72,7 @@ export const CategoryListPage = () => {
                                         to={`/categories/edit/${category.categoryNumber}`}
                                         className="text-blue-600 hover:text-blue-800 font-medium hover:underline"
                                     >
-                                        Edit
+                                        Редагувати
                                     </Link>
 
                                     <button
@@ -80,7 +80,7 @@ export const CategoryListPage = () => {
                                         disabled={deleteMutation.isPending}
                                         className="text-red-500 hover:text-red-700 font-medium hover:underline disabled:opacity-50"
                                     >
-                                        Delete
+                                        Видалити
                                     </button>
 
                                 </td>

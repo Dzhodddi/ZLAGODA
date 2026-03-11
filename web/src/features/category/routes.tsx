@@ -4,10 +4,12 @@ import {CreateCategoryPage} from "@/features/category/routes/CreateCategoryPage.
 import {EditCategoryPage} from "@/features/category/routes/EditCategoryPage.tsx";
 
 
-export const categoryRoutes = (
+const categoryRoutes = (
     <>
         <Route path="/categories" element={<CategoryListPage />} />
         <Route path="/categories/new" element={<CreateCategoryPage />} />
         <Route path="/categories/edit/:id" element={<EditCategoryPage />} />
     </>
 );
+
+export { categoryRoutes }

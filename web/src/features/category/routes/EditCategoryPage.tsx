@@ -14,15 +14,15 @@ export const EditCategoryPage = () => {
         enabled: !!categoryId && !isNaN(categoryId),
     });
 
-    if (isLoading) return <div className="p-4 text-center">Loading...</div>;
+    if (isLoading)
+        return <div className="p-4 text-center">Завантаження...</div>;
 
     if (categoryId && isNaN(categoryId)) {
-        return <div className="p-4 text-center text-red-500">Invalid Category ID</div>;
+        return <div className="p-4 text-center text-red-500">Неправильне ІД категорії</div>;
     }
 
     return (
         <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Categories / Edit</h1>
             <UpsertCategoryForm initialData={data} />
         </div>
     );

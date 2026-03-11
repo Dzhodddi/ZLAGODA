@@ -26,21 +26,21 @@ export const UpsertCategoryForm = ({ initialData }: Props) => {
                 })}
                 className="grid grid-cols-12 gap-4"
             >
-                {(_methods, { isEditMode, isSaving }) => (
+                {(_methods, { isEditMode, isSaving, isDirty }) => (
                     <>
                         <h2 className="col-span-12 text-xl font-bold mb-4">
-                            {isEditMode ? "Update Category" : "Create New Category"}
+                            {isEditMode ? "Редагувати категорію" : "Створити нову категорію"}
                         </h2>
 
-                        <InputField name="categoryName" label="Category Name" />
+                        <InputField name="categoryName" label="Назва категорії" />
 
                         <div className="col-span-12 flex justify-end mt-4">
                             <button
                                 type="submit"
-                                disabled={isSaving}
+                                disabled={isSaving || (isEditMode && !isDirty)}
                                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                             >
-                                {isSaving ? 'Saving...' : isEditMode ? 'Update Category' : 'Create Category'}
+                                {isSaving ? 'Збереження...' : isEditMode ? 'Відредагувати категорію' : 'Створити категорію'}
                             </button>
                         </div>
                     </>

@@ -6,7 +6,6 @@ import {
 } from "@/features/auth/types/types.ts";
 import {javaApiClient} from "@/lib/axios.ts";
 
-
 const prefix = "/auth"
 
 export const login = async (payload: Login): Promise<LoginResponse> => {

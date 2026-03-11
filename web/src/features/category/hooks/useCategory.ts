@@ -15,10 +15,10 @@ export const useCreateCategory = () => {
         mutationFn: createCategory,
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['categories']})
-            toast.success("Successfully created category!");
+            toast.success("Успішно створено категорію");
         },
         onError: (error) => {
-            toast.error("Failed to create category");
+            toast.error("Помилка під час створення категорії");
             console.error(error);
         }
     })
@@ -31,10 +31,10 @@ export const useUpdateCategory = () => {
         mutationFn: updateCategory,
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['categories']})
-            toast.success("Successfully updated category")
+            toast.success("Успішно оновлено категорію")
         },
         onError: (error) => {
-            toast.error("Failed to update category")
+            toast.error("Помилка під час оновлення категорії")
             console.error(error);
         }
     })
@@ -56,7 +56,7 @@ export const useDeleteCategory = () => {
             queryClient.invalidateQueries({ queryKey: ['categories'] });
         },
         onError: (error) => {
-            toast.error("Could not delete category. It might be in use.")
+            toast.error("Помилка під час видалення категорії")
             console.error(error)
         }
     });

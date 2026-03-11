@@ -17,7 +17,7 @@ interface GenericUpsertFormProps<TFormValues extends FieldValues, TUpdatePayload
 
     children: (
         methods: UseFormReturn<TFormValues>,
-        context: { isEditMode: boolean; isSaving: boolean }
+        context: { isEditMode: boolean; isSaving: boolean, isDirty: boolean }
     ) => React.ReactNode;
 }
 
@@ -63,7 +63,8 @@ export const GenericUpsertForm = <TFormValues extends FieldValues, TUpdatePayloa
         >
             {(methods) => {
                 resetFormRef.current = methods.reset;
-                return children(methods, { isEditMode, isSaving });
+                const isDirty = methods.formState.isDirty;
+                return children(methods, { isEditMode, isSaving, isDirty });
             }}
         </Form>
     );

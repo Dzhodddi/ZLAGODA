@@ -21,7 +21,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
                     "--normal-text": "#09090b",
                     "--normal-border": "#e4e4e7",
                     "--border-radius": "var(--radius)",
-                    "--width": "450px",
+                    "--width": "600px",
                 } as React.CSSProperties
             }
             toastOptions={{
