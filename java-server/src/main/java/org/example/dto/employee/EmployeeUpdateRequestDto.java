@@ -2,10 +2,7 @@ package org.example.dto.employee;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,6 +42,10 @@ public class EmployeeUpdateRequestDto {
     private Date date_of_start;
     @NotBlank
     @Length(min = 8, max = 13)
+    @Pattern(
+            regexp = "^(\\+380|0)\\d{9}$",
+            message = "Phone number must be in format +380XXXXXXXXX or 0XXXXXXXXX"
+    )
     private String phone_number;
     @NotNull
     @DecimalMin("0.0")

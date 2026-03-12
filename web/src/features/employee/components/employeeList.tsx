@@ -41,9 +41,11 @@ export const EmployeeList = () => {
         : undefined;
 
     const handleDelete = (idEmployee: string) => {
-        toast("Чи дійсно ви хочете видалити?", {
+        toast("Видалити працівника?", {
+            actionButtonStyle: { backgroundColor: "#e45757", color: "white" },
+            cancelButtonStyle: { color: "#5c5c5c" },
             action: {
-                label: "Видалити",
+                label: "ТАК",
                 onClick: () => deleteMutation.mutate(idEmployee, {
                     onSuccess: () => toast.success("Працівник успішно видалений"),
                     onError: () => toast.error("Помилка під час видалення працівника"),
@@ -74,9 +76,9 @@ export const EmployeeList = () => {
                             <button
                                 onClick={() => pdfMutation.mutate()}
                                 disabled={pdfMutation.isPending}
-                                className="bg-zinc-700 text-white px-3 py-1 rounded hover:bg-zinc-800 text-sm"
+                                className="bg-zinc-700 text-white px-3 py-1 rounded hover:bg-zinc-800 text-xs"
                             >
-                                Видрукувати звіт
+                                Видрукувати звіт про всіх працівників
                             </button>
                         </>
                     )}
@@ -98,12 +100,13 @@ export const EmployeeList = () => {
                     </button>
                 ))}
 
-                <div className="flex gap-1 ml-auto">
+            <div className="ml-auto flex gap-2 items-center">
+                <div className="relative">
                     <input
                         value={surnameInput}
                         onChange={(e) => setSurnameInput(e.target.value)}
                         placeholder="Введіть прізвище"
-                        className="border rounded px-2 py-1 text-sm w-44"
+                        className="border rounded px-2 py-1 text-sm w-58 pr-9"
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
                                 setSearchSurname(surnameInput);
@@ -116,23 +119,25 @@ export const EmployeeList = () => {
                             setSearchSurname(surnameInput);
                             setView("search");
                         }}
-                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 group"
                     >
-                        Шукати
+                        <img src="/src/logos/search.png" alt="search" className="w-6 h-6 group-hover:opacity-0" />
+                        <img src="/src/logos/search-hover.png" alt="search" className="w-6 h-6 absolute inset-0 opacity-0 group-hover:opacity-100" />
                     </button>
-                    {view === "search" && (
-                        <button
-                            onClick={() => {
-                                setSurnameInput("");
-                                setSearchSurname("");
-                                setView("all");
-                            }}
-                            className="text-red-500 text-sm px-2"
-                        >
-                            ✕
-                        </button>
-                    )}
                 </div>
+                {view === "search" && (
+                    <button
+                        onClick={() => {
+                            setSurnameInput("");
+                            setSearchSurname("");
+                            setView("all");
+                        }}
+                        className="text-red-500 text-sm px-2"
+                    >
+                        ✕
+                    </button>
+                )}
+            </div>
             </div>
 
             {activeQuery.isLoading && <p className="text-zinc-500">Завантаження…</p>}
@@ -146,14 +151,12 @@ export const EmployeeList = () => {
                 contacts.length === 0 ? (
                     <p className="text-zinc-400 text-sm">Нічого не знайдено для працівника_ці "{searchSurname}"</p>
                 ) : (
-                    <table className="w-full text-sm border-collapse">
+                    <table className="w-full text-xs border-collapse table-fixed border border-blue-300">
                         <thead>
-                        <tr className="bg-blue-700 text-left text-white">
-                            <th className="px-3 py-2 font-semibold">ID</th>
-                            <th className="px-3 py-2 font-semibold">Телефон</th>
-                            <th className="px-3 py-2 font-semibold">Місто</th>
-                            <th className="px-3 py-2 font-semibold">Вулиця</th>
-                            <th className="px-3 py-2 font-semibold">Поштовий індекс</th>
+                        <tr className="bg-blue-700 text-center text-white">
+                            <th className="px-3 py-2 font-semibold w-16 border border-blue-500">ID</th>
+                            <th className="px-3 py-2 font-semibold w-32 border border-blue-500">Контактний телефон</th>
+                            <th className="px-3 py-2 font-semibold w-48 border border-blue-500">Адреса</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -161,11 +164,9 @@ export const EmployeeList = () => {
                             <tr key={i}
                                 onClick={() => navigate(`/employee/${c.idEmployee}`)}
                                 className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer">
-                                <td className="px-3 py-2">{c.idEmployee}</td>
-                                <td className="px-3 py-2">{c.phoneNumber}</td>
-                                <td className="px-3 py-2">{c.city}</td>
-                                <td className="px-3 py-2">{c.street}</td>
-                                <td className="px-3 py-2">{c.zipCode}</td>
+                                <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.idEmployee}</td>
+                                <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.phoneNumber}</td>
+                                <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.city}, {"вул."} {c.street}, {c.zipCode}</td>
                             </tr>
                         ))}
                         </tbody>
@@ -183,11 +184,11 @@ export const EmployeeList = () => {
                             <tr className="bg-blue-700 text-center text-white">
                                 <th className="px-3 py-2 font-semibold w-16 border border-blue-500">ID</th>
                                 <th className="px-3 py-2 font-semibold w-40 border border-blue-500">ПІБ</th>
-                                <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Роль</th>
+                                <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Посада</th>
                                 <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Зарплата, грн</th>
                                 <th className="px-3 py-2 font-semibold w-32 border border-blue-500">Дата народження</th>
-                                <th className="px-3 py-2 font-semibold w-36 border border-blue-500">Дата прийому на роботу</th>
-                                <th className="px-3 py-2 font-semibold w-32 border border-blue-500">Номер телефону</th>
+                                <th className="px-3 py-2 font-semibold w-36 border border-blue-500">Дата початку роботи</th>
+                                <th className="px-3 py-2 font-semibold w-32 border border-blue-500">Контактний телефон</th>
                                 <th className="px-3 py-2 font-semibold w-48 border border-blue-500">Адреса</th>
                                 {isManager && <th className="px-3 py-2 w-8 border border-blue-500 border-r-blue-700" />}
                                 {isManager && <th className="px-3 py-2 w-8 border border-blue-500" />}
@@ -197,7 +198,7 @@ export const EmployeeList = () => {
                             {employees.map((emp) => (
                                 <tr key={emp.idEmployee}
                                     onClick={() => navigate(`/employee/${emp.idEmployee}`)}
-                                    className="bg-blue-100 text-left border-t text-zinc-900">
+                                    className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer">
                                     <td className="px-3 py-2 font-mono text-xs border border-blue-200 wrap-break-word">{emp.idEmployee}</td>
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">
                                         {emp.emplSurname} {emp.emplName} {emp.emplPatronymic ?? ""}
@@ -213,14 +214,20 @@ export const EmployeeList = () => {
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
                                             <button onClick={() => navigate(`/employee/edit/${emp.idEmployee}`)}>
-                                                <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
+                                                <div className="relative w-4 h-4 group">
+                                                    <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4 group-hover:opacity-0" />
+                                                    <img src="/src/logos/edit-hover.png" alt="edit" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                                                </div>
                                             </button>
                                         </td>
                                     )}
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
                                             <button onClick={() => handleDelete(emp.idEmployee)}>
-                                                <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
+                                                <div className="relative w-4 h-4 group">
+                                                    <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4 group-hover:opacity-0" />
+                                                    <img src="/src/logos/delete-hover.png" alt="delete" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                                                </div>
                                             </button>
                                         </td>
                                     )}

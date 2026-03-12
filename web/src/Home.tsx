@@ -8,7 +8,6 @@ export const Home = () => {
             <p className="text-zinc-600 text-lg leading-relaxed">
                 Програмний застосунок для обробки даних, що використовуються
                 в процесі збуту товарів у продуктовому мінісупермаркеті{" "}
-                <span className="font-semibold text-zinc-900">«ZLAGODA»</span>
             </p>
 
             <p className="text-sm text-zinc-800 mt-4">

@@ -45,8 +45,8 @@ export const BaseEmployeeSchema = z.object({
         .max(50, "Місто занадто довге"),
     street: z
         .string()
-        .min(1, "Вулиця занадто коротка")
-        .max(50, "Вулиця занадто довга"),
+        .min(1, "Назва вулиці занадто коротка")
+        .max(50, "Назва вулиці занадто довга"),
     zipCode: z
         .string()
         .min(3, "Індекс занадто короткий")
@@ -55,12 +55,12 @@ export const BaseEmployeeSchema = z.object({
 
 export const EmployeeSchema = BaseEmployeeSchema.refine(
     (data) => new Date(data.dateOfBirth) < new Date(data.dateOfStart), {
-        message: "Дата народження має бути раніше дати старту",
+        message: "Дата народження має бути раніше ніж дата початку роботи",
         path: ["dateOfStart"]
     }
 ).refine(
     (data) => new Date(data.dateOfBirth).getFullYear() > 1900, {
-        message: "Дата має бути пізніше 1900",
+        message: "Дата має бути пізніше за 1900",
         path: ["dateOfBirth"]
     }
 ).refine(
@@ -70,12 +70,12 @@ export const EmployeeSchema = BaseEmployeeSchema.refine(
     }
 ).refine(
     (data) => new Date().getFullYear() - new Date(data.dateOfBirth).getFullYear() >= 18, {
-        message: "Працівник має бути старше 18",
+        message: "Вік працівника_ці має бути більше за 18 років",
         path: ["dateOfBirth"]
     }
 ).refine(
     (data) => new Date(data.dateOfStart).getFullYear() > 1900, {
-        message: "Дата має бути пізніше 1900",
+        message: "Дата має бути пізніше за 1900 рік",
         path: ["dateOfStart"]
     }
 );
@@ -108,7 +108,13 @@ export const PageEmployeeSchema = z.object({
     hasNext: z.boolean(),
 });
 
-export const EmployeeContactSchema = BaseEmployeeSchema.pick(['idEmployee', 'phoneNumber', 'city', 'street', 'zipCode']);
+export const EmployeeContactSchema = z.object({
+    idEmployee: z.string(),
+    phoneNumber: z.string(),
+    city: z.string(),
+    street: z.string(),
+    zipCode: z.string(),
+});
 
 export type EmployeeContact = z.infer<typeof EmployeeContactSchema>;
 

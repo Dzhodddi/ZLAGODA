@@ -13,12 +13,17 @@ import {productRoutes} from "@/features/product/routes.tsx";
 import {authRoutes} from "@/features/auth/routes.tsx";
 import {checkRoutes} from "@/features/checks/routes.tsx";
 import {customerCardRoutes} from "@/features/customer-card/routes.tsx";
+import { useEffect } from "react";
 
 const Toaster = lazy(() =>
     import("@/components/ui/sonner").then((module) => ({ default: module.Toaster }))
 );
 
 export function App() {
+    useEffect(() => {
+        document.title = "Zlagoda Shop";
+    }, []);
+
     return (
         <BrowserRouter>
             <Routes>

@@ -58,5 +58,6 @@ export const getEmployeePhoneAndAddress  = async (surname: string): Promise<Page
     const response = await javaApiClient.get(prefix, {
         params: { surname },
     });
+    console.log(response.data);
     return PageEmployeeContactSchema.parse(response.data);
 }

@@ -9,11 +9,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
             position="top-right"
             className="toaster group"
             icons={{
-                success: <CheckCircleIcon className="size-6 text-green-500" />,
-                info: <InfoIcon className="size-6 text-blue-500" />,
-                warning: <WarningIcon className="size-6 text-yellow-500" />,
-                error: <XCircleIcon className="size-6 text-red-500" />,
-                loading: <SpinnerIcon className="size-6 animate-spin text-zinc-500" />,
+                success: <CheckCircleIcon className="size-5 text-green-500" />,
+                info: <InfoIcon className="size-5 text-blue-500" />,
+                warning: <WarningIcon className="size-5 text-yellow-500" />,
+                error: <XCircleIcon className="size-5 text-red-500" />,
+                loading: <SpinnerIcon className="size-5 animate-spin text-zinc-500" />,
             }}
             style={
                 {
@@ -21,7 +21,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
                     "--normal-text": "#09090b",
                     "--normal-border": "#e4e4e7",
                     "--border-radius": "var(--radius)",
-                    "--width": "600px",
+                    "--width": "260px",
                 } as React.CSSProperties
             }
             toastOptions={{
@@ -29,13 +29,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
                     background: 'white',
                     opacity: 1,
                     boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-                    padding: '24px',
-                    gap: '16px',
+                    padding: '14px',
+                    gap: '8px',
+                    fontSize: "12px",
                 },
                 classNames: {
                     toast: "group toast group-[.toaster]:bg-white group-[.toaster]:text-zinc-950 group-[.toaster]:border-border group-[.toaster]:shadow-xl group-[.toaster]:opacity-100 text-base",
-                    title: "text-lg font-semibold",
-                    description: "group-[.toast]:text-zinc-500 text-sm",
+                    title: "text-sm font-semibold",
+                    description: "group-[.toast]:text-zinc-500 text-xs",
                     actionButton: "group-[.toast]:bg-zinc-900 group-[.toast]:text-white px-4 py-2 text-sm",
                     cancelButton: "group-[.toast]:bg-zinc-100 group-[.toast]:text-zinc-500 px-4 py-2 text-sm",
                 },

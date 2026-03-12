@@ -38,15 +38,16 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         Font font = getFont();
         Font headerFont = getHeaderFont();
 
-        document.add(new Paragraph("ЗВІТ ПРО ПРАЦІВНИКІВ\n\n", headerFont));
+        Font titleFont = getTitleFont();
+        document.add(new Paragraph("ЗВІТ ПРО ПРАЦІВНИКІВ\n\n", titleFont));
 
         PdfPTable table = new PdfPTable(12);
         table.setWidthPercentage(100);
         table.setWidths(new float[]{2, 3, 3, 3, 2, 2, 3, 3, 3, 3, 3, 2});
 
         for (String header : new String[]{
-                "ID", "Прізвище", "Ім'я", "По батькові", "Роль",
-                "Зарплата", "Телефон", "Дата народження", "Дата прийому на роботу",
+                "ID", "Прізвище", "Ім'я", "По батькові", "Посада",
+                "Зарплата", "Контактний телефон", "Дата народження", "Дата початку роботи",
                 "Місто", "Вулиця", "Поштовий індекс"
         }) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
@@ -92,7 +93,8 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         Font font = getFont();
         Font headerFont = getHeaderFont();
 
-        document.add(new Paragraph("ЗВІТ ПРО ТОВАРИ\n\n", headerFont));
+        Font titleFont = getTitleFont();
+        document.add(new Paragraph("ЗВІТ ПРО ТОВАРИ\n\n", titleFont));
 
         PdfPTable table = new PdfPTable(3);
         table.setWidthPercentage(100);
@@ -133,13 +135,14 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         Font font = getFont();
         Font headerFont = getHeaderFont();
 
-        document.add(new Paragraph("ЗВІТ ПРО ТОВАРИ В МАГАЗИНІ\n\n", headerFont));
+        Font titleFont = getTitleFont();
+        document.add(new Paragraph("ЗВІТ ПРО ТОВАРИ В МАГАЗИНІ\n\n", titleFont));
 
         PdfPTable table = new PdfPTable(6);
         table.setWidthPercentage(100);
 
         for (String header : new String[]{
-                "UPC", "UPC промо", "ID продукту", "Ціна продажу", "Кількість", "Акційний"
+                "UPC", "UPC промо", "ID продукту", "Ціна продажу", "Кількість", "Акційність"
         }) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
             cell.setBackgroundColor(new BaseColor(59, 130, 246));
@@ -190,5 +193,12 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
                 BaseFont.IDENTITY_H,
                 BaseFont.EMBEDDED
         );
+    }
+
+    private Font getTitleFont() throws IOException, DocumentException {
+        BaseFont bf = createBaseFont();
+        Font f = new Font(bf, 14, Font.BOLD);
+        f.setColor(BaseColor.BLACK);
+        return f;
     }
 }

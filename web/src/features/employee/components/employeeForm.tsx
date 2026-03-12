@@ -17,7 +17,7 @@ const RoleSelect = () => {
     const { register } = useFormContext();
     return (
         <div className="col-span-12 flex flex-col gap-1">
-            <label className="text-sm font-medium text-zinc-700">Роль</label>
+            <label className="text-sm font-medium text-zinc-700">Посада</label>
             <select
                 {...register("role")}
                 className="border rounded px-1 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -68,10 +68,10 @@ export const UpsertEmployeeForm = () => {
                         <InputField name="emplName" label="Ім'я" />
                         <InputField name="emplPatronymic" label="По батькові" />
                         <RoleSelect />
-                        <InputField name="salary" label="Зарплата" />
+                        <InputField type="number" name="salary" label="Зарплата" />
                         <InputField type="date" name="dateOfBirth" label="Дата народження" />
-                        <InputField type="date" name="dateOfStart" label="Дата прийому на роботу" />
-                        <InputField name="phoneNumber" label="Номер телефону" />
+                        <InputField type="date" name="dateOfStart" label="Дата початку роботи" />
+                        <InputField name="phoneNumber" label="Контактний телефон" />
                         <InputField name="city" label="Місто" />
                         <InputField name="street" label="Вулиця" />
                         <InputField name="zipCode" label="Поштовий індекс" />

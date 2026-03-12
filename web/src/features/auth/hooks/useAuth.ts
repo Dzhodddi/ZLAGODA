@@ -17,11 +17,11 @@ export const useRegister = () => {
     return useMutation({
         mutationFn: register,
         onSuccess: () => {
-            toast.success("Успішно зареєстровано.");
+            toast.success("Успішно зареєстровано");
             navigate("/login");
         },
         onError: (error) => {
-            toast.error("Помилка під час реєстрації")
+            toast.error("Помилка реєстрації")
             console.error(error);
         },
     });
@@ -43,7 +43,7 @@ export const useLogin = () => {
             navigate("/");
         },
         onError: (error) => {
-            toast.error("Помилка під час авторизації")
+            toast.error("Помилка авторизації")
             console.error(error)
         },
     });
