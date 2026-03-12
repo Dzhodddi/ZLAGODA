@@ -19,10 +19,10 @@
    - Створення чеків та здійснення продажу товарів
 
 ## ER-модель
-<img width="637" height="460" alt="image" src="https://github.com/user-attachments/assets/5a3567c5-1849-4f35-8004-90f0b0950e99" />
+<img width="600" height="400" alt="image" src="https://github.com/user-attachments/assets/5a3567c5-1849-4f35-8004-90f0b0950e99" />
 
 ## Реляційна модель
-<img width="920" height="613" alt="image" src="https://github.com/user-attachments/assets/6f6ff924-d9b8-47c1-a7fe-8a706a846d41" />
+<img width="600" height="400" alt="image" src="https://github.com/user-attachments/assets/6f6ff924-d9b8-47c1-a7fe-8a706a846d41" />
 
 ### Основні функції системи
 - Реєстрація користувачів
