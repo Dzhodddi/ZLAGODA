@@ -22,7 +22,6 @@ const RoleSelect = () => {
                 {...register("role")}
                 className="border rounded px-1 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-                <option value="">Оберіть роль</option>
                 <option value="MANAGER">Менеджер</option>
                 <option value="CASHIER">Касир</option>
             </select>
@@ -69,7 +68,7 @@ export const UpsertEmployeeForm = () => {
                         <InputField name="emplName" label="Ім'я" />
                         <InputField name="emplPatronymic" label="По батькові" />
                         <RoleSelect />
-                        <InputField type="number" name="salary" label="Зарплата" />
+                        <InputField name="salary" label="Зарплата" />
                         <InputField type="date" name="dateOfBirth" label="Дата народження" />
                         <InputField type="date" name="dateOfStart" label="Дата прийому на роботу" />
                         <InputField name="phoneNumber" label="Номер телефону" />

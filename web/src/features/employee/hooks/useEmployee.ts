@@ -9,7 +9,6 @@ import {
     getEmployeePhoneAndAddress,
     downloadEmployeePdf, getEmployee,
 } from "@/features/employee/api/employeeApi.ts";
-import {getStoreProduct} from "@/features/store_product/api/storeProductApi.ts";
 import type {CreateEmployee} from "@/features/employee/types/types.ts";
 
 const QUERY_KEY = "employees";
@@ -20,9 +19,10 @@ export const useCreateEmployee = () => {
         mutationFn: createEmployee,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Успішно додано працівника!");
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            console.error(error.message);
+        },
     });
 };
 
@@ -32,9 +32,10 @@ export const useUpdateEmployee = () => {
         mutationFn: (data: CreateEmployee) => updateEmployee(data.idEmployee, data), // ✅
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Успішно оновлено працівника!");
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            console.error(error.message);
+        },
     });
 };
 
@@ -44,9 +45,10 @@ export const useDeleteEmployee = () => {
         mutationFn: deleteEmployee,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Успішно видалено працівника!");
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            console.error(error.message);
+        }
     });
 };
 
@@ -101,6 +103,8 @@ export const useDownloadEmployeePdf = () => {
             win?.print();
             URL.revokeObjectURL(url);
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            console.error(error.message);
+        },
     });
 };
