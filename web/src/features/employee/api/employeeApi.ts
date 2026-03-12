@@ -22,11 +22,10 @@ export const createEmployee = async (data: CreateEmployee): Promise<Employee> =>
     return EmployeeSchema.parse(response.data);
 }
 
-export const updateEmployee = async (idEmployee: string, data: CreateEmployee): Promise<Employee> => {
-    const response = await javaApiClient.put(prefix  + "/" + idEmployee, data);
+export const updateEmployee = async (data: Employee): Promise<Employee> => {
+    const response = await javaApiClient.put(prefix  + "/" + data.idEmployee, data);
     return EmployeeSchema.parse(response.data);
 }
-
 
 export const getAllEmployees = async (): Promise<PageResponse<Employee>> => {
     const response = await javaApiClient.get(prefix);

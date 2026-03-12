@@ -9,7 +9,6 @@ import {
     getEmployeePhoneAndAddress,
     downloadEmployeePdf, getEmployee,
 } from "@/features/employee/api/employeeApi.ts";
-import type {CreateEmployee} from "@/features/employee/types/types.ts";
 
 const QUERY_KEY = "employees";
 
@@ -29,7 +28,7 @@ export const useCreateEmployee = () => {
 export const useUpdateEmployee = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data: CreateEmployee) => updateEmployee(data.idEmployee, data),
+        mutationFn: updateEmployee,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
         },

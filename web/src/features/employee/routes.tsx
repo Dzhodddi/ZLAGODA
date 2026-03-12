@@ -1,9 +1,10 @@
 import { Route } from "react-router-dom";
-import {EmployeeList} from "@/features/employee/components/employeeList.tsx";
-import {UpsertEmployeeForm} from "@/features/employee/components/employeeForm.tsx";
 import {ProtectedRoute} from "@/components/protectedRoutes.tsx";
-import {EmployeeMe} from "@/features/employee/components/employeeMe.tsx";
-import {EmployeeGet} from "@/features/employee/components/employeeGet.tsx";
+import {EmployeeList} from "@/features/employee/routes/EmployeeList.tsx";
+import {CreateEmployeePage} from "@/features/employee/routes/CreateEmployeePage.tsx";
+import {EditEmployeePage} from "@/features/employee/routes/EditEmployeePage.tsx";
+import {EmployeePage} from "@/features/employee/routes/EmployeePage.tsx";
+import {OwnEmployeePage} from "@/features/employee/routes/EmployeeMePage.tsx";
 
 
 
@@ -11,12 +12,12 @@ const employeeRoutes = (
     <>
         <Route element={<ProtectedRoute allowedRoles={["MANAGER"]} />}>
             <Route path="/employee" element={<EmployeeList/>} />
-            <Route path="/employee/create" element={<UpsertEmployeeForm/>} />
-            <Route path="/employee/edit/:id" element={<UpsertEmployeeForm/>} />
-            <Route path="/employee/:id" element={<EmployeeGet/>} />
+            <Route path="/employee/create" element={<CreateEmployeePage/>} />
+            <Route path="/employee/edit/:id" element={<EditEmployeePage/>} />
+            <Route path="/employee/:id" element={<EmployeePage/>} />
         </Route>
         <Route element={<ProtectedRoute allowedRoles={["CASHIER"]} />}>
-            <Route path="/employee/me" element={<EmployeeMe/>} />
+            <Route path="/employee/me" element={<OwnEmployeePage/>} />
         </Route>
     </>
 );

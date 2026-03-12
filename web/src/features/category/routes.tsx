@@ -7,7 +7,7 @@ import {EditCategoryPage} from "@/features/category/routes/EditCategoryPage.tsx"
 const categoryRoutes = (
     <>
         <Route path="/categories" element={<CategoryListPage />} />
-        <Route path="/categories/new" element={<CreateCategoryPage />} />
+        <Route path="/categories/create" element={<CreateCategoryPage />} />
         <Route path="/categories/edit/:id" element={<EditCategoryPage />} />
     </>
 );

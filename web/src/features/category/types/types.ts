@@ -1,18 +1,18 @@
-import {z} from 'zod';
+import { z } from 'zod';
 
 export const CategorySchema = z.object({
     categoryNumber: z
         .coerce
-        .number("Invalid number")
-        .min(1, "Number must be positive")
-        .max(999999, "Number too large"),
+        .number("Некоректне число")
+        .min(1, "Число має бути додатнім")
+        .max(999999, "Число занадто велике"),
     categoryName: z
         .string()
-        .min(1, "Name too short")
-        .max(50, "Name too long"),
-})
+        .min(1, "Назва занадто коротка")
+        .max(50, "Назва занадто довга"),
+});
 
-export type Category = z.infer<typeof CategorySchema>
+export type Category = z.infer<typeof CategorySchema>;
 
 export const CreateCategorySchema = CategorySchema.omit({
     categoryNumber: true

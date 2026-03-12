@@ -40,7 +40,7 @@ export const UpsertCategoryForm = ({ initialData }: Props) => {
                                 disabled={isSaving || (isEditMode && !isDirty)}
                                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                             >
-                                {isSaving ? 'Збереження...' : isEditMode ? 'Відредагувати категорію' : 'Створити категорію'}
+                                {isSaving ? 'Збереження...' : isEditMode ? 'Оновити' : 'Створити категорію'}
                             </button>
                         </div>
                     </>

@@ -22,15 +22,15 @@ interface GenericUpsertFormProps<TFormValues extends FieldValues, TUpdatePayload
 }
 
 export const GenericUpsertForm = <TFormValues extends FieldValues, TUpdatePayload, TInitialData = TFormValues>({
-                                                                                                                   schema,
-                                                                                                                   initialData,
-                                                                                                                   createMutation,
-                                                                                                                   updateMutation,
-                                                                                                                   prepareUpdatePayload,
-                                                                                                                   onSuccessAction,
-                                                                                                                   className,
-                                                                                                                   children
-                                                                                                               }: GenericUpsertFormProps<TFormValues, TUpdatePayload, TInitialData>) => {
+    schema,
+    initialData,
+    createMutation,
+    updateMutation,
+    prepareUpdatePayload,
+    onSuccessAction,
+    className,
+    children
+}: GenericUpsertFormProps<TFormValues, TUpdatePayload, TInitialData>) => {
 
     const resetFormRef = useRef<() => void>(null);
     const isEditMode = !!initialData;
