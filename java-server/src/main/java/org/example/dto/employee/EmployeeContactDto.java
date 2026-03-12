@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EmployeeContactDto {
+    private String id_employee;
     private String phone_number;
     private String city;
     private String street;

@@ -34,6 +34,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    public Optional<EmployeeResponseDto> getEmployee(String id) {
+        return employeeRepository.findById(id);
+    }
+
+    @Override
     @Transactional
     public EmployeeResponseDto register(EmployeeRegistrationRequestDto request) throws RegistrationException {
         if (request.getId_employee() == null || request.getId_employee().isEmpty()) {

@@ -7,8 +7,10 @@ import {
     getAllCashiers,
     getMe,
     getEmployeePhoneAndAddress,
-    downloadEmployeePdf,
+    downloadEmployeePdf, getEmployee,
 } from "@/features/employee/api/employeeApi.ts";
+import {getStoreProduct} from "@/features/store_product/api/storeProductApi.ts";
+import type {CreateEmployee} from "@/features/employee/types/types.ts";
 
 const QUERY_KEY = "employees";
 
@@ -18,7 +20,7 @@ export const useCreateEmployee = () => {
         mutationFn: createEmployee,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Successfully created employee!");
+            alert("Успішно додано працівника!");
         },
         onError: (error) => alert(error),
     });
@@ -27,11 +29,10 @@ export const useCreateEmployee = () => {
 export const useUpdateEmployee = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateEmployee>[1] }) =>
-            updateEmployee(id, data),
+        mutationFn: (data: CreateEmployee) => updateEmployee(data.idEmployee, data), // ✅
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Successfully updated employee!");
+            alert("Успішно оновлено працівника!");
         },
         onError: (error) => alert(error),
     });
@@ -43,7 +44,7 @@ export const useDeleteEmployee = () => {
         mutationFn: deleteEmployee,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Successfully deleted employee!");
+            alert("Успішно видалено працівника!");
         },
         onError: (error) => alert(error),
     });
@@ -73,6 +74,15 @@ export const useGetMe = () => {
     });
 };
 
+export const useEmployee = (id: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEY, id],
+        queryFn: () => getEmployee(id),
+        enabled: !!id,
+        staleTime: 1000 * 30,
+    });
+};
+
 export const useEmployeePhoneAndAddress = (surname: string) => {
     return useQuery({
         queryKey: [QUERY_KEY, "contact", surname],
@@ -87,10 +97,8 @@ export const useDownloadEmployeePdf = () => {
         mutationFn: downloadEmployeePdf,
         onSuccess: (blob) => {
             const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "employees.pdf";
-            a.click();
+            const win = window.open(url);
+            win?.print();
             URL.revokeObjectURL(url);
         },
         onError: (error) => alert(error),

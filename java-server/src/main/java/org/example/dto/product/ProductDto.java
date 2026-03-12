@@ -7,5 +7,6 @@ import lombok.Setter;
 @Setter
 public class ProductDto {
     private String product_name;
+    private String producer;
     private String product_characteristics;
 }

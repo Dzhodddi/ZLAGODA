@@ -34,7 +34,7 @@ export const Layout = () => {
                     ZLAGODA
                 </Link>
                 <div className="flex flex-1 overflow-hidden">
-                    <span className="text-xs px-2 py-2 rounded font-mono text-zinc-300">
+                    <span className="text-xs px-2 py-2 rounded font-mono text-zinc-400">
                         {isManager ? "Менеджер" : "Касир"}
                     </span>
                     {isCashier && (
@@ -45,13 +45,14 @@ export const Layout = () => {
                             Мій профіль
                         </Link>
                     )}
-                    <button
-                        onClick={handleLogout}
-                        className="bg-red-600 px-3 py-1 rounded text-sm transition-colors"
-                    >
-                        Вийти
-                    </button>
+
                 </div>
+                <button
+                    onClick={handleLogout}
+                    className="px-3 py-1 rounded text-sm transition-colors inline-flex items-center gap-1"
+                >
+                    <img src="/src/logos/exit.png" alt="exit" className="w-4 h-4"/> Вийти
+                </button>
             </header>
 
             <div className="flex flex-1 overflow-hidden">

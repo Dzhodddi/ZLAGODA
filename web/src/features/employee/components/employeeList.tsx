@@ -5,10 +5,11 @@ import {
     useAllCashiers,
     useDeleteEmployee,
     useDownloadEmployeePdf,
-    useEmployeePhoneAndAddress,
+    useEmployeePhoneAndAddress
 } from "@/features/employee/hooks/useEmployee";
 import { type Employee } from "@/features/employee/types/types";
 import { useRole } from "@/hooks/useRole";
+import { toast } from "sonner";
 
 type View = "all" | "cashiers" | "search";
 
@@ -39,8 +40,24 @@ export const EmployeeList = () => {
         ? searchQuery.data?.content
         : undefined;
 
+    const handleDelete = (idEmployee: string) => {
+        toast("Чи дійсно ви хочете видалити?", {
+            action: {
+                label: "Видалити",
+                onClick: () => deleteMutation.mutate(idEmployee, {
+                    onSuccess: () => toast.success("Працівник успішно видалений"),
+                    onError: () => toast.error("Помилка під час видалення працівника"),
+                }),
+            },
+            cancel: {
+                label: "Скасувати",
+                onClick: () => {},
+            },
+        });
+    };
+
     return (
-        <div className="bg-white rounded shadow-md p-6 max-w-4xl mx-auto space-y-4">
+        <div className="bg-zinc-100 p-2 mx-auto space-y-4">
             <div className="flex flex-wrap justify-between items-center gap-2">
                 <h2 className="text-xl font-bold text-zinc-900">Працівники</h2>
                 <div className="flex gap-2 flex-wrap">
@@ -48,16 +65,18 @@ export const EmployeeList = () => {
                         <>
                             <button
                                 onClick={() => navigate("/employee/create")}
-                                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
                             >
-                                + Додати
+                                <div className="relative w-8 h-8 group">
+                                    <img src="/src/logos/add.png" alt="add" className="w-8 h-8 group-hover:opacity-0" />
+                                    <img src="/src/logos/add-hover.png" alt="add" className="w-8 h-8 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                                </div>
                             </button>
                             <button
                                 onClick={() => pdfMutation.mutate()}
                                 disabled={pdfMutation.isPending}
-                                className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
+                                className="bg-zinc-700 text-white px-3 py-1 rounded hover:bg-zinc-800 text-sm"
                             >
-                                PDF
+                                Видрукувати звіт
                             </button>
                         </>
                     )}
@@ -97,7 +116,7 @@ export const EmployeeList = () => {
                             setSearchSurname(surnameInput);
                             setView("search");
                         }}
-                        className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
                     >
                         Шукати
                     </button>
@@ -125,22 +144,28 @@ export const EmployeeList = () => {
 
             {view === "search" && contacts && (
                 contacts.length === 0 ? (
-                    <p className="text-zinc-400 text-sm">Нічого не знайдено для "{searchSurname}"</p>
+                    <p className="text-zinc-400 text-sm">Нічого не знайдено для працівника_ці "{searchSurname}"</p>
                 ) : (
                     <table className="w-full text-sm border-collapse">
                         <thead>
-                        <tr className="bg-zinc-100 text-left">
+                        <tr className="bg-blue-700 text-left text-white">
+                            <th className="px-3 py-2 font-semibold">ID</th>
                             <th className="px-3 py-2 font-semibold">Телефон</th>
                             <th className="px-3 py-2 font-semibold">Місто</th>
                             <th className="px-3 py-2 font-semibold">Вулиця</th>
+                            <th className="px-3 py-2 font-semibold">Поштовий індекс</th>
                         </tr>
                         </thead>
                         <tbody>
                         {contacts.map((c, i) => (
-                            <tr key={i} className="border-t">
+                            <tr key={i}
+                                onClick={() => navigate(`/employee/${c.idEmployee}`)}
+                                className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer">
+                                <td className="px-3 py-2">{c.idEmployee}</td>
                                 <td className="px-3 py-2">{c.phoneNumber}</td>
                                 <td className="px-3 py-2">{c.city}</td>
                                 <td className="px-3 py-2">{c.street}</td>
+                                <td className="px-3 py-2">{c.zipCode}</td>
                             </tr>
                         ))}
                         </tbody>
@@ -152,50 +177,58 @@ export const EmployeeList = () => {
                 employees.length === 0 ? (
                     <p className="text-zinc-400 text-sm">Працівників не знайдено</p>
                 ) : (
-                    <table className="w-full text-sm border-collapse">
-                        <thead>
-                        <tr className="bg-blue-700 text-left text-white">
-                            <th className="px-3 py-2 font-semibold">ID</th>
-                            <th className="px-3 py-2 font-semibold">ПІБ</th>
-                            <th className="px-3 py-2 font-semibold">Роль</th>
-                            <th className="px-3 py-2 font-semibold">Телефон</th>
-                            {isManager && <th className="px-3 py-2" />}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {employees.map((emp) => (
-                            <tr
-                                key={emp.idEmployee}
-                                onClick={() => navigate(`/employee/edit/${emp.idEmployee}`)}
-                                className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer"
-                            >
-                                <td className="px-3 py-2 font-mono text-xs">{emp.idEmployee}</td>
-                                <td className="px-3 py-2">
-                                    {emp.emplSurname} {emp.emplName}{" "}
-                                    {emp.emplPatronymic ?? ""}
-                                </td>
-                                <td className="px-3 py-2">
-                                    {emp.role === "MANAGER" ? "Менеджер" : "Касир"}
-                                </td>
-                                <td className="px-3 py-2">{emp.phoneNumber}</td>
-                                {isManager && (
-                                    <td
-                                        className="px-3 py-2"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        <button
-                                            onClick={() => deleteMutation.mutate(emp.idEmployee)}
-                                            disabled={deleteMutation.isPending}
-                                            className="text-red-600"
-                                        >
-                                            ✕
-                                        </button>
-                                    </td>
-                                )}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-xs border-collapse table-fixed border border-blue-300">
+                            <thead>
+                            <tr className="bg-blue-700 text-center text-white">
+                                <th className="px-3 py-2 font-semibold w-16 border border-blue-500">ID</th>
+                                <th className="px-3 py-2 font-semibold w-40 border border-blue-500">ПІБ</th>
+                                <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Роль</th>
+                                <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Зарплата, грн</th>
+                                <th className="px-3 py-2 font-semibold w-32 border border-blue-500">Дата народження</th>
+                                <th className="px-3 py-2 font-semibold w-36 border border-blue-500">Дата прийому на роботу</th>
+                                <th className="px-3 py-2 font-semibold w-32 border border-blue-500">Номер телефону</th>
+                                <th className="px-3 py-2 font-semibold w-48 border border-blue-500">Адреса</th>
+                                {isManager && <th className="px-3 py-2 w-8 border border-blue-500 border-r-blue-700" />}
+                                {isManager && <th className="px-3 py-2 w-8 border border-blue-500" />}
                             </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {employees.map((emp) => (
+                                <tr key={emp.idEmployee}
+                                    onClick={() => navigate(`/employee/${emp.idEmployee}`)}
+                                    className="bg-blue-100 text-left border-t text-zinc-900">
+                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 break-words">{emp.idEmployee}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">
+                                        {emp.emplSurname} {emp.emplName} {emp.emplPatronymic ?? ""}
+                                    </td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">
+                                        {emp.role === "MANAGER" ? "Менеджер" : "Касир"}
+                                    </td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{emp.salary}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{emp.dateOfBirth}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{emp.dateOfStart}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{emp.phoneNumber}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{emp.city}, {"вул."} {emp.street}, {emp.zipCode}</td>
+                                    {isManager && (
+                                        <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
+                                            <button onClick={() => navigate(`/employee/edit/${emp.idEmployee}`)}>
+                                                <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    )}
+                                    {isManager && (
+                                        <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
+                                            <button onClick={() => handleDelete(emp.idEmployee)}>
+                                                <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    )}
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )
             )}
         </div>

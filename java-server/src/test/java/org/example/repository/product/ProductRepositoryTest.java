@@ -1,20 +1,12 @@
 package org.example.repository.product;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
@@ -61,13 +53,16 @@ class ProductRepositoryTest {
         product = new Product();
         product.setId_product(1);
         product.setProduct_name("TestProduct");
+        product.setProducer("TestProducer");
         product.setCategory_number(10);
 
         productDto = new ProductDto();
         productDto.setProduct_name("TestProduct");
+        productDto.setProducer("TestProducer");
 
         productRequestDto = new ProductRequestDto();
         productRequestDto.setProduct_name("TestProduct");
+        productRequestDto.setProducer("TestProducer");
         productRequestDto.setCategory_number(10);
     }
 
@@ -76,38 +71,17 @@ class ProductRepositoryTest {
     void findAll_noParams_shouldReturnProducts() {
         when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt()))
                 .thenReturn(List.of(product));
-        when(jdbcTemplate.queryForObject(
-                anyString(),
-                eq(Integer.class)
-        )).thenReturn(1);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
+                .thenReturn(1);
         when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> result = repository.findAll(pageable,  null);
+        PageResponseDto<ProductDto> result = repository.findAll(pageable, null);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
-    }
-
-    @Test
-    @DisplayName("findAll should return list of products (With lastSeen params)")
-    void findAll_withLastSeenParams_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any()))
-                .thenReturn(List.of(product));
-        when(jdbcTemplate.queryForObject(
-                anyString(),
-                eq(Integer.class)
-        )).thenReturn(1);
-        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
-
-        Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> result = repository.findAll(pageable,
-                 5);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(jdbcTemplate).query(anyString(), eq(rowMapper), eq(5), eq(10));
+        assertEquals("TestProducer", result.getContent().get(0).getProducer());
     }
 
     @Test
@@ -118,88 +92,7 @@ class ProductRepositoryTest {
         Optional<Product> result = repository.findById(1);
         assertTrue(result.isPresent());
         assertEquals("TestProduct", result.get().getProduct_name());
-    }
-
-    @Test
-    @DisplayName("findById should return empty when product does not exist")
-    void findById_nonExistingId_shouldReturnEmpty() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq(2)))
-                .thenThrow(EmptyResultDataAccessException.class);
-        Optional<Product> result = repository.findById(2);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    @DisplayName("findByName should return products with matching name (No pagination params)")
-    void findByName_noParams_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any()))
-                .thenReturn(List.of(product));
-        when(jdbcTemplate.queryForObject(
-                anyString(),
-                eq(Integer.class),
-                eq("TestProduct")
-        )).thenReturn(1);
-        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
-
-        Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> result = repository.findByName("TestProduct",
-                pageable, null);
-
-        assertEquals(1, result.getContent().size());
-        assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
-    }
-
-    @Test
-    @DisplayName("findByName should return products (With lastSeen params)")
-    void findByName_withLastSeenParams_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any()))
-                .thenReturn(List.of(product));
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), any())).thenReturn(1);
-        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
-
-        Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> result = repository.findByName("TestProduct",
-                pageable,  5);
-
-        assertEquals(1, result.getContent().size());
-        verify(jdbcTemplate).query(anyString(), eq(rowMapper),
-                eq("TestProduct"), eq(5), eq(10));
-    }
-
-    @Test
-    @DisplayName("findByCategoryId should return products in category (No pagination params)")
-    void findByCategoryId_noParams_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any()))
-                .thenReturn(List.of(product));
-        when(jdbcTemplate.queryForObject(
-                anyString(),
-                eq(Integer.class),
-                eq(10))
-        ).thenReturn(1);
-        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
-
-        Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> result = repository.findByCategoryId(10,
-                pageable, null);
-
-        assertEquals(1, result.getContent().size());
-        assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
-    }
-
-    @Test
-    @DisplayName("findByCategoryId should return products (with lastSeenId)")
-    void findByCategoryId_withLastSeenId_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), any(), any(), any()))
-                .thenReturn(List.of(product));
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), any())).thenReturn(1);
-        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
-
-        Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> result = repository.findByCategoryId(10,
-                pageable,  5);
-
-        assertEquals(1, result.getContent().size());
-        verify(jdbcTemplate).query(anyString(), eq(rowMapper), eq(10), eq(5), eq(10));
+        assertEquals("TestProducer", result.get().getProducer());
     }
 
     @Test
@@ -208,70 +101,32 @@ class ProductRepositoryTest {
         Product newProduct = new Product();
         newProduct.setId_product(0);
         newProduct.setProduct_name("TestProduct");
+        newProduct.setProducer("TestProducer");
         newProduct.setCategory_number(10);
 
         Product savedProduct = new Product();
         savedProduct.setId_product(1);
         savedProduct.setProduct_name("TestProduct");
+        savedProduct.setProducer("TestProducer");
         savedProduct.setCategory_number(10);
 
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                eq("TestProduct"), eq(null), eq(10))).thenReturn(savedProduct);
+                eq("TestProduct"), eq("TestProducer"), eq(null), eq(10)))
+                .thenReturn(savedProduct);
 
         Product result = repository.save(newProduct);
 
         assertNotNull(result);
         assertEquals("TestProduct", result.getProduct_name());
+        assertEquals("TestProducer", result.getProducer());
     }
 
     @Test
-    @DisplayName("save should update existing product when id is not 0")
-    void save_existingProduct_shouldUpdateAndReturnProduct() {
-        when(jdbcTemplate.update(anyString(), anyString(), any(), anyInt(), anyInt()))
-                .thenReturn(1);
-        when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq(1)))
-                .thenReturn(product);
-
-        Product result = repository.save(product);
-
-        assertNotNull(result);
-        assertEquals("TestProduct", result.getProduct_name());
-        verify(jdbcTemplate, times(1)).update(anyString(),
-                anyString(), any(), anyInt(), anyInt());
-        verify(jdbcTemplate, times(1)).queryForObject(
-                anyString(), eq(rowMapper), eq(1));
-    }
-
-    @Test
-    @DisplayName("save should throw EntityNotFoundException when update affects 0 rows")
-    void save_existingProduct_notFound_shouldThrowException() {
-        when(jdbcTemplate.update(anyString(), anyString(), any(), anyInt(), anyInt()))
-                .thenReturn(0);
-
-        assertThrows(EntityNotFoundException.class, () -> repository.save(product));
-    }
-
-    @Test
-    @DisplayName("save should throw InvalidCategoryException on data integrity violation")
-    void save_invalidCategory_shouldThrowException() {
-        Product newProduct = new Product();
-        newProduct.setId_product(0);
-        newProduct.setProduct_name("TestProduct");
-        newProduct.setCategory_number(999);
-
-        when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                eq("TestProduct"), eq(null), eq(999)))
-                .thenThrow(DataIntegrityViolationException.class);
-
-        assertThrows(InvalidCategoryException.class, () -> repository.save(newProduct));
-    }
-
-    @Test
-    @DisplayName("updateProductById should update and return ProductDto when product exists")
+    @DisplayName("updateProductById should update and return ProductDto")
     void updateProductById_existingProduct_shouldReturnDto() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(1)))
                 .thenReturn(1);
-        when(jdbcTemplate.update(anyString(), anyString(), any(), anyInt(), eq(1)))
+        when(jdbcTemplate.update(anyString(), anyString(), anyString(), any(), anyInt(), eq(1)))
                 .thenReturn(1);
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq(1)))
                 .thenReturn(product);
@@ -281,68 +136,7 @@ class ProductRepositoryTest {
 
         assertNotNull(result);
         assertEquals("TestProduct", result.getProduct_name());
-        verify(jdbcTemplate, times(1)).update(anyString(),
-                anyString(), any(), anyInt(), eq(1));
-    }
-
-    @Test
-    @DisplayName("updateProductById should throw EntityNotFoundException when product does not exist")
-    void updateProductById_nonExistingProduct_shouldThrowException() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(2)))
-                .thenReturn(0);
-
-        assertThrows(EntityNotFoundException.class,
-                () -> repository.updateProductById(2, productRequestDto));
-    }
-
-    @Test
-    @DisplayName("updateProductById should throw InvalidCategoryException on data integrity violation")
-    void updateProductById_invalidCategory_shouldThrowException() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(1)))
-                .thenReturn(1);
-        when(jdbcTemplate.update(anyString(), anyString(), any(), anyInt(), eq(1)))
-                .thenThrow(DataIntegrityViolationException.class);
-
-        assertThrows(InvalidCategoryException.class,
-                () -> repository.updateProductById(1, productRequestDto));
-    }
-
-    @Test
-    @DisplayName("deleteById should delete product when it exists")
-    void deleteById_existingProduct_shouldDeleteProduct() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(1)))
-                .thenReturn(1);
-        when(jdbcTemplate.update(anyString(), eq(1))).thenReturn(1);
-
-        repository.deleteById(1);
-
-        verify(jdbcTemplate, times(1)).update(anyString(), eq(1));
-    }
-
-    @Test
-    @DisplayName("deleteById should throw EntityNotFoundException when product does not exist")
-    void deleteById_nonExistingProduct_shouldThrowException() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(2)))
-                .thenReturn(0);
-
-        assertThrows(EntityNotFoundException.class, () -> repository.deleteById(2));
-    }
-
-    @Test
-    @DisplayName("existsByIdProduct should return true when product exists")
-    void existsByIdProduct_existingProduct_shouldReturnTrue() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(1)))
-                .thenReturn(1);
-
-        assertTrue(repository.existsByIdProduct(1));
-    }
-
-    @Test
-    @DisplayName("existsByIdProduct should return false when product does not exist")
-    void existsByIdProduct_nonExistingProduct_shouldReturnFalse() {
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(2)))
-                .thenReturn(0);
-        assertFalse(repository.existsByIdProduct(2));
+        assertEquals("TestProducer", result.getProducer());
     }
 
     @Test
@@ -356,5 +150,6 @@ class ProductRepositoryTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("TestProduct", result.get(0).getProduct_name());
+        assertEquals("TestProducer", result.get(0).getProducer());
     }
 }

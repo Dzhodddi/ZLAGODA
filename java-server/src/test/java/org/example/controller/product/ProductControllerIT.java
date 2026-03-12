@@ -20,6 +20,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.web.client.RestClient;
 
+import java.util.Objects;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "FRONT_URL=http://localhost:3000")
 @ActiveProfiles("test")
@@ -68,6 +70,6 @@ public class ProductControllerIT {
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<RestPage<ProductDto>>() {});
 
-        assertEquals(2, response.getBody().getContent().size());
+        assertEquals(2, Objects.requireNonNull(response.getBody()).getContent().size());
     }
 }

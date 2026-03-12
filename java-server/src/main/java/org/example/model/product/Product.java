@@ -8,6 +8,7 @@ import lombok.Setter;
 public class Product {
     private int id_product;
     private String product_name;
+    private String producer;
     private String product_characteristics;
     private int category_number;
 }

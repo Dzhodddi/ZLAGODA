@@ -92,12 +92,14 @@ export const CreateEmployeeSchema = z.object({
         .max(9, "Індекс занадто довгий"),
     password: z
         .string()
-        .min(1, "Пароль занадто короткий")
-        .max(100, "Пароль занадто довгий"),
+        .max(100, "Пароль занадто довгий")
+        .optional()
+        .or(z.literal("")),
     repeatPassword: z
         .string()
-        .min(1, "Пароль занадто короткий")
-        .max(100, "Пароль занадто довгий"),
+        .max(100, "Пароль занадто довгий")
+        .optional()
+        .or(z.literal("")),
 }).refine(
     (data) => data.password === data.repeatPassword,
     {
@@ -109,10 +111,25 @@ export const CreateEmployeeSchema = z.object({
 export type CreateEmployee = z.infer<typeof CreateEmployeeSchema>;
 
 export const EmployeeContactSchema = z.object({
-    phoneNumber: z.string(),
-    city: z.string(),
-    street: z.string(),
-    zipCode: z.string(),
+    idEmployee: z
+        .string()
+        .min(1, "ID занадто короткий")
+        .max(10, "ID занадто довгий"),
+    phoneNumber: z
+        .string()
+        .regex(phoneRegex, "Неправильний формат номеру телефону"),
+    city: z
+        .string()
+        .min(1, "Місто занадто коротке")
+        .max(50, "Місто занадто довге"),
+    street: z
+        .string()
+        .min(1, "Вулиця занадто коротка")
+        .max(50, "Вулиця занадто довга"),
+    zipCode: z
+        .string()
+        .min(1, "Індекс занадто короткий")
+        .max(9, "Індекс занадто довгий")
 });
 
 export type EmployeeContact = z.infer<typeof EmployeeContactSchema>;
@@ -123,3 +140,7 @@ export const PageEmployeeContactSchema = z.object({
     totalElements: z.number(),
     hasNext: z.boolean(),
 });
+
+export type PageResponse<T> = z.infer<typeof PageEmployeeSchema>;
+
+export type PageResponseContact<T> = z.infer<typeof PageEmployeeContactSchema>;

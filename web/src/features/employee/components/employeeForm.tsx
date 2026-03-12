@@ -1,13 +1,17 @@
-import { useRef } from "react";
 import { useFormContext } from "react-hook-form";
-import { useCreateEmployee } from "@/features/employee/hooks/useEmployee.ts";
+import { useNavigate, useParams } from "react-router-dom";
+import { useCreateEmployee, useUpdateEmployee, useEmployee } from "@/features/employee/hooks/useEmployee.ts";
 import {
     type Employee,
     type CreateEmployee,
     CreateEmployeeSchema
 } from "@/features/employee/types/types.ts";
-import { Form } from "@/components/ui/Form.tsx";
+import { GenericUpsertForm } from "@/components/ui/GenericUpsertForm.tsx";
 import { InputField } from "@/components/ui/InputFields.tsx";
+
+interface Props {
+    initialData?: Employee;
+}
 
 const RoleSelect = () => {
     const { register } = useFormContext();
@@ -27,61 +31,70 @@ const RoleSelect = () => {
 };
 
 export const UpsertEmployeeForm = () => {
-    const resetFormRef = useRef<() => void>(null);
+    const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
 
-    const mutation = useCreateEmployee();
+    const { data: existingEmployee, isLoading } = useEmployee(id ?? "");
 
-    const handleSubmit = (data: CreateEmployee) => {
-        mutation.mutate(data, {
-            onSuccess: () => {
-                if (resetFormRef.current) {
-                    resetFormRef.current();
-                }
-            }
-        });
-    };
+    const initialData = id && existingEmployee ? {
+        ...existingEmployee,
+        password: "",
+        repeatPassword: "",
+    } as unknown as CreateEmployee : undefined;
+
+    if (id && isLoading) return <p>Завантаження...</p>;
 
     return (
         <div className="p-6 bg-white rounded text-zinc-900 shadow-md max-w-2xl mx-auto">
-            <h2 className="text-xl font-bold mb-4">Створити працівника</h2>
-
-            <Form<Employee>
+            <GenericUpsertForm<CreateEmployee, CreateEmployee, Employee>
                 schema={CreateEmployeeSchema}
-                onSubmit={handleSubmit}
+                initialData={initialData}
+                createMutation={useCreateEmployee()}
+                updateMutation={useUpdateEmployee()}
+                onSuccessAction={() => navigate("/employee")}
+                prepareUpdatePayload={(formData, initial) => ({
+                    ...formData,
+                    idEmployee: initial.idEmployee
+                })}
                 className="grid grid-cols-12 gap-4"
             >
-                {({ formState: { isSubmitting }, reset }) => {
-                    resetFormRef.current = reset;
-                    return (
-                        <>
-                            <InputField name="idEmployee" label="ID працівника" />
-                            <InputField name="emplSurname" label="Прізвище" />
-                            <InputField name="emplName" label="Ім'я" />
-                            <InputField name="emplPatronymic" label="По батькові" />
-                            <RoleSelect />
-                            <InputField type="number" name="salary" label="Зарплата" />
-                            <InputField type="date" name="dateOfBirth" label="Дата народження" />
-                            <InputField type="date" name="dateOfStart" label="Дата прийому на роботу" />
-                            <InputField name="phoneNumber" label="Номер телефону" />
-                            <InputField name="city" label="Місто" />
-                            <InputField name="street" label="Вулиця" />
-                            <InputField name="zipCode" label="Поштовий індекс" />
-                            <InputField type="password" name="password" label="Пароль" />
-                            <InputField type="password" name="repeatPassword" label="Повторіть пароль" />
+                {(_methods, { isEditMode, isSaving }) => (
+                    <>
+                        <h2 className="col-span-12 text-xl font-bold mb-4">
+                            {isEditMode ? "Редагувати працівника" : "Додати працівника"}
+                        </h2>
 
-                            <div className="col-span-12 flex justify-end mt-4">
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-                                >
-                                    {isSubmitting ? "Збереження..." : "Створити працівника"}
-                                </button>
-                            </div>
-                        </>
-                    );
-                }}
-            </Form>
+                        <InputField name="idEmployee" label="ID працівника" />
+                        <InputField name="emplSurname" label="Прізвище" />
+                        <InputField name="emplName" label="Ім'я" />
+                        <InputField name="emplPatronymic" label="По батькові" />
+                        <RoleSelect />
+                        <InputField type="number" name="salary" label="Зарплата" />
+                        <InputField type="date" name="dateOfBirth" label="Дата народження" />
+                        <InputField type="date" name="dateOfStart" label="Дата прийому на роботу" />
+                        <InputField name="phoneNumber" label="Номер телефону" />
+                        <InputField name="city" label="Місто" />
+                        <InputField name="street" label="Вулиця" />
+                        <InputField name="zipCode" label="Поштовий індекс" />
+                        {!isEditMode && (
+                            <>
+                                <InputField type="password" name="password" label="Пароль" />
+                                <InputField type="password" name="repeatPassword" label="Повторіть пароль" />
+                            </>
+                        )}
+
+                        <div className="col-span-12 flex justify-end mt-4">
+                            <button
+                                type="submit"
+                                disabled={isSaving}
+                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                            >
+                                {isSaving ? "Збереження..." : isEditMode ? "Оновити" : "Створити"}
+                            </button>
+                        </div>
+                    </>
+                )}
+            </GenericUpsertForm>
         </div>
     );
 };

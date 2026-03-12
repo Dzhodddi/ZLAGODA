@@ -45,6 +45,16 @@ public class EmployeeController {
     private final EmployeeService employeeService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
 
+    @GetMapping("/{id}")
+    @Operation(
+            summary = "Get employee",
+            description = "Get employee by id"
+    )
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public EmployeeResponseDto getEmployee(@PathVariable String id) {
+        return employeeService.getEmployee(id).orElseThrow();
+    }
+
     @GetMapping
     @Operation(
             summary = "Get all employees",

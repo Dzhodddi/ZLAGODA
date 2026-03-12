@@ -13,6 +13,9 @@ public class ProductRequestDto {
     @Length(min = 1, max = 50)
     private String product_name;
     @NotBlank
+    @Length(min = 1, max = 50)
+    private String producer;
+    @NotBlank
     @Length(min = 1, max = 100)
     private String product_characteristics;
     @NotNull

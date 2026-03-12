@@ -1,23 +1,10 @@
 package org.example.controller.product;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -36,14 +23,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(properties = "FRONT_URL=http://localhost:3000")
 @AutoConfigureMockMvc
-@EnableMethodSecurity
 @ActiveProfiles("test")
 class ProductControllerTest {
 
@@ -67,14 +52,17 @@ class ProductControllerTest {
     void setUp() {
         productDto1 = new ProductDto();
         productDto1.setProduct_name("Apple");
+        productDto1.setProducer("Producer A");
         productDto1.setProduct_characteristics("Tasty apple");
 
         productDto2 = new ProductDto();
         productDto2.setProduct_name("Banana");
+        productDto2.setProducer("Producer B");
         productDto2.setProduct_characteristics("Delicious banana");
 
         productRequestDto = new ProductRequestDto();
         productRequestDto.setProduct_name("Orange");
+        productRequestDto.setProducer("Producer C");
         productRequestDto.setProduct_characteristics("Juicy orange");
         productRequestDto.setCategory_number(10);
     }
@@ -97,7 +85,9 @@ class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.content[0].product_name").value("Apple"))
-                .andExpect(jsonPath("$.content[1].product_name").value("Banana"));
+                .andExpect(jsonPath("$.content[0].producer").value("Producer A"))
+                .andExpect(jsonPath("$.content[1].product_name").value("Banana"))
+                .andExpect(jsonPath("$.content[1].producer").value("Producer B"));
 
         verify(productService).getAll(any(Pageable.class), anyInt());
     }
@@ -120,7 +110,8 @@ class ProductControllerTest {
                         .param("lastSeenId", "0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
-                .andExpect(jsonPath("$.content[0].product_name").value("Apple"));
+                .andExpect(jsonPath("$.content[0].product_name").value("Apple"))
+                .andExpect(jsonPath("$.content[0].producer").value("Producer A"));
 
         verify(productService).findByName(eq("Apple"), any(Pageable.class), anyInt());
     }
@@ -154,7 +145,9 @@ class ProductControllerTest {
                         .param("categoryId", "10")
                         .param("lastSeenId", "0"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(2));
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].producer").value("Producer A"))
+                .andExpect(jsonPath("$.content[1].producer").value("Producer B"));
 
         verify(productService).findByCategoryId(eq(10), any(Pageable.class), anyInt());
     }
@@ -165,6 +158,7 @@ class ProductControllerTest {
     void createProduct_ok() throws Exception {
         ProductDto created = new ProductDto();
         created.setProduct_name("Orange");
+        created.setProducer("Producer C");
 
         when(productService.save(any(ProductRequestDto.class))).thenReturn(created);
 
@@ -173,7 +167,8 @@ class ProductControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(productRequestDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.product_name").value("Orange"));
+                .andExpect(jsonPath("$.product_name").value("Orange"))
+                .andExpect(jsonPath("$.producer").value("Producer C"));
 
         verify(productService).save(any(ProductRequestDto.class));
     }
@@ -195,6 +190,7 @@ class ProductControllerTest {
     void updateProduct_ok() throws Exception {
         ProductDto updated = new ProductDto();
         updated.setProduct_name("Updated Apple");
+        updated.setProducer("Producer A");
 
         when(productService.updateProductById(eq(1), any(ProductRequestDto.class)))
                 .thenReturn(updated);
@@ -204,7 +200,8 @@ class ProductControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(productRequestDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.product_name").value("Updated Apple"));
+                .andExpect(jsonPath("$.product_name").value("Updated Apple"))
+                .andExpect(jsonPath("$.producer").value("Producer A"));
 
         verify(productService).updateProductById(eq(1), any(ProductRequestDto.class));
     }
@@ -232,8 +229,7 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/products/report"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition",
-                        "attachment; filename=products.pdf"))
+                .andExpect(header().string("Content-Disposition", "attachment; filename=products.pdf"))
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF))
                 .andExpect(content().bytes(pdf));
 

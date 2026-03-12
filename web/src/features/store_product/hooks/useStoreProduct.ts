@@ -83,10 +83,8 @@ export const useDownloadStoreProductPdf = () => {
         mutationFn: downloadStoreProductPdf,
         onSuccess: (blob) => {
             const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "store-products.pdf";
-            a.click();
+            const win = window.open(url);
+            win?.print();
             URL.revokeObjectURL(url);
         },
         onError: (error) => alert(error),

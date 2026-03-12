@@ -5,10 +5,17 @@ import {
     type CreateEmployee,
     PageEmployeeSchema,
     type EmployeeContact,
-    PageEmployeeContactSchema
+    PageEmployeeContactSchema,
+    type PageResponse,
+    type PageResponseContact
 } from "@/features/employee/types/types.ts";
 
 const prefix = "/employees"
+
+export const getEmployee = async (idEmployee: string): Promise<Employee> => {
+    const response = await javaApiClient.get(prefix  + "/" + idEmployee);
+    return EmployeeSchema.parse(response.data);
+}
 
 export const createEmployee = async (data: CreateEmployee): Promise<Employee> => {
     const response = await javaApiClient.post(prefix, data);
@@ -20,11 +27,6 @@ export const updateEmployee = async (idEmployee: string, data: CreateEmployee): 
     return EmployeeSchema.parse(response.data);
 }
 
-export interface PageResponse<T> {
-    content: T[];
-    totalPages: number;
-    totalElements: number;
-}
 
 export const getAllEmployees = async (): Promise<PageResponse<Employee>> => {
     const response = await javaApiClient.get(prefix);
@@ -52,7 +54,7 @@ export const getMe = async (): Promise<Employee> => {
     return EmployeeSchema.parse(response.data);
 };
 
-export const getEmployeePhoneAndAddress  = async (surname: string): Promise<PageResponse<EmployeeContact>> => {
+export const getEmployeePhoneAndAddress  = async (surname: string): Promise<PageResponseContact<EmployeeContact>> => {
     const response = await javaApiClient.get(prefix, {
         params: { surname },
     });

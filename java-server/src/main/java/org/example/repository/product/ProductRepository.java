@@ -48,7 +48,7 @@ public class ProductRepository {
         if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                            SELECT p.product_name, p.product_characteristics
+                            SELECT p.product_name, p.producer, p.product_characteristics
                             FROM product p
                             INNER JOIN store_product sp1
                             ON p.id_product = sp1.id_product
@@ -78,7 +78,7 @@ public class ProductRepository {
         } else {
             products = jdbcTemplate.query(
                             """
-                            SELECT p.product_name, p.product_characteristics
+                            SELECT p.product_name, p.producer, p.product_characteristics
                             FROM product p
                             INNER JOIN store_product sp1
                             ON p.id_product = sp1.id_product
@@ -117,7 +117,7 @@ public class ProductRepository {
         if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                            SELECT product_name, product_characteristics
+                            SELECT product_name, producer, product_characteristics
                             FROM product
                             WHERE id_product > ?
                             ORDER BY id_product
@@ -132,7 +132,7 @@ public class ProductRepository {
         } else {
             products = jdbcTemplate.query(
                             """
-                            SELECT product_name, product_characteristics
+                            SELECT product_name, producer, product_characteristics
                             FROM product
                             ORDER BY id_product
                             FETCH FIRST ? ROWS ONLY
@@ -158,7 +158,7 @@ public class ProductRepository {
         if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                            SELECT product_name, product_characteristics
+                            SELECT product_name, producer, product_characteristics
                             FROM product
                             WHERE product_name = ?
                               AND id_product > ?
@@ -175,7 +175,7 @@ public class ProductRepository {
         } else {
             products = jdbcTemplate.query(
                             """
-                            SELECT product_name, product_characteristics
+                            SELECT product_name, producer, product_characteristics
                             FROM product
                             WHERE product_name = ?
                             ORDER BY id_product
@@ -203,7 +203,7 @@ public class ProductRepository {
         if (lastSeenId != null && lastSeenId > 0) {
             products = jdbcTemplate.query(
                             """
-                            SELECT product_name, product_characteristics
+                            SELECT product_name, producer, product_characteristics
                             FROM product
                             WHERE category_number = ?
                               AND id_product > ?
@@ -220,7 +220,7 @@ public class ProductRepository {
         } else {
             products = jdbcTemplate.query(
                             """
-                            SELECT product_name, product_characteristics
+                            SELECT product_name, producer, product_characteristics
                             FROM product
                             WHERE category_number = ?
                             ORDER BY id_product
@@ -245,7 +245,7 @@ public class ProductRepository {
             return Optional.ofNullable(
                     jdbcTemplate.queryForObject(
                             """
-                            SELECT product_name, product_characteristics
+                            SELECT product_name, producer, product_characteristics
                             FROM product
                             WHERE id_product = ?
                             """,
@@ -265,13 +265,15 @@ public class ProductRepository {
                         """
                         INSERT INTO product (
                             product_name,
+                            producer,
                             product_characteristics,
                             category_number
-                        ) VALUES (?, ?, ?)
+                        ) VALUES (?, ?, ?, ?)
                         RETURNING id_product, category_number, product_name, product_characteristics
                         """,
                         rowMapper,
                         product.getProduct_name(),
+                        product.getProducer(),
                         product.getProduct_characteristics(),
                         product.getCategory_number()
                 );
@@ -280,11 +282,13 @@ public class ProductRepository {
                         """
                         UPDATE product SET
                             product_name = ?,
+                            producer = ?,
                             product_characteristics = ?,
                             category_number = ?
                         WHERE id_product = ?
                         """,
                         product.getProduct_name(),
+                        product.getProducer(),
                         product.getProduct_characteristics(),
                         product.getCategory_number(),
                         product.getId_product()
@@ -314,11 +318,13 @@ public class ProductRepository {
                     """
                     UPDATE product SET
                         product_name = ?,
+                        producer = ?,
                         product_characteristics = ?,
                         category_number = ?
                     WHERE id_product = ?
                     """,
                     requestDto.getProduct_name(),
+                    requestDto.getProducer(),
                     requestDto.getProduct_characteristics(),
                     requestDto.getCategory_number(),
                     id
@@ -363,7 +369,7 @@ public class ProductRepository {
 
     public List<ProductDto> findAllNoPagination() {
         return jdbcTemplate.query("""
-                            SELECT product_name, product_characteristics
+                            SELECT product_name, producer, product_characteristics
                             FROM product
                             ORDER BY product_name
                             """,

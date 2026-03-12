@@ -2,6 +2,8 @@ package org.example.repository.employee;
 
 import java.util.List;
 import java.util.Optional;
+
+import io.jsonwebtoken.security.Jwks;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.EmployeeContactDto;
 import org.example.dto.employee.EmployeeUpdateRequestDto;
@@ -13,6 +15,7 @@ import org.example.mapper.employee.EmployeeMapper;
 import org.example.mapper.employee.EmployeeRowMapper;
 import org.example.model.employee.Employee;
 import org.example.model.employee.Role;
+import org.example.model.product.Product;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +29,41 @@ public class EmployeeRepository {
     private final JdbcTemplate jdbcTemplate;
     private final EmployeeRowMapper employeeRowMapper;
     private final EmployeeMapper employeeMapper;
+
+    public Optional<EmployeeResponseDto> findById(String id) {
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(
+                            """
+                            SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+                                   empl_role, empl_salary, date_of_birth, date_of_start,
+                                   phone_number, city, street, zip_code
+                            FROM employee
+                            WHERE id_employee = ?
+                            """,
+                            (rs, rowNum) -> {
+                                EmployeeResponseDto dto = new EmployeeResponseDto();
+                                dto.setId_employee(rs.getString("id_employee"));
+                                dto.setEmpl_surname(rs.getString("empl_surname"));
+                                dto.setEmpl_name(rs.getString("empl_name"));
+                                dto.setEmpl_patronymic(rs.getString("empl_patronymic"));
+                                dto.setRole(rs.getString("empl_role"));
+                                dto.setSalary(rs.getBigDecimal("empl_salary"));
+                                dto.setDate_of_birth(rs.getDate("date_of_birth"));
+                                dto.setDate_of_start(rs.getDate("date_of_start"));
+                                dto.setPhone_number(rs.getString("phone_number"));
+                                dto.setCity(rs.getString("city"));
+                                dto.setStreet(rs.getString("street"));
+                                dto.setZip_code(rs.getString("zip_code"));
+                                return dto;
+                            },
+                            id
+                    )
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
 
     public PageResponseDto<EmployeeResponseDto> findAll(Pageable pageable,
                                                         String lastSeenId) {
@@ -307,15 +345,16 @@ public class EmployeeRepository {
         if (lastSeenId != null) {
             employees = jdbcTemplate.query(
                     """
-                    SELECT phone_number, city, street, zip_code
+                    SELECT id_employee, phone_number, city, street, zip_code
                     FROM employee
-                    WHERE empl_surname = ?
+                    WHERE LOWER(empl_surname) = LOWER(?)
                       AND id_employee > ?
                     ORDER BY id_employee
                     FETCH FIRST ? ROWS ONLY
                     """,
                     (rs, rowNum) -> {
                         EmployeeContactDto dto = new EmployeeContactDto();
+                        dto.setId_employee(rs.getString("id_employee"));
                         dto.setPhone_number(rs.getString("phone_number"));
                         dto.setCity(rs.getString("city"));
                         dto.setStreet(rs.getString("street"));
@@ -330,14 +369,15 @@ public class EmployeeRepository {
             int pageSize = pageable.getPageSize();
             employees = jdbcTemplate.query(
                     """
-                    SELECT phone_number, city, street, zip_code
+                    SELECT id_employee, phone_number, city, street, zip_code
                     FROM employee
-                    WHERE empl_surname = ?
+                    WHERE LOWER(empl_surname) = LOWER(?)
                     ORDER BY id_employee
                     FETCH FIRST ? ROWS ONLY
                     """,
                     (rs, rowNum) -> {
                         EmployeeContactDto dto = new EmployeeContactDto();
+                        dto.setId_employee(rs.getString("id_employee"));
                         dto.setPhone_number(rs.getString("phone_number"));
                         dto.setCity(rs.getString("city"));
                         dto.setStreet(rs.getString("street"));
@@ -364,7 +404,7 @@ public class EmployeeRepository {
                 """
                 SELECT COUNT(*)
                 FROM employee
-                WHERE empl_surname = ?
+                WHERE LOWER(empl_surname) = LOWER(?)
                 """,
                 Integer.class,
                 surname
