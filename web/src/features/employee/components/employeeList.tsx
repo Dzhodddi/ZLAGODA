@@ -67,8 +67,8 @@ export const EmployeeList = () => {
                                 onClick={() => navigate("/employee/create")}
                             >
                                 <div className="relative w-8 h-8 group">
-                                    <img src="/images/add.png" alt="add" className="w-8 h-8 group-hover:opacity-0" />
-                                    <img src="/images/add-hover.png" alt="add" className="w-8 h-8 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                                    <img src="/src/logos/add.png" alt="add" className="w-8 h-8 group-hover:opacity-0" />
+                                    <img src="/src/logos/add-hover.png" alt="add" className="w-8 h-8 absolute inset-0 opacity-0 group-hover:opacity-100" />
                                 </div>
                             </button>
                             <button
@@ -213,14 +213,14 @@ export const EmployeeList = () => {
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
                                             <button onClick={() => navigate(`/employee/edit/${emp.idEmployee}`)}>
-                                                <img src="/images/edit.png" alt="edit" className="w-4 h-4" />
+                                                <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
                                             </button>
                                         </td>
                                     )}
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
                                             <button onClick={() => handleDelete(emp.idEmployee)}>
-                                                <img src="/images/delete.png" alt="delete" className="w-4 h-4" />
+                                                <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
                                             </button>
                                         </td>
                                     )}
