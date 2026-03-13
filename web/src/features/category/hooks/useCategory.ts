@@ -1,12 +1,15 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     createCategory,
-    deleteCategory,
+    deleteCategory, getCategory,
     listCategories,
     updateCategory
 } from "@/features/category/api/categoryApi.ts";
 import {toast} from "sonner";
+import {CategorySchema} from "@/features/category/types/types.ts";
+import {getEmployee} from "@/features/employee/api/employeeApi.ts";
 
+const QUERY_KEY = "categories"
 
 export const useCreateCategory = () => {
     const queryClient = useQueryClient();
@@ -14,7 +17,7 @@ export const useCreateCategory = () => {
     return useMutation({
         mutationFn: createCategory,
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['categories']})
+            queryClient.invalidateQueries({queryKey: [QUERY_KEY]})
             toast.success("Успішно створено категорію");
         },
         onError: (error) => {
@@ -30,7 +33,7 @@ export const useUpdateCategory = () => {
     return useMutation({
         mutationFn: updateCategory,
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['categories']})
+            queryClient.invalidateQueries({queryKey: [QUERY_KEY]})
             toast.success("Успішно оновлено категорію")
         },
         onError: (error) => {
@@ -42,7 +45,7 @@ export const useUpdateCategory = () => {
 
 export const useCategoryList = () => {
     return useQuery({
-        queryKey: ['categories'],
+        queryKey: [QUERY_KEY],
         queryFn: listCategories,
     });
 }
@@ -53,11 +56,20 @@ export const useDeleteCategory = () => {
     return useMutation({
         mutationFn: deleteCategory,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['categories'] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
         },
         onError: (error) => {
             toast.error("Помилка під час видалення категорії")
             console.error(error)
         }
+    });
+};
+
+export const useCategory = (categoryNumber: number) => {
+    return useQuery({
+        queryKey: [QUERY_KEY, categoryNumber],
+        queryFn: () => getCategory(categoryNumber),
+        enabled: !!categoryNumber,
+        staleTime: 1000 * 30,
     });
 };

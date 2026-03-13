@@ -74,33 +74,40 @@ export const CategoryListPage = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-xs border-collapse table-fixed border border-blue-300">
                         <thead>
-                            <tr className="bg-blue-700 text-center text-white">
-                                <th className="px-3 py-2 font-semibold w-16 border border-blue-500">Номер</th>
-                                <th className="px-3 py-2 font-semibold w-40 border border-blue-500">Назва</th>
-                                <th className="px-3 py-2 font-semibold w-24 border border-blue-500"></th>
-                                <th className="px-3 py-2 font-semibold w-24 border border-blue-500"></th>
-                            </tr>
+                        <tr className="bg-blue-700 text-left text-white">
+                            <th className="px-3 py-2 font-semibold w-16 border border-blue-500">Номер</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500">Назва</th>
+                            <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
+                            <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {categories?.map((category) => (
-                                <tr
-                                    key={category.categoryNumber}
-                                    className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer"
-                                >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200">{category.categoryNumber}</td>
-                                    <td className="px-3 py-2 border border-blue-200">{category.categoryName}</td>
-                                    <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
-                                        <button onClick={() => navigate(`/categories/edit/${category.categoryNumber}`)}>
-                                            <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
-                                        </button>
-                                    </td>
-                                    <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
-                                        <button onClick={() => handleDelete(category.categoryNumber)}>
-                                            <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                        {categories?.map((category) => (
+                            <tr
+                                key={category.categoryNumber}
+                                onClick={() => navigate(`/categories/${category.categoryNumber}`)}
+                                className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
+                            >
+                                <td className="px-3 py-2 font-mono text-xs border border-blue-200">{category.categoryNumber}</td>
+                                <td className="px-3 py-2 border border-blue-200 truncate ">{category.categoryName}</td>
+                                <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                        onClick={() => navigate(`/categories/edit/${category.categoryNumber}`)}
+                                        className="hover:scale-110 transition-transform flex justify-center w-full"
+                                    >
+                                        <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
+                                    </button>
+                                </td>
+                                <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                        onClick={() => handleDelete(category.categoryNumber)}
+                                        className="hover:scale-110 transition-transform flex justify-center w-full"
+                                    >
+                                        <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                 </div>
