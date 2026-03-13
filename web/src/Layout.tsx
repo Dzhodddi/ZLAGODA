@@ -63,9 +63,13 @@ export const Layout = () => {
                 </div>
                 <button
                     onClick={handleLogout}
-                    className="px-3 py-1 rounded text-sm transition-colors inline-flex items-center gap-1"
+                    className="px-3 py-1 flex items-center gap-1 group relative hover:text-zinc-300"
                 >
-                    <img src="/src/logos/exit.png" alt="exit" className="w-4 h-4"/> Вийти
+                    <div className="relative w-4 h-4 group">
+                        <img src="/src/logos/exit.png" alt="exit" className="w-4 h-4 group-hover:opacity-0" />
+                        <img src="/src/logos/exit-hover.png" alt="exit" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                    </div>
+                    Вийти
                 </button>
             </header>
 
