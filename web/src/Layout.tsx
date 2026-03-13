@@ -31,7 +31,21 @@ export const Layout = () => {
                     to="/"
                     className="text-xl font-bold tracking-widest transition-colors"
                 >
-                    ZLAGODA
+                    <div className="flex items-center gap-2 group relative hover:text-zinc-300">
+                        <div className="relative w-8 h-8">
+                            <img
+                                src="/src/logos/icon-red.png"
+                                alt="Zlagoda logo"
+                                className="w-8 h-8 group-hover:opacity-0"
+                            />
+                            <img
+                                src="/src/logos/icon-red-hover.png"
+                                alt="Zlagoda logo"
+                                className="w-8 h-8 absolute inset-0 opacity-0 group-hover:opacity-100"
+                            />
+                        </div>
+                        <span className="font-bold">ZLAGODA</span>
+                    </div>
                 </Link>
                 <div className="flex flex-1 overflow-hidden">
                     <span className="text-xs px-2 py-2 rounded font-mono text-zinc-400">
