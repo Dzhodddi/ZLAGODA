@@ -57,7 +57,7 @@ export const UpsertEmployeeForm = ({ initialData }: Props) => {
                         <InputField name="emplName" label="Ім'я" />
                         <InputField name="emplPatronymic" label="По батькові" />
                         <RoleSelect />
-                        <InputField name="salary" label="Зарплата" />
+                        <InputField type="number" name="salary" label="Зарплата, грн" min="0" step="0.01"/>
                         <InputField type="date" name="dateOfBirth" label="Дата народження" />
                         <InputField type="date" name="dateOfStart" label="Дата початку роботи" />
                         <InputField name="phoneNumber" label="Контактний телефон" />

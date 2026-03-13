@@ -163,7 +163,7 @@ export const EmployeeList = () => {
                         {contacts.map((c, i) => (
                             <tr key={i}
                                 onClick={() => navigate(`/employee/${c.idEmployee}`)}
-                                className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer">
+                                className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer">
                                 <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.idEmployee}</td>
                                 <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.phoneNumber}</td>
                                 <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.city}, {"вул."} {c.street}, {c.zipCode}</td>
@@ -198,7 +198,7 @@ export const EmployeeList = () => {
                             {employees.map((emp) => (
                                 <tr key={emp.idEmployee}
                                     onClick={() => navigate(`/employee/${emp.idEmployee}`)}
-                                    className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer">
+                                    className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer">
                                     <td className="px-3 py-2 font-mono text-xs border border-blue-200 wrap-break-word">{emp.idEmployee}</td>
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">
                                         {emp.emplSurname} {emp.emplName} {emp.emplPatronymic ?? ""}
