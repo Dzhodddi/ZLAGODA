@@ -52,9 +52,7 @@ export const UpsertEmployeeForm = ({ initialData }: Props) => {
                         <h2 className="col-span-12 text-xl font-bold mb-4">
                             {isEditMode ? "Редагувати працівника" : "Додати працівника"}
                         </h2>
-                        {!isEditMode && (
-                            <InputField name="idEmployee" label="ID працівника" />
-                        )}
+                        <InputField name="idEmployee" label="ID працівника" disabled={isEditMode}/>
                         <InputField name="emplSurname" label="Прізвище" />
                         <InputField name="emplName" label="Ім'я" />
                         <InputField name="emplPatronymic" label="По батькові" />

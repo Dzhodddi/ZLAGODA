@@ -11,6 +11,7 @@ export const InputField = ({
                                name,
                                label,
                                size = 12,
+                               disabled = false,
                                className,
                                ...props
                            }: InputFieldProps) => {
@@ -28,10 +29,12 @@ export const InputField = ({
                 id={name}
                 {...register(name)}
                 {...props}
+                disabled={disabled}
                 className={`
-          border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none text-zinc-900
-          ${error ? 'border-red-500 bg-red-50' : 'border-gray-300'}
-          ${className}
+                    border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none text-zinc-900
+                    ${error ? 'border-red-500 bg-red-50' : 'border-gray-300'}
+                    ${disabled ? 'shadow-md bg-gray-100 cursor-not-allowed' : ''}
+                    ${className}
             `}
             />
 
