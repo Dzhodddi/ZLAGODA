@@ -54,9 +54,20 @@ export const Layout = () => {
                     {isCashier && (
                         <Link
                             to="/employee/me"
-                            className="text-sm hover:text-blue-300 transition-colors"
+                            className="group text-sm py-2 hover:text-blue-300 transition-colors"
                         >
-                            Мій профіль
+                            <div className="relative w-6 h-6">
+                            <img
+                                src="/src/logos/profile.png"
+                                alt="Zlagoda logo"
+                                className="w-6 h-6 group-hover:opacity-0"
+                            />
+                            <img
+                                src="/src/logos/profile-hover.png"
+                                alt="Zlagoda logo"
+                                className="w-6 h-6 absolute inset-0 opacity-0 group-hover:opacity-100"
+                            />
+                            </div>
                         </Link>
                     )}
 
