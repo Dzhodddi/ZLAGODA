@@ -68,9 +68,8 @@ export const EmployeeList = () => {
                             <button
                                 onClick={() => navigate("/employee/create")}
                             >
-                                <div className="relative w-8 h-8 group">
-                                    <img src="/src/logos/add.png" alt="add" className="w-8 h-8 group-hover:opacity-0" />
-                                    <img src="/src/logos/add-hover.png" alt="add" className="w-8 h-8 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                                <div className="hover:scale-110 transition-transform flex justify-center w-full">
+                                    <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
                                 </div>
                             </button>
                             <button
@@ -121,8 +120,7 @@ export const EmployeeList = () => {
                         }}
                         className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 group"
                     >
-                        <img src="/src/logos/search.png" alt="search" className="w-6 h-6 group-hover:opacity-0" />
-                        <img src="/src/logos/search-hover.png" alt="search" className="w-6 h-6 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                        <img src="/src/logos/search.png" alt="search" className="w-6 h-6 hover:scale-110" />
                     </button>
                 </div>
                 {view === "search" && (
@@ -214,9 +212,8 @@ export const EmployeeList = () => {
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
                                             <button onClick={() => navigate(`/employee/edit/${emp.idEmployee}`)}>
-                                                <div className="relative w-4 h-4 group">
-                                                    <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4 group-hover:opacity-0" />
-                                                    <img src="/src/logos/edit-hover.png" alt="edit" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                                                <div className="hover:scale-110 transition-transform flex justify-center w-full">
+                                                    <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
                                                 </div>
                                             </button>
                                         </td>
@@ -224,9 +221,8 @@ export const EmployeeList = () => {
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
                                             <button onClick={() => handleDelete(emp.idEmployee)}>
-                                                <div className="relative w-4 h-4 group">
-                                                    <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4 group-hover:opacity-0" />
-                                                    <img src="/src/logos/delete-hover.png" alt="delete" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                                                <div className="hover:scale-110 transition-transform flex justify-center w-full">
+                                                    <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
                                                 </div>
                                             </button>
                                         </td>

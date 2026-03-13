@@ -56,16 +56,11 @@ export const Layout = () => {
                             to="/employee/me"
                             className="group text-sm py-2 hover:text-blue-300 transition-colors"
                         >
-                            <div className="relative w-6 h-6">
+                            <div className="hover:scale-110 transition-transform flex justify-center w-full">
                             <img
                                 src="/src/logos/profile.png"
-                                alt="Zlagoda logo"
-                                className="w-6 h-6 group-hover:opacity-0"
-                            />
-                            <img
-                                src="/src/logos/profile-hover.png"
-                                alt="Zlagoda logo"
-                                className="w-6 h-6 absolute inset-0 opacity-0 group-hover:opacity-100"
+                                alt="my profile logo"
+                                className="w-6 h-6"
                             />
                             </div>
                         </Link>
