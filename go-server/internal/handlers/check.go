@@ -12,7 +12,6 @@ import (
 	validation "github.com/Dzhodddi/ZLAGODA/internal/validator"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 )
 
 type CheckHandler struct {
@@ -198,7 +197,6 @@ func (h *CheckHandler) getCheckListWithinToday(c echo.Context) error {
 	}
 	timeNow := time.Now()
 	today := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 0, 0, 0, 0, timeNow.Location())
-	log.Info(q.EmployeeID)
 	checkList, err := h.checkService.GetCheckList(c.Request().Context(), &q.EmployeeID, today, today.Add(24*time.Hour-time.Nanosecond))
 	if err != nil {
 		return err

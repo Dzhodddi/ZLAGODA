@@ -39,7 +39,6 @@ func (auth *JWTAuth) AuthMiddleware(employeeRepo repository.EmployeeRepository) 
 			if len(parts) != 2 || parts[0] != "Bearer" {
 				return errorResponse.UnAuthorized(fmt.Errorf(constants.InvalidAuthHeader))
 			}
-			log.Infof("token: %v, iss: %v, add: %v, secret: %v", parts[1], auth.iss, auth.aud, auth.secret)
 			jwtToken, err := auth.ValidateToken(parts[1])
 			if err != nil {
 				return errorResponse.UnAuthorized(err)
