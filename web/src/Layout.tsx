@@ -1,11 +1,13 @@
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
-import { useAuthStore } from "@/store/authStore";
+import { type Role, useAuthStore } from "@/store/authStore";
 import { useRole } from "@/hooks/useRole";
 
 const navItems = [
+    { path: "/employee/me", label: "Мій профіль", isHidden: (role: Role) => role === "MANAGER" },
     { path: "/store-product", label: "Товари в магазині" },
-    { path: "/product", label: "Товари"},
-    { path: "/categories", label: "Категорії" },
+    { path: "/product", label: "Товари" },
+    { path: "/categories", label: "Категорії", isHidden: (role: Role) => role === "CASHIER" },
+    { path: "/employee", label: "Працівники", isHidden: (role: Role) => role === "CASHIER" },
     { path: "/card", label: "Карти клієнтів" },
     { path: "/check", label: "Чеки" },
 ];
@@ -57,15 +59,14 @@ export const Layout = () => {
                             className="group text-sm py-2 hover:text-blue-300 transition-colors"
                         >
                             <div className="hover:scale-110 transition-transform flex justify-center w-full">
-                            <img
-                                src="/src/logos/profile.png"
-                                alt="my profile logo"
-                                className="w-6 h-6"
-                            />
+                                <img
+                                    src="/src/logos/profile.png"
+                                    alt="my profile logo"
+                                    className="w-6 h-6"
+                                />
                             </div>
                         </Link>
                     )}
-
                 </div>
                 <button
                     onClick={handleLogout}
@@ -81,32 +82,23 @@ export const Layout = () => {
 
             <div className="flex flex-1 overflow-hidden">
                 <aside className="w-52 bg-zinc-800 text-white flex flex-col py-6 px-3 gap-1 shrink-0 shadow-lg">
-                    {navItems.map(({ path, label }) => (
-                        <Link
-                            key={path}
-                            to={path}
-                            className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors
-                                ${isActive(path)
-                                ? "bg-blue-600 text-white"
-                                : "text-zinc-300 hover:bg-zinc-700 hover:text-white"
-                            }`}
-                        >
-                            {label}
-                        </Link>
-                    ))}
-
-                    {isManager && (
-                        <Link
-                            to="/employee"
-                            className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors
-                                ${isActive("/employee")
-                                ? "bg-blue-600 text-white"
-                                : "text-zinc-300 hover:bg-zinc-700 hover:text-white"
-                            }`}
-                        >
-                            Працівники
-                        </Link>
-                    )}
+                    {navItems
+                        .filter(({ isHidden }) => {
+                            return !isHidden || !isHidden(role);
+                        })
+                        .map(({ path, label }) => (
+                            <Link
+                                key={path}
+                                to={path}
+                                className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors
+                                    ${isActive(path)
+                                    ? "bg-blue-600 text-white"
+                                    : "text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                                }`}
+                            >
+                                {label}
+                            </Link>
+                        ))}
                 </aside>
 
                 <main className="flex-1 overflow-y-auto p-6">

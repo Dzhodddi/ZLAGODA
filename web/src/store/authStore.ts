@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-type Role = "MANAGER" | "CASHIER" | null;
+export type Role = "MANAGER" | "CASHIER" | null;
 
 interface AuthState {
     accessToken: string | null;
