@@ -76,6 +76,7 @@ type Product struct {
 	IDProduct              int64
 	CategoryNumber         int32
 	ProductName            string
+	Producer               string
 	ProductCharacteristics string
 }
 

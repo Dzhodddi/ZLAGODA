@@ -23,8 +23,14 @@ export const deleteCategory = async (categoryNumber: number): Promise<void> => {
     await goApiClient.delete(`${prefix}/${categoryNumber}`);
 }
 
-export const listCategories = async (): Promise<Category[]> => {
-    const response = await goApiClient.get(prefix);
+export const listCategories = async (
+    category_number: number,
+    category_name: string | undefined = undefined,
+    sorted: boolean | undefined = undefined
+): Promise<Category[]> => {
+    const response = await goApiClient.get(prefix, {
+        params: {category_number, category_name, sorted}
+    });
     if (!response.data)
         return []
     return z.array(CategorySchema).parse(response.data);

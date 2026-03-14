@@ -43,10 +43,15 @@ export const useUpdateCategory = () => {
     })
 }
 
-export const useCategoryList = () => {
+export const useCategoryList = (
+    cursor: number,
+    name: string | undefined = undefined,
+    sorted: boolean | undefined = undefined
+) => {
     return useQuery({
-        queryKey: [QUERY_KEY],
-        queryFn: listCategories,
+        queryKey: [QUERY_KEY, cursor, sorted],
+        queryFn: () => listCategories(cursor, name, sorted),
+        placeholderData: (previousData) => previousData,
     });
 }
 

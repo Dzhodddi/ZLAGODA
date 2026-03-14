@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
@@ -67,7 +68,10 @@ func (s *categoryService) GetAllCategories(ctx context.Context, q views.ListCate
 	}
 	switch {
 	case q.Sorted != nil && *q.Sorted:
-		categories, err = s.categoryRepository.GetAllCategoriesSortedByName(ctx, *q.LastCategoryNumber)
+		if q.LastCategoryName == nil {
+			q.LastCategoryName = new(string)
+		}
+		categories, err = s.categoryRepository.GetAllCategoriesSortedByName(ctx, *q.LastCategoryName, *q.LastCategoryNumber)
 	default:
 		categories, err = s.categoryRepository.GetAllCategories(ctx, *q.LastCategoryNumber)
 	}

@@ -31,6 +31,6 @@ RETURNING category_number;
 -- name: GetAllCategoriesSortedByName :many
 SELECT category_number, category_name
 FROM category
-WHERE category_number > $1
-ORDER BY category_name, category_number
-FETCH FIRST $2 ROWS ONLY;
+WHERE (category_name, category_number) > ($1, $2::bigint)
+ORDER BY category_name ASC, category_number ASC
+FETCH FIRST $3 ROWS ONLY;

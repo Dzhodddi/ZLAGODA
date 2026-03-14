@@ -78,18 +78,19 @@ func (q *Queries) GetAllCategories(ctx context.Context, arg GetAllCategoriesPara
 const getAllCategoriesSortedByName = `-- name: GetAllCategoriesSortedByName :many
 SELECT category_number, category_name
 FROM category
-WHERE category_number > $1
-ORDER BY category_name, category_number
-FETCH FIRST $2 ROWS ONLY
+WHERE (category_name, category_number) > ($1, $2::bigint)
+ORDER BY category_name ASC, category_number ASC
+FETCH FIRST $3 ROWS ONLY
 `
 
 type GetAllCategoriesSortedByNameParams struct {
-	CategoryNumber int64
-	Limit          int32
+	CategoryName string
+	Column2      int64
+	Limit        int32
 }
 
 func (q *Queries) GetAllCategoriesSortedByName(ctx context.Context, arg GetAllCategoriesSortedByNameParams) ([]Category, error) {
-	rows, err := q.db.QueryContext(ctx, getAllCategoriesSortedByName, arg.CategoryNumber, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, getAllCategoriesSortedByName, arg.CategoryName, arg.Column2, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
