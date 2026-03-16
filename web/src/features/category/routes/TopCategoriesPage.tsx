@@ -23,7 +23,7 @@ export const TopCategoriesPage = () => {
                     onClick={() => navigate(-1)}
                     className="text-sm text-zinc-500 hover:text-zinc-800 transition-colors"
                 >
-                    ← Назад
+                    ← До всіх категорій
                 </button>
             </div>
 
