@@ -6,22 +6,13 @@ export const Home = () => {
                     <h1 className="text-4xl font-black text-zinc-900 leading-tight mb-4">
                         ZLAGODA <br />
                         <span className="text-blue-700">
-                            — ВСЕ ДЛЯ ПІДТРИМКИ АРМІЇ
+                            — МАГАЗИН ТВОГО ЖИТТЯ
                         </span>
                     </h1>
 
                     <p className="text-zinc-600 text-lg leading-relaxed max-w-md">
                         Програмний застосунок для обробки даних, що використовуються
                         в процесі збуту товарів у продуктовому мінісупермаркеті
-                    </p>
-
-                    <p className="text-sm text-zinc-800 mt-6">
-                        <a
-                            href="https://smerch.com.ua/"
-                            className="hover:underline"
-                        >
-                            Inspired by Сергій Стерненко
-                        </a>
                     </p>
                 </div>
 
