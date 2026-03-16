@@ -17,10 +17,8 @@ export const useCreateEmployee = () => {
     return useMutation({
         mutationFn: createEmployee,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-        },
-        onError: (error) => {
-            console.error(error.message);
+            queryClient.invalidateQueries({ queryKey: ["employees-list"] });
+            queryClient.invalidateQueries({ queryKey: ["cashiers-list"] });
         },
     });
 };
@@ -30,10 +28,9 @@ export const useUpdateEmployee = () => {
     return useMutation({
         mutationFn: updateEmployee,
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["employees-list"] });
+            queryClient.invalidateQueries({ queryKey: ["cashiers-list"] });
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-        },
-        onError: (error) => {
-            console.error(error.message);
         },
     });
 };
@@ -43,29 +40,35 @@ export const useDeleteEmployee = () => {
     return useMutation({
         mutationFn: deleteEmployee,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+            queryClient.invalidateQueries({ queryKey: ["employees-list"] });
+            queryClient.invalidateQueries({ queryKey: ["cashiers-list"] });
         },
-        onError: (error) => {
-            console.error(error.message);
-        }
     });
 };
 
-export const useAllEmployees = () => {
-    return useQuery({
-        queryKey: [QUERY_KEY],
-        queryFn: getAllEmployees,
+export const useAllEmployees = (page: number, enabled = true) =>
+    useQuery({
+        queryKey: ["employees-list", page],
+        queryFn: () => getAllEmployees(page),
+        enabled,
         staleTime: 1000 * 30,
     });
-};
 
-export const useAllCashiers = () => {
-    return useQuery({
-        queryKey: [QUERY_KEY, "cashiers"],
-        queryFn: getAllCashiers,
+export const useAllCashiers = (page: number, enabled = true) =>
+    useQuery({
+        queryKey: ["cashiers-list", page],
+        queryFn: () => getAllCashiers(page),
+        enabled,
         staleTime: 1000 * 30,
     });
-};
+
+export const useEmployeePhoneAndAddress = (surname: string, page: number, enabled = true) =>
+    useQuery({
+        queryKey: ["employees-contact", surname, page],
+        queryFn: () => getEmployeePhoneAndAddress(surname, page),
+        enabled: !!surname && enabled,
+        staleTime: 1000 * 30,
+    });
 
 export const useGetMe = () => {
     return useQuery({
@@ -80,15 +83,6 @@ export const useEmployee = (id: string) => {
         queryKey: [QUERY_KEY, id],
         queryFn: () => getEmployee(id),
         enabled: !!id,
-        staleTime: 1000 * 30,
-    });
-};
-
-export const useEmployeePhoneAndAddress = (surname: string) => {
-    return useQuery({
-        queryKey: [QUERY_KEY, "contact", surname],
-        queryFn: () => getEmployeePhoneAndAddress(surname),
-        enabled: !!surname,
         staleTime: 1000 * 30,
     });
 };

@@ -1,5 +1,10 @@
-import {goApiClient} from "@/lib/axios.ts";
-import {type Category, CategorySchema, type CreateCategory} from "@/features/category/types/types.ts";
+import {goApiClient, javaApiClient} from "@/lib/axios.ts";
+import {
+    type Category,
+    CategorySchema,
+    type CreateCategory, type TopCategory,
+    TopCategorySchema
+} from "@/features/category/types/types.ts";
 import {z} from "zod";
 
 const prefix = "/categories"
@@ -34,4 +39,10 @@ export const listCategories = async (
     if (!response.data)
         return []
     return z.array(CategorySchema).parse(response.data);
+}
+
+export const getPopCategories
+    = async (): Promise<TopCategory[]> => {
+    const response = await javaApiClient.get(prefix + "/top");
+    return z.array(TopCategorySchema).parse(response.data);
 }

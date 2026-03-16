@@ -3,7 +3,6 @@ import { type Role, useAuthStore } from "@/store/authStore";
 import { useRole } from "@/hooks/useRole";
 
 const navItems = [
-    { path: "/employee/me", label: "Мій профіль", isHidden: (role: Role) => role === "MANAGER" },
     { path: "/store-product", label: "Товари в магазині" },
     { path: "/product", label: "Товари" },
     { path: "/categories", label: "Категорії", isHidden: (role: Role) => role === "CASHIER" },

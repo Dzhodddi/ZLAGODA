@@ -3,16 +3,13 @@ package org.example.service.store_product;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.example.dto.page.PageResponseDto;
@@ -39,11 +36,8 @@ import org.springframework.data.domain.Pageable;
 @DisplayName("Store Product Service Tests")
 class StoreProductServiceTest {
 
-    @Mock
-    private StoreProductRepository repository;
-
-    @Mock
-    private StoreProductMapper mapper;
+    @Mock private StoreProductRepository repository;
+    @Mock private StoreProductMapper mapper;
 
     @InjectMocks
     private StoreProductServiceImpl service;
@@ -93,21 +87,20 @@ class StoreProductServiceTest {
         priceAndQuantityDto.setProducts_number(50);
     }
 
+    private <T> PageResponseDto<T> page(T item) {
+        return PageResponseDto.of(List.of(item), 10, 1, false);
+    }
+
     @Test
     @DisplayName("getAll with Pageable should return all products")
     void getAll_withPageable_shouldReturnAllProducts() {
-        PageResponseDto<StoreProductDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(storeProductDto)),
-                0, 10, false
-        );
-        when(repository.findAll(eq(pageable), isNull())).thenReturn(page);
+        when(repository.findAll(eq(pageable))).thenReturn(page(storeProductDto));
 
-        PageResponseDto<StoreProductDto> result = service.getAll(pageable, null);
+        PageResponseDto<StoreProductDto> result = service.getAll(pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        assertEquals("123456789012", result.getContent().get(0).getUPC());
-        verify(repository, times(1)).findAll(eq(pageable), isNull());
+        verify(repository, times(1)).findAll(eq(pageable));
     }
 
     @Test
@@ -117,7 +110,6 @@ class StoreProductServiceTest {
 
         List<StoreProductDto> result = service.getAllNoPagination();
 
-        assertNotNull(result);
         assertEquals(1, result.size());
         verify(repository, times(1)).findAllNoPagination();
     }
@@ -125,211 +117,120 @@ class StoreProductServiceTest {
     @Test
     @DisplayName("getAllSortedByQuantity should return products sorted by quantity")
     void getAllSortedByQuantity_shouldReturnSortedProducts() {
-        PageResponseDto<StoreProductDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(storeProductDto)),
-                0, 10, false
-        );
-        when(repository.findAllSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
+        when(repository.findAllSortedByQuantity(eq(pageable))).thenReturn(page(storeProductDto));
 
-        PageResponseDto<StoreProductDto> result = service.getAllSortedByQuantity(pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findAllSortedByQuantity(eq(pageable), isNull());
+        assertEquals(1, service.getAllSortedByQuantity(pageable).getContent().size());
+        verify(repository, times(1)).findAllSortedByQuantity(eq(pageable));
     }
 
     @Test
     @DisplayName("getAllSortedByName should return products sorted by name")
     void getAllSortedByName_shouldReturnSortedProducts() {
-        PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(withNameDto)),
-                0, 10, false
-        );
-        when(repository.findAllSortedByName(eq(pageable), isNull())).thenReturn(page);
+        when(repository.findAllSortedByName(eq(pageable))).thenReturn(page(withNameDto));
 
-        PageResponseDto<StoreProductWithNameDto> result = service.getAllSortedByName(pageable, null);
+        PageResponseDto<StoreProductWithNameDto> result = service.getAllSortedByName(pageable);
 
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
         assertEquals("Test Product", result.getContent().get(0).getProduct_name());
-        verify(repository, times(1)).findAllSortedByName(eq(pageable), isNull());
+        verify(repository, times(1)).findAllSortedByName(eq(pageable));
     }
 
     @Test
     @DisplayName("getPromotionalSortedByQuantity should return promotional products")
     void getPromotionalSortedByQuantity_shouldReturnPromotionalProducts() {
-        storeProduct.setPromotional_product(true);
-        PageResponseDto<StoreProductDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(storeProductDto)),
-                0, 10, false
-        );
-        when(repository.findPromotionalSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
+        when(repository.findPromotionalSortedByQuantity(eq(pageable))).thenReturn(page(storeProductDto));
 
-        PageResponseDto<StoreProductDto> result = service.getPromotionalSortedByQuantity(pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findPromotionalSortedByQuantity(eq(pageable), isNull());
+        assertEquals(1, service.getPromotionalSortedByQuantity(pageable).getContent().size());
+        verify(repository, times(1)).findPromotionalSortedByQuantity(eq(pageable));
     }
 
     @Test
     @DisplayName("getNonPromotionalSortedByQuantity should return non-promotional products")
     void getNonPromotionalSortedByQuantity_shouldReturnNonPromotionalProducts() {
-        PageResponseDto<StoreProductDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(storeProductDto)),
-                0, 10, false
-        );
-        when(repository.findNonPromotionalSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
+        when(repository.findNonPromotionalSortedByQuantity(eq(pageable))).thenReturn(page(storeProductDto));
 
-        PageResponseDto<StoreProductDto> result = service.getNonPromotionalSortedByQuantity(pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findNonPromotionalSortedByQuantity(eq(pageable), isNull());
+        assertEquals(1, service.getNonPromotionalSortedByQuantity(pageable).getContent().size());
+        verify(repository, times(1)).findNonPromotionalSortedByQuantity(eq(pageable));
     }
 
     @Test
     @DisplayName("getPromotionalSortedByName should return promotional products sorted by name")
     void getPromotionalSortedByName_shouldReturnPromotionalProducts() {
-        PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(withNameDto)),
-                0, 10, false
-        );
-        when(repository.findPromotionalSortedByName(eq(pageable), isNull())).thenReturn(page);
+        when(repository.findPromotionalSortedByName(eq(pageable))).thenReturn(page(withNameDto));
 
-        PageResponseDto<StoreProductWithNameDto> result = service.getPromotionalSortedByName(pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findPromotionalSortedByName(eq(pageable), isNull());
+        assertEquals(1, service.getPromotionalSortedByName(pageable).getContent().size());
+        verify(repository, times(1)).findPromotionalSortedByName(eq(pageable));
     }
 
     @Test
     @DisplayName("getNonPromotionalSortedByName should return non-promotional products sorted by name")
     void getNonPromotionalSortedByName_shouldReturnNonPromotionalProducts() {
-        PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(withNameDto)),
-                0, 10, false
-        );
-        when(repository.findNonPromotionalSortedByName(eq(pageable), isNull())).thenReturn(page);
+        when(repository.findNonPromotionalSortedByName(eq(pageable))).thenReturn(page(withNameDto));
 
-        PageResponseDto<StoreProductWithNameDto> result = service.getNonPromotionalSortedByName(pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findNonPromotionalSortedByName(eq(pageable), isNull());
+        assertEquals(1, service.getNonPromotionalSortedByName(pageable).getContent().size());
+        verify(repository, times(1)).findNonPromotionalSortedByName(eq(pageable));
     }
 
     @Test
-    @DisplayName("getAll with sortedBy=name and prom=null should return all sorted by name")
-    void getAll_sortByName_promNull_shouldReturnAllSortedByName() {
-        PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(withNameDto)),
-                0, 10, false
-        );
-        when(repository.findAllSortedByName(eq(pageable), isNull())).thenReturn(page);
+    @DisplayName("getAll sortedBy=name prom=null should return all sorted by name")
+    void getAll_sortByName_promNull() {
+        when(repository.findAllSortedByName(eq(pageable))).thenReturn(page(withNameDto));
 
-        PageResponseDto<?> result = service.getAll("name", null, pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findAllSortedByName(eq(pageable), isNull());
+        assertEquals(1, service.getAll("name", null, pageable).getContent().size());
+        verify(repository, times(1)).findAllSortedByName(eq(pageable));
     }
 
     @Test
-    @DisplayName("getAll with sortedBy=name and prom=true should return promotional sorted by name")
-    void getAll_sortByName_promTrue_shouldReturnPromotionalSortedByName() {
-        PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(withNameDto)),
-                0, 10, false
-        );
-        when(repository.findPromotionalSortedByName(eq(pageable), isNull())).thenReturn(page);
+    @DisplayName("getAll sortedBy=name prom=true should return promotional sorted by name")
+    void getAll_sortByName_promTrue() {
+        when(repository.findPromotionalSortedByName(eq(pageable))).thenReturn(page(withNameDto));
 
-        PageResponseDto<?> result = service.getAll("name", true, pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findPromotionalSortedByName(eq(pageable), isNull());
+        assertEquals(1, service.getAll("name", true, pageable).getContent().size());
+        verify(repository, times(1)).findPromotionalSortedByName(eq(pageable));
     }
 
     @Test
-    @DisplayName("getAll with sortedBy=name and prom=false should return non-promotional sorted by name")
-    void getAll_sortByName_promFalse_shouldReturnNonPromotionalSortedByName() {
-        PageResponseDto<StoreProductWithNameDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(withNameDto)),
-                0, 10, false
-        );
-        when(repository.findNonPromotionalSortedByName(eq(pageable), isNull())).thenReturn(page);
+    @DisplayName("getAll sortedBy=name prom=false should return non-promotional sorted by name")
+    void getAll_sortByName_promFalse() {
+        when(repository.findNonPromotionalSortedByName(eq(pageable))).thenReturn(page(withNameDto));
 
-        PageResponseDto<?> result = service.getAll("name", false, pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findNonPromotionalSortedByName(eq(pageable), isNull());
+        assertEquals(1, service.getAll("name", false, pageable).getContent().size());
+        verify(repository, times(1)).findNonPromotionalSortedByName(eq(pageable));
     }
 
     @Test
-    @DisplayName("getAll with sortedBy=quantity and prom=null should return all sorted by quantity")
-    void getAll_sortByQuantity_promNull_shouldReturnAllSortedByQuantity() {
-        PageResponseDto<StoreProductDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(storeProductDto)),
-                0, 10, false
-        );
-        when(repository.findAllSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
+    @DisplayName("getAll sortedBy=quantity prom=null should return all sorted by quantity")
+    void getAll_sortByQuantity_promNull() {
+        when(repository.findAllSortedByQuantity(eq(pageable))).thenReturn(page(storeProductDto));
 
-        PageResponseDto<?> result = service.getAll("quantity", null, pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findAllSortedByQuantity(eq(pageable), isNull());
+        assertEquals(1, service.getAll("quantity", null, pageable).getContent().size());
+        verify(repository, times(1)).findAllSortedByQuantity(eq(pageable));
     }
 
     @Test
-    @DisplayName("getAll with sortedBy=quantity and prom=true should return promotional sorted by quantity")
-    void getAll_sortByQuantity_promTrue_shouldReturnPromotionalSortedByQuantity() {
-        PageResponseDto<StoreProductDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(storeProductDto)),
-                0, 10, false
-        );
-        when(repository.findPromotionalSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
+    @DisplayName("getAll sortedBy=quantity prom=true should return promotional sorted by quantity")
+    void getAll_sortByQuantity_promTrue() {
+        when(repository.findPromotionalSortedByQuantity(eq(pageable))).thenReturn(page(storeProductDto));
 
-        PageResponseDto<?> result = service.getAll("quantity", true, pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findPromotionalSortedByQuantity(eq(pageable), isNull());
+        assertEquals(1, service.getAll("quantity", true, pageable).getContent().size());
+        verify(repository, times(1)).findPromotionalSortedByQuantity(eq(pageable));
     }
 
     @Test
-    @DisplayName("getAll with sortedBy=quantity and prom=false should return non-promotional sorted by quantity")
-    void getAll_sortByQuantity_promFalse_shouldReturnNonPromotionalSortedByQuantity() {
-        PageResponseDto<StoreProductDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(storeProductDto)),
-                0, 10, false
-        );
-        when(repository.findNonPromotionalSortedByQuantity(eq(pageable), isNull())).thenReturn(page);
+    @DisplayName("getAll sortedBy=quantity prom=false should return non-promotional sorted by quantity")
+    void getAll_sortByQuantity_promFalse() {
+        when(repository.findNonPromotionalSortedByQuantity(eq(pageable))).thenReturn(page(storeProductDto));
 
-        PageResponseDto<?> result = service.getAll("quantity", false, pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findNonPromotionalSortedByQuantity(eq(pageable), isNull());
+        assertEquals(1, service.getAll("quantity", false, pageable).getContent().size());
+        verify(repository, times(1)).findNonPromotionalSortedByQuantity(eq(pageable));
     }
 
     @Test
     @DisplayName("getAll with invalid sortedBy should return all products")
     void getAll_invalidSortedBy_shouldReturnAll() {
-        PageResponseDto<StoreProductDto> page = PageResponseDto.of(
-                new ArrayList<>(List.of(storeProductDto)),
-                0, 10, false
-        );
-        when(repository.findAll(eq(pageable), isNull())).thenReturn(page);
+        when(repository.findAll(eq(pageable))).thenReturn(page(storeProductDto));
 
-        PageResponseDto<?> result = service.getAll("invalid", null, pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(repository, times(1)).findAll(eq(pageable), isNull());
+        assertEquals(1, service.getAll("invalid", null, pageable).getContent().size());
+        verify(repository, times(1)).findAll(eq(pageable));
     }
 
     @Test
@@ -340,10 +241,8 @@ class StoreProductServiceTest {
 
         StoreProductDto result = service.save(requestDto);
 
-        assertNotNull(result);
         assertEquals("123456789012", result.getUPC());
         verify(repository, times(1)).save(requestDto);
-        verify(mapper, times(1)).toDto(storeProduct);
     }
 
     @Test
@@ -351,10 +250,7 @@ class StoreProductServiceTest {
     void updateByUPC_shouldReturnUpdatedDto() {
         when(repository.updateByUPC("123456789012", requestDto)).thenReturn(storeProductDto);
 
-        StoreProductDto result = service.updateByUPC("123456789012", requestDto);
-
-        assertNotNull(result);
-        assertEquals("123456789012", result.getUPC());
+        assertEquals("123456789012", service.updateByUPC("123456789012", requestDto).getUPC());
         verify(repository, times(1)).updateByUPC("123456789012", requestDto);
     }
 
@@ -373,10 +269,7 @@ class StoreProductServiceTest {
     void findByUPC_existingProduct_shouldReturnCharacteristics() {
         when(repository.findByUPC("123456789012")).thenReturn(Optional.of(characteristicsDto));
 
-        StoreProductCharacteristicsDto result = service.findByUPC("123456789012");
-
-        assertNotNull(result);
-        assertEquals("Test Product", result.getProduct_name());
+        assertEquals("Test Product", service.findByUPC("123456789012").getProduct_name());
         verify(repository, times(1)).findByUPC("123456789012");
     }
 
@@ -390,20 +283,19 @@ class StoreProductServiceTest {
 
     @Test
     @DisplayName("findPriceAndQuantityByUPC should return price and quantity when product exists")
-    void findPriceAndQuantityByUPC_existingProduct_shouldReturnPriceAndQuantity() {
+    void findPriceAndQuantityByUPC_existingProduct_shouldReturn() {
         when(repository.findPriceAndQuantityByUPC("123456789012"))
                 .thenReturn(Optional.of(priceAndQuantityDto));
 
-        StoreProductPriceAndQuantityDto result = service.findPriceAndQuantityByUPC("123456789012");
+        StoreProductPriceAndQuantityDto result =
+                service.findPriceAndQuantityByUPC("123456789012");
 
-        assertNotNull(result);
         assertEquals(new BigDecimal("12.00"), result.getSelling_price());
-        assertEquals(50, result.getProducts_number());
         verify(repository, times(1)).findPriceAndQuantityByUPC("123456789012");
     }
 
     @Test
-    @DisplayName("findPriceAndQuantityByUPC should throw EntityNotFoundException when product not found")
+    @DisplayName("findPriceAndQuantityByUPC should throw EntityNotFoundException when not found")
     void findPriceAndQuantityByUPC_nonExistingProduct_shouldThrowException() {
         when(repository.findPriceAndQuantityByUPC("999999999999")).thenReturn(Optional.empty());
 

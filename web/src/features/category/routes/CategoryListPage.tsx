@@ -86,29 +86,39 @@ export const CategoryListPage = () => {
 
     return (
         <div className="bg-zinc-100 p-2 mx-auto space-y-4">
-            <div className="flex flex-wrap justify-between items-center gap-2">
-                <h2 className="text-xl font-bold text-zinc-900">Категорії</h2>
-                <div className="flex gap-2 flex-wrap">
-                    <Link
-                        to="/categories/create"
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-                    >
-                        + Додати категорію
-                    </Link>
-                </div>
+            <div className="flex flex-wrap justify-center items-center">
+                <h2 className="text-xl font-bold text-zinc-900">Категорії товарів</h2>
             </div>
 
-            <div className="flex justify-between flex-wrap text-black gap-2">
-                <button
-                    onClick={handleSortToggle}
-                    className={`px-3 py-1 text-sm border rounded transition-colors ${
-                        isSorted
-                            ? "bg-blue-100 border-blue-400 text-blue-800 font-medium"
-                            : "bg-white border-zinc-300 text-zinc-700 hover:bg-zinc-50"
-                    }`}
-                >
-                    Сортувати за назвою: {isSorted ? "Увімк" : "Вимк"}
-                </button>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                        <span className="text-sm text-zinc-700 font-medium">
+                            Сортувати за назвою
+                        </span>
+
+                    <button
+                        onClick={handleSortToggle}
+                        className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
+                            isSorted ? "bg-green-500" : "bg-blue-200"
+                        }`}
+                    >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                            isSorted ? "translate-x-5" : "translate-x-0"
+                        }`} />
+                    </button>
+                </div>
+                <div className="flex items-center gap-5">
+                    <Link to="/categories/top">
+                        <div className="hover:scale-110 transition-transform flex justify-center">
+                            <img src="/src/logos/top-2.png" alt="top" className="h-6" />
+                        </div>
+                    </Link>
+                    <Link to="/categories/create">
+                        <div className="hover:scale-110 transition-transform flex justify-center">
+                            <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
+                        </div>
+                    </Link>
+                </div>
             </div>
 
             {categories?.length === 0 && currentIndex === 0 ? (
@@ -124,8 +134,8 @@ export const CategoryListPage = () => {
                     <table className="w-full text-xs border-collapse table-fixed border-b border-blue-300">
                         <thead>
                         <tr className="bg-blue-700 text-left text-white">
-                            <th className="px-3 py-2 font-semibold w-16 border border-blue-500">Номер</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500">Назва</th>
+                            <th className="px-3 py-2 font-semibold w-16 border border-blue-500 text-center">Номер</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Назва</th>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
                         </tr>
@@ -168,27 +178,30 @@ export const CategoryListPage = () => {
                         </tbody>
                     </table>
 
-                    <div className="flex justify-between items-center p-3 bg-zinc-50 text-sm">
+                    <div className="flex justify-between items-center p-3 bg-zinc-50 text-xs">
+                        <button
+                            onClick={handlePrevPage}
+                            disabled={currentIndex === 0 || isFetching}
+                            className={`transition-opacity ${currentIndex === 0 || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
+                        >
+                            <div className="hover:scale-110 transition-transform flex justify-center w-full">
+                                <img src="/src/logos/arrow-left.png" alt="edit" className="w-5 h-5" />
+                            </div>
+                        </button>
+
                         <span className="text-zinc-500">
-                            Сторінка {currentIndex + 1}
+                                Сторінка {currentIndex + 1}
                         </span>
 
-                        <div className="flex gap-2">
-                            <button
-                                onClick={handlePrevPage}
-                                disabled={currentIndex === 0 || isFetching}
-                                className="px-3 py-1 bg-white border border-zinc-300 rounded hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-700 transition-colors"
-                            >
-                                Попередня
-                            </button>
-                            <button
-                                onClick={handleNextPage}
-                                disabled={isLastPage || isFetching}
-                                className="px-3 py-1 bg-white border border-zinc-300 rounded hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-700 transition-colors"
-                            >
-                                Наступна
-                            </button>
-                        </div>
+                        <button
+                            onClick={handleNextPage}
+                            disabled={isLastPage || isFetching}
+                            className={`transition-opacity ${isLastPage || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
+                        >
+                            <div className="hover:scale-110 transition-transform flex justify-center w-full">
+                                <img src="/src/logos/arrow-right.png" alt="edit" className="w-5 h-5" />
+                            </div>
+                        </button>
                     </div>
 
                 </div>

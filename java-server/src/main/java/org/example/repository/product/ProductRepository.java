@@ -25,15 +25,11 @@ public class ProductRepository {
     private final ProductRowMapper rowMapper;
     private final ProductMapper productMapper;
 
-    public PageResponseDto<ProductDto> findDeleted(String checkNumber,
-                                                       Pageable pageable,
-                                                       Integer lastSeenId) {
+    public PageResponseDto<ProductDto> findDeleted(String checkNumber, Pageable pageable) {
         Boolean checkExists = jdbcTemplate.queryForObject(
                 """
                 SELECT EXISTS(
-                    SELECT 1
-                    FROM checks
-                    WHERE check_number = ?
+                    SELECT 1 FROM checks WHERE check_number = ?
                 )
                 """,
                 Boolean.class,
@@ -44,200 +40,96 @@ public class ProductRepository {
             throw new EntityNotFoundException("Check not found: " + checkNumber);
         }
 
-        List<ProductDto> products;
-        if (lastSeenId != null && lastSeenId > 0) {
-            products = jdbcTemplate.query(
-                            """
-                            SELECT p.product_name, p.producer, p.product_characteristics
-                            FROM product p
-                            INNER JOIN store_product sp1
-                            ON p.id_product = sp1.id_product
-                            INNER JOIN sale s
-                            ON sp1.UPC = s.UPC
-                            WHERE p.id_product > ?
-                              AND s.check_number = ?
-                              AND NOT EXISTS(
-                                  SELECT 1
-                                  FROM store_product sp2
-                                  WHERE sp1.UPC = sp2.UPC AND NOT EXISTS(
-                                      SELECT 1
-                                      FROM store_product sp3
-                                      WHERE sp2.UPC = sp3.UPC AND is_deleted = true
-                                      )
-                              )
-                            ORDER BY p.product_name
-                            FETCH FIRST ? ROWS ONLY
-                            """,
-                            rowMapper,
-                            lastSeenId,
-                            checkNumber,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        } else {
-            products = jdbcTemplate.query(
-                            """
-                            SELECT p.product_name, p.producer, p.product_characteristics
-                            FROM product p
-                            INNER JOIN store_product sp1
-                            ON p.id_product = sp1.id_product
-                            INNER JOIN sale s
-                            ON sp1.UPC = s.UPC
-                            WHERE s.check_number = ?
-                              AND NOT EXISTS(
-                                  SELECT 1
-                                  FROM store_product sp2
-                                  WHERE sp1.UPC = sp2.UPC AND NOT EXISTS(
-                                      SELECT 1
-                                      FROM store_product sp3
-                                      WHERE sp2.UPC = sp3.UPC AND is_deleted = true
-                                      )
-                              )
-                            ORDER BY p.product_name
-                            FETCH FIRST ? ROWS ONLY
-                            """,
-                            rowMapper,
-                            checkNumber,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        }
+        long offset = pageable.getOffset();
+        List<ProductDto> products = jdbcTemplate.query(
+                """
+                SELECT p.product_name, p.producer, p.product_characteristics
+                FROM product p
+                INNER JOIN store_product sp1 ON p.id_product = sp1.id_product
+                INNER JOIN sale s ON sp1.UPC = s.UPC
+                WHERE s.check_number = ?
+                  AND NOT EXISTS(
+                      SELECT 1 FROM store_product sp2
+                      WHERE sp1.UPC = sp2.UPC AND NOT EXISTS(
+                          SELECT 1 FROM store_product sp3
+                          WHERE sp2.UPC = sp3.UPC AND is_deleted = true
+                      )
+                  )
+                ORDER BY p.product_name
+                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                """,
+                rowMapper,
+                checkNumber,
+                offset,
+                pageable.getPageSize()
+        ).stream().map(productMapper::toDto).toList();
 
         long total = getDeletedCount(checkNumber);
-        boolean hasNext = products.size() == pageable.getPageSize();
-
-        return PageResponseDto.of(products, pageable.getPageSize(), total, hasNext);
+        return PageResponseDto.of(products, pageable.getPageSize(), total,
+                offset + products.size() < total);
     }
 
-    public PageResponseDto<ProductDto> findAll(Pageable pageable, Integer lastSeenId) {
-        List<ProductDto> products;
-
-        if (lastSeenId != null && lastSeenId > 0) {
-            products = jdbcTemplate.query(
-                            """
-                            SELECT product_name, producer, product_characteristics
-                            FROM product
-                            WHERE id_product > ?
-                            ORDER BY id_product
-                            FETCH FIRST ? ROWS ONLY
-                            """,
-                            rowMapper,
-                            lastSeenId,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        } else {
-            products = jdbcTemplate.query(
-                            """
-                            SELECT product_name, producer, product_characteristics
-                            FROM product
-                            ORDER BY id_product
-                            FETCH FIRST ? ROWS ONLY
-                            """,
-                            rowMapper,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        }
+    public PageResponseDto<ProductDto> findAll(Pageable pageable) {
+        long offset = pageable.getOffset();
+        List<ProductDto> products = jdbcTemplate.query(
+                """
+                SELECT product_name, producer, product_characteristics
+                FROM product
+                ORDER BY id_product
+                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                """,
+                rowMapper,
+                offset,
+                pageable.getPageSize()
+        ).stream()
+                .map(productMapper::toDto)
+                .toList();
 
         long total = getTotalCount();
-        boolean hasNext = products.size() == pageable.getPageSize();
-
-        return PageResponseDto.of(products, pageable.getPageSize(), total, hasNext);
+        return PageResponseDto.of(products, pageable.getPageSize(), total,
+                offset + products.size() < total);
     }
 
-    public PageResponseDto<ProductDto> findByName(
-            String name, Pageable pageable, Integer lastSeenId) {
-
-        List<ProductDto> products;
-
-        if (lastSeenId != null && lastSeenId > 0) {
-            products = jdbcTemplate.query(
-                            """
-                            SELECT product_name, producer, product_characteristics
-                            FROM product
-                            WHERE product_name = ?
-                              AND id_product > ?
-                            ORDER BY id_product
-                            FETCH FIRST ? ROWS ONLY
-                            """,
-                            rowMapper,
-                            name,
-                            lastSeenId,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        } else {
-            products = jdbcTemplate.query(
-                            """
-                            SELECT product_name, producer, product_characteristics
-                            FROM product
-                            WHERE product_name = ?
-                            ORDER BY id_product
-                            FETCH FIRST ? ROWS ONLY
-                            """,
-                            rowMapper,
-                            name,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        }
+    public PageResponseDto<ProductDto> findByName(String name, Pageable pageable) {
+        long offset = pageable.getOffset();
+        List<ProductDto> products = jdbcTemplate.query(
+                """
+                SELECT product_name, producer, product_characteristics
+                FROM product
+                WHERE product_name = ?
+                ORDER BY id_product
+                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                """,
+                rowMapper,
+                name,
+                offset,
+                pageable.getPageSize()
+        ).stream().map(productMapper::toDto).toList();
 
         long total = getNameCount(name);
-        boolean hasNext = products.size() == pageable.getPageSize();
-
-        return PageResponseDto.of(products, pageable.getPageSize(), total, hasNext);
+        return PageResponseDto.of(products, pageable.getPageSize(), total,
+                offset + products.size() < total);
     }
 
-    public PageResponseDto<ProductDto> findByCategoryId(
-            int categoryNumber, Pageable pageable, Integer lastSeenId) {
-
-        List<ProductDto> products;
-
-        if (lastSeenId != null && lastSeenId > 0) {
-            products = jdbcTemplate.query(
-                            """
-                            SELECT product_name, producer, product_characteristics
-                            FROM product
-                            WHERE category_number = ?
-                              AND id_product > ?
-                            ORDER BY id_product
-                            FETCH FIRST ? ROWS ONLY
-                            """,
-                            rowMapper,
-                            categoryNumber,
-                            lastSeenId,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        } else {
-            products = jdbcTemplate.query(
-                            """
-                            SELECT product_name, producer, product_characteristics
-                            FROM product
-                            WHERE category_number = ?
-                            ORDER BY id_product
-                            FETCH FIRST ? ROWS ONLY
-                            """,
-                            rowMapper,
-                            categoryNumber,
-                            pageable.getPageSize()
-                    ).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        }
+    public PageResponseDto<ProductDto> findByCategoryId(int categoryNumber, Pageable pageable) {
+        long offset = pageable.getOffset();
+        List<ProductDto> products = jdbcTemplate.query(
+                """
+                SELECT product_name, producer, product_characteristics
+                FROM product
+                WHERE category_number = ?
+                ORDER BY id_product
+                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                """,
+                rowMapper,
+                categoryNumber,
+                offset,
+                pageable.getPageSize()
+        ).stream().map(productMapper::toDto).toList();
 
         long total = getCategoryIdCount(categoryNumber);
-        boolean hasNext = products.size() == pageable.getPageSize();
-
-        return PageResponseDto.of(products, pageable.getPageSize(), total, hasNext);
+        return PageResponseDto.of(products, pageable.getPageSize(), total,
+                offset + products.size() < total);
     }
 
     public Optional<Product> findById(int id) {

@@ -16,21 +16,18 @@ public interface EmployeeService {
 
     EmployeeResponseDto register(EmployeeRegistrationRequestDto request) throws RegistrationException;
 
-    PageResponseDto<EmployeeResponseDto> getAll(Pageable pageable,
-                                                String lastSeenId);
+    PageResponseDto<EmployeeResponseDto> getAll(Pageable pageable);
 
     EmployeeResponseDto updateEmployeeById(String id, EmployeeUpdateRequestDto requestDto);
 
     void deleteEmployeeById(String id);
 
-    PageResponseDto<EmployeeResponseDto> getAllCashiers(Pageable pageable,
-                                             String lastSeenId);
+    PageResponseDto<EmployeeResponseDto> getAllCashiers(Pageable pageable);
 
     EmployeeResponseDto getMe();
 
     PageResponseDto<EmployeeContactDto> findPhoneAndAddressBySurname(String surname,
-                                                                     Pageable pageable,
-                                                                     String lastSeenId);
+                                                                     Pageable pageable);
 
     List<EmployeeResponseDto> findAllNoPagination();
 }

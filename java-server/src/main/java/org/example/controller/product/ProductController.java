@@ -51,10 +51,9 @@ public class ProductController {
             description = "Get deleted products' name existing in some check"
     )
     @PreAuthorize("hasAuthority('MANAGER')")
-    public PageResponseDto<ProductDto> getDeleted(@RequestParam String checkNumber,
-                                              @RequestParam(required = false) Integer lastSeenId) {
+    public PageResponseDto<ProductDto> getDeleted(@RequestParam String checkNumber) {
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("product_name"));
-        return productService.getDeleted(checkNumber, pageable, lastSeenId);
+        return productService.getDeleted(checkNumber, pageable);
     }
 
     @GetMapping
@@ -62,8 +61,7 @@ public class ProductController {
             summary = "Get all products",
             description = "Get all products sorted by their names"
     )
-    public PageResponseDto<ProductDto> getAll(@RequestParam(required = false) Integer lastSeenId,
-                                              @RequestParam(required = false) String name,
+    public PageResponseDto<ProductDto> getAll(@RequestParam(required = false) String name,
                                               @RequestParam(required = false) Integer categoryId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
@@ -73,12 +71,12 @@ public class ProductController {
             if (!isCashier) {
                 throw new AuthorizationException("Only Cashier can search products by name");
             }
-            return productService.findByName(name, pageable, lastSeenId);
+            return productService.findByName(name, pageable);
         }
         if (categoryId != null) {
-            return productService.findByCategoryId(categoryId, pageable, lastSeenId);
+            return productService.findByCategoryId(categoryId, pageable);
         }
-        return productService.getAll(pageable, lastSeenId);
+        return productService.getAll(pageable);
     }
 
     @PostMapping

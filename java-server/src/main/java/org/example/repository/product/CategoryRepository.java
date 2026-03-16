@@ -15,14 +15,17 @@ public class CategoryRepository {
     private final RowMapper<CategoryResponseDto> rowMapper
             = (rs, rowNum) -> {
         CategoryResponseDto dto = new CategoryResponseDto();
+        dto.setCategory_number(rs.getInt("category_number"));
         dto.setCategory_name(rs.getString("category_name"));
+        dto.setTotal_sold(rs.getInt("total_sold"));
         return dto;
     };
 
     public List<CategoryResponseDto> findPopCategories() {
         return jdbcTemplate.query(
                             """
-                            SELECT category_name 
+                            SELECT c.category_number, c.category_name,
+                            SUM(s.product_number) AS total_sold
                             FROM category c
                             INNER JOIN product p
                             ON c.category_number = p.category_number

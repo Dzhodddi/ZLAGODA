@@ -1,7 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     createCategory,
-    deleteCategory, getCategory,
+    deleteCategory, getCategory, getPopCategories,
     listCategories,
     updateCategory
 } from "@/features/category/api/categoryApi.ts";
@@ -75,6 +75,14 @@ export const useCategory = (categoryNumber: number) => {
         queryKey: [QUERY_KEY, categoryNumber],
         queryFn: () => getCategory(categoryNumber),
         enabled: !!categoryNumber,
+        staleTime: 1000 * 30,
+    });
+};
+
+export const usePopCategories = () => {
+    return useQuery({
+        queryKey: [QUERY_KEY, "top"],
+        queryFn: () => getPopCategories(),
         staleTime: 1000 * 30,
     });
 };

@@ -20,9 +20,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageResponseDto<ProductDto> getDeleted(String checkNumber,
-                                                   Pageable pageable,
-                                                   Integer lastSeenId) {
-        return repository.findDeleted(checkNumber, pageable, lastSeenId);
+                                                   Pageable pageable) {
+        return repository.findDeleted(checkNumber, pageable);
     }
 
     @Override
@@ -31,9 +30,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageResponseDto<ProductDto> getAll(Pageable pageable,
-                                              Integer lastSeenId) {
-        return repository.findAll(pageable, lastSeenId);
+    public PageResponseDto<ProductDto> getAll(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     @Override
@@ -49,16 +47,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageResponseDto<ProductDto> findByName(String name,
-                                                  Pageable pageable,
-                                                  Integer lastSeenId) {
-        return repository.findByName(name, pageable, lastSeenId);
+                                                  Pageable pageable) {
+        return repository.findByName(name, pageable);
     }
 
     @Override
     public PageResponseDto<ProductDto> findByCategoryId(int category_number,
-                                                        Pageable pageable,
-                                                        Integer lastSeenId) {
-        return repository.findByCategoryId(category_number, pageable, lastSeenId);
+                                                        Pageable pageable) {
+        return repository.findByCategoryId(category_number, pageable);
     }
 
     @Override

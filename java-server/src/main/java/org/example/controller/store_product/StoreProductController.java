@@ -82,7 +82,7 @@ public class StoreProductController {
         } else {
             pageable = PageRequest.of(0, PAGE_SIZE);
         }
-        return storeProductService.getAll(sortedBy, prom, pageable, lastSeenUPC);
+        return storeProductService.getAll(sortedBy, prom, pageable);
     }
 
     @PostMapping

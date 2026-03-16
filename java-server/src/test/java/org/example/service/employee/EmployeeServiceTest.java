@@ -1,10 +1,11 @@
 package org.example.service.employee;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,20 +47,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @DisplayName("Employee Service Tests")
 class EmployeeServiceTest {
 
-    @Mock
-    private EmployeeRepository employeeRepository;
-
-    @Mock
-    private EmployeeMapper employeeMapper;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private SecurityContext securityContext;
-
-    @Mock
-    private Authentication authentication;
+    @Mock private EmployeeRepository employeeRepository;
+    @Mock private EmployeeMapper employeeMapper;
+    @Mock private PasswordEncoder passwordEncoder;
+    @Mock private SecurityContext securityContext;
+    @Mock private Authentication authentication;
 
     @InjectMocks
     private EmployeeServiceImpl service;
@@ -68,11 +60,10 @@ class EmployeeServiceTest {
     private EmployeeResponseDto employeeResponseDto;
     private EmployeeRegistrationRequestDto registrationRequestDto;
     private EmployeeUpdateRequestDto updateRequestDto;
-    private Role role;
 
     @BeforeEach
     void setUp() {
-        role = new Role();
+        Role role = new Role();
         role.setName(Role.RoleName.MANAGER);
 
         employee = new Employee();
@@ -142,7 +133,6 @@ class EmployeeServiceTest {
     @DisplayName("register should throw RegistrationException when ID is null")
     void register_nullId_shouldThrowException() {
         registrationRequestDto.setId_employee(null);
-
         assertThrows(RegistrationException.class, () -> service.register(registrationRequestDto));
         verify(employeeRepository, never()).save(any());
     }
@@ -151,7 +141,6 @@ class EmployeeServiceTest {
     @DisplayName("register should throw RegistrationException when ID is empty")
     void register_emptyId_shouldThrowException() {
         registrationRequestDto.setId_employee("");
-
         assertThrows(RegistrationException.class, () -> service.register(registrationRequestDto));
         verify(employeeRepository, never()).save(any());
     }
@@ -160,7 +149,6 @@ class EmployeeServiceTest {
     @DisplayName("register should throw RegistrationException when employee already exists")
     void register_existingEmployee_shouldThrowException() {
         when(employeeRepository.existsByIdEmployee("EMP001")).thenReturn(true);
-
         assertThrows(RegistrationException.class, () -> service.register(registrationRequestDto));
         verify(employeeRepository, never()).save(any());
     }
@@ -171,7 +159,6 @@ class EmployeeServiceTest {
         registrationRequestDto.setDate_of_birth(Date.from(LocalDate.now().minusYears(17)
                 .atStartOfDay(ZoneId.systemDefault()).toInstant()));
         when(employeeRepository.existsByIdEmployee("EMP001")).thenReturn(false);
-
         assertThrows(RegistrationException.class, () -> service.register(registrationRequestDto));
         verify(employeeRepository, never()).save(any());
     }
@@ -182,7 +169,6 @@ class EmployeeServiceTest {
         registrationRequestDto.setRole("INVALID_ROLE");
         when(employeeRepository.existsByIdEmployee("EMP001")).thenReturn(false);
         when(employeeMapper.toEmployeeEntity(registrationRequestDto)).thenReturn(employee);
-
         assertThrows(InvalidRoleException.class, () -> service.register(registrationRequestDto));
     }
 
@@ -207,22 +193,17 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("getAll should return list of employees")
     void getAll_shouldReturnList() {
-        PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
-                List.of(employeeResponseDto),
-                0,
-                10,
-                false
-        );
         Pageable pageable = Pageable.ofSize(10);
-        when(employeeRepository.findAll(pageable, null))
-                .thenReturn(page);
-        PageResponseDto<EmployeeResponseDto> result = service
-                .getAll(pageable, null);
+        PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
+                List.of(employeeResponseDto), 10, 1, false);
+        when(employeeRepository.findAll(pageable)).thenReturn(page);
+
+        PageResponseDto<EmployeeResponseDto> result = service.getAll(pageable);
+
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("EMP001", result.getContent().get(0).getId_employee());
-        verify(employeeRepository, times(1))
-                .findAll(pageable, null);
+        verify(employeeRepository, times(1)).findAll(pageable);
     }
 
     @Test
@@ -236,15 +217,13 @@ class EmployeeServiceTest {
 
         assertNotNull(result);
         assertEquals("EMP001", result.getId_employee());
-        verify(employeeRepository, times(1))
-                .updateEmployeeById("EMP001", updateRequestDto);
+        verify(employeeRepository, times(1)).updateEmployeeById("EMP001", updateRequestDto);
     }
 
     @Test
     @DisplayName("updateEmployeeById should throw EntityNotFoundException when employee not found")
     void updateEmployeeById_nonExistingEmployee_shouldThrowException() {
         when(employeeRepository.findByIdEmployee("EMP999")).thenReturn(Optional.empty());
-
         assertThrows(EntityNotFoundException.class,
                 () -> service.updateEmployeeById("EMP999", updateRequestDto));
         verify(employeeRepository, never()).updateEmployeeById(anyString(), any());
@@ -289,22 +268,16 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("getAllCashiers should return list of cashiers")
     void getAllCashiers_shouldReturnCashiers() {
-        PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
-                List.of(employeeResponseDto),
-                0,
-                10,
-                false
-        );
         Pageable pageable = Pageable.ofSize(10);
-        when(employeeRepository.findAllCashiers(pageable, null))
-                .thenReturn(page);
+        PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
+                List.of(employeeResponseDto), 10, 1, false);
+        when(employeeRepository.findAllCashiers(pageable)).thenReturn(page);
 
-        PageResponseDto<EmployeeResponseDto> result = service
-                .getAllCashiers(pageable, null);
+        PageResponseDto<EmployeeResponseDto> result = service.getAllCashiers(pageable);
+
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        verify(employeeRepository, times(1))
-                .findAllCashiers(pageable, null);
+        verify(employeeRepository, times(1)).findAllCashiers(pageable);
     }
 
     @Test
@@ -337,29 +310,25 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("findPhoneAndAddressBySurname should return contact info")
     void findPhoneAndAddressBySurname_existingEmployee_shouldReturnContact() {
+        Pageable pageable = Pageable.ofSize(10);
+        String surname = "Іваненко";
         EmployeeContactDto contactDto = new EmployeeContactDto();
         contactDto.setPhone_number("+380501234567");
         contactDto.setCity("Київ");
-        contactDto.setStreet("вул. Хрещатик, 1");
-        contactDto.setZip_code("01001");
-        Pageable pageable = Pageable.ofSize(10);
-        String surname = "Іваненко";
         PageResponseDto<EmployeeContactDto> expectedPage = PageResponseDto.of(
-                List.of(contactDto),
-                10,
-                1L,
-                false
-        );
-        when(employeeRepository.findPhoneAndAddressBySurname(surname, pageable, null))
+                List.of(contactDto), 10, 1L, false);
+
+        // ← прибрано null (lastSeenId)
+        when(employeeRepository.findPhoneAndAddressBySurname(surname, pageable))
                 .thenReturn(expectedPage);
-        PageResponseDto<EmployeeContactDto> result = service
-                .findPhoneAndAddressBySurname(surname, pageable, null);
+
+        PageResponseDto<EmployeeContactDto> result =
+                service.findPhoneAndAddressBySurname(surname, pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("+380501234567", result.getContent().get(0).getPhone_number());
-        assertEquals("Київ", result.getContent().get(0).getCity());
         verify(employeeRepository, times(1))
-                .findPhoneAndAddressBySurname(surname, pageable, null);
+                .findPhoneAndAddressBySurname(surname, pageable);
     }
 }

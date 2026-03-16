@@ -77,7 +77,7 @@ class ProductControllerTest {
                 10,
                 false
         );
-        when(productService.getAll(any(Pageable.class), anyInt())).thenReturn(page);
+        when(productService.getAll(any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/products")
                         .param("lastSeenName", "")
@@ -89,7 +89,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[1].product_name").value("Banana"))
                 .andExpect(jsonPath("$.content[1].producer").value("Producer B"));
 
-        verify(productService).getAll(any(Pageable.class), anyInt());
+        verify(productService).getAll(any(Pageable.class));
     }
 
     @Test
@@ -102,7 +102,7 @@ class ProductControllerTest {
                 10,
                 false
         );
-        when(productService.findByName(eq("Apple"), any(Pageable.class), anyInt()))
+        when(productService.findByName(eq("Apple"), any(Pageable.class)))
                 .thenReturn(page);
 
         mockMvc.perform(get("/products")
@@ -113,7 +113,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[0].product_name").value("Apple"))
                 .andExpect(jsonPath("$.content[0].producer").value("Producer A"));
 
-        verify(productService).findByName(eq("Apple"), any(Pageable.class), anyInt());
+        verify(productService).findByName(eq("Apple"), any(Pageable.class));
     }
 
     @Test
@@ -125,7 +125,7 @@ class ProductControllerTest {
                         .param("lastSeenId", "0"))
                 .andExpect(status().isForbidden());
 
-        verify(productService, never()).findByName(anyString(), any(), anyInt());
+        verify(productService, never()).findByName(anyString(), any());
     }
 
     @Test
@@ -138,7 +138,7 @@ class ProductControllerTest {
                 10,
                 false
         );
-        when(productService.findByCategoryId(eq(10), any(Pageable.class), anyInt()))
+        when(productService.findByCategoryId(eq(10), any(Pageable.class)))
                 .thenReturn(page);
 
         mockMvc.perform(get("/products")
@@ -149,7 +149,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[0].producer").value("Producer A"))
                 .andExpect(jsonPath("$.content[1].producer").value("Producer B"));
 
-        verify(productService).findByCategoryId(eq(10), any(Pageable.class), anyInt());
+        verify(productService).findByCategoryId(eq(10), any(Pageable.class));
     }
 
     @Test

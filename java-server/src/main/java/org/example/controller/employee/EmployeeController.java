@@ -61,10 +61,10 @@ public class EmployeeController {
             description = "Get all employees sorted by their surnames"
     )
     @PreAuthorize("hasAuthority('MANAGER')")
-    public PageResponseDto<EmployeeResponseDto> getAll(@RequestParam(required = false)
-                                                       String lastSeenId) {
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("empl_surname"));
-        return employeeService.getAll(pageable, lastSeenId);
+    public PageResponseDto<EmployeeResponseDto> getAll(
+            @RequestParam(required = false, defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("empl_surname").and(Sort.by("id_employee")));
+        return employeeService.getAll(pageable);
     }
 
     @PostMapping
@@ -125,9 +125,9 @@ public class EmployeeController {
     )
     @PreAuthorize("hasAuthority('MANAGER')")
     public PageResponseDto<EmployeeResponseDto> getAllCashiers(
-            @RequestParam(required = false) String lastSeenId) {
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("empl_surname"));
-        return employeeService.getAllCashiers(pageable, lastSeenId);
+            @RequestParam(required = false, defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("empl_surname").and(Sort.by("id_employee")));
+        return employeeService.getAllCashiers(pageable);
     }
 
     @GetMapping("/me")
@@ -148,8 +148,8 @@ public class EmployeeController {
     @PreAuthorize("hasAuthority('MANAGER')")
     public PageResponseDto<EmployeeContactDto> findPhoneAndAddressBySurname(
             @RequestParam String surname,
-            @RequestParam(required = false) String lastSeenId) {
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("empl_surname"));
-        return employeeService.findPhoneAndAddressBySurname(surname, pageable, lastSeenId);
+            @RequestParam(required = false, defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("empl_surname").and(Sort.by("id_employee")));
+        return employeeService.findPhoneAndAddressBySurname(surname, pageable);
     }
 }

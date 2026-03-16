@@ -5,7 +5,6 @@ import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -139,7 +138,7 @@ class StoreProductControllerTest {
                         .param("sortedBy", "name"))
                 .andExpect(status().isForbidden());
 
-        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class), any());
+        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class));
     }
 
     @Test
@@ -153,8 +152,8 @@ class StoreProductControllerTest {
                 false
         );
         when(storeProductService.getAll(eq("name"), any(),
-                any(Pageable.class),
-                isNull()))
+                any(Pageable.class)
+        ))
                 .thenReturn((PageResponseDto) page);
 
         mockMvc.perform(get("/store-products")
@@ -164,7 +163,7 @@ class StoreProductControllerTest {
                 .andExpect(jsonPath("$.content[0].upc").value("1234567890"));
 
         verify(storeProductService, times(1))
-                .getAll(eq("name"), any(), any(Pageable.class), isNull());
+                .getAll(eq("name"), any(), any(Pageable.class));
     }
 
     @Test
@@ -178,8 +177,8 @@ class StoreProductControllerTest {
                 false
         );
         when(storeProductService.getAll(eq("quantity"), any(),
-                any(Pageable.class),
-                isNull()))
+                any(Pageable.class)
+        ))
                 .thenReturn((PageResponseDto) page);
 
         mockMvc.perform(get("/store-products")
@@ -188,7 +187,7 @@ class StoreProductControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(2));
 
         verify(storeProductService, times(1))
-                .getAll(eq("quantity"), any(), any(Pageable.class), isNull());
+                .getAll(eq("quantity"), any(), any(Pageable.class));
     }
 
     @Test
@@ -199,7 +198,7 @@ class StoreProductControllerTest {
                         .param("sortedBy", "quantity"))
                 .andExpect(status().isForbidden());
 
-        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class), any());
+        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class));
     }
 
     @Test

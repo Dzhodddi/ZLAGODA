@@ -8,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,19 +19,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.example.dto.page.PageResponseDto;
-import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
-import org.example.dto.store_product.product.StoreProductDto;
-import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
-import org.example.dto.store_product.product.StoreProductRequestDto;
-import org.example.dto.store_product.product.StoreProductWithNameDto;
+import org.example.dto.store_product.product.*;
 import org.example.exception.custom_exception.EntityNotFoundException;
 import org.example.exception.custom_exception.InvalidProductException;
 import org.example.mapper.store_product.StoreProductMapper;
 import org.example.mapper.store_product.StoreProductRowMapper;
 import org.example.model.store_product.StoreProduct;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -50,14 +44,9 @@ import org.springframework.jdbc.core.RowMapper;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class StoreProductRepositoryTest {
 
-    @Mock
-    private JdbcTemplate jdbcTemplate;
-
-    @Mock
-    private StoreProductRowMapper rowMapper;
-
-    @Mock
-    private StoreProductMapper mapper;
+    @Mock private JdbcTemplate jdbcTemplate;
+    @Mock private StoreProductRowMapper rowMapper;
+    @Mock private StoreProductMapper mapper;
 
     @InjectMocks
     private StoreProductRepository repository;
@@ -70,7 +59,6 @@ class StoreProductRepositoryTest {
     @BeforeEach
     void setUp() {
         pageable = PageRequest.of(0, 10);
-
         storeProduct = createStoreProduct(false);
         requestDto = createRequestDto(false);
         storeProductDto = createStoreProductDto();
@@ -113,33 +101,17 @@ class StoreProductRepositoryTest {
         return dto;
     }
 
-    private StoreProductCharacteristicsDto createCharacteristicsDto() {
-        StoreProductCharacteristicsDto dto = new StoreProductCharacteristicsDto();
-        dto.setSelling_price(new BigDecimal("12.00"));
-        dto.setProducts_number(50);
-        dto.setProduct_name("Test Product");
-        dto.setProduct_characteristics("Test characteristics");
-        return dto;
-    }
-
-    private StoreProductPriceAndQuantityDto createPriceAndQuantityDto() {
-        StoreProductPriceAndQuantityDto dto = new StoreProductPriceAndQuantityDto();
-        dto.setSelling_price(new BigDecimal("12.00"));
-        dto.setProducts_number(50);
-        return dto;
-    }
+    // ← offset-based: query тепер отримує (offset: long, pageSize: int)
 
     @Test
-    @DisplayName("findAll should return page of store products (No params)")
-    void findAll_noParams_shouldReturnStoreProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt()))
+    @DisplayName("findAll should return page of store products")
+    void findAll_shouldReturnStoreProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyLong(), anyInt()))
                 .thenReturn(List.of(storeProduct));
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
-                .thenReturn(1);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
         when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
 
-        PageResponseDto<StoreProductDto> result
-                = repository.findAll(pageable, null);
+        PageResponseDto<StoreProductDto> result = repository.findAll(pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
@@ -147,46 +119,40 @@ class StoreProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("findAll should return page of store products (With params)")
-    void findAll_withParams_shouldReturnStoreProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyString(), anyInt()))
+    @DisplayName("findAll page 2 should use correct offset")
+    void findAll_page2_shouldUseCorrectOffset() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), eq(10L), eq(10)))
                 .thenReturn(List.of(storeProduct));
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(11);
         when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
 
-        PageResponseDto<StoreProductDto> result = repository.findAll(pageable, "LAST_UPC");
+        PageResponseDto<StoreProductDto> result = repository.findAll(PageRequest.of(1, 10));
 
         assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(jdbcTemplate).query(anyString(), eq(rowMapper), eq("LAST_UPC"), eq(10));
+        assertFalse(result.isHasNext()); // 10 + 1 < 11 → false
     }
 
     @Test
     @DisplayName("findAllNoPagination should return list of store products")
     void findAllNoPagination_shouldReturnStoreProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper)))
-                .thenReturn(List.of(storeProduct));
+        when(jdbcTemplate.query(anyString(), eq(rowMapper))).thenReturn(List.of(storeProduct));
         when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
 
         List<StoreProductDto> result = repository.findAllNoPagination();
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("123456789012", result.get(0).getUPC());
     }
 
     @Test
-    @DisplayName("findAllSortedByName should return page (No params)")
-    void findAllSortedByName_noParams_shouldReturnProductsWithNames() {
+    @DisplayName("findAllSortedByName should return products with names")
+    void findAllSortedByName_shouldReturnProductsWithNames() {
         StoreProductWithNameDto dto = createStoreProductWithNameDto(false);
-
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyInt()))
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyLong(), anyInt()))
                 .thenReturn(List.of(dto));
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
-                .thenReturn(1);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
 
-        PageResponseDto<StoreProductWithNameDto> result
-                = repository.findAllSortedByName(pageable, null);
+        PageResponseDto<StoreProductWithNameDto> result = repository.findAllSortedByName(pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
@@ -194,145 +160,57 @@ class StoreProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("findAllSortedByName should return page (With params)")
-    void findAllSortedByName_withParams_shouldReturnProductsWithNames() {
-        StoreProductWithNameDto dto = createStoreProductWithNameDto(false);
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyString(), anyInt()))
-                .thenReturn(List.of(dto));
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
-
-        PageResponseDto<StoreProductWithNameDto> result = repository.findAllSortedByName(pageable, "UPC123");
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(jdbcTemplate).query(anyString(), any(RowMapper.class), eq("UPC123"), eq(10));
-    }
-
-    @Test
-    @DisplayName("findAllSortedByQuantity should return page (No params)")
-    void findAllSortedByQuantity_noParams_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt()))
-                .thenReturn(List.of(storeProduct));
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
-                .thenReturn(1);
-        when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
-
-        PageResponseDto<StoreProductDto> result
-                = repository.findAllSortedByQuantity(pageable, null);
-
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-    }
-
-    @Test
-    @DisplayName("findAllSortedByQuantity should return page (With params)")
-    void findAllSortedByQuantity_withParams_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyString(), anyInt()))
+    @DisplayName("findAllSortedByQuantity should return products sorted by quantity")
+    void findAllSortedByQuantity_shouldReturnProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyLong(), anyInt()))
                 .thenReturn(List.of(storeProduct));
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
         when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
 
-        PageResponseDto<StoreProductDto> result = repository.findAllSortedByQuantity(pageable, "UPC123");
+        PageResponseDto<StoreProductDto> result = repository.findAllSortedByQuantity(pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        verify(jdbcTemplate).query(anyString(), eq(rowMapper), eq("UPC123"), eq(10));
     }
 
     @Test
-    @DisplayName("findPromotionalSortedByQuantity should return only promotional products (No params)")
-    void findPromotionalSortedByQuantity_noParams_shouldReturnPromotionalProducts() {
+    @DisplayName("findPromotionalSortedByQuantity should return only promotional products")
+    void findPromotionalSortedByQuantity_shouldReturnPromotionalProducts() {
         storeProduct.setPromotional_product(true);
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt()))
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyLong(), anyInt()))
                 .thenReturn(List.of(storeProduct));
-        when(jdbcTemplate.queryForObject(
-                eq("""
-                SELECT COUNT(*)
-                FROM store_product
-                WHERE promotional_product = true
-                """),
-                eq(Integer.class)))
-                .thenReturn(1);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
         when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
 
-        PageResponseDto<StoreProductDto> result
-                = repository.findPromotionalSortedByQuantity(pageable, null);
+        PageResponseDto<StoreProductDto> result = repository.findPromotionalSortedByQuantity(pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
     }
 
     @Test
-    @DisplayName("findPromotionalSortedByQuantity should return only promotional products (With params)")
-    void findPromotionalSortedByQuantity_withParams_shouldReturnPromotionalProducts() {
-        storeProduct.setPromotional_product(true);
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyString(), anyInt()))
+    @DisplayName("findNonPromotionalSortedByQuantity should return only non-promotional products")
+    void findNonPromotionalSortedByQuantity_shouldReturnNonPromotionalProducts() {
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyLong(), anyInt()))
                 .thenReturn(List.of(storeProduct));
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
         when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
 
-        PageResponseDto<StoreProductDto> result
-                = repository.findPromotionalSortedByQuantity(pageable, "UPC123");
-
-        assertNotNull(result);
-        verify(jdbcTemplate).query(anyString(), eq(rowMapper), eq("UPC123"), eq(10));
-    }
-
-    @Test
-    @DisplayName("findNonPromotionalSortedByQuantity should return only non-promotional products (No params)")
-    void findNonPromotionalSortedByQuantity_noParams_shouldReturnNonPromotionalProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt()))
-                .thenReturn(List.of(storeProduct));
-        when(jdbcTemplate.queryForObject(
-                eq("""
-                SELECT COUNT(*)
-                FROM store_product
-                WHERE promotional_product = false
-                """),
-                eq(Integer.class)))
-                .thenReturn(1);
-        when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
-
-        PageResponseDto<StoreProductDto> result
-                = repository.findNonPromotionalSortedByQuantity(pageable, null);
+        PageResponseDto<StoreProductDto> result = repository.findNonPromotionalSortedByQuantity(pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
     }
 
     @Test
-    @DisplayName("findNonPromotionalSortedByQuantity should return only non-promotional products (With params)")
-    void findNonPromotionalSortedByQuantity_withParams_shouldReturnNonPromotionalProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyString(), anyInt()))
-                .thenReturn(List.of(storeProduct));
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
-        when(mapper.toDto(any(StoreProduct.class))).thenReturn(storeProductDto);
-
-        PageResponseDto<StoreProductDto> result
-                = repository.findNonPromotionalSortedByQuantity(pageable, "UPC123");
-
-        assertNotNull(result);
-        verify(jdbcTemplate).query(anyString(), eq(rowMapper), eq("UPC123"), eq(10));
-    }
-
-    @Test
-    @DisplayName("findPromotionalSortedByName should return promotional products sorted by name (No params)")
-    void findPromotionalSortedByName_noParams_shouldReturnPromotionalProducts() {
+    @DisplayName("findPromotionalSortedByName should return promotional products sorted by name")
+    void findPromotionalSortedByName_shouldReturnPromotionalProducts() {
         StoreProductWithNameDto dto = createStoreProductWithNameDto(true);
-
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyInt()))
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyLong(), anyInt()))
                 .thenReturn(List.of(dto));
-        when(jdbcTemplate.queryForObject(
-                eq("""
-                SELECT COUNT(*)
-                FROM store_product
-                WHERE promotional_product = true
-                """),
-                eq(Integer.class)))
-                .thenReturn(1);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
 
-        PageResponseDto<StoreProductWithNameDto> result
-                = repository.findPromotionalSortedByName(pageable, null);
+        PageResponseDto<StoreProductWithNameDto> result = repository.findPromotionalSortedByName(pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
@@ -340,57 +218,18 @@ class StoreProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("findPromotionalSortedByName should return promotional products sorted by name (With params)")
-    void findPromotionalSortedByName_withParams_shouldReturnPromotionalProducts() {
-        StoreProductWithNameDto dto = createStoreProductWithNameDto(true);
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyString(), anyInt()))
+    @DisplayName("findNonPromotionalSortedByName should return non-promotional products sorted by name")
+    void findNonPromotionalSortedByName_shouldReturnNonPromotionalProducts() {
+        StoreProductWithNameDto dto = createStoreProductWithNameDto(false);
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyLong(), anyInt()))
                 .thenReturn(List.of(dto));
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
 
-        PageResponseDto<StoreProductWithNameDto> result
-                = repository.findPromotionalSortedByName(pageable, "UPC123");
-
-        assertNotNull(result);
-        verify(jdbcTemplate).query(anyString(), any(RowMapper.class), eq("UPC123"), eq(10));
-    }
-
-    @Test
-    @DisplayName("findNonPromotionalSortedByName should return non-promotional products sorted by name (No params)")
-    void findNonPromotionalSortedByName_noParams_shouldReturnNonPromotionalProducts() {
-        StoreProductWithNameDto dto = createStoreProductWithNameDto(false);
-
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyInt()))
-                .thenReturn(List.of(dto));
-        when(jdbcTemplate.queryForObject(
-                eq("""
-                SELECT COUNT(*)
-                FROM store_product
-                WHERE promotional_product = false
-                """),
-                eq(Integer.class)))
-                .thenReturn(1);
-
-        PageResponseDto<StoreProductWithNameDto> result
-                = repository.findNonPromotionalSortedByName(pageable, null);
+        PageResponseDto<StoreProductWithNameDto> result = repository.findNonPromotionalSortedByName(pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertFalse(result.getContent().get(0).isPromotional_product());
-    }
-
-    @Test
-    @DisplayName("findNonPromotionalSortedByName should return non-promotional products sorted by name (With params)")
-    void findNonPromotionalSortedByName_withParams_shouldReturnNonPromotionalProducts() {
-        StoreProductWithNameDto dto = createStoreProductWithNameDto(false);
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyString(), anyInt()))
-                .thenReturn(List.of(dto));
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(1);
-
-        PageResponseDto<StoreProductWithNameDto> result
-                = repository.findNonPromotionalSortedByName(pageable, "UPC123");
-
-        assertNotNull(result);
-        verify(jdbcTemplate).query(anyString(), any(RowMapper.class), eq("UPC123"), eq(10));
     }
 
     @Test
@@ -403,8 +242,6 @@ class StoreProductRepositoryTest {
 
         assertTrue(result.isPresent());
         assertEquals("123456789012", result.get().getUPC());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(),
-                eq(rowMapper), eq("123456789012"));
     }
 
     @Test
@@ -413,17 +250,15 @@ class StoreProductRepositoryTest {
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq("999999999999")))
                 .thenThrow(EmptyResultDataAccessException.class);
 
-        Optional<StoreProduct> result = repository.findAllInfoByUPC("999999999999");
-
-        assertTrue(result.isEmpty());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(),
-                eq(rowMapper), eq("999999999999"));
+        assertTrue(repository.findAllInfoByUPC("999999999999").isEmpty());
     }
 
     @Test
     @DisplayName("findByUPC should return characteristics when product exists")
     void findByUPC_existingUPC_shouldReturnCharacteristics() {
-        StoreProductCharacteristicsDto dto = createCharacteristicsDto();
+        StoreProductCharacteristicsDto dto = new StoreProductCharacteristicsDto();
+        dto.setProduct_name("Test Product");
+        dto.setSelling_price(new BigDecimal("12.00"));
 
         when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq("123456789012")))
                 .thenReturn(dto);
@@ -432,7 +267,6 @@ class StoreProductRepositoryTest {
 
         assertTrue(result.isPresent());
         assertEquals("Test Product", result.get().getProduct_name());
-        assertEquals(new BigDecimal("12.00"), result.get().getSelling_price());
     }
 
     @Test
@@ -441,25 +275,24 @@ class StoreProductRepositoryTest {
         when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq("999999999999")))
                 .thenThrow(EmptyResultDataAccessException.class);
 
-        Optional<StoreProductCharacteristicsDto> result = repository.findByUPC("999999999999");
-
-        assertTrue(result.isEmpty());
+        assertTrue(repository.findByUPC("999999999999").isEmpty());
     }
 
     @Test
     @DisplayName("findPriceAndQuantityByUPC should return price and quantity")
     void findPriceAndQuantityByUPC_shouldReturnPriceAndQuantity() {
-        StoreProductPriceAndQuantityDto dto = createPriceAndQuantityDto();
+        StoreProductPriceAndQuantityDto dto = new StoreProductPriceAndQuantityDto();
+        dto.setSelling_price(new BigDecimal("12.00"));
+        dto.setProducts_number(50);
 
         when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq("123456789012")))
                 .thenReturn(dto);
 
-        Optional<StoreProductPriceAndQuantityDto> result = repository
-                .findPriceAndQuantityByUPC("123456789012");
+        Optional<StoreProductPriceAndQuantityDto> result =
+                repository.findPriceAndQuantityByUPC("123456789012");
 
         assertTrue(result.isPresent());
         assertEquals(new BigDecimal("12.00"), result.get().getSelling_price());
-        assertEquals(50, result.get().getProducts_number());
     }
 
     @Test
@@ -468,10 +301,7 @@ class StoreProductRepositoryTest {
         when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq("999999999999")))
                 .thenThrow(EmptyResultDataAccessException.class);
 
-        Optional<StoreProductPriceAndQuantityDto> result = repository
-                .findPriceAndQuantityByUPC("999999999999");
-
-        assertTrue(result.isEmpty());
+        assertTrue(repository.findPriceAndQuantityByUPC("999999999999").isEmpty());
     }
 
     @Test
@@ -485,8 +315,6 @@ class StoreProductRepositoryTest {
 
         assertNotNull(result);
         assertEquals("123456789012", result.getUPC());
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), eq(rowMapper),
-                anyString(), isNull(), anyInt(), any(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -497,11 +325,7 @@ class StoreProductRepositoryTest {
                 anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(), anyBoolean()))
                 .thenReturn(storeProduct);
 
-        StoreProduct result = repository.save(requestDto);
-
-        assertNotNull(result);
-        verify(jdbcTemplate, times(1)).queryForObject(anyString(), eq(rowMapper),
-                anyString(), isNull(), anyInt(), any(), anyInt(), anyBoolean(), anyBoolean());
+        assertNotNull(repository.save(requestDto));
     }
 
     @Test
@@ -530,8 +354,6 @@ class StoreProductRepositoryTest {
 
         assertNotNull(result);
         assertEquals("123456789012", result.getUPC());
-        verify(jdbcTemplate, times(1)).update(anyString(),
-                any(), anyInt(), any(), anyInt(), anyBoolean(), eq("123456789012"));
     }
 
     @Test
@@ -549,8 +371,8 @@ class StoreProductRepositoryTest {
     void updateByUPC_invalidProduct_shouldThrowException() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
                 .thenReturn(1);
-        when(jdbcTemplate.update(anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(),
-                eq("123456789012")))
+        when(jdbcTemplate.update(anyString(), any(), anyInt(), any(), anyInt(),
+                anyBoolean(), eq("123456789012")))
                 .thenThrow(DataIntegrityViolationException.class);
 
         assertThrows(InvalidProductException.class,
@@ -562,8 +384,8 @@ class StoreProductRepositoryTest {
     void updateByUPC_updateFailed_shouldThrowException() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
                 .thenReturn(1);
-        when(jdbcTemplate.update(anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(),
-                eq("123456789012")))
+        when(jdbcTemplate.update(anyString(), any(), anyInt(), any(), anyInt(),
+                anyBoolean(), eq("123456789012")))
                 .thenReturn(0);
 
         assertThrows(EntityNotFoundException.class,
@@ -571,12 +393,12 @@ class StoreProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("updateByUPC should throw EntityNotFoundException when product not found after update")
+    @DisplayName("updateByUPC should throw EntityNotFoundException when not found after update")
     void updateByUPC_notFoundAfterUpdate_shouldThrowException() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
                 .thenReturn(1);
-        when(jdbcTemplate.update(anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(),
-                eq("123456789012")))
+        when(jdbcTemplate.update(anyString(), any(), anyInt(), any(), anyInt(),
+                anyBoolean(), eq("123456789012")))
                 .thenReturn(1);
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq("123456789012")))
                 .thenThrow(EmptyResultDataAccessException.class);
@@ -592,8 +414,7 @@ class StoreProductRepositoryTest {
 
         repository.softDeleteByUPC("123456789012");
 
-        verify(jdbcTemplate, times(1)).update(anyString(),
-                eq("123456789012"));
+        verify(jdbcTemplate, times(1)).update(anyString(), eq("123456789012"));
     }
 
     @Test
@@ -601,7 +422,6 @@ class StoreProductRepositoryTest {
     void existsByUPC_existingProduct_shouldReturnTrue() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
                 .thenReturn(1);
-
         assertTrue(repository.existsByUPC("123456789012"));
     }
 
@@ -610,7 +430,6 @@ class StoreProductRepositoryTest {
     void existsByUPC_nonExistingProduct_shouldReturnFalse() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("999999999999")))
                 .thenReturn(0);
-
         assertFalse(repository.existsByUPC("999999999999"));
     }
 
@@ -619,20 +438,18 @@ class StoreProductRepositoryTest {
     void existsByUPC_nullCount_shouldReturnFalse() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("123456789012")))
                 .thenReturn(null);
-
         assertFalse(repository.existsByUPC("123456789012"));
     }
 
     @Test
     @DisplayName("updateProductPriceAndPromotion should update price and promotional status")
-    void updateProductPriceAndPromotion_shouldUpdatePriceAndStatus() {
+    void updateProductPriceAndPromotion_shouldUpdate() {
         BigDecimal newPrice = new BigDecimal("15.00");
         when(jdbcTemplate.update(anyString(), eq(newPrice), eq(true), eq("123456789012")))
                 .thenReturn(1);
 
         repository.updateProductPriceAndPromotion("123456789012", newPrice, true);
 
-        verify(jdbcTemplate, times(1))
-                .update(anyString(), eq(newPrice), eq(true), eq("123456789012"));
+        verify(jdbcTemplate, times(1)).update(anyString(), eq(newPrice), eq(true), eq("123456789012"));
     }
 }

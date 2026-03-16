@@ -69,14 +69,14 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("findAll should return list of products (No pagination params)")
     void findAll_noParams_shouldReturnProducts() {
-        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyInt()))
+        when(jdbcTemplate.query(anyString(), eq(rowMapper), anyLong(), anyInt()))
                 .thenReturn(List.of(product));
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class)))
                 .thenReturn(1);
         when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<ProductDto> result = repository.findAll(pageable, null);
+        PageResponseDto<ProductDto> result = repository.findAll(pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());

@@ -9,25 +9,21 @@ import org.springframework.data.domain.Pageable;
 public interface ProductService {
 
     PageResponseDto<ProductDto> getDeleted(String checkNumber,
-                                           Pageable pageable,
-                                           Integer lastSeenId);
+                                           Pageable pageable);
 
     List<ProductDto> getAllNoPagination();
 
-    PageResponseDto<ProductDto> getAll(Pageable pageable,
-                                       Integer lastSeenId);
+    PageResponseDto<ProductDto> getAll(Pageable pageable);
 
     ProductDto save(ProductRequestDto requestDto);
 
     ProductDto updateProductById(int id, ProductRequestDto requestDto);
 
     PageResponseDto<ProductDto> findByName(String name,
-                                           Pageable pageable,
-                                           Integer lastSeenId);
+                                           Pageable pageable);
 
     PageResponseDto<ProductDto> findByCategoryId(int category_number,
-                                                 Pageable pageable,
-                                                 Integer lastSeenId);
+                                                 Pageable pageable);
 
     void deleteProductById(int id);
 }

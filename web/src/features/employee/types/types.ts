@@ -82,16 +82,39 @@ export const EmployeeSchema = BaseEmployeeSchema.refine(
 
 export type Employee = z.infer<typeof EmployeeSchema>;
 
-export const CreateEmployeeSchema = EmployeeSchema.extend({
-    password: z
-        .string()
-        .min(8, "Пароль занадто короткий")
-        .max(100, "Пароль занадто довгий"),
-    repeatPassword: z
-        .string()
-        .min(8, "Пароль занадто короткий")
-        .max(100, "Пароль занадто довгий"),
-}).refine(
+export const CreateEmployeeSchema = BaseEmployeeSchema
+    .extend({
+        password: z
+            .string()
+            .min(8, "Пароль занадто короткий")
+            .max(100, "Пароль занадто довгий"),
+        repeatPassword: z
+            .string()
+            .min(8, "Пароль занадто короткий")
+            .max(100, "Пароль занадто довгий"),
+    })
+    .refine(
+        (data) => new Date(data.dateOfBirth).getFullYear() > 1900, {
+            message: "Дата має бути пізніше за 1900",
+            path: ["dateOfBirth"]
+        }
+    ).refine(
+        (data) => new Date(data.dateOfStart) < new Date(), {
+            message: "Дата старту має бути в минулому",
+            path: ["dateOfStart"]
+        }
+    ).refine(
+        (data) => new Date().getFullYear() - new Date(data.dateOfBirth).getFullYear() >= 18, {
+            message: "Вік працівника_ці має бути більше за 18 років",
+            path: ["dateOfBirth"]
+        }
+    ).refine(
+        (data) => new Date(data.dateOfStart).getFullYear() > 1900, {
+            message: "Дата має бути пізніше за 1900 рік",
+            path: ["dateOfStart"]
+        }
+    )
+    .refine(
     (data) => data.password === data.repeatPassword,
     {
         message: "Паролі не збігаються",
@@ -102,7 +125,7 @@ export const CreateEmployeeSchema = EmployeeSchema.extend({
 export type CreateEmployee = z.infer<typeof CreateEmployeeSchema>;
 
 export const PageEmployeeSchema = z.object({
-    content: z.array(EmployeeSchema),
+    content: z.array(BaseEmployeeSchema),
     pageSize: z.number(),
     totalElements: z.number(),
     hasNext: z.boolean(),

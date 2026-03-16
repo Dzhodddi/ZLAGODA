@@ -23,31 +23,30 @@ public class StoreProductServiceImpl implements StoreProductService {
 
     public PageResponseDto<?> getAll(String sortedBy,
                                      Boolean prom,
-                                     Pageable pageable,
-                                     String lastSeenUPC) {
+                                     Pageable pageable) {
         if ("name".equals(sortedBy)) {
             if (prom == null) {
-                return getAllSortedByName(pageable, lastSeenUPC);
+                return getAllSortedByName(pageable);
             }
             return prom
-                    ? getPromotionalSortedByName(pageable, lastSeenUPC)
-                    : getNonPromotionalSortedByName(pageable, lastSeenUPC);
+                    ? getPromotionalSortedByName(pageable)
+                    : getNonPromotionalSortedByName(pageable);
         }
         if ("quantity".equals(sortedBy)) {
             if (prom == null) {
-                return getAllSortedByQuantity(pageable, lastSeenUPC);
+                return getAllSortedByQuantity(pageable);
             }
             return prom
-                    ? getPromotionalSortedByQuantity(pageable, lastSeenUPC)
-                    : getNonPromotionalSortedByQuantity(pageable, lastSeenUPC);
+                    ? getPromotionalSortedByQuantity(pageable)
+                    : getNonPromotionalSortedByQuantity(pageable);
         }
-        return getAll(pageable, lastSeenUPC);
+        return getAll(pageable);
     }
 
     @Override
     public PageResponseDto<StoreProductDto> getAll(
-            Pageable pageable, String lastSeenUPC) {
-        return repository.findAll(pageable, lastSeenUPC);
+            Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     @Override
@@ -57,38 +56,38 @@ public class StoreProductServiceImpl implements StoreProductService {
 
     @Override
     public PageResponseDto<StoreProductDto> getAllSortedByQuantity(
-            Pageable pageable, String lastSeenUPC) {
-        return repository.findAllSortedByQuantity(pageable, lastSeenUPC);
+            Pageable pageable) {
+        return repository.findAllSortedByQuantity(pageable);
     }
 
     @Override
     public PageResponseDto<StoreProductWithNameDto> getAllSortedByName(
-            Pageable pageable, String lastSeenUPC) {
-        return repository.findAllSortedByName(pageable, lastSeenUPC);
+            Pageable pageable) {
+        return repository.findAllSortedByName(pageable);
     }
 
     @Override
     public PageResponseDto<StoreProductDto> getPromotionalSortedByQuantity(
-            Pageable pageable, String lastSeenUPC) {
-        return repository.findPromotionalSortedByQuantity(pageable, lastSeenUPC);
+            Pageable pageable) {
+        return repository.findPromotionalSortedByQuantity(pageable);
     }
 
     @Override
     public PageResponseDto<StoreProductDto> getNonPromotionalSortedByQuantity(
-            Pageable pageable, String lastSeenUPC) {
-        return repository.findNonPromotionalSortedByQuantity(pageable, lastSeenUPC);
+            Pageable pageable) {
+        return repository.findNonPromotionalSortedByQuantity(pageable);
     }
 
     @Override
     public PageResponseDto<StoreProductWithNameDto> getPromotionalSortedByName(
-            Pageable pageable, String lastSeenUPC) {
-        return repository.findPromotionalSortedByName(pageable, lastSeenUPC);
+            Pageable pageable) {
+        return repository.findPromotionalSortedByName(pageable);
     }
 
     @Override
     public PageResponseDto<StoreProductWithNameDto> getNonPromotionalSortedByName(
-            Pageable pageable, String lastSeenUPC) {
-        return repository.findNonPromotionalSortedByName(pageable, lastSeenUPC);
+            Pageable pageable) {
+        return repository.findNonPromotionalSortedByName(pageable);
     }
 
     @Override

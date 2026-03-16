@@ -11,28 +11,21 @@ import org.springframework.data.domain.Pageable;
 
 public interface StoreProductService {
 
-    PageResponseDto<StoreProductDto> getAll(Pageable pageable,
-                                            String lastSeenUPC);
+    PageResponseDto<StoreProductDto> getAll(Pageable pageable);
 
     List<StoreProductDto> getAllNoPagination();
 
-    PageResponseDto<StoreProductDto> getAllSortedByQuantity(
-            Pageable pageable, String lastSeenUPC);
+    PageResponseDto<StoreProductDto> getAllSortedByQuantity(Pageable pageable);
 
-    PageResponseDto<StoreProductWithNameDto> getAllSortedByName(
-            Pageable pageable, String lastSeenUPC);
+    PageResponseDto<StoreProductWithNameDto> getAllSortedByName(Pageable pageable);
 
-    PageResponseDto<StoreProductDto> getPromotionalSortedByQuantity(
-            Pageable pageable, String lastSeenUPC);
+    PageResponseDto<StoreProductDto> getPromotionalSortedByQuantity(Pageable pageable);
 
-    PageResponseDto<StoreProductDto> getNonPromotionalSortedByQuantity(
-            Pageable pageable, String lastSeenUPC);
+    PageResponseDto<StoreProductDto> getNonPromotionalSortedByQuantity(Pageable pageable);
 
-    PageResponseDto<StoreProductWithNameDto> getPromotionalSortedByName(
-            Pageable pageable, String lastSeenUPC);
+    PageResponseDto<StoreProductWithNameDto> getPromotionalSortedByName(Pageable pageable);
 
-    PageResponseDto<StoreProductWithNameDto> getNonPromotionalSortedByName(
-            Pageable pageable, String lastSeenUPC);
+    PageResponseDto<StoreProductWithNameDto> getNonPromotionalSortedByName(Pageable pageable);
 
     StoreProductDto save(StoreProductRequestDto requestDto);
 
@@ -44,5 +37,5 @@ public interface StoreProductService {
 
     StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(String upc);
 
-    PageResponseDto<?> getAll(String sortedBy, Boolean prom, Pageable pageable, String lastSeenUPC);
+    PageResponseDto<?> getAll(String sortedBy, Boolean prom, Pageable pageable);
 }

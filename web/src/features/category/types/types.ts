@@ -19,3 +19,9 @@ export const CreateCategorySchema = CategorySchema.omit({
 });
 
 export type CreateCategory = z.infer<typeof CreateCategorySchema>;
+
+export const TopCategorySchema = CategorySchema.extend({
+    totalSold: z.number()
+});
+
+export type TopCategory = z.infer<typeof TopCategorySchema>;

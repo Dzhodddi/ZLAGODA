@@ -56,13 +56,14 @@ export const StoreProductList = () => {
                     </button>
                 )}
                 {isManager && (
+
                     <button
                         onClick={() => setSortedBy(sortedBy === "quantity" ? undefined : "quantity")}
                         className={`px-3 py-1 rounded text-sm border transition-colors ${
                             sortedBy === "quantity" ? "bg-zinc-700 text-white" : "border-zinc-300"
                         }`}
                     >
-                        За кількістю
+                        Відсортувати за кількістю
                     </button>
                 )}
                 <button

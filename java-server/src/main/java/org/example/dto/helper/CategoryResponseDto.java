@@ -6,5 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CategoryResponseDto {
+    private int category_number;
     private String category_name;
+    private Integer total_sold;
 }
