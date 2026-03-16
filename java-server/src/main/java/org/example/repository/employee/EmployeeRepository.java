@@ -114,9 +114,10 @@ public class EmployeeRepository {
         long offset = pageable.getOffset();
         List<EmployeeContactDto> employees = jdbcTemplate.query(
                 """
-                SELECT id_employee, phone_number, city, street, zip_code
+                SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+                       phone_number, city, street, zip_code
                 FROM employee
-                WHERE LOWER(empl_surname) = LOWER(?)
+                WHERE empl_surname ILIKE ?
                 ORDER BY id_employee
                 OFFSET ? ROWS
                 FETCH NEXT ? ROWS ONLY
@@ -124,13 +125,16 @@ public class EmployeeRepository {
                 (rs, rowNum) -> {
                     EmployeeContactDto dto = new EmployeeContactDto();
                     dto.setId_employee(rs.getString("id_employee"));
+                    dto.setEmpl_surname(rs.getString("empl_surname"));
+                    dto.setEmpl_name(rs.getString("empl_name"));
+                    dto.setEmpl_patronymic(rs.getString("empl_patronymic"));
                     dto.setPhone_number(rs.getString("phone_number"));
                     dto.setCity(rs.getString("city"));
                     dto.setStreet(rs.getString("street"));
                     dto.setZip_code(rs.getString("zip_code"));
                     return dto;
                 },
-                surname,
+                "%" + surname + "%",
                 offset,
                 pageable.getPageSize()
         );
@@ -297,10 +301,10 @@ public class EmployeeRepository {
                 """
                 SELECT COUNT(*)
                 FROM employee
-                WHERE LOWER(empl_surname) = LOWER(?)
+                WHERE empl_surname ILIKE ?
                 """,
                 Integer.class,
-                surname
+                "%" + surname + "%"
         );
         return count != null ? count : 0;
     }

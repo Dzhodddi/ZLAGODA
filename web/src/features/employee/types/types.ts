@@ -133,6 +133,9 @@ export const PageEmployeeSchema = z.object({
 
 export const EmployeeContactSchema = z.object({
     idEmployee: z.string(),
+    emplSurname: z.string(),
+    emplName: z.string(),
+    emplPatronymic: z.string(),
     phoneNumber: z.string(),
     city: z.string(),
     street: z.string(),

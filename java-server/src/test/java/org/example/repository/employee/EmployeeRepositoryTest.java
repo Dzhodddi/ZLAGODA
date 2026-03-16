@@ -166,9 +166,9 @@ class EmployeeRepositoryTest {
         when(jdbcTemplate.query(
                 anyString(),
                 any(org.springframework.jdbc.core.RowMapper.class),
-                eq(surname), eq(0L), eq(10)
+                eq("%" + surname + "%"), eq(0L), eq(10)
         )).thenReturn(List.of(dto));
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(surname)))
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("%" + surname + "%")))
                 .thenReturn(1);
 
         PageResponseDto<EmployeeContactDto> result =
@@ -188,9 +188,9 @@ class EmployeeRepositoryTest {
         when(jdbcTemplate.query(
                 anyString(),
                 any(org.springframework.jdbc.core.RowMapper.class),
-                eq(surname), eq(0L), eq(10)
+                eq("%" + surname + "%"), eq(0L), eq(10)
         )).thenReturn(List.of());
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(surname)))
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("%" + surname + "%")))
                 .thenReturn(0);
 
         PageResponseDto<EmployeeContactDto> result =

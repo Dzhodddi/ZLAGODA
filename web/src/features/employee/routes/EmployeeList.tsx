@@ -194,13 +194,14 @@ export const EmployeeList = () => {
 
             {view === "search" && contacts && (
                 contacts.length === 0 ? (
-                    <p className="text-zinc-400 text-sm">Нічого не знайдено для працівника_ці "{searchSurname}"</p>
+                    <p className="text-zinc-400 text-sm">Нічого не знайдено для працівника "{searchSurname}"</p>
                 ) : (
                     <div>
                         <table className="w-full text-xs border-collapse table-fixed border border-blue-300">
                             <thead>
                             <tr className="bg-blue-700 text-center text-white">
                                 <th className="px-3 py-2 font-semibold w-16 border border-blue-500">ID</th>
+                                <th className="px-3 py-2 font-semibold w-40 border border-blue-500">ПІБ</th>
                                 <th className="px-3 py-2 font-semibold w-32 border border-blue-500">Контактний телефон</th>
                                 <th className="px-3 py-2 font-semibold w-48 border border-blue-500">Адреса</th>
                             </tr>
@@ -213,6 +214,9 @@ export const EmployeeList = () => {
                                     className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer"
                                 >
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.idEmployee}</td>
+                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">
+                                        {c.emplSurname} {c.emplName} {c.emplPatronymic ?? ""}
+                                    </td>
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.phoneNumber}</td>
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.city}, {"вул."} {c.street}, {c.zipCode}</td>
                                 </tr>
