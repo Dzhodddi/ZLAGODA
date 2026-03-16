@@ -27,23 +27,23 @@ export const TopCategoriesPage = () => {
                 </button>
             </div>
 
-            <div className="overflow-x-auto bg-white border border-blue-300 relative">
-                <table className="w-full text-xs border-collapse table-fixed border-b border-blue-300">
+            <div className="overflow-x-auto bg-white border border-green-300 relative">
+                <table className="w-full text-xs border-collapse table-fixed border-b border-green-300">
                     <thead>
-                    <tr className="bg-blue-700 text-center text-white">
-                        <th className="px-3 py-2 font-semibold w-16 border border-blue-500">Номер</th>
-                        <th className="px-3 py-2 font-semibold border border-blue-500">Назва</th>
-                        <th className="px-3 py-2 font-semibold w-60 border border-blue-500">Продано одиниць</th>
+                    <tr className="bg-green-600 text-center text-white">
+                        <th className="px-3 py-2 font-semibold w-16 border border-green-700">Номер</th>
+                        <th className="px-3 py-2 font-semibold border border-green-700">Назва</th>
+                        <th className="px-3 py-2 font-semibold w-60 border border-green-700">Продано одиниць</th>
                     </tr>
                     </thead>
                     <tbody>
                     {categories?.map((category, index) => (
                         <tr key={index}
                             onClick={() => navigate(`/categories/${category.categoryNumber}`)}
-                            className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors">
-                            <td className="px-3 py-2 font-mono text-xs border border-blue-200">{category.categoryNumber}</td>
-                            <td className="px-3 py-2 border border-blue-200 truncate ">{category.categoryName}</td>
-                            <td className="px-3 py-2 border border-blue-200">{category.totalSold}</td>
+                            className="bg-green-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-green-200 transition-colors">
+                            <td className="px-3 py-2 font-mono text-xs border border-green-300">{category.categoryNumber}</td>
+                            <td className="px-3 py-2 border border-green-300 truncate ">{category.categoryName}</td>
+                            <td className="px-3 py-2 border border-green-300">{category.totalSold}</td>
                         </tr>
                     ))}
                     </tbody>
