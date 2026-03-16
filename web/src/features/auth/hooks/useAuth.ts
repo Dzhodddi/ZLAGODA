@@ -40,7 +40,7 @@ export const useLogin = () => {
             setTokens(payload.accessToken, payload.refreshToken, role!);
             queryClient.setQueryData(["authUser"], decoded);
             toast.success("Успішно авторизовано")
-            navigate("/");
+            navigate("/", { replace: true });
         },
         onError: (error) => {
             toast.error("Помилка авторизації")
