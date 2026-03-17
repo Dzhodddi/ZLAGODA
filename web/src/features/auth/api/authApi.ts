@@ -2,9 +2,9 @@ import {
     type Login,
     type LoginResponse,
     LoginResponseSchema,
-    type RegisterEmployee
 } from "@/features/auth/types/types.ts";
 import {javaApiClient} from "@/lib/axios.ts";
+import type {CreateEmployee} from "@/features/employee/types/types.ts";
 
 const prefix = "/auth"
 
@@ -13,6 +13,6 @@ export const login = async (payload: Login): Promise<LoginResponse> => {
     return LoginResponseSchema.parse(response.data);
 }
 
-export const register  = async (payload: RegisterEmployee): Promise<void> => {
+export const register  = async (payload: CreateEmployee): Promise<void> => {
     await javaApiClient.post(prefix + "/registration", payload);
 };

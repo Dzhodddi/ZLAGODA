@@ -7,7 +7,7 @@ const navItems = [
     { path: "/product", label: "Товари" },
     { path: "/categories", label: "Категорії", isHidden: (role: Role) => role === "CASHIER" },
     { path: "/employee", label: "Працівники", isHidden: (role: Role) => role === "CASHIER" },
-    { path: "/card", label: "Карти клієнтів" },
+    { path: "/customer-card", label: "Картки клієнтів" },
     { path: "/check", label: "Чеки" },
 ];
 

@@ -1,0 +1,1 @@
+export const phoneRegex = new RegExp("^(\\+380|0)\\d{9}$");

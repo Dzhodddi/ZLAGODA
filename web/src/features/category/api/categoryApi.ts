@@ -41,7 +41,7 @@ export const listCategories = async (
     return z.array(CategorySchema).parse(response.data);
 }
 
-export const getPopCategories
+export const getTopCategories
     = async (): Promise<TopCategory[]> => {
     const response = await javaApiClient.get(prefix + "/top");
     return z.array(TopCategorySchema).parse(response.data);

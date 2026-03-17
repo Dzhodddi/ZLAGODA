@@ -1,6 +1,5 @@
 import {z} from 'zod';
-
-const phoneRegex = new RegExp("^(\\+380|0)\\d{9}$");
+import {phoneRegex} from "@/constants/constants.ts";
 
 export const BaseEmployeeSchema = z.object({
     idEmployee: z

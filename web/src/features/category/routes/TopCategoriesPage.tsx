@@ -1,8 +1,8 @@
-import { usePopCategories } from "@/features/category/hooks/useCategory.ts";
+import { useTopCategories } from "@/features/category/hooks/useCategory.ts";
 import { useNavigate } from "react-router-dom";
 
 export const TopCategoriesPage = () => {
-    const { data: categories, isLoading, isError } = usePopCategories();
+    const { data: categories, isLoading, isError } = useTopCategories();
     const navigate = useNavigate();
 
     if (isLoading) {

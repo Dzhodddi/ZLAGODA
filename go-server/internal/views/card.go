@@ -8,7 +8,7 @@ type CreateNewCustomerCard struct {
 	PhoneNumber        string  `json:"phone_number" validate:"required,max=13"`
 	City               *string `json:"city" validate:"omitempty,max=50"`
 	Street             *string `json:"street" validate:"omitempty,max=50"`
-	Zipcode            *string `json:"zipcode" validate:"omitempty,max=9"`
+	Zipcode            *string `json:"zip_code" validate:"omitempty,max=9"`
 	CustomerPercent    int32   `json:"customer_percent" validate:"required,max=100,min=1"`
 }
 
@@ -20,7 +20,7 @@ type CustomerCardResponse struct {
 	PhoneNumber        string  `json:"phone_number"`
 	City               *string `json:"city"`
 	Street             *string `json:"street"`
-	Zipcode            *string `json:"zipcode"`
+	Zipcode            *string `json:"zip_code"`
 	CustomerPercent    int32   `json:"customer_percent"`
 }
 
@@ -31,7 +31,7 @@ type UpdateCustomerCard struct {
 	PhoneNumber        string  `json:"phone_number" validate:"required,max=13"`
 	City               *string `json:"city" validate:"omitempty,max=50"`
 	Street             *string `json:"street" validate:"omitempty,max=50"`
-	Zipcode            *string `json:"zipcode" validate:"omitempty,max=9"`
+	Zipcode            *string `json:"zip_code" validate:"omitempty,max=9"`
 	CustomerPercent    int32   `json:"customer_percent" validate:"required,max=100,min=1"`
 }
 

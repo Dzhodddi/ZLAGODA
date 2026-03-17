@@ -1,13 +1,11 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     createCategory,
-    deleteCategory, getCategory, getPopCategories,
+    deleteCategory, getCategory, getTopCategories,
     listCategories,
     updateCategory
 } from "@/features/category/api/categoryApi.ts";
 import {toast} from "sonner";
-import {CategorySchema} from "@/features/category/types/types.ts";
-import {getEmployee} from "@/features/employee/api/employeeApi.ts";
 
 const QUERY_KEY = "categories"
 
@@ -79,10 +77,10 @@ export const useCategory = (categoryNumber: number) => {
     });
 };
 
-export const usePopCategories = () => {
+export const useTopCategories = () => {
     return useQuery({
         queryKey: [QUERY_KEY, "top"],
-        queryFn: () => getPopCategories(),
+        queryFn: () => getTopCategories(),
         staleTime: 1000 * 30,
     });
 };
