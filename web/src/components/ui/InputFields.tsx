@@ -12,6 +12,7 @@ export const InputField = ({
                                label,
                                size = 12,
                                disabled = false,
+                               required = true,
                                className,
                                ...props
                            }: InputFieldProps) => {
@@ -21,8 +22,14 @@ export const InputField = ({
     const colSpanClass = `col-span-${size}`
     return (
         <div className={`${colSpanClass} flex flex-col gap-1`}>
-            <label htmlFor={name} className="text-sm font-medium text-gray-700">
+            <label
+                htmlFor={name}
+                className="text-sm font-medium text-gray-700 flex items-center"
+            >
                 {label}
+                {required && (
+                    <span className="ml-1 text-red-500">*</span>
+                )}
             </label>
 
             <input
