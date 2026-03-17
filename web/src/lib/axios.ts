@@ -16,7 +16,6 @@ export const javaApiClient = applyCaseMiddleware(axios.create({
     withCredentials: true,
 }));
 
-// --- Auth request interceptor (для обох клієнтів) ---
 const addAuthToken = (config: any) => {
     const { accessToken } = useAuthStore.getState();
     if (accessToken && config.headers) {
@@ -28,7 +27,6 @@ const addAuthToken = (config: any) => {
 goApiClient.interceptors.request.use(addAuthToken, (error) => Promise.reject(error));
 javaApiClient.interceptors.request.use(addAuthToken, (error) => Promise.reject(error));
 
-// --- Refresh token логіка ---
 let isRefreshing = false;
 let failedQueue: Array<{
     resolve: (value?: unknown) => void;
@@ -58,7 +56,7 @@ const authInterceptor = async (error: any) => {
                     failedQueue.push({ resolve, reject });
                 });
                 originalRequest.headers.Authorization = `Bearer ${token}`;
-                return goApiClient(originalRequest);
+                return axios(originalRequest);
             } catch (err) {
                 return Promise.reject(err);
             }
@@ -70,10 +68,10 @@ const authInterceptor = async (error: any) => {
         try {
             const { refreshToken, setTokens, role } = useAuthStore.getState();
             if (!refreshToken) {
-                throw new Error("No refresh token");
+                throw new Error("No refresh token available");
             }
 
-            const response = await axios.post("http://localhost:8081/api/v1/auth/refresh", {
+            const response = await javaApiClient.post("/auth/refresh", {
                 refreshToken,
             });
 
@@ -81,11 +79,11 @@ const authInterceptor = async (error: any) => {
             if (!role) {
                 throw new Error("No role");
             }
-            setTokens(newAccessToken, newRefreshToken, role);
 
+            setTokens(newAccessToken, newRefreshToken, role);
             processQueue(null, newAccessToken);
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-            return goApiClient(originalRequest);
+            return axios(originalRequest);
 
         } catch (refreshError) {
             processQueue(refreshError, null);
@@ -103,14 +101,10 @@ const authInterceptor = async (error: any) => {
 
 goApiClient.interceptors.response.use(
     (response) => response,
-    (error) => {
-        return authInterceptor(error);
-    }
+    (error) => authInterceptor(error)
 );
 
 javaApiClient.interceptors.response.use(
     (response) => response,
-    (error) => {
-        return authInterceptor(error);
-    }
+    (error) => authInterceptor(error)
 );

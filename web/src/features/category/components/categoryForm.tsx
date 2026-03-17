@@ -31,7 +31,9 @@ export const UpsertCategoryForm = ({ initialData }: Props) => {
                         <h2 className="col-span-12 text-xl font-bold mb-4">
                             {isEditMode ? "Редагувати категорію" : "Додати категорію"}
                         </h2>
-
+                        {isEditMode &&
+                            <InputField name="categoryNumber" label="Номер категорії" disabled={isEditMode}/>
+                        }
                         <InputField name="categoryName" label="Назва категорії" />
 
                         <div className="col-span-12 flex justify-end mt-4">

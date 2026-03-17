@@ -1,10 +1,8 @@
-import { useRef } from "react";
-import { Form } from "@/components/ui/Form.tsx";
-import { InputField } from "@/components/ui/InputFields.tsx";
-import { type RegisterEmployee, RegisterEmployeeSchema } from "@/features/auth/types/types.ts";
-import { useRegister } from "@/features/auth/hooks/useAuth.ts";
-import { Link } from "react-router-dom";
+import { InputField } from "@/components/ui/InputFields.tsx";import { useRegister } from "@/features/auth/hooks/useAuth.ts";
+import {Link, useNavigate} from "react-router-dom";
 import {useFormContext} from "react-hook-form";
+import {type CreateEmployee, CreateEmployeeSchema, type Employee} from "@/features/employee/types/types.ts";
+import {GenericUpsertForm} from "@/components/ui/GenericUpsertForm.tsx";
 
 const RoleSelect = () => {
     const { register } = useFormContext();
@@ -15,7 +13,6 @@ const RoleSelect = () => {
                 {...register("role")}
                 className="border rounded px-1 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-                <option value="">Оберіть роль</option>
                 <option value="MANAGER">Менеджер</option>
                 <option value="CASHIER">Касир</option>
             </select>
@@ -24,34 +21,33 @@ const RoleSelect = () => {
 };
 
 export const RegistrationForm = () => {
-    const resetFormRef = useRef<() => void>(null);
-    const mutation = useRegister();
-
-    const handleSubmit = (data: RegisterEmployee) => {
-        mutation.mutate(data, {
-            onSuccess: () => resetFormRef.current?.(),
-        });
-    };
+    const navigate = useNavigate();
 
     return (
-        <div className="p-6 bg-white rounded text-zinc-900 shadow-md max-w-2xl mx-auto max-h-[100vh] overflow-y-auto">
+        <div className="p-6 bg-white rounded text-zinc-900 shadow-md max-w-2xl mx-auto max-h-screen overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Зареєструватися</h2>
 
-            <Form<RegisterEmployee>
-                schema={RegisterEmployeeSchema}
-                onSubmit={handleSubmit}
+            <GenericUpsertForm<CreateEmployee, CreateEmployee, Employee>
+                schema={CreateEmployeeSchema}
+                initialData={undefined}
+                createMutation={useRegister()}
+                updateMutation={useRegister()}
+                prepareUpdatePayload={(formData, initial) => ({
+                    ...formData,
+                    idEmployee: initial.idEmployee
+                })}
+                onSuccessAction={() => navigate("/")}
                 className="grid grid-cols-12 gap-4"
             >
-                {({ formState: { isSubmitting }, reset }) => {
-                    resetFormRef.current = reset;
+                {(_methods, { isEditMode, isSaving, isDirty }) => {
                     return (
                         <>
                             <InputField name="idEmployee" label="ID працівника" />
                             <InputField name="emplSurname" label="Прізвище" />
                             <InputField name="emplName" label="Ім'я" />
-                            <InputField name="emplPatronymic" label="По батькові" />
+                            <InputField name="emplPatronymic" label="По батькові" required={false}/>
                             <RoleSelect />
-                            <InputField type="number" name="salary" label="Зарплата" />
+                            <InputField name="salary" label="Зарплата" />
                             <InputField type="date" name="dateOfBirth" label="Дата народження" />
                             <InputField type="date" name="dateOfStart" label="Дата прийому на роботу" />
                             <InputField name="phoneNumber" label="Номер телефону" />
@@ -67,16 +63,16 @@ export const RegistrationForm = () => {
                                 </Link>
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting}
+                                    disabled={isSaving || (isEditMode && !isDirty)}
                                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                                 >
-                                    {isSubmitting ? "Збереження..." : "Зареєструватися"}
+                                    {isSaving ? "Збереження..." : "Зареєструватися"}
                                 </button>
                             </div>
                         </>
                     );
                 }}
-            </Form>
+            </GenericUpsertForm>
         </div>
     );
 };

@@ -27,7 +27,7 @@ export const InputField = ({
                 className="text-sm font-medium text-gray-700 flex items-center"
             >
                 {label}
-                {required && (
+                {!disabled && required && (
                     <span className="ml-1 text-red-500">*</span>
                 )}
             </label>

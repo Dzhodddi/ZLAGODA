@@ -5,6 +5,7 @@ import {login, register} from "@/features/auth/api/authApi.ts";
 import { jwtDecode } from "jwt-decode";
 import {useAuthStore} from "@/store/authStore.ts";
 import {toast} from "sonner";
+import {isAxiosError} from "axios";
 
 interface JwtPayload {
     sub: string;
@@ -21,7 +22,17 @@ export const useRegister = () => {
             navigate("/login");
         },
         onError: (error) => {
-            toast.error("Помилка реєстрації")
+            if (isAxiosError(error) && error.response?.data) {
+                const backendError = error.response.data;
+
+                if (error.response.status === 409 || backendError.error === "Conflict") {
+                    toast.error("Працівник з таким ID вже існує!");
+                    return;
+                }
+                toast.error("Помилка реєстрації");
+                return;
+            }
+            toast.error("Помилка підключення до сервера");
             console.error(error);
         },
     });
