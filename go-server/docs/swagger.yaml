@@ -111,7 +111,7 @@ definitions:
       street:
         maxLength: 50
         type: string
-      zipcode:
+      zip_code:
         maxLength: 9
         type: string
     required:
@@ -139,7 +139,7 @@ definitions:
         type: string
       street:
         type: string
-      zipcode:
+      zip_code:
         type: string
     type: object
   views.ProductResponse:
@@ -211,7 +211,7 @@ definitions:
       street:
         maxLength: 50
         type: string
-      zipcode:
+      zip_code:
         maxLength: 9
         type: string
     required:

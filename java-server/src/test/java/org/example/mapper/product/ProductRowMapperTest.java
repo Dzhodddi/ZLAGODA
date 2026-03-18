@@ -1,11 +1,14 @@
 package org.example.mapper.product;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-
 import org.example.model.product.Product;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,12 +24,24 @@ class ProductRowMapperTest {
     @Mock
     private ResultSet resultSet;
 
+    @Mock
+    private ResultSetMetaData metaData;
+
     @InjectMocks
     private ProductRowMapper mapper;
+
+    private void mockColumns(String... columnNames) throws SQLException {
+        when(resultSet.getMetaData()).thenReturn(metaData);
+        when(metaData.getColumnCount()).thenReturn(columnNames.length);
+        for (int i = 0; i < columnNames.length; i++) {
+            when(metaData.getColumnName(i + 1)).thenReturn(columnNames[i]);
+        }
+    }
 
     @Test
     @DisplayName("mapRow should map all product fields correctly")
     void mapRow_allFields_shouldMapCorrectly() throws SQLException {
+        mockColumns("id_product", "product_name", "producer", "product_characteristics", "category_number");
         when(resultSet.getInt("id_product")).thenReturn(1);
         when(resultSet.getString("product_name")).thenReturn("Молоко");
         when(resultSet.getString("producer")).thenReturn("Ферма А");
@@ -46,6 +61,7 @@ class ProductRowMapperTest {
     @Test
     @DisplayName("mapRow should handle null characteristics")
     void mapRow_nullCharacteristics_shouldHandleCorrectly() throws SQLException {
+        mockColumns("id_product", "product_name", "producer", "product_characteristics", "category_number");
         when(resultSet.getInt("id_product")).thenReturn(1);
         when(resultSet.getString("product_name")).thenReturn("Хліб");
         when(resultSet.getString("producer")).thenReturn("Пекарня Б");
@@ -65,6 +81,7 @@ class ProductRowMapperTest {
     @Test
     @DisplayName("mapRow should handle empty characteristics")
     void mapRow_emptyCharacteristics_shouldHandleCorrectly() throws SQLException {
+        mockColumns("id_product", "product_name", "producer", "product_characteristics", "category_number");
         when(resultSet.getInt("id_product")).thenReturn(2);
         when(resultSet.getString("product_name")).thenReturn("Вода");
         when(resultSet.getString("producer")).thenReturn("Виробник В");
@@ -84,6 +101,7 @@ class ProductRowMapperTest {
     @Test
     @DisplayName("mapRow should handle zero category number")
     void mapRow_zeroCategoryNumber_shouldHandleCorrectly() throws SQLException {
+        mockColumns("id_product", "product_name", "producer", "product_characteristics", "category_number");
         when(resultSet.getInt("id_product")).thenReturn(3);
         when(resultSet.getString("product_name")).thenReturn("Товар без категорії");
         when(resultSet.getString("producer")).thenReturn("Виробник Г");
@@ -100,6 +118,7 @@ class ProductRowMapperTest {
     @Test
     @DisplayName("mapRow should create new Product instance each time")
     void mapRow_multipleCalls_shouldCreateNewInstances() throws SQLException {
+        mockColumns("id_product", "product_name", "producer", "product_characteristics", "category_number");
         when(resultSet.getInt("id_product")).thenReturn(1);
         when(resultSet.getString("product_name")).thenReturn("Молоко");
         when(resultSet.getString("producer")).thenReturn("Ферма А");

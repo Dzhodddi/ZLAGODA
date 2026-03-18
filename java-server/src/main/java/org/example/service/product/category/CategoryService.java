@@ -5,4 +5,6 @@ import org.example.dto.helper.CategoryResponseDto;
 
 public interface CategoryService {
     List<CategoryResponseDto> getPopCategories();
+
+    List<CategoryResponseDto> getAll();
 }

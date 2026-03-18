@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
         description = "Endpoints for custom category endpoint")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/{categories}")
+@RequestMapping("/categories")
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -28,5 +28,15 @@ public class CategoryController {
     @PreAuthorize("hasAuthority('MANAGER')")
     public List<CategoryResponseDto> getPopCategories() {
         return categoryService.getPopCategories();
+    }
+
+    @GetMapping()
+    @Operation(
+            summary = "Get two most popular categories",
+            description = "Get two most popular categories"
+    )
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CASHIER')")
+    public List<CategoryResponseDto> getAll() {
+        return categoryService.getAll();
     }
 }

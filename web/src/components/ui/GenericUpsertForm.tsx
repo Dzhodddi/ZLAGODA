@@ -10,7 +10,7 @@ interface GenericUpsertFormProps<TFormValues extends FieldValues, TUpdatePayload
     createMutation: { mutate: (data: TFormValues, options?: any) => void; isPending: boolean };
     updateMutation: { mutate: (data: TUpdatePayload, options?: any) => void; isPending: boolean };
 
-    prepareUpdatePayload: (formData: TFormValues, initialData: TInitialData) => TUpdatePayload; // ✅
+    prepareUpdatePayload: (formData: TFormValues, initialData: TInitialData) => TUpdatePayload;
 
     onSuccessAction?: () => void;
     className?: string;
@@ -54,7 +54,7 @@ export const GenericUpsertForm = <TFormValues extends FieldValues, TUpdatePayloa
         <Form<TFormValues>
             schema={schema}
             onSubmit={handleSubmit}
-            values={initialData as unknown as TFormValues || undefined} // ✅
+            values={initialData as unknown as TFormValues || undefined}
             className={className}
         >
             {(methods) => {

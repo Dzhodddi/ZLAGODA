@@ -1,7 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     createCategory,
-    deleteCategory, getCategory, getTopCategories,
+    deleteCategory, getAllCategories, getCategory, getTopCategories,
     listCategories,
     updateCategory
 } from "@/features/category/api/categoryApi.ts";
@@ -81,6 +81,14 @@ export const useTopCategories = () => {
     return useQuery({
         queryKey: [QUERY_KEY, "top"],
         queryFn: () => getTopCategories(),
+        staleTime: 1000 * 30,
+    });
+};
+
+export const useAllCategories = () => {
+    return useQuery({
+        queryKey: [QUERY_KEY, "all"],
+        queryFn: () => getAllCategories(),
         staleTime: 1000 * 30,
     });
 };

@@ -5,9 +5,37 @@ import {
     getAllProducts,
     deleteProduct,
     downloadProductPdf,
+    getDeletedProducts, getProduct,
 } from "@/features/product/api/productApi";
+import type {CreateProduct} from "@/features/product/types/types.ts";
 
 const QUERY_KEY = "products";
+
+export const useProduct = (id: number) => {
+    return useQuery({
+        queryKey: [QUERY_KEY, id],
+        queryFn: () => getProduct(id),
+        enabled: !!id,
+        staleTime: 1000 * 30,
+    });
+};
+
+export const useDeletedProducts = (checkNumber: string, page: number, enabled = true) => {
+    return useQuery({
+        queryKey: ["deleted", checkNumber, page],
+        queryFn: () => getDeletedProducts(checkNumber, page),
+        enabled: !!checkNumber && enabled,
+        staleTime: 1000 * 30,
+    });
+};
+
+export const useProducts = (name?: string, categoryId?: number, page = 0) => {
+    return useQuery({
+        queryKey: [QUERY_KEY, name, categoryId, page],
+        queryFn: () => getAllProducts(name, categoryId, page),
+        staleTime: 1000 * 30,
+    });
+};
 
 export const useCreateProduct = () => {
     const queryClient = useQueryClient();
@@ -15,7 +43,6 @@ export const useCreateProduct = () => {
         mutationFn: createProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Successfully created product!");
         },
         onError: (error) => alert(error),
     });
@@ -24,11 +51,10 @@ export const useCreateProduct = () => {
 export const useUpdateProduct = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, data }: { id: number; data: Parameters<typeof updateProduct>[1] }) =>
-            updateProduct(id, data),
+        mutationFn: ({ id, ...data }: CreateProduct & { id: number }) =>
+            updateProduct(id, data as CreateProduct),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Successfully updated product!");
         },
         onError: (error) => alert(error),
     });
@@ -40,17 +66,8 @@ export const useDeleteProduct = () => {
         mutationFn: deleteProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Successfully deleted product!");
         },
         onError: (error) => alert(error),
-    });
-};
-
-export const useProducts = (name?: string, categoryId?: number) => {
-    return useQuery({
-        queryKey: [QUERY_KEY, name, categoryId],
-        queryFn: () => getAllProducts(name, categoryId),
-        staleTime: 1000 * 30,
     });
 };
 

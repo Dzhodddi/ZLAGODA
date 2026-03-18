@@ -11,4 +11,5 @@ public class Product {
     private String producer;
     private String product_characteristics;
     private int category_number;
+    private String category_name;
 }

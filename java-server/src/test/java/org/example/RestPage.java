@@ -12,8 +12,8 @@ public class RestPage<T> extends PageImpl<T> {
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public RestPage(@JsonProperty("content") List<T> content,
-                    @JsonProperty("pageNumber") int pageNumber,
-                    @JsonProperty("pageSize") int pageSize,
+                    @JsonProperty("number") int pageNumber,
+                    @JsonProperty("size") int pageSize,
                     @JsonProperty("totalElements") Long totalElements) {
         super(content, PageRequest.of(
                         pageNumber,

@@ -76,8 +76,7 @@ class ProductServiceTest {
     @DisplayName("save should map, save and return ProductDto")
     void save_ok() {
         when(mapper.toEntity(productRequestDto)).thenReturn(product);
-        when(repository.save(product)).thenReturn(product);
-        when(mapper.toDto(product)).thenReturn(productDto);
+        when(repository.save(product)).thenReturn(productDto);
 
         ProductDto result = service.save(productRequestDto);
 
@@ -86,7 +85,6 @@ class ProductServiceTest {
 
         verify(mapper).toEntity(productRequestDto);
         verify(repository).save(product);
-        verify(mapper).toDto(product);
     }
 
     @Test

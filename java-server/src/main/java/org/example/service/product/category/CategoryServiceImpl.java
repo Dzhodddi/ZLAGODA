@@ -17,4 +17,9 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryResponseDto> getPopCategories() {
         return categoryRepository.findPopCategories();
     }
+
+    @Override
+    public List<CategoryResponseDto> getAll() {
+        return categoryRepository.findAll();
+    }
 }

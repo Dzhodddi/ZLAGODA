@@ -268,7 +268,8 @@ export const EmployeeList = () => {
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">{emp.phoneNumber}</td>
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">{emp.city}, {"вул."} {emp.street}, {emp.zipCode}</td>
                                     {isManager && (
-                                        <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
+                                        <td className="px-2 py-2 border border-blue-200 text-center w-8"
+                                            onClick={(e) => e.stopPropagation()}>
                                             <button onClick={() => navigate(`/employee/edit/${emp.idEmployee}`)}>
                                                 <div className="hover:scale-110 transition-transform flex justify-center w-full">
                                                     <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />

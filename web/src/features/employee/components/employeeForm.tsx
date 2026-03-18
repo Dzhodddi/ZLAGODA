@@ -1,4 +1,3 @@
-import { useFormContext } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCreateEmployee, useUpdateEmployee, useEmployee } from "@/features/employee/hooks/useEmployee.ts";
 import {
@@ -8,26 +7,23 @@ import {
 } from "@/features/employee/types/types.ts";
 import { GenericUpsertForm } from "@/components/ui/GenericUpsertForm.tsx";
 import { InputField } from "@/components/ui/InputFields.tsx";
+import {SelectField, type SelectFieldProps} from "@/components/ui/SelectField.tsx";
 
 interface Props {
     initialData?: Employee;
 }
 
-const RoleSelect = () => {
-    const { register } = useFormContext();
-    return (
-        <div className="col-span-12 flex flex-col gap-1">
-            <label className="text-sm font-medium text-zinc-700">Посада</label>
-            <select
-                {...register("role")}
-                className="border rounded px-1 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-                <option value="MANAGER">Менеджер</option>
-                <option value="CASHIER">Касир</option>
-            </select>
-        </div>
-    );
-};
+export const RoleSelect = (props: Omit<SelectFieldProps, 'name' | 'label' | 'options'>) => (
+    <SelectField
+        name="role"
+        label="Посада"
+        options={[
+            { value: "MANAGER", label: "Менеджер" },
+            { value: "CASHIER", label: "Касир" },
+        ]}
+        {...props}
+    />
+);
 
 export const UpsertEmployeeForm = ({ initialData }: Props) => {
     const navigate = useNavigate();

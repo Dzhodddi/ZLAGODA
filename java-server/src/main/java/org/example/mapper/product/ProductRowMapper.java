@@ -4,7 +4,10 @@ import org.example.model.product.Product;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class ProductRowMapper implements RowMapper<Product> {
@@ -12,21 +15,25 @@ public class ProductRowMapper implements RowMapper<Product> {
     @Override
     public Product mapRow(ResultSet rs, int rowNum) throws SQLException {
         Product product = new Product();
-        product.setProduct_name(rs.getString("product_name"));
-        product.setProducer(rs.getString("producer"));
-        product.setProduct_characteristics(rs.getString("product_characteristics"));
 
-        try {
-            product.setCategory_number(rs.getInt("category_number"));
-        } catch (SQLException e) {
-            // skip
+        ResultSetMetaData meta = rs.getMetaData();
+        Set<String> columns = new HashSet<>();
+        for (int i = 1; i <= meta.getColumnCount(); i++) {
+            columns.add(meta.getColumnName(i).toLowerCase());
         }
 
-        try {
+        if (columns.contains("id_product"))
             product.setId_product(rs.getInt("id_product"));
-        } catch (SQLException e) {
-            // skip
-        }
+        if (columns.contains("product_name"))
+            product.setProduct_name(rs.getString("product_name"));
+        if (columns.contains("producer"))
+            product.setProducer(rs.getString("producer"));
+        if (columns.contains("product_characteristics"))
+            product.setProduct_characteristics(rs.getString("product_characteristics"));
+        if (columns.contains("category_number"))
+            product.setCategory_number(rs.getInt("category_number"));
+        if (columns.contains("category_name"))
+            product.setCategory_name(rs.getString("category_name"));
 
         return product;
     }

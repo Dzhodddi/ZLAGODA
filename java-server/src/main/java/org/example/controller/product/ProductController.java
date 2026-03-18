@@ -45,14 +45,24 @@ public class ProductController {
     private final ProductService productService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
 
+    @GetMapping("/{id}")
+    @Operation(
+            summary = "Get product by id",
+            description = "Get product by its id"
+    )
+    public ProductDto getById(@PathVariable int id) {
+        return productService.getById(id);
+    }
+
     @GetMapping("/deleted")
     @Operation(
-            summary = "Get deleted products' name existing in some check",
-            description = "Get deleted products' name existing in some check"
+            summary = "Get deleted products existing in some check",
+            description = "Get deleted products existing in some check"
     )
     @PreAuthorize("hasAuthority('MANAGER')")
-    public PageResponseDto<ProductDto> getDeleted(@RequestParam String checkNumber) {
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("product_name"));
+    public PageResponseDto<ProductDto> getDeleted(@RequestParam String checkNumber,
+                                                  @RequestParam(defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("product_name"));
         return productService.getDeleted(checkNumber, pageable);
     }
 
@@ -62,11 +72,12 @@ public class ProductController {
             description = "Get all products sorted by their names"
     )
     public PageResponseDto<ProductDto> getAll(@RequestParam(required = false) String name,
-                                              @RequestParam(required = false) Integer categoryId) {
+                                              @RequestParam(required = false) Integer categoryId,
+                                              @RequestParam(defaultValue = "0") int page) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CASHIER"));
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("product_name"));
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("product_name"));
         if (name != null && !name.isEmpty()) {
             if (!isCashier) {
                 throw new AuthorizationException("Only Cashier can search products by name");

@@ -125,7 +125,7 @@ export const CustomerCardListPage = () => {
                     <table className="w-full text-xs border-collapse table-fixed border-b border-blue-300">
                         <thead>
                         <tr className="bg-blue-700 text-left text-white">
-                            <th className="px-3 py-2 font-semibold w-16 border border-blue-500 text-center">Номер</th>
+                            <th className="px-3 py-2 font-semibold w-40 border border-blue-500 text-center">Номер</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">ПІБ</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Знижка (у відсотках %)</th>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>

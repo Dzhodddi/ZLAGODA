@@ -43,18 +43,20 @@ public class ProductRepository {
         long offset = pageable.getOffset();
         List<ProductDto> products = jdbcTemplate.query(
                 """
-                SELECT p.product_name, p.producer, p.product_characteristics
+                SELECT DISTINCT p.id_product,
+                       p.product_name,
+                       p.producer,
+                       p.product_characteristics
                 FROM product p
                 INNER JOIN store_product sp1 ON p.id_product = sp1.id_product
                 INNER JOIN sale s ON sp1.UPC = s.UPC
                 WHERE s.check_number = ?
                   AND NOT EXISTS(
-                      SELECT 1 FROM store_product sp2
-                      WHERE sp1.UPC = sp2.UPC AND NOT EXISTS(
-                          SELECT 1 FROM store_product sp3
-                          WHERE sp2.UPC = sp3.UPC AND is_deleted = true
+                        SELECT 1
+                        FROM store_product sp2
+                        WHERE sp2.UPC = sp1.UPC
+                        AND NOT sp2.is_deleted
                       )
-                  )
                 ORDER BY p.product_name
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
@@ -73,9 +75,12 @@ public class ProductRepository {
         long offset = pageable.getOffset();
         List<ProductDto> products = jdbcTemplate.query(
                 """
-                SELECT product_name, producer, product_characteristics
-                FROM product
-                ORDER BY id_product
+                SELECT p.id_product, p.product_name, p.producer, p.product_characteristics,
+                       c.category_number, c.category_name
+                FROM product p
+                INNER JOIN category c
+                ON p.category_number = c.category_number
+                ORDER BY p.product_name
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
                 rowMapper,
@@ -94,14 +99,17 @@ public class ProductRepository {
         long offset = pageable.getOffset();
         List<ProductDto> products = jdbcTemplate.query(
                 """
-                SELECT product_name, producer, product_characteristics
-                FROM product
-                WHERE product_name = ?
+                SELECT p.id_product, p.product_name, p.producer, p.product_characteristics,
+                       c.category_number, c.category_name
+                FROM product p
+                INNER JOIN category c
+                ON p.category_number = c.category_number
+                WHERE product_name ILIKE ?
                 ORDER BY id_product
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
                 rowMapper,
-                name,
+                "%" + name + "%",
                 offset,
                 pageable.getPageSize()
         ).stream().map(productMapper::toDto).toList();
@@ -115,45 +123,59 @@ public class ProductRepository {
         long offset = pageable.getOffset();
         List<ProductDto> products = jdbcTemplate.query(
                 """
-                SELECT product_name, producer, product_characteristics
-                FROM product
-                WHERE category_number = ?
-                ORDER BY id_product
+                SELECT p.id_product, p.product_name, p.producer, p.product_characteristics,
+                       c.category_number, c.category_name
+                FROM product p
+                INNER JOIN category c
+                ON p.category_number = c.category_number
+                WHERE p.category_number = ?
+                ORDER BY product_name
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
                 rowMapper,
                 categoryNumber,
                 offset,
                 pageable.getPageSize()
-        ).stream().map(productMapper::toDto).toList();
+        )
+                .stream()
+                .map(productMapper::toDto)
+                .toList();
 
         long total = getCategoryIdCount(categoryNumber);
         return PageResponseDto.of(products, pageable.getPageSize(), total,
                 offset + products.size() < total);
     }
 
-    public Optional<Product> findById(int id) {
+    public Optional<ProductDto> findById(int id) {
         try {
-            return Optional.ofNullable(
+            Optional<Product> res = Optional.ofNullable(
                     jdbcTemplate.queryForObject(
                             """
-                            SELECT product_name, producer, product_characteristics
-                            FROM product
+                            SELECT p.id_product,
+                                   p.product_name,
+                                   p.producer,
+                                   p.product_characteristics,
+                                   c.category_number,
+                                   c.category_name
+                            FROM product p
+                            INNER JOIN category c
+                            ON p.category_number = c.category_number
                             WHERE id_product = ?
                             """,
                             rowMapper,
                             id
                     )
             );
+            return res.map(productMapper::toDto);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
 
-    public Product save(Product product) {
+    public ProductDto save(Product product) {
         try {
             if (product.getId_product() == 0) {
-                return jdbcTemplate.queryForObject(
+                Product res = jdbcTemplate.queryForObject(
                         """
                         INSERT INTO product (
                             product_name,
@@ -169,6 +191,7 @@ public class ProductRepository {
                         product.getProduct_characteristics(),
                         product.getCategory_number()
                 );
+                return productMapper.toDto(res);
             } else {
                 int updated = jdbcTemplate.update(
                         """
@@ -227,8 +250,8 @@ public class ProductRepository {
             }
 
             return findById(id)
-                    .map(productMapper::toDto)
-                    .orElseThrow(() -> new EntityNotFoundException("Product not found after update: " + id));
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Product not found after update: " + id));
 
         } catch (DataIntegrityViolationException e) {
             throw new InvalidCategoryException("Invalid category: " + requestDto.getCategory_number());
@@ -287,10 +310,10 @@ public class ProductRepository {
                 """
                 SELECT COUNT(*)
                 FROM product
-                WHERE product_name = ?
+                WHERE product_name ILIKE ?
                 """,
                 Integer.class,
-                name
+                "%" + name + "%"
         );
         return count != null ? count : 0;
     }

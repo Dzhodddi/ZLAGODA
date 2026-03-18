@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
+import org.example.exception.custom_exception.InvalidProductException;
 import org.example.mapper.product.ProductMapper;
 import org.example.model.product.Product;
 import org.example.repository.product.ProductRepository;
@@ -17,6 +18,12 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repository;
     private final ProductMapper productMapper;
+
+    @Override
+    public ProductDto getById(int id) {
+        return repository.findById(id).orElseThrow(()
+                -> new InvalidProductException("No product with such id: " + id));
+    }
 
     @Override
     public PageResponseDto<ProductDto> getDeleted(String checkNumber,
@@ -37,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDto save(ProductRequestDto requestDto) {
         Product product = productMapper.toEntity(requestDto);
-        return productMapper.toDto(repository.save(product));
+        return repository.save(product);
     }
 
     @Override

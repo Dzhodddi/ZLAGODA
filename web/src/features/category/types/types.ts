@@ -4,7 +4,7 @@ export const CategorySchema = z.object({
     categoryNumber: z
         .coerce
         .number("Некоректне число")
-        .min(1, "Число має бути додатнім")
+        .min(1, "Число має бути додатним")
         .max(999999, "Число занадто велике"),
     categoryName: z
         .string()
@@ -21,7 +21,7 @@ export const CreateCategorySchema = CategorySchema.omit({
 export type CreateCategory = z.infer<typeof CreateCategorySchema>;
 
 export const TopCategorySchema = CategorySchema.extend({
-    totalSold: z.number()
+    totalSold: z.number().nullable(),
 });
 
 export type TopCategory = z.infer<typeof TopCategorySchema>;

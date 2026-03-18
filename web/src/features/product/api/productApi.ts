@@ -1,48 +1,58 @@
 import { javaApiClient } from "@/lib/axios";
 import {
     type Product,
-    ProductSchema,
     type CreateProduct,
+    type PageProduct,
+    BaseProductSchema,
     PageProductSchema,
 } from "@/features/product/types/types";
 
 const prefix = "/products";
 
-export interface PageResponse<T> {
-    content: T[];
-    pageSize: number;
-    totalElements: number;
-    hasNext: boolean;
-}
+export const getProduct = async (idProduct: number): Promise<Product> => {
+    const response = await javaApiClient.get(`${prefix}/${idProduct}`);
+    return BaseProductSchema.parse(response.data);
+};
 
 export const createProduct = async (data: CreateProduct): Promise<Product> => {
     const response = await javaApiClient.post(prefix, data);
-    return ProductSchema.parse(response.data);
+    return BaseProductSchema.parse(response.data);
 };
 
 export const updateProduct = async (idProduct: number, data: CreateProduct): Promise<Product> => {
-    const response = await javaApiClient.put(prefix + "/" + idProduct, data);
-    return ProductSchema.parse(response.data);
+    const response = await javaApiClient.put(`${prefix}/${idProduct}`, data);
+    return BaseProductSchema.parse(response.data);
 };
 
 export const getAllProducts = async (
     name?: string,
     categoryId?: number,
-    lastSeenId?: number
-): Promise<PageResponse<Product>> => {
+    page = 0
+): Promise<PageProduct> => {
+    console.log("getAllProducts params:", { name, categoryId, page });
     const response = await javaApiClient.get(prefix, {
-        params: { name, categoryId, lastSeenId },
+        params: { name, categoryId, page },
     });
     return PageProductSchema.parse(response.data);
 };
 
 export const deleteProduct = async (idProduct: number): Promise<void> => {
-    await javaApiClient.delete(prefix + "/" + idProduct);
+    await javaApiClient.delete(`${prefix}/${idProduct}`);
 };
 
 export const downloadProductPdf = async (): Promise<Blob> => {
-    const response = await javaApiClient.get(prefix + "/report", {
+    const response = await javaApiClient.get(`${prefix}/report`, {
         responseType: "blob",
     });
     return response.data;
+};
+
+export const getDeletedProducts = async (
+    checkNumber?: string,
+    page = 0
+): Promise<PageProduct> => {
+    const response = await javaApiClient.get(`${prefix}/deleted`, {
+        params: { checkNumber, page },
+    });
+    return PageProductSchema.parse(response.data);
 };

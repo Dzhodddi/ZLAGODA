@@ -46,3 +46,9 @@ export const getTopCategories
     const response = await javaApiClient.get(prefix + "/top");
     return z.array(TopCategorySchema).parse(response.data);
 }
+
+export const getAllCategories
+    = async (): Promise<Category[]> => {
+    const response = await javaApiClient.get(prefix);
+    return z.array(CategorySchema).parse(response.data);
+}

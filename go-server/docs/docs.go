@@ -1393,7 +1393,7 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 50
                 },
-                "zipcode": {
+                "zip_code": {
                     "type": "string",
                     "maxLength": 9
                 }
@@ -1426,7 +1426,7 @@ const docTemplate = `{
                 "street": {
                     "type": "string"
                 },
-                "zipcode": {
+                "zip_code": {
                     "type": "string"
                 }
             }
@@ -1534,7 +1534,7 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 50
                 },
-                "zipcode": {
+                "zip_code": {
                     "type": "string",
                     "maxLength": 9
                 }
