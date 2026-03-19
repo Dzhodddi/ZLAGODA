@@ -133,6 +133,7 @@ export const ProductList = () => {
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                     setSearchName(nameInput);
+                                    setSearchCategoryId(undefined);
                                     handleSetView("byName");
                                 }
                             }}
