@@ -59,21 +59,26 @@ func (s *cardService) DeleteCustomerCard(ctx context.Context, cardNumber string)
 }
 
 func (s *cardService) ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]views.CustomerCardResponse, error) {
-	var cards []generated.CustomerCard
-	var err error
-	if q.LastCardNumber == nil {
-		q.LastCardNumber = new(string)
-	}
-	switch {
-	case q.Surname != nil:
-		cards, err = s.cardRepository.SearchCustomerCartBySurname(ctx, *q.Surname)
-	case q.Percent != nil:
-		cards, err = s.cardRepository.ListCustomerCardsSortedByPercent(ctx, *q.Percent, *q.LastCardNumber)
-	case q.Sorted != nil && *q.Sorted:
-		cards, err = s.cardRepository.ListCustomerCardsSortedBySurname(ctx, *q.LastCardNumber)
-	default:
-		cards, err = s.cardRepository.ListCustomerCards(ctx, *q.LastCardNumber)
-	}
+    var cards []generated.CustomerCard
+    var err error
+
+    if q.LastCardNumber == nil {
+        q.LastCardNumber = new(string)
+    }
+
+    switch {
+        case q.Sorted != nil && *q.Sorted:
+            if q.Surname == nil {
+                q.Surname = new(string)
+            }
+            cards, err = s.cardRepository.ListCustomerCardsSortedBySurname(ctx, *q.LastCardNumber, *q.Surname)
+        case q.Percent != nil:
+            cards, err = s.cardRepository.ListCustomerCardsSortedByPercent(ctx, *q.Percent, *q.LastCardNumber)
+        case q.Surname != nil:
+            cards, err = s.cardRepository.SearchCustomerCartBySurname(ctx, *q.LastCardNumber, *q.Surname)
+        default:
+            cards, err = s.cardRepository.ListCustomerCards(ctx, *q.LastCardNumber)
+    }
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch all cards: %w", err)

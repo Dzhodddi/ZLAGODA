@@ -48,11 +48,14 @@ export const useCustomerCard = (customerCardNumber: string) => {
 }
 
 export const useCustomerCardList = (
+    cardNumber: string | undefined = undefined,
+    cardSurname: string | undefined = undefined,
     sorted: boolean | undefined = undefined
 ) => {
+    const effectiveSurname = sorted ? cardSurname : undefined;
     return useQuery({
-        queryKey: [QUERY_KEY, sorted],
-        queryFn: () => listCustomerCard(sorted),
+        queryKey: [QUERY_KEY, cardNumber, effectiveSurname, sorted],
+        queryFn: () => listCustomerCard(cardNumber, effectiveSurname, sorted),
         placeholderData: (previousData) => previousData,
     });
 }

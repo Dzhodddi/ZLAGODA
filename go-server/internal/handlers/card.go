@@ -164,6 +164,7 @@ func (h *CardHandler) deleteCustomerCard(c echo.Context) error {
 //	@Param			percent	query		int	false	"percent"
 //	@Param			sorted 	query		bool	false	"sorted"
 //	@Param			surname 	query		string	false	"surname"
+//	@Param			card_number 	query		string	false	"card_number"
 //
 // @Success      200  {array}  views.CustomerCardResponse
 // @Failure      401  {object}  map[string]any  "Unauthorized"

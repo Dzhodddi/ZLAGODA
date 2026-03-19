@@ -20,9 +20,20 @@ type CardRepository interface {
 	UpdateCustomerCard(ctx context.Context, card views.UpdateCustomerCard, cardNumber string) (*generated.CustomerCard, error)
 	DeleteCustomerCard(ctx context.Context, cardNumber string) error
 	ListCustomerCards(ctx context.Context, lastCardNumber string) ([]generated.CustomerCard, error)
-	ListCustomerCardsSortedBySurname(ctx context.Context, lastCardNumber string) ([]generated.CustomerCard, error)
-	ListCustomerCardsSortedByPercent(ctx context.Context, percent int, lastCardNumber string) ([]generated.CustomerCard, error)
-	SearchCustomerCartBySurname(ctx context.Context, surname string) ([]generated.CustomerCard, error)
+	ListCustomerCardsSortedBySurname(
+		ctx context.Context,
+		lastCardNumber string,
+		lastCustomerSurname string,
+	) ([]generated.CustomerCard, error)
+	ListCustomerCardsSortedByPercent(
+		ctx context.Context,
+		percent int,
+		lastCardNumber string,
+	) ([]generated.CustomerCard, error)
+	SearchCustomerCartBySurname(ctx context.Context,
+		lastCardNumber string,
+		lastCustomerSurname string,
+	) ([]generated.CustomerCard, error)
 }
 
 type cardRepository struct {
@@ -146,13 +157,15 @@ func (r *cardRepository) ListCustomerCards(
 func (r *cardRepository) ListCustomerCardsSortedBySurname(
 	ctx context.Context,
 	lastCardNumber string,
+	lastCustomerSurname string,
 ) ([]generated.CustomerCard, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
 	return r.queries.GetAllCustomerCardsSortedBySurname(ctx, generated.GetAllCustomerCardsSortedBySurnameParams{
-		CardNumber: lastCardNumber,
-		Limit:      constants.PaginationStep,
+		Cardnumber:      lastCardNumber,
+		Customersurname: lastCustomerSurname,
+		Limit:           constants.PaginationStep,
 	})
 }
 
@@ -175,12 +188,16 @@ func (r *cardRepository) ListCustomerCardsSortedByPercent(
 	return rows, nil
 }
 
-func (r *cardRepository) SearchCustomerCartBySurname(ctx context.Context, surname string) ([]generated.CustomerCard, error) {
+func (r *cardRepository) SearchCustomerCartBySurname(
+	ctx context.Context,
+	lastCardNumber string,
+	lastCustomerSurname string,
+) ([]generated.CustomerCard, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 	return r.queries.SearchCustomerCardBySurname(ctx, generated.SearchCustomerCardBySurnameParams{
-		CardNumber:      "",
-		CustomerSurname: fmt.Sprintf("%%%s%%", surname),
+		CardNumber:      lastCardNumber,
+		CustomerSurname: fmt.Sprintf("%%%s%%", lastCustomerSurname),
 		Limit:           constants.PaginationStep,
 	})
 }

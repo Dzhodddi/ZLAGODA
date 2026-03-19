@@ -850,6 +850,12 @@ const docTemplate = `{
                         "description": "surname",
                         "name": "surname",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "card_number",
+                        "name": "card_number",
+                        "in": "query"
                     }
                 ],
                 "responses": {

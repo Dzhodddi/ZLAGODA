@@ -4,17 +4,21 @@ import { toast } from "sonner";
 import { useState } from "react";
 
 type Cursor = {
-    id: string;
-    name: string;
+    cardNumber: string;
+    customerSurname: string | undefined;
 };
 
 export const CustomerCardListPage = () => {
     const [isSorted, setIsSorted] = useState(false);
 
-    const [cursorHistory, setCursorHistory] = useState<Cursor[]>([{ id: "", name: "" }]);
+    const [cursorHistory, setCursorHistory] = useState<Cursor[]>([{ cardNumber: "", customerSurname: undefined }]);
     const [currentIndex, setCurrentIndex] = useState(0);
 
+    const currentCursor = cursorHistory[currentIndex] ?? { cardNumber: "", customerSurname: undefined };
+
     const { data: customerCards, isLoading, isError, isFetching } = useCustomerCardList(
+        currentCursor.cardNumber,
+        currentCursor.customerSurname,
         isSorted
     );
 
@@ -32,10 +36,7 @@ export const CustomerCardListPage = () => {
                     onError: () => toast.error("Помилка під час видалення картки"),
                 }),
             },
-            cancel: {
-                label: "Скасувати",
-                onClick: () => {},
-            },
+            cancel: { label: "Скасувати", onClick: () => {} },
         });
     };
 
@@ -47,8 +48,8 @@ export const CustomerCardListPage = () => {
         if (!lastItem) return;
 
         const nextCursor: Cursor = {
-            id: lastItem.cardNumber,
-            name: lastItem.customerName
+            cardNumber: lastItem.cardNumber,
+            customerSurname: lastItem.customerSurname
         };
 
         const nextIndex = currentIndex + 1;
@@ -67,7 +68,7 @@ export const CustomerCardListPage = () => {
     const handleSortToggle = () => {
         setIsSorted((prev) => !prev);
         setCurrentIndex(0);
-        setCursorHistory([{ id: "", name: "" }]);
+        setCursorHistory([{ cardNumber: "", customerSurname: undefined}]);
     };
 
     const isLastPage = customerCards ? customerCards.length < 10 : true;
@@ -125,7 +126,7 @@ export const CustomerCardListPage = () => {
                     <table className="w-full text-xs border-collapse table-fixed border-b border-blue-300">
                         <thead>
                         <tr className="bg-blue-700 text-left text-white">
-                            <th className="px-3 py-2 font-semibold w-40 border border-blue-500 text-center">Номер</th>
+                            <th className="px-15 py-2 font-semibold w-16 border border-blue-500 text-center">Номер</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">ПІБ</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Знижка (у відсотках %)</th>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
@@ -135,7 +136,7 @@ export const CustomerCardListPage = () => {
                         <tbody>
                         {customerCards?.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="px-3 py-8 text-center text-zinc-500 bg-white">
+                                <td colSpan={5} className="px-3 py-8 text-center text-zinc-500 bg-white">
                                     Ви досягли кінця списку. Більше карток немає
                                 </td>
                             </tr>
@@ -146,9 +147,9 @@ export const CustomerCardListPage = () => {
                                     onClick={() => navigate(`/customer-card/${card.cardNumber}`)}
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200">{card.cardNumber}</td>
+                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 text-center">{card.cardNumber}</td>
                                     <td className="px-3 py-2 border border-blue-200 truncate ">{card.customerName + " " + card.customerSurname + " " + (card.customerPatronymic ? card.customerPatronymic : "")}</td>
-                                    <td className="px-3 py-2 border border-blue-200 truncate ">{card.customerPercent}</td>
+                                    <td className="px-3 py-2 border border-blue-200 truncate text-center">{card.customerPercent}</td>
                                     <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => navigate(`/customer-card/edit/${card.cardNumber}`)}

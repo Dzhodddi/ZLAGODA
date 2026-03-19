@@ -41,7 +41,7 @@ export const UpsertCustomerCardForm = ({ initialData }: Props) => {
                         <InputField name="customerName" label="Ім'я" />
                         <InputField name="customerSurname" label="Прізвище" />
                         <InputField name="customerPatronymic" label="По батькові" required={false} />
-                        <InputField type="number" name="customerPercent" label="Відсоток" min="1" max="100" step="0.01" />
+                        <InputField name="customerPercent" label="Відсоток" min="1" max="100"/>
                         <InputField name="phoneNumber" label="Контактний телефон" />
                         <InputField name="city" label="Місто" required={false}/>
                         <InputField name="street" label="Вулиця" required={false}/>

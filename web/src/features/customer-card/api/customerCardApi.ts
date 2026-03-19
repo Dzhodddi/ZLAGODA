@@ -24,10 +24,16 @@ export const deleteCustomerCard = async (customerCardNumber: string): Promise<vo
 }
 
 export const listCustomerCard = async (
+    card_number: string | undefined = undefined,
+    surname: string | undefined = undefined,
     sorted: boolean | undefined = undefined
 ): Promise<CustomerCard[]> => {
     const response = await goApiClient.get(prefix, {
-        params: {sorted}
+        params: {
+            card_number,
+            surname: sorted ? surname : undefined,
+            sorted
+        }
     });
     if (!response.data)
         return []
