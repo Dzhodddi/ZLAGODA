@@ -11,6 +11,9 @@ type Cursor = {
 export const CustomerCardListPage = () => {
     const [isSorted, setIsSorted] = useState(false);
 
+    const [percentInput, setPercentInput] = useState("");
+    const [appliedPercent, setAppliedPercent] = useState<number | undefined>(undefined);
+
     const [cursorHistory, setCursorHistory] = useState<Cursor[]>([{ cardNumber: "", customerSurname: undefined }]);
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -19,7 +22,8 @@ export const CustomerCardListPage = () => {
     const { data: customerCards, isLoading, isError, isFetching } = useCustomerCardList(
         currentCursor.cardNumber,
         currentCursor.customerSurname,
-        isSorted
+        isSorted,
+        appliedPercent
     );
 
     const deleteMutation = useDeleteCustomerCard();
@@ -65,10 +69,36 @@ export const CustomerCardListPage = () => {
         setCurrentIndex((prev) => Math.max(0, prev - 1));
     };
 
-    const handleSortToggle = () => {
-        setIsSorted((prev) => !prev);
+    const resetPagination = () => {
         setCurrentIndex(0);
-        setCursorHistory([{ cardNumber: "", customerSurname: undefined}]);
+        setCursorHistory([{ cardNumber: "", customerSurname: undefined }]);
+    };
+
+    const handleSortToggle = () => {
+        handleClearPercent()
+        setIsSorted((prev) => !prev);
+        resetPagination();
+    };
+
+    const handleSearchPercent = () => {
+        if (percentInput.trim() === "") {
+            handleClearPercent();
+            return;
+        }
+
+        const parsed = parseInt(percentInput, 10);
+        if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+            setAppliedPercent(parsed);
+            resetPagination();
+        } else {
+            toast.error("Введіть коректний відсоток (від 0 до 100)");
+        }
+    };
+
+    const handleClearPercent = () => {
+        setPercentInput("");
+        setAppliedPercent(undefined);
+        resetPagination();
     };
 
     const isLastPage = customerCards ? customerCards.length < 10 : true;
@@ -87,8 +117,8 @@ export const CustomerCardListPage = () => {
                 <h2 className="text-xl font-bold text-zinc-900">Картки клієнтів</h2>
             </div>
 
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-1.5 shrink-0">
                     <span className="text-sm text-zinc-700 font-medium">
                         Сортувати за ім'ям
                     </span>
@@ -104,7 +134,38 @@ export const CustomerCardListPage = () => {
                         }`} />
                     </button>
                 </div>
-                <div className="flex items-center gap-5">
+
+                <div className="relative flex-1 max-w-sm">
+                    <input
+                        value={percentInput}
+                        onChange={(e) => setPercentInput(e.target.value)}
+                        placeholder="Пошук за % знижки"
+                        min="1"
+                        max="100"
+                        className="w-full border rounded px-3 py-1.5 text-sm pr-16 text-zinc-900"
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                handleSearchPercent();
+                            }
+                        }}
+                    />
+                    <button
+                        onClick={handleSearchPercent}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center"
+                    >
+                        <img src="/src/logos/search.png" alt="search" className="w-5 h-5 hover:scale-110 transition-transform" />
+                    </button>
+                    {appliedPercent !== undefined && (
+                        <button
+                            onClick={handleClearPercent}
+                            className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 text-sm px-1 hover:scale-110 transition-transform"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-5 shrink-0">
                     <Link to="/customer-card/create">
                         <div className="hover:scale-110 transition-transform flex justify-center">
                             <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
@@ -114,7 +175,11 @@ export const CustomerCardListPage = () => {
             </div>
 
             {customerCards?.length === 0 && currentIndex === 0 ? (
-                <p className="text-zinc-400 text-sm">Карток не знайдено. Натисніть "Додати картку", щоб створити нову.</p>
+                <p className="text-zinc-400 text-sm">
+                    {appliedPercent !== undefined
+                        ? `Карток зі знижкою ${appliedPercent}% не знайдено.`
+                        : 'Карток не знайдено. Натисніть "Додати картку", щоб створити нову.'}
+                </p>
             ) : (
                 <div className="overflow-x-auto bg-white border border-blue-300 relative">
                     {isFetching && currentIndex > 0 && (
