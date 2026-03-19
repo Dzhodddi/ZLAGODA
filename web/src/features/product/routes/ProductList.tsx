@@ -27,8 +27,8 @@ export const ProductList = () => {
     const { data: categories } = useAllCategories();
 
     const productsQuery = useProducts(
-        view === "byName" ? searchName : undefined,
-        view === "byCategory" ? searchCategoryId : undefined,
+        searchName || undefined,
+        searchCategoryId,
         currentIndex,
     );
 
@@ -59,15 +59,10 @@ export const ProductList = () => {
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const val = e.target.value;
-        console.log("selected val:", val, typeof val);
-        if (!val) {
-            setSearchCategoryId(undefined);
-            handleSetView("all");
-        } else {
-            setSearchCategoryId(Number(val));
-            setView("byCategory");
-            resetPagination();
-        }
+        setSearchName("");
+        setNameInput("");
+        setCurrentIndex(0);
+        setSearchCategoryId(val ? Number(val) : undefined);
     };
 
     const handleDelete = (id: number) => {
@@ -165,7 +160,8 @@ export const ProductList = () => {
                     >
                         <option value="">Усі категорії</option>
                         {categories?.map((cat) => (
-                            <option key={cat.categoryNumber} value={cat.categoryNumber}>
+                            <option key={cat.categoryNumber}
+                                    value={cat.categoryNumber}>
                                 {cat.categoryName}
                             </option>
                         ))}

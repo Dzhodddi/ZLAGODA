@@ -1,4 +1,4 @@
-package org.example.repository.product;
+package org.example.repository.product.helper;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;

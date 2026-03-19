@@ -5,7 +5,7 @@ interface Props {
 }
 
 export const ProductComponent = ({ data }: Props) => {
-    const title = "Деталі товару";
+    const title = "Інформація про товар";
     return (
         <div className="p-6 bg-white rounded text-zinc-900 shadow-md max-w-2xl mx-auto">
             <h2 className="text-xl font-bold mb-4">{title}</h2>

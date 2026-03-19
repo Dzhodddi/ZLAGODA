@@ -46,3 +46,20 @@ export const PageProductSchema = z.object({
 });
 
 export type PageProduct = z.infer<typeof PageProductSchema>;
+
+export const DeletedProductSchema = z.object({
+    idProduct: z
+        .coerce
+        .number(),
+    productName: z
+        .string(),
+});
+
+export const PageDeletedProductSchema = z.object({
+    content: z.array(DeletedProductSchema),
+    pageSize: z.number(),
+    totalElements: z.number(),
+    hasNext: z.boolean(),
+});
+
+export type PageDeletedProduct = z.infer<typeof PageDeletedProductSchema>;

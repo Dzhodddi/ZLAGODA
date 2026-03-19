@@ -56,11 +56,11 @@ public class ProductController {
 
     @GetMapping("/deleted")
     @Operation(
-            summary = "Get deleted products existing in some check",
-            description = "Get deleted products existing in some check"
+            summary = "Get existing in check deleted products' names",
+            description = "Get existing in some check deleted products' names"
     )
     @PreAuthorize("hasAuthority('MANAGER')")
-    public PageResponseDto<ProductDto> getDeleted(@RequestParam String checkNumber,
+    public PageResponseDto<ProductDto> getDeleted(@RequestParam("check_number") String checkNumber,
                                                   @RequestParam(defaultValue = "0") int page) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("product_name"));
         return productService.getDeleted(checkNumber, pageable);
@@ -72,12 +72,13 @@ public class ProductController {
             description = "Get all products sorted by their names"
     )
     public PageResponseDto<ProductDto> getAll(@RequestParam(required = false) String name,
-                                              @RequestParam(required = false) Integer categoryId,
+                                              @RequestParam(value = "category_id",
+                                                      required = false) Integer categoryId,
                                               @RequestParam(defaultValue = "0") int page) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CASHIER"));
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("product_name"));
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         if (name != null && !name.isEmpty()) {
             if (!isCashier) {
                 throw new AuthorizationException("Only Cashier can search products by name");

@@ -20,7 +20,7 @@ export const useProduct = (id: number) => {
     });
 };
 
-export const useDeletedProducts = (checkNumber: string, page: number, enabled = true) => {
+export const useDeletedProducts = (checkNumber: string | undefined, page: number, enabled = true) => {
     return useQuery({
         queryKey: ["deleted", checkNumber, page],
         queryFn: () => getDeletedProducts(checkNumber, page),

@@ -4,7 +4,7 @@ import {
     type CreateProduct,
     type PageProduct,
     BaseProductSchema,
-    PageProductSchema,
+    PageProductSchema, type PageDeletedProduct, PageDeletedProductSchema,
 } from "@/features/product/types/types";
 
 const prefix = "/products";
@@ -29,9 +29,10 @@ export const getAllProducts = async (
     categoryId?: number,
     page = 0
 ): Promise<PageProduct> => {
-    console.log("getAllProducts params:", { name, categoryId, page });
     const response = await javaApiClient.get(prefix, {
-        params: { name, categoryId, page },
+        params: { name,
+            category_id: categoryId,
+            page },
     });
     return PageProductSchema.parse(response.data);
 };
@@ -50,9 +51,9 @@ export const downloadProductPdf = async (): Promise<Blob> => {
 export const getDeletedProducts = async (
     checkNumber?: string,
     page = 0
-): Promise<PageProduct> => {
+): Promise<PageDeletedProduct> => {
     const response = await javaApiClient.get(`${prefix}/deleted`, {
         params: { checkNumber, page },
     });
-    return PageProductSchema.parse(response.data);
+    return PageDeletedProductSchema.parse(response.data);
 };

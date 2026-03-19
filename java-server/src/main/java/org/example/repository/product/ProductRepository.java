@@ -44,9 +44,7 @@ public class ProductRepository {
         List<ProductDto> products = jdbcTemplate.query(
                 """
                 SELECT DISTINCT p.id_product,
-                       p.product_name,
-                       p.producer,
-                       p.product_characteristics
+                       p.product_name
                 FROM product p
                 INNER JOIN store_product sp1 ON p.id_product = sp1.id_product
                 INNER JOIN sale s ON sp1.UPC = s.UPC
@@ -57,7 +55,7 @@ public class ProductRepository {
                         WHERE sp2.UPC = sp1.UPC
                         AND NOT sp2.is_deleted
                       )
-                ORDER BY p.product_name
+                ORDER BY p.id_product
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
                 rowMapper,
@@ -119,7 +117,8 @@ public class ProductRepository {
                 offset + products.size() < total);
     }
 
-    public PageResponseDto<ProductDto> findByCategoryId(int categoryNumber, Pageable pageable) {
+    public PageResponseDto<ProductDto> findByCategoryId(int categoryNumber,
+                                                        Pageable pageable) {
         long offset = pageable.getOffset();
         List<ProductDto> products = jdbcTemplate.query(
                 """

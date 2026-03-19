@@ -142,8 +142,7 @@ class ProductControllerTest {
                 .thenReturn(page);
 
         mockMvc.perform(get("/products")
-                        .param("categoryId", "10")
-                        .param("lastSeenId", "0"))
+                        .param("category_id", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.content[0].producer").value("Producer A"))

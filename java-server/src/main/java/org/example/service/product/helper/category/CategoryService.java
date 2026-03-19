@@ -1,4 +1,4 @@
-package org.example.service.product.category;
+package org.example.service.product.helper.category;
 
 import java.util.List;
 import org.example.dto.helper.CategoryResponseDto;
