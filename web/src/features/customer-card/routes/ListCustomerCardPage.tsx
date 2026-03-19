@@ -53,7 +53,7 @@ export const CustomerCardListPage = () => {
 
         const nextCursor: Cursor = {
             cardNumber: lastItem.cardNumber,
-            customerSurname: lastItem.customerSurname
+            customerSurname: (isSorted || appliedPercent !== undefined) ? lastItem.customerSurname : undefined
         };
 
         const nextIndex = currentIndex + 1;
@@ -75,7 +75,6 @@ export const CustomerCardListPage = () => {
     };
 
     const handleSortToggle = () => {
-        handleClearPercent()
         setIsSorted((prev) => !prev);
         resetPagination();
     };
@@ -213,7 +212,7 @@ export const CustomerCardListPage = () => {
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
                                     <td className="px-3 py-2 font-mono text-xs border border-blue-200 text-center">{card.cardNumber}</td>
-                                    <td className="px-3 py-2 border border-blue-200 truncate ">{card.customerName + " " + card.customerSurname + " " + (card.customerPatronymic ? card.customerPatronymic : "")}</td>
+                                    <td className="px-3 py-2 border border-blue-200 truncate ">{card.customerSurname + " " + card.customerName + " " + (card.customerPatronymic ? card.customerPatronymic : "")}</td>
                                     <td className="px-3 py-2 border border-blue-200 truncate text-center">{card.customerPercent}</td>
                                     <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                         <button

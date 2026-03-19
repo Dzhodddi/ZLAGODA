@@ -234,19 +234,25 @@ SELECT
 	zip_code,
 	customer_percent
 FROM customer_card
-WHERE customer_percent = $1 and card_number > $2
-ORDER BY card_number
-FETCH FIRST $3 ROWS ONLY
+WHERE customer_percent = $1 and (customer_surname, card_number) > ($3::varchar, $4::varchar)
+ORDER BY customer_surname, card_number
+FETCH FIRST $2 ROWS ONLY
 `
 
 type GetCustomerCardsByPercentSortedParams struct {
 	CustomerPercent int32
-	CardNumber      string
 	Limit           int32
+	Customersurname string
+	Cardnumber      string
 }
 
 func (q *Queries) GetCustomerCardsByPercentSorted(ctx context.Context, arg GetCustomerCardsByPercentSortedParams) ([]CustomerCard, error) {
-	rows, err := q.db.QueryContext(ctx, getCustomerCardsByPercentSorted, arg.CustomerPercent, arg.CardNumber, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, getCustomerCardsByPercentSorted,
+		arg.CustomerPercent,
+		arg.Limit,
+		arg.Customersurname,
+		arg.Cardnumber,
+	)
 	if err != nil {
 		return nil, err
 	}

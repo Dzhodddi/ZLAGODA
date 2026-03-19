@@ -53,7 +53,7 @@ export const useCustomerCardList = (
     sorted: boolean | undefined = undefined,
     percent: number | undefined = undefined,
 ) => {
-    const effectiveSurname = sorted ? cardSurname : undefined;
+    const effectiveSurname = (sorted || percent !== undefined) ? cardSurname : undefined;
     return useQuery({
         queryKey: [QUERY_KEY, cardNumber, effectiveSurname, percent, sorted],
         queryFn: () => listCustomerCard(cardNumber, effectiveSurname, percent, sorted),

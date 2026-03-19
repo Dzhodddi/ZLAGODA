@@ -29,6 +29,7 @@ type CardRepository interface {
 		ctx context.Context,
 		percent int,
 		lastCardNumber string,
+		lastCustomerSurname string,
 	) ([]generated.CustomerCard, error)
 	SearchCustomerCartBySurname(ctx context.Context,
 		lastCardNumber string,
@@ -173,13 +174,15 @@ func (r *cardRepository) ListCustomerCardsSortedByPercent(
 	ctx context.Context,
 	percent int,
 	lastCardNumber string,
+	lastCustomerSurname string,
 ) ([]generated.CustomerCard, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
 	rows, err := r.queries.GetCustomerCardsByPercentSorted(ctx, generated.GetCustomerCardsByPercentSortedParams{
 		CustomerPercent: int32(percent),
-		CardNumber:      lastCardNumber,
+		Cardnumber:      lastCardNumber,
+		Customersurname: lastCustomerSurname,
 		Limit:           constants.PaginationStep,
 	})
 	if err != nil {

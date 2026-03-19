@@ -100,9 +100,9 @@ SELECT
 	zip_code,
 	customer_percent
 FROM customer_card
-WHERE customer_percent = $1 and card_number > $2
-ORDER BY card_number
-FETCH FIRST $3 ROWS ONLY;
+WHERE customer_percent = $1 and (customer_surname, card_number) > (@CustomerSurname::varchar, @CardNumber::varchar)
+ORDER BY customer_surname, card_number
+FETCH FIRST $2 ROWS ONLY;
 
 -- name: SearchCustomerCardBySurname :many
 SELECT

@@ -33,7 +33,7 @@ export const listCustomerCard = async (
         params: {
             card_number,
             percent,
-            surname: sorted ? surname : undefined,
+            surname: (sorted || percent !== undefined) ? surname : undefined,
             sorted
         }
     });
