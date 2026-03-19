@@ -36,7 +36,7 @@ export const DeletedProductsPage = () => {
         <div className="bg-zinc-100 p-2 mx-auto space-y-4">
             <div className="flex flex-wrap justify-center items-center">
                 <h2 className="text-xl font-bold text-zinc-900">
-                    Знайти назви товарів, яких більше немає у магазині
+                    Знайти назви товарів, яких більше немає у магазині, за раніше оформленими чеками
                 </h2>
             </div>
 
