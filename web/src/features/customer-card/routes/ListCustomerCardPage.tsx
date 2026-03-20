@@ -151,11 +151,12 @@ export const CustomerCardListPage = () => {
                     </button>
                 </div>
                 {isManager &&
-                <div className="relative flex-1 max-w-sm">
+                <div className="relative flex-1">
                     <input
+                        type="number"
                         value={percentInput}
                         onChange={(e) => setPercentInput(e.target.value)}
-                        placeholder="Пошук за % знижки"
+                        placeholder="Введіть % знижки"
                         min="1"
                         max="100"
                         className="w-full border rounded px-3 py-1.5 text-sm pr-16 text-zinc-900"
@@ -223,7 +224,7 @@ export const CustomerCardListPage = () => {
             {customerCards?.length === 0 && currentIndex === 0 ? (
                 <p className="text-zinc-400 text-sm">
                     {appliedPercent !== undefined
-                        ? `Карток зі знижкою ${appliedPercent}% не знайдено.`
+                        ? `Карток зі знижкою ${appliedPercent} % не знайдено`
                         : 'Карток не знайдено. Натисніть "Додати картку", щоб створити нову.'}
                 </p>
             ) : (

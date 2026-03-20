@@ -134,7 +134,7 @@ export const EmployeeContactSchema = z.object({
     idEmployee: z.string(),
     emplSurname: z.string(),
     emplName: z.string(),
-    emplPatronymic: z.string(),
+    emplPatronymic: z.string().nullish(),
     phoneNumber: z.string(),
     city: z.string(),
     street: z.string(),
