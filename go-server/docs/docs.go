@@ -853,6 +853,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "search_surname",
+                        "name": "search_surname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "card_number",
                         "name": "card_number",
                         "in": "query"

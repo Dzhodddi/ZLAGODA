@@ -19,7 +19,7 @@ const employeeCtx employeeKey = "employee"
 
 type RoleKey string
 
-const roleCtx RoleKey = "role"
+const RoleCtx RoleKey = "role"
 
 const (
 	Manager RoleKey = "MANAGER"
@@ -52,7 +52,7 @@ func (auth *JWTAuth) AuthMiddleware(employeeRepo repository.EmployeeRepository) 
 			}
 			ctx := c.Request().Context()
 			ctx = context.WithValue(ctx, employeeCtx, employee.IDEmployee)
-			ctx = context.WithValue(ctx, roleCtx, employee.EmplRole)
+			ctx = context.WithValue(ctx, RoleCtx, employee.EmplRole)
 			c.SetRequest(c.Request().WithContext(ctx))
 			return next(c)
 		}
@@ -62,7 +62,7 @@ func (auth *JWTAuth) AuthMiddleware(employeeRepo repository.EmployeeRepository) 
 func (auth *JWTAuth) CheckRole(requiredRoles ...RoleKey) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			employeeRole := getRoleFromCtx(c.Request())
+			employeeRole := GetRoleFromCtx(c.Request())
 			for _, role := range requiredRoles {
 				if employeeRole == string(role) {
 					return next(c)
@@ -73,7 +73,7 @@ func (auth *JWTAuth) CheckRole(requiredRoles ...RoleKey) echo.MiddlewareFunc {
 	}
 }
 
-func getRoleFromCtx(r *http.Request) string {
-	role, _ := r.Context().Value(roleCtx).(string)
+func GetRoleFromCtx(r *http.Request) string {
+	role, _ := r.Context().Value(RoleCtx).(string)
 	return role
 }

@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCustomerCardList, useDeleteCustomerCard } from "@/features/customer-card/hooks/useCustomerCard.ts";
 import { toast } from "sonner";
 import { useState } from "react";
+import {useRole} from "@/hooks/useRole.ts";
 
 type Cursor = {
     cardNumber: string;
@@ -14,6 +15,8 @@ export const CustomerCardListPage = () => {
     const [percentInput, setPercentInput] = useState("");
     const [appliedPercent, setAppliedPercent] = useState<number | undefined>(undefined);
 
+    const [surnameInput, setSurnameInput] = useState<string | undefined>(undefined)
+
     const [cursorHistory, setCursorHistory] = useState<Cursor[]>([{ cardNumber: "", customerSurname: undefined }]);
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -23,11 +26,13 @@ export const CustomerCardListPage = () => {
         currentCursor.cardNumber,
         currentCursor.customerSurname,
         isSorted,
-        appliedPercent
+        appliedPercent,
+        surnameInput,
     );
 
     const deleteMutation = useDeleteCustomerCard();
     const navigate = useNavigate();
+    const { isManager, isCashier } = useRole();
 
     const handleDelete = (cardNumber: string) => {
         toast("Видалити картку клієнта?", {
@@ -37,7 +42,6 @@ export const CustomerCardListPage = () => {
                 label: "ТАК",
                 onClick: () => deleteMutation.mutate(cardNumber, {
                     onSuccess: () => toast.success("Картку успішно видалено"),
-                    onError: () => toast.error("Помилка під час видалення картки"),
                 }),
             },
             cancel: { label: "Скасувати", onClick: () => {} },
@@ -94,11 +98,24 @@ export const CustomerCardListPage = () => {
         }
     };
 
+    const handleSearchSurname = () => {
+        if (!surnameInput || surnameInput.trim() === "") {
+            handleClearPercent();
+            return;
+        }
+        setSurnameInput(surnameInput);
+    }
+
     const handleClearPercent = () => {
         setPercentInput("");
         setAppliedPercent(undefined);
         resetPagination();
     };
+
+    const handleClearSurname = () => {
+        setSurnameInput("")
+        resetPagination()
+    }
 
     const isLastPage = customerCards ? customerCards.length < 10 : true;
 
@@ -133,7 +150,7 @@ export const CustomerCardListPage = () => {
                         }`} />
                     </button>
                 </div>
-
+                {isManager &&
                 <div className="relative flex-1 max-w-sm">
                     <input
                         value={percentInput}
@@ -162,15 +179,45 @@ export const CustomerCardListPage = () => {
                             ✕
                         </button>
                     )}
-                </div>
-
+                </div> }
+                {isCashier &&
+                    <div className="relative flex-1 max-w-sm">
+                        <input
+                            value={surnameInput}
+                            onChange={(e) => setSurnameInput(e.target.value)}
+                            placeholder="Пошук за прізвищем"
+                            min="1"
+                            max="100"
+                            className="w-full border rounded px-3 py-1.5 text-sm pr-16 text-zinc-900"
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    handleSearchSurname();
+                                }
+                            }}
+                        />
+                        <button
+                            onClick={handleSearchSurname}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center"
+                        >
+                            <img src="/src/logos/search.png" alt="search" className="w-5 h-5 hover:scale-110 transition-transform" />
+                        </button>
+                        {surnameInput !== undefined && surnameInput !== "" && (
+                            <button
+                                onClick={handleClearSurname}
+                                className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 text-sm px-1 hover:scale-110 transition-transform"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div> }
+                {isManager &&
                 <div className="flex items-center gap-5 shrink-0">
                     <Link to="/customer-card/create">
                         <div className="hover:scale-110 transition-transform flex justify-center">
                             <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
                         </div>
                     </Link>
-                </div>
+                </div> }
             </div>
 
             {customerCards?.length === 0 && currentIndex === 0 ? (
@@ -193,8 +240,10 @@ export const CustomerCardListPage = () => {
                             <th className="px-15 py-2 font-semibold w-16 border border-blue-500 text-center">Номер</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">ПІБ</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Знижка (у відсотках %)</th>
+                            {isManager && <>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
+                            </>}
                         </tr>
                         </thead>
                         <tbody>
@@ -214,6 +263,7 @@ export const CustomerCardListPage = () => {
                                     <td className="px-3 py-2 font-mono text-xs border border-blue-200 text-center">{card.cardNumber}</td>
                                     <td className="px-3 py-2 border border-blue-200 truncate ">{card.customerSurname + " " + card.customerName + " " + (card.customerPatronymic ? card.customerPatronymic : "")}</td>
                                     <td className="px-3 py-2 border border-blue-200 truncate text-center">{card.customerPercent}</td>
+                                    {isManager && <>
                                     <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => navigate(`/customer-card/edit/${card.cardNumber}`)}
@@ -230,6 +280,7 @@ export const CustomerCardListPage = () => {
                                             <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
                                         </button>
                                     </td>
+                                    </>}
                                 </tr>
                             ))
                         )}

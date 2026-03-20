@@ -40,4 +40,5 @@ type ListCustomerCardsQueryParams struct {
 	Sorted         *bool   `query:"sorted"`
 	Surname        *string `query:"surname" validate:"omitempty,max=50"`
 	LastCardNumber *string `query:"card_number" validate:"omitempty,max=50"`
+	SearchSurname  *string `query:"search_surname" validate:"omitempty,max=50"`
 }

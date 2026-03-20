@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/auth"
-
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	"github.com/Dzhodddi/ZLAGODA/internal/services"
@@ -164,6 +163,7 @@ func (h *CardHandler) deleteCustomerCard(c echo.Context) error {
 //	@Param			percent	query		int	false	"percent"
 //	@Param			sorted 	query		bool	false	"sorted"
 //	@Param			surname 	query		string	false	"surname"
+//	@Param			search_surname 	query		string	false	"search_surname"
 //	@Param			card_number 	query		string	false	"card_number"
 //
 // @Success      200  {array}  views.CustomerCardResponse
@@ -182,12 +182,12 @@ func (h *CardHandler) listCustomerCards(c echo.Context) error {
 	if err := validation.ValidateStruct(q); err != nil {
 		return errorResponse.ValidationError(constants.ValidationError, err)
 	}
-	role, _ := c.Get("role").(string)
+	role := auth.GetRoleFromCtx(c.Request())
 	if role == string(auth.Cashier) && q.Percent != nil {
 		return errorResponse.Forbidden(fmt.Errorf("percent query param is not allowed for cashier"))
 	}
-	if role == string(auth.Manager) && q.Surname != nil {
-		return errorResponse.Forbidden(fmt.Errorf("surname query param is not allowed for manager"))
+	if role == string(auth.Manager) && q.SearchSurname != nil {
+		return errorResponse.Forbidden(fmt.Errorf("search surname query param is not allowed for manager"))
 	}
 	cards, err := h.service.ListCustomerCards(c.Request().Context(), q)
 	if err != nil {

@@ -1,19 +1,25 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import {getCustomerCard} from "@/features/customer-card/api/customerCardApi.ts";
 import {UpsertCustomerCardForm} from "@/features/customer-card/components/customerCardForm.tsx";
+import {useCustomerCard} from "@/features/customer-card/hooks/useCustomerCard.ts";
+import {NotFoundEntity} from "@/components/ui/NotFoundEntity.tsx";
 
 export const EditCustomerCardPage = () => {
     const { id } = useParams<{ id: string }>();
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['customer_cards', id],
-        queryFn: () => getCustomerCard(id!),
-        enabled: !!id ,
-    });
+    const { data, isLoading, isError } = useCustomerCard(id!);
 
     if (isLoading)
-        return <div className="p-4 text-center">Завантаження...</div>;
+        return <div className="p-6 text-center text-zinc-500">Завантаження...</div>;
+
+    if (isError) {
+        return (
+            <NotFoundEntity
+                title="Картку не знайдено"
+                redirectTiList="/customer-card"
+                message={`Клієнта з номером картки ${id} не існує в базі даних.`}
+            />
+        );
+    }
 
     return (
         <div className="p-4">

@@ -27,6 +27,7 @@ export const listCustomerCard = async (
     card_number: string | undefined = undefined,
     surname: string | undefined = undefined,
     percent: number | undefined = undefined,
+    search_surname: string | undefined = undefined,
     sorted: boolean | undefined = undefined
 ): Promise<CustomerCard[]> => {
     const response = await goApiClient.get(prefix, {
@@ -34,7 +35,8 @@ export const listCustomerCard = async (
             card_number,
             percent,
             surname: (sorted || percent !== undefined) ? surname : undefined,
-            sorted
+            sorted,
+            search_surname,
         }
     });
     if (!response.data)

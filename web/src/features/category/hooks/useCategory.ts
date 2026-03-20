@@ -6,6 +6,8 @@ import {
     updateCategory
 } from "@/features/category/api/categoryApi.ts";
 import {toast} from "sonner";
+import {AxiosError, isAxiosError} from "axios";
+import {staleTime} from "@/constants/constants.ts";
 
 const QUERY_KEY = "categories"
 
@@ -62,8 +64,16 @@ export const useDeleteCategory = () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
         },
         onError: (error) => {
-            toast.error("Помилка під час видалення категорії")
-            console.error(error)
+            if (isAxiosError(error) && error.response?.data) {
+                if (error.response.status === 400) {
+                    toast.error("Категорія використовується!");
+                    return;
+                }
+                toast.error("Помилка під час видалення категорії")
+                return;
+            }
+            toast.error("Помилка підключення до сервера");
+            console.error(error);
         }
     });
 };
@@ -73,7 +83,13 @@ export const useCategory = (categoryNumber: number) => {
         queryKey: [QUERY_KEY, categoryNumber],
         queryFn: () => getCategory(categoryNumber),
         enabled: !!categoryNumber,
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
+        retry: (failureCount, error) => {
+            if (error instanceof AxiosError && error.response?.status === 404) {
+                return false;
+            }
+            return failureCount < 3;
+        }
     });
 };
 
@@ -81,7 +97,7 @@ export const useTopCategories = () => {
     return useQuery({
         queryKey: [QUERY_KEY, "top"],
         queryFn: () => getTopCategories(),
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
     });
 };
 
@@ -89,6 +105,6 @@ export const useAllCategories = () => {
     return useQuery({
         queryKey: [QUERY_KEY, "all"],
         queryFn: () => getAllCategories(),
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
     });
 };

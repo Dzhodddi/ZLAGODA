@@ -1,15 +1,21 @@
 import {useParams} from "react-router-dom";
 import {useCategory} from "@/features/category/hooks/useCategory.ts";
 import {CategoryComponent} from "@/features/category/components/CategoryComponent.tsx";
+import {NotFoundEntity} from "@/components/ui/NotFoundEntity.tsx";
 
 export const CategoryPage = () => {
     const { id } = useParams<{ id: string }>();
 
     const categoryId = id ? Number(id) : undefined;
 
-    if (!categoryId || isNaN(categoryId)) {
-        return <div className="p-4 text-center text-red-500">Неправильний ІД категорії</div>;
-    }
+    if (!categoryId || isNaN(categoryId))
+        return (
+            <NotFoundEntity
+                title="Категорію не знайдено"
+                redirectTiList="/categories"
+                message={`Категорію з ID ${id} не існує в базі даних.`}
+            />
+    );
 
     const { data, isLoading, isError } = useCategory(categoryId);
 
@@ -17,7 +23,13 @@ export const CategoryPage = () => {
         return <div className="p-4 text-center">Завантаження...</div>;
 
     if (isError || !data)
-        return <div className="p-4 text-center text-red-500">Категорію не знайдено</div>;
+        return (
+            <NotFoundEntity
+                title="Категорію не знайдено"
+                redirectTiList="/categories"
+                message={`Категорію з ID ${id} не існує в базі даних.`}
+            />
+        );
 
     return (
         <div className="p-4">

@@ -9,6 +9,7 @@ import {
     getEmployeePhoneAndAddress,
     downloadEmployeePdf, getEmployee,
 } from "@/features/employee/api/employeeApi.ts";
+import {staleTime} from "@/constants/constants.ts";
 
 const QUERY_KEY = "employees";
 
@@ -51,7 +52,7 @@ export const useAllEmployees = (page: number, enabled = true) =>
         queryKey: ["employees-list", page],
         queryFn: () => getAllEmployees(page),
         enabled,
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
     });
 
 export const useAllCashiers = (page: number, enabled = true) =>
@@ -59,7 +60,7 @@ export const useAllCashiers = (page: number, enabled = true) =>
         queryKey: ["cashiers-list", page],
         queryFn: () => getAllCashiers(page),
         enabled,
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
     });
 
 export const useEmployeePhoneAndAddress = (surname: string, page: number, enabled = true) =>
@@ -67,7 +68,7 @@ export const useEmployeePhoneAndAddress = (surname: string, page: number, enable
         queryKey: ["employees-contact", surname, page],
         queryFn: () => getEmployeePhoneAndAddress(surname, page),
         enabled: !!surname && enabled,
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
     });
 
 export const useGetMe = () => {
@@ -83,7 +84,7 @@ export const useEmployee = (id: string) => {
         queryKey: [QUERY_KEY, id],
         queryFn: () => getEmployee(id),
         enabled: !!id,
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
     });
 };
 

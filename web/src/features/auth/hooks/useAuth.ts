@@ -54,8 +54,16 @@ export const useLogin = () => {
             navigate("/", { replace: true });
         },
         onError: (error) => {
-            toast.error("Помилка авторизації")
-            console.error(error)
+            if (isAxiosError(error) && error.response?.data) {
+                if (error.response.status === 401) {
+                    toast.error("Неправильні дані! \nПеревірте ID та пароль");
+                    return;
+                }
+                toast.error("Помилка авторизації");
+                return;
+            }
+            toast.error("Помилка підключення до сервера");
+            console.error(error);
         },
     });
 };

@@ -32,8 +32,7 @@ export const CategoryListPage = () => {
             action: {
                 label: "ТАК",
                 onClick: () => deleteMutation.mutate(categoryNumber, {
-                    onSuccess: () => toast.success("Категорію успішно видалено"),
-                    onError: () => toast.error("Помилка під час видалення категорії"),
+                    onSuccess: () => toast.success("Категорію успішно видалено")
                 }),
             },
             cancel: {

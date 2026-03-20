@@ -65,20 +65,16 @@ func (s *cardService) ListCustomerCards(ctx context.Context, q views.ListCustome
 	if q.LastCardNumber == nil {
 		q.LastCardNumber = new(string)
 	}
-
+	if q.Surname == nil {
+		q.Surname = new(string)
+	}
 	switch {
 	case q.Sorted != nil && *q.Sorted:
-		if q.Surname == nil {
-			q.Surname = new(string)
-		}
 		cards, err = s.cardRepository.ListCustomerCardsSortedBySurname(ctx, *q.LastCardNumber, *q.Surname)
 	case q.Percent != nil:
-		if q.Surname == nil {
-			q.Surname = new(string)
-		}
 		cards, err = s.cardRepository.ListCustomerCardsSortedByPercent(ctx, *q.Percent, *q.LastCardNumber, *q.Surname)
-	case q.Surname != nil:
-		cards, err = s.cardRepository.SearchCustomerCartBySurname(ctx, *q.LastCardNumber, *q.Surname)
+	case q.SearchSurname != nil:
+		cards, err = s.cardRepository.SearchCustomerCartBySurname(ctx, *q.LastCardNumber, *q.SearchSurname)
 	default:
 		cards, err = s.cardRepository.ListCustomerCards(ctx, *q.LastCardNumber)
 	}
