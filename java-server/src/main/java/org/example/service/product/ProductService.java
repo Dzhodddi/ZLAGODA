@@ -10,8 +10,7 @@ public interface ProductService {
 
     ProductDto getById(int id);
 
-    PageResponseDto<ProductDto> getDeleted(String checkNumber,
-                                           Pageable pageable);
+    PageResponseDto<ProductDto> getSold(Pageable pageable);
 
     List<ProductDto> getAllNoPagination();
 

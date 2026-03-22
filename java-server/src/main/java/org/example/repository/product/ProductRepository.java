@@ -25,46 +25,40 @@ public class ProductRepository {
     private final ProductRowMapper rowMapper;
     private final ProductMapper productMapper;
 
-    public PageResponseDto<ProductDto> findDeleted(String checkNumber, Pageable pageable) {
-        Boolean checkExists = jdbcTemplate.queryForObject(
-                """
-                SELECT EXISTS(
-                    SELECT 1 FROM checks WHERE check_number = ?
-                )
-                """,
-                Boolean.class,
-                checkNumber
-        );
-
-        if (Boolean.FALSE.equals(checkExists)) {
-            throw new EntityNotFoundException("Check not found: " + checkNumber);
-        }
-
+    public PageResponseDto<ProductDto> findSold(Pageable pageable) {
         long offset = pageable.getOffset();
         List<ProductDto> products = jdbcTemplate.query(
                 """
-                SELECT DISTINCT p.id_product,
-                       p.product_name
+                SELECT p.id_product, p.product_name,
+                       SUM(s1.product_number) AS sold_number,
+                       SUM(s1.selling_price * s1.product_number) AS total_sold
                 FROM product p
-                INNER JOIN store_product sp1 ON p.id_product = sp1.id_product
-                INNER JOIN sale s ON sp1.UPC = s.UPC
-                WHERE s.check_number = ?
-                  AND NOT EXISTS(
+                INNER JOIN store_product sp1
+                    ON sp1.id_product = p.id_product
+                INNER JOIN sale s1
+                    ON s1.UPC = sp1.UPC
+                WHERE NOT EXISTS(
                         SELECT 1
-                        FROM store_product sp2
-                        WHERE sp2.UPC = sp1.UPC
-                        AND NOT sp2.is_deleted
+                        FROM store_product sp3
+                        WHERE sp3.id_product = p.id_product
+                        AND NOT EXISTS(
+                            SELECT 1
+                            FROM sale s2
+                            WHERE s2.UPC = sp3.UPC
+                        )
                       )
+                GROUP BY p.id_product, p.product_name
                 ORDER BY p.id_product
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
                 rowMapper,
-                checkNumber,
                 offset,
                 pageable.getPageSize()
-        ).stream().map(productMapper::toDto).toList();
+        ).stream()
+                .map(productMapper::toDto)
+                .toList();
 
-        long total = getDeletedCount(checkNumber);
+        long total = getSoldCount();
         return PageResponseDto.of(products, pageable.getPageSize(), total,
                 offset + products.size() < total);
     }
@@ -182,7 +176,7 @@ public class ProductRepository {
                             product_characteristics,
                             category_number
                         ) VALUES (?, ?, ?, ?)
-                        RETURNING id_product, category_number, product_name, product_characteristics
+                        RETURNING category_number, product_name, producer, product_characteristics
                         """,
                         rowMapper,
                         product.getProduct_name(),
@@ -330,20 +324,27 @@ public class ProductRepository {
         return count != null ? count : 0;
     }
 
-    private long getDeletedCount(String checkNumber) {
+    private long getSoldCount() {
         Integer count = jdbcTemplate.queryForObject(
                 """
                 SELECT COUNT(DISTINCT p.id_product)
                 FROM product p
-                INNER JOIN store_product sp
-                ON p.id_product = sp.id_product
-                INNER JOIN sale s
-                ON sp.UPC = s.UPC
-                WHERE s.check_number = ?
-                  AND sp.is_deleted = true
+                WHERE EXISTS (
+                        SELECT 1
+                        FROM store_product sp
+                        WHERE sp.id_product = p.id_product
+                      ) AND NOT EXISTS(
+                        SELECT 1
+                        FROM store_product sp
+                        WHERE sp.id_product = p.id_product
+                        AND NOT EXISTS(
+                            SELECT 1
+                            FROM sale s
+                            WHERE s.UPC = sp.UPC
+                        )
+                      )
                 """,
-                Integer.class,
-                checkNumber
+                Integer.class
         );
         return count != null ? count : 0;
     }

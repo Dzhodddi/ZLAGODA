@@ -47,19 +47,21 @@ export const PageProductSchema = z.object({
 
 export type PageProduct = z.infer<typeof PageProductSchema>;
 
-export const DeletedProductSchema = z.object({
+export const SoldProductSchema = z.object({
     idProduct: z
         .coerce
         .number(),
     productName: z
         .string(),
+    soldNumber: z.coerce.number(),
+    totalSold: z.coerce.number(),
 });
 
-export const PageDeletedProductSchema = z.object({
-    content: z.array(DeletedProductSchema),
+export const PageSoldProductSchema = z.object({
+    content: z.array(SoldProductSchema),
     pageSize: z.number(),
     totalElements: z.number(),
     hasNext: z.boolean(),
 });
 
-export type PageDeletedProduct = z.infer<typeof PageDeletedProductSchema>;
+export type PageSoldProduct = z.infer<typeof PageSoldProductSchema>;

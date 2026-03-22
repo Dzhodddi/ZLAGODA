@@ -162,14 +162,11 @@ class ProductRepositoryTest {
     @Test
     @DisplayName("updateProductById should update and return ProductDto")
     void updateProductById_existingProduct_shouldReturnDto() {
-        // existsByIdProduct
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(1)))
                 .thenReturn(1);
-        // update
         when(jdbcTemplate.update(anyString(),
                 eq("TestProduct"), eq("TestProducer"), eq("TestChars"), eq(10), eq(1)))
                 .thenReturn(1);
-        // findById всередині updateProductById
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq(1)))
                 .thenReturn(product);
         when(productMapper.toDto(product)).thenReturn(productDto);

@@ -105,7 +105,6 @@ class EmployeeRepositoryTest {
     @Test
     @DisplayName("findAll should return employees with offset pagination")
     void findAll_shouldReturnEmployees() {
-        // ← offset-based: query отримує (offset: long, pageSize: int)
         when(jdbcTemplate.query(anyString(), any(EmployeeRowMapper.class), anyLong(), anyInt()))
                 .thenReturn(List.of(employee));
         when(employeeMapper.toEmployeeResponseDto(employee)).thenReturn(employeeResponseDto);

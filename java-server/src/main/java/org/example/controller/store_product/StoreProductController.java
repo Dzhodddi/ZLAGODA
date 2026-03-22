@@ -11,8 +11,6 @@ import org.example.dto.page.PageResponseDto;
 import org.example.dto.store_product.batch.BatchRequestDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
-import org.example.exception.custom_exception.AuthorizationException;
-import org.example.exception.custom_exception.InvalidParameterException;
 import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
@@ -59,28 +57,17 @@ public class StoreProductController {
     """
     )
     public PageResponseDto<?> getStoreProducts(
-            @RequestParam(required = false) String sortedBy,
+            @RequestParam(required = false, name = "sorted_by") String sortedBy,
             @RequestParam(required = false) Boolean prom,
-            @RequestParam(required = false) String lastSeenUPC
+            @RequestParam(required = false, defaultValue = "0") int page
     ) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isCashier = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("CASHIER"));
-        boolean isManager = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("MANAGER"));
-        if ("name".equals(sortedBy) && !isCashier) {
-            throw new AuthorizationException("Only Cashier can sort by name");
-        }
-        if ("quantity".equals(sortedBy) && !isManager) {
-            throw new AuthorizationException("Only Manager can sort by quantity");
-        }
-        Pageable pageable = null;
+        Pageable pageable;
         if ("name".equals(sortedBy)) {
-            pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("product_name"));
+            pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("product_name"));
         } else if ("quantity".equals(sortedBy)) {
-            pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("products_number"));
+            pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("products_number"));
         } else {
-            pageable = PageRequest.of(0, PAGE_SIZE);
+            pageable = PageRequest.of(page, PAGE_SIZE);
         }
         return storeProductService.getAll(sortedBy, prom, pageable);
     }
@@ -125,41 +112,22 @@ public class StoreProductController {
     @GetMapping("/{upc}")
     @Operation(
             summary = "Find store product info by UPC",
-            description = "Returns different data based on query parameters and user role"
+            description = "Returns different data based on user role"
     )
     public ResponseEntity<?> findByUpc(
-            @PathVariable String upc,
-            @RequestParam(required = false) Boolean selling_price,
-            @RequestParam(required = false) Boolean quantity,
-            @RequestParam(required = false) Boolean name,
-            @RequestParam(required = false) Boolean characteristics
+            @PathVariable String upc
     ) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isManager = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("MANAGER"));
         boolean isCashier = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CASHIER"));
-        if (Boolean.TRUE.equals(selling_price) &&
-                Boolean.TRUE.equals(quantity) &&
-                Boolean.TRUE.equals(name) &&
-                Boolean.TRUE.equals(characteristics)) {
-            if (!isManager) {
-                throw new AuthorizationException("Only Manager can access full product characteristics");
-            }
+        if (isManager) {
             return ResponseEntity.ok(storeProductService.findByUPC(upc));
-        }
-        if (Boolean.TRUE.equals(selling_price) &&
-                Boolean.TRUE.equals(quantity) &&
-                name == null &&
-                characteristics == null) {
-            if (!isCashier) {
-                throw new AuthorizationException("Only Cashier can access price and quantity");
-            }
+        } else if (isCashier) {
             return ResponseEntity.ok(storeProductService.findPriceAndQuantityByUPC(upc));
         }
-        throw new InvalidParameterException("Invalid parameter combination. Use either: " +
-                        "(selling_price, quantity) for Cashier or " +
-                        "(selling_price, quantity, name, characteristics) for Manager");
+        return ResponseEntity.unprocessableEntity().build();
     }
 
     @PostMapping("/receive")

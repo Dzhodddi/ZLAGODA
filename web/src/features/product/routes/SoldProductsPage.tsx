@@ -1,27 +1,18 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useDeletedProducts } from "@/features/product/hooks/useProduct.ts";
-import { useAllChecks } from "@/features/checks/hooks/useCheck.ts";
+import { useSoldProducts } from "@/features/product/hooks/useProduct.ts";
 
-export const DeletedProductsPage = () => {
+export const SoldProductsPage = () => {
     const navigate = useNavigate();
 
-    const [searchCheck, setSearchCheck] = useState<string | undefined>(undefined);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const { data: checks } = useAllChecks();
+    const soldQuery = useSoldProducts(currentIndex);
 
-    const deletedQuery = useDeletedProducts(searchCheck, currentIndex);
+    const products = soldQuery.data?.content;
+    const isLastPage = !(soldQuery.data?.hasNext ?? false);
+    const isFetching = soldQuery.isFetching;
 
-    const products = deletedQuery.data?.content;
-    const isLastPage = !(deletedQuery.data?.hasNext ?? false);
-    const isFetching = deletedQuery.isFetching;
-
-    const handleCheckChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const val = e.target.value;
-        setCurrentIndex(0);
-        setSearchCheck(val ? val : undefined);
-    };
 
     const handleNextPage = () => {
         if (isLastPage || isFetching) return;
@@ -36,7 +27,7 @@ export const DeletedProductsPage = () => {
         <div className="bg-zinc-100 p-2 mx-auto space-y-4">
             <div className="flex flex-wrap justify-center items-center">
                 <h2 className="text-xl font-bold text-zinc-900">
-                    Знайти назви товарів, яких більше немає у магазині, за раніше оформленими чеками
+                    Товари, одиниці яких продавалися в магазині хоча б один раз
                 </h2>
             </div>
 
@@ -47,36 +38,16 @@ export const DeletedProductsPage = () => {
                 >
                     ← До всіх товарів
                 </button>
-
-                <div className="relative flex-1">
-                    <select
-                        value={searchCheck ?? ""}
-                        onChange={handleCheckChange}
-                        className="w-full border rounded px-3 py-1.5 text-sm text-zinc-900 bg-red-50 appearance-none pr-6 cursor-pointer"
-                    >
-                        <option value="">Оберіть номер чека</option>
-                        {checks?.map((check) => (
-                            <option key={check.checkNumber} value={check.checkNumber}>
-                                {check.checkNumber}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-zinc-900">▽</div>
-                </div>
             </div>
 
-            {!searchCheck && (
-                <p className="text-zinc-400 text-sm">Укажіть чек</p>
+            {soldQuery.isLoading && <p className="text-zinc-500">Завантаження…</p>}
+            {soldQuery.error && (
+                <p className="text-red-500 text-sm">Помилка: {(soldQuery.error as Error).message}</p>
             )}
 
-            {deletedQuery.isLoading && <p className="text-zinc-500">Завантаження…</p>}
-            {deletedQuery.error && (
-                <p className="text-red-500 text-sm">Помилка: {(deletedQuery.error as Error).message}</p>
-            )}
-
-            {searchCheck && products && (
+            {products && (
                 products.length === 0 ? (
-                    <p className="text-zinc-400 text-sm">Нічого не знайдено для чека "{searchCheck}"</p>
+                    <p className="text-zinc-400 text-sm">Нічого не знайдено</p>
                 ) : (
                     <div className="overflow-x-auto bg-white border border-green-300">
                         <table className="w-full text-xs border-collapse table-fixed border-b border-green-300">
@@ -84,6 +55,8 @@ export const DeletedProductsPage = () => {
                             <tr className="bg-green-600 text-center text-white">
                                 <th className="px-3 py-2 font-semibold w-8 border border-green-700">ID</th>
                                 <th className="px-3 py-2 font-semibold w-40 border border-green-700">Назва</th>
+                                <th className="px-3 py-2 font-semibold w-32 border border-green-700">Кількість проданих одиниць</th>
+                                <th className="px-3 py-2 font-semibold w-32 border border-green-700">Сума проданих одиниць, грн</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -95,6 +68,8 @@ export const DeletedProductsPage = () => {
                                 >
                                     <td className="px-3 py-2 font-mono text-xs border border-green-300">{product.idProduct}</td>
                                     <td className="px-3 py-2 border border-green-300">{product.productName}</td>
+                                    <td className="px-3 py-2 border border-green-300">{product.soldNumber}</td>
+                                    <td className="px-3 py-2 border border-green-300">{product.totalSold}</td>
                                 </tr>
                             ))}
                             </tbody>

@@ -2,7 +2,6 @@ package org.example.service.store_product;
 
 import java.util.List;
 import org.example.dto.page.PageResponseDto;
-import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
@@ -11,21 +10,25 @@ import org.springframework.data.domain.Pageable;
 
 public interface StoreProductService {
 
-    PageResponseDto<StoreProductDto> getAll(Pageable pageable);
+    PageResponseDto<StoreProductWithNameDto> getAll(Pageable pageable);
 
     List<StoreProductDto> getAllNoPagination();
 
-    PageResponseDto<StoreProductDto> getAllSortedByQuantity(Pageable pageable);
+    PageResponseDto<StoreProductWithNameDto> getAllSortedByQuantity(Pageable pageable);
 
     PageResponseDto<StoreProductWithNameDto> getAllSortedByName(Pageable pageable);
 
-    PageResponseDto<StoreProductDto> getPromotionalSortedByQuantity(Pageable pageable);
+    PageResponseDto<StoreProductWithNameDto> getPromotionalSortedByQuantity(Pageable pageable);
 
-    PageResponseDto<StoreProductDto> getNonPromotionalSortedByQuantity(Pageable pageable);
+    PageResponseDto<StoreProductWithNameDto> getNonPromotionalSortedByQuantity(Pageable pageable);
 
     PageResponseDto<StoreProductWithNameDto> getPromotionalSortedByName(Pageable pageable);
 
     PageResponseDto<StoreProductWithNameDto> getNonPromotionalSortedByName(Pageable pageable);
+
+    PageResponseDto<StoreProductWithNameDto> getPromotional(Pageable pageable);
+
+    PageResponseDto<StoreProductWithNameDto> getNonPromotional(Pageable pageable);
 
     StoreProductDto save(StoreProductRequestDto requestDto);
 
@@ -33,7 +36,7 @@ public interface StoreProductService {
 
     void softDeleteByUPC(String upc);
 
-    StoreProductCharacteristicsDto findByUPC(String upc);
+    StoreProductWithNameDto findByUPC(String upc);
 
     StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(String upc);
 

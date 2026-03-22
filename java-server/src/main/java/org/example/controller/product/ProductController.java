@@ -54,16 +54,15 @@ public class ProductController {
         return productService.getById(id);
     }
 
-    @GetMapping("/deleted")
+    @GetMapping("/sold")
     @Operation(
-            summary = "Get existing in check deleted products' names",
-            description = "Get existing in some check deleted products' names"
+            summary = "Get products' names which were sold",
+            description = "Get products' names which were sold"
     )
     @PreAuthorize("hasAuthority('MANAGER')")
-    public PageResponseDto<ProductDto> getDeleted(@RequestParam("check_number") String checkNumber,
-                                                  @RequestParam(defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("product_name"));
-        return productService.getDeleted(checkNumber, pageable);
+    public PageResponseDto<ProductDto> getSold(@RequestParam(defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        return productService.getSold(pageable);
     }
 
     @GetMapping

@@ -12,4 +12,6 @@ public class Product {
     private String product_characteristics;
     private int category_number;
     private String category_name;
+    private int sold_number;
+    private int total_sold;
 }

@@ -17,7 +17,7 @@ public class StoreProductRequestDto {
     @NotNull
     private int id_product;
     @NotNull()
-    private BigDecimal price;
+    private BigDecimal selling_price;
     @Min(1)
     private int products_number;
     @NotNull

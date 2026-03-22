@@ -116,10 +116,10 @@ export const ProductList = () => {
             <div className="flex flex-wrap items-center gap-2">
                 {isManager && (
                     <button
-                        onClick={() => navigate("/product/deleted")}
-                        className="px-3 py-1.5 rounded text-sm border transition-colors bg-red-100 border-red-300 text-zinc-900 hover:bg-red-200"
+                        onClick={() => navigate("/product/sold")}
+                        className="px-3 py-1.5 rounded text-sm border transition-colors bg-blue-200 border-blue-300 text-zinc-900 hover:bg-green-200 hover:border-green-200"
                     >
-                        Видалені у чеках
+                        Товари, що продавалися
                     </button>
                 )}
 

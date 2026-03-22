@@ -142,7 +142,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         table.setWidthPercentage(100);
 
         for (String header : new String[]{
-                "UPC", "UPC промо", "ID продукту", "Ціна продажу", "Кількість", "Акційність"
+                "UPC", "UPC промо", "ID товару", "Ціна продажу", "Кількість", "Акційність"
         }) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
             cell.setBackgroundColor(new BaseColor(59, 130, 246));

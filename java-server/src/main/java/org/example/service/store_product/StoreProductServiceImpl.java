@@ -3,7 +3,6 @@ package org.example.service.store_product;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.page.PageResponseDto;
-import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
@@ -21,30 +20,32 @@ public class StoreProductServiceImpl implements StoreProductService {
     private final StoreProductRepository repository;
     private final StoreProductMapper storeProductMapper;
 
-    public PageResponseDto<?> getAll(String sortedBy,
-                                     Boolean prom,
-                                     Pageable pageable) {
+    public PageResponseDto<?> getAll(String sortedBy, Boolean prom, Pageable pageable) {
         if ("name".equals(sortedBy)) {
             if (prom == null) {
                 return getAllSortedByName(pageable);
             }
-            return prom
-                    ? getPromotionalSortedByName(pageable)
+            return prom ? getPromotionalSortedByName(pageable)
                     : getNonPromotionalSortedByName(pageable);
         }
         if ("quantity".equals(sortedBy)) {
             if (prom == null) {
                 return getAllSortedByQuantity(pageable);
             }
-            return prom
-                    ? getPromotionalSortedByQuantity(pageable)
+            return prom ? getPromotionalSortedByQuantity(pageable)
                     : getNonPromotionalSortedByQuantity(pageable);
+        }
+        if (Boolean.TRUE.equals(prom)) {
+            return getPromotional(pageable);
+        }
+        if (Boolean.FALSE.equals(prom)) {
+            return getNonPromotional(pageable);
         }
         return getAll(pageable);
     }
 
     @Override
-    public PageResponseDto<StoreProductDto> getAll(
+    public PageResponseDto<StoreProductWithNameDto> getAll(
             Pageable pageable) {
         return repository.findAll(pageable);
     }
@@ -55,7 +56,7 @@ public class StoreProductServiceImpl implements StoreProductService {
     }
 
     @Override
-    public PageResponseDto<StoreProductDto> getAllSortedByQuantity(
+    public PageResponseDto<StoreProductWithNameDto> getAllSortedByQuantity(
             Pageable pageable) {
         return repository.findAllSortedByQuantity(pageable);
     }
@@ -67,15 +68,27 @@ public class StoreProductServiceImpl implements StoreProductService {
     }
 
     @Override
-    public PageResponseDto<StoreProductDto> getPromotionalSortedByQuantity(
+    public PageResponseDto<StoreProductWithNameDto> getPromotionalSortedByQuantity(
             Pageable pageable) {
         return repository.findPromotionalSortedByQuantity(pageable);
     }
 
     @Override
-    public PageResponseDto<StoreProductDto> getNonPromotionalSortedByQuantity(
+    public PageResponseDto<StoreProductWithNameDto> getNonPromotionalSortedByQuantity(
             Pageable pageable) {
         return repository.findNonPromotionalSortedByQuantity(pageable);
+    }
+
+    @Override
+    public PageResponseDto<StoreProductWithNameDto> getPromotional(
+            Pageable pageable) {
+        return repository.findPromotional(pageable);
+    }
+
+    @Override
+    public PageResponseDto<StoreProductWithNameDto> getNonPromotional(
+            Pageable pageable) {
+        return repository.findNonPromotional(pageable);
     }
 
     @Override
@@ -106,7 +119,7 @@ public class StoreProductServiceImpl implements StoreProductService {
     }
 
     @Override
-    public StoreProductCharacteristicsDto findByUPC(String upc) {
+    public StoreProductWithNameDto findByUPC(String upc) {
         return repository.findByUPC(upc)
                 .orElseThrow(() -> new EntityNotFoundException("No product found with UPC: " + upc));
     }

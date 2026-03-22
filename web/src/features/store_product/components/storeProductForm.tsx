@@ -1,77 +1,79 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useCreateStoreProduct, useUpdateStoreProduct } from "@/features/store_product/hooks/useStoreProduct.ts";
-import { type CreateStoreProduct, CreateStoreProductSchema } from "@/features/store_product/types/types.ts";
-import { Form } from "@/components/ui/Form.tsx";
+import { useNavigate } from "react-router-dom";
+import {
+    useCreateStoreProduct,
+    useUpdateStoreProduct,
+} from "@/features/store_product/hooks/useStoreProduct.ts";
+import {
+    type StoreProduct,
+    type CreateStoreProduct,
+    CreateStoreProductSchema,
+    BaseStoreProductSchema,
+} from "@/features/store_product/types/types.ts";
+import { GenericUpsertForm } from "@/components/ui/GenericUpsertForm.tsx";
 import { InputField, CheckboxField } from "@/components/ui/InputFields.tsx";
+import { useWatch, useFormContext } from "react-hook-form";
 
-export const UpsertStoreProductForm = () => {
-    const { upc } = useParams();
+interface Props {
+    initialData?: StoreProduct;
+}
+
+const StoreProductFormFields = ({ isEditMode }: { isEditMode: boolean }) => {
+    const { control } = useFormContext<CreateStoreProduct>();
+    const isPromotional = useWatch({ control, name: "promotionalProduct" });
+
+    return (
+        <>
+            <div className="col-span-12"><InputField name="upc" label="UPC" disabled={isEditMode} /></div>
+            <div className="col-span-12"><InputField name="idProduct" label="ID товару" /></div>
+            <div className="col-span-12"><InputField type="number" name="sellingPrice" label="Ціна продажу" min="0" step="0.01" /></div>
+            <div className="col-span-12"><InputField type="number" name="productsNumber" label="Кількість одиниць" min="0" /></div>
+            <div className="col-span-12 my-2">
+                <CheckboxField name="promotionalProduct" label="Акційний товар" />
+            </div>
+            {isPromotional && (
+                <div className="col-span-12"><InputField name="upcProm" label="UPC промо" /></div>
+            )}
+        </>
+    );
+};
+
+export const UpsertStoreProductForm = ({ initialData }: Props) => {
     const navigate = useNavigate();
-    const isEditing = !!upc;
-
-    const createMutation = useCreateStoreProduct();
-    const updateMutation = useUpdateStoreProduct();
-
-    const handleSubmit = (formData: CreateStoreProduct) => {
-        if (isEditing) {
-            updateMutation.mutate(
-                { upc: upc!, data: formData },
-                { onSuccess: () => navigate("/store-product") }
-            );
-        } else {
-            createMutation.mutate(formData, {
-                onSuccess: () => navigate("/store-product")
-            });
-        }
-    };
 
     return (
         <div className="p-6 bg-white rounded text-zinc-900 shadow-md max-w-2xl mx-auto">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">
-                    {isEditing ? `Редагувати: ${upc}` : "Створити товар у магазині"}
-                </h2>
-                <button
-                    onClick={() => navigate("/store-product")}
-                    className="text-gray-500 hover:text-gray-700 text-sm"
-                >
-                    ← Назад
-                </button>
-            </div>
-
-            <Form<CreateStoreProduct>
-                schema={CreateStoreProductSchema}
-                onSubmit={handleSubmit}
+            <GenericUpsertForm<CreateStoreProduct, CreateStoreProduct, StoreProduct>
+                schema={initialData ? BaseStoreProductSchema : CreateStoreProductSchema}
+                initialData={initialData}
+                createMutation={useCreateStoreProduct()}
+                updateMutation={useUpdateStoreProduct()}
+                onSuccessAction={() => navigate("/store-product")}
+                prepareUpdatePayload={(formData, initial) => ({
+                    ...formData,
+                    upc: initial.upc,
+                })}
                 className="grid grid-cols-12 gap-4"
             >
-                {({ formState: { isSubmitting } }) => (
+                {(_methods, { isEditMode, isSaving, isDirty }) => (
                     <>
-                        <InputField name="upc" label="UPC" />
-                        <InputField name="upcProm" label="UPC промо" />
-                        <InputField name="idProduct" label="ID товару" />
-                        <InputField type="number" name="price" label="Ціна продажу" />
-                        <InputField type="number" name="productsNumber" label="Кількість" />
-                        <CheckboxField name="promotionalProduct" label="Акційний товар" />
+                        <h2 className="col-span-12 text-xl font-bold mb-4">
+                            {isEditMode ? `Редагувати товар у магазині` : "Створити товар у магазині"}
+                        </h2>
 
-                        <div className="col-span-12 flex justify-end gap-2 mt-4">
-                            <button
-                                type="button"
-                                onClick={() => navigate("/store-product")}
-                                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
-                            >
-                                Скасувати
-                            </button>
+                        <StoreProductFormFields isEditMode={isEditMode} />
+
+                        <div className="col-span-12 flex justify-end mt-4">
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSaving || (isEditMode && !isDirty)}
                                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                             >
-                                {isSubmitting ? "Збереження..." : isEditing ? "Оновити" : "Створити"}
+                                {isSaving ? "Збереження..." : isEditMode ? "Оновити" : "Створити"}
                             </button>
                         </div>
                     </>
                 )}
-            </Form>
+            </GenericUpsertForm>
         </div>
     );
 };

@@ -8,33 +8,33 @@ interface GenericUpsertFormProps<TFormValues extends FieldValues, TUpdatePayload
     initialData?: TInitialData | null;
 
     createMutation: { mutate: (data: TFormValues, options?: any) => void; isPending: boolean };
-    updateMutation: { mutate: (data: TUpdatePayload, options?: any) => void; isPending: boolean };
+    updateMutation?: { mutate: (data: TUpdatePayload, options?: any) => void; isPending: boolean };
 
-    prepareUpdatePayload: (formData: TFormValues, initialData: TInitialData) => TUpdatePayload;
+    prepareUpdatePayload?: (formData: TFormValues, initialData: TInitialData) => TUpdatePayload;
 
     onSuccessAction?: () => void;
     className?: string;
 
     children: (
         methods: UseFormReturn<TFormValues>,
-        context: { isEditMode: boolean; isSaving: boolean, isDirty: boolean }
+        context: { isEditMode: boolean; isSaving: boolean; isDirty: boolean }
     ) => React.ReactNode;
 }
 
 export const GenericUpsertForm = <TFormValues extends FieldValues, TUpdatePayload, TInitialData = TFormValues>({
-    schema,
-    initialData,
-    createMutation,
-    updateMutation,
-    prepareUpdatePayload,
-    onSuccessAction,
-    className,
-    children
-}: GenericUpsertFormProps<TFormValues, TUpdatePayload, TInitialData>) => {
+                                                                                                                   schema,
+                                                                                                                   initialData,
+                                                                                                                   createMutation,
+                                                                                                                   updateMutation,
+                                                                                                                   prepareUpdatePayload,
+                                                                                                                   onSuccessAction,
+                                                                                                                   className,
+                                                                                                                   children
+                                                                                                               }: GenericUpsertFormProps<TFormValues, TUpdatePayload, TInitialData>) => {
 
     const resetFormRef = useRef<() => void>(null);
     const isEditMode = !!initialData;
-    const isSaving = createMutation.isPending || updateMutation.isPending;
+    const isSaving = createMutation.isPending || (updateMutation?.isPending ?? false);
 
     const handleSubmit = (data: TFormValues) => {
         const handleSuccess = () => {
@@ -42,7 +42,7 @@ export const GenericUpsertForm = <TFormValues extends FieldValues, TUpdatePayloa
             onSuccessAction?.();
         };
 
-        if (isEditMode && initialData) {
+        if (isEditMode && initialData && updateMutation && prepareUpdatePayload) {
             const payload = prepareUpdatePayload(data, initialData as TInitialData);
             updateMutation.mutate(payload, { onSuccess: handleSuccess });
         } else {

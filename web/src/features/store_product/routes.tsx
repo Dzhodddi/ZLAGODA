@@ -1,18 +1,23 @@
 import { Route } from "react-router-dom";
-import {ProtectedRoute} from "@/components/protectedRoutes.tsx";
-import {UpsertStoreProductForm} from "@/features/store_product/components/storeProductForm.tsx";
-import {StoreProductList} from "@/features/store_product/components/storeProductList.tsx";
-import {OwnEmployeePage} from "@/features/employee/routes/EmployeeMePage.tsx";
+import { ProtectedRoute } from "@/components/protectedRoutes.tsx";
+import { StoreProductList } from "@/features/store_product/routes/StoreProductList.tsx";
+import { CreateStoreProductPage } from "@/features/store_product/routes/CreateStoreProductPage.tsx";
+import { EditStoreProductPage } from "@/features/store_product/routes/EditStoreProductPage.tsx";
+import { StoreProductPage } from "@/features/store_product/routes/StoreProductPage.tsx";
+import { ReceiveBatchPage } from "@/features/store_product/routes/ReceiveBatchPage.tsx";
 
 const storeProductRoutes = (
     <>
-        <Route path="/store-product" element={<StoreProductList/>} />
-        <Route path="/store-product/create" element={<UpsertStoreProductForm/>} />
-        <Route path="/store-product/edit/:upc" element={<UpsertStoreProductForm/>} />
-        <Route element={<ProtectedRoute allowedRoles={["CASHIER"]} />}>
-            <Route path="/employee/me" element={<OwnEmployeePage />} />
+        <Route element={<ProtectedRoute allowedRoles={["MANAGER"]} />}>
+            <Route path="/store-product/create" element={<CreateStoreProductPage />} />
+            <Route path="/store-product/edit/:upc" element={<EditStoreProductPage />} />
+            <Route path="/store-product/receive/:upc" element={<ReceiveBatchPage />} />
+        </Route>
+        <Route element={<ProtectedRoute allowedRoles={["MANAGER", "CASHIER"]} />}>
+            <Route path="/store-product" element={<StoreProductList />} />
+            <Route path="/store-product/:upc" element={<StoreProductPage />} />
         </Route>
     </>
 );
 
-export { storeProductRoutes }
+export { storeProductRoutes };

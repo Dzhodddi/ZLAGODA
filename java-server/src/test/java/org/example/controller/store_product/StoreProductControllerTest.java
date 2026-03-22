@@ -104,7 +104,7 @@ class StoreProductControllerTest {
         storeProductRequestDto = new StoreProductRequestDto();
         storeProductRequestDto.setUPC("1111111111");
         storeProductRequestDto.setId_product(3);
-        storeProductRequestDto.setPrice(BigDecimal.valueOf(150.0));
+        storeProductRequestDto.setSelling_price(BigDecimal.valueOf(150.0));
         storeProductRequestDto.setProducts_number(25);
         storeProductRequestDto.setPromotional_product(false);
 
@@ -131,17 +131,6 @@ class StoreProductControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "MANAGER")
-    @DisplayName("GET /store-products?sortedBy=name - Manager should get forbidden when sorting by name")
-    void getStoreProducts_sortedByName_asManager_Forbidden() throws Exception {
-        mockMvc.perform(get("/store-products")
-                        .param("sortedBy", "name"))
-                .andExpect(status().isForbidden());
-
-        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class));
-    }
-
-    @Test
     @WithMockUser(authorities = "CASHIER")
     @DisplayName("GET /store-products?sortedBy=name - Cashier should get products sorted by name")
     void getStoreProducts_sortedByName_asCashier_Ok() throws Exception {
@@ -157,7 +146,7 @@ class StoreProductControllerTest {
                 .thenReturn((PageResponseDto) page);
 
         mockMvc.perform(get("/store-products")
-                        .param("sortedBy", "name"))
+                        .param("sorted_by", "name"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].upc").value("1234567890"));
@@ -182,23 +171,12 @@ class StoreProductControllerTest {
                 .thenReturn((PageResponseDto) page);
 
         mockMvc.perform(get("/store-products")
-                        .param("sortedBy", "quantity"))
+                        .param("sorted_by", "quantity"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2));
 
         verify(storeProductService, times(1))
                 .getAll(eq("quantity"), any(), any(Pageable.class));
-    }
-
-    @Test
-    @WithMockUser(authorities = "CASHIER")
-    @DisplayName("GET /store-products?sortedBy=quantity - Cashier should get forbidden when sorting by quantity")
-    void getStoreProducts_sortedByQuantity_asCashier_Forbidden() throws Exception {
-        mockMvc.perform(get("/store-products")
-                        .param("sortedBy", "quantity"))
-                .andExpect(status().isForbidden());
-
-        verify(storeProductService, never()).getAll(anyString(), any(), any(Pageable.class));
     }
 
     @Test
@@ -309,43 +287,23 @@ class StoreProductControllerTest {
 
     @Test
     @WithMockUser(authorities = "MANAGER")
-    @DisplayName("GET /store-products/{upc}?selling_price=true&quantity=true&name=true&characteristics=true"
-            + "- Manager should get full product info")
+    @DisplayName("GET /store-products/{upc} - Manager should get full product info")
     void findByUpc_fullInfo_asManager_Ok() throws Exception {
-        StoreProductCharacteristicsDto dto = new StoreProductCharacteristicsDto();
+        StoreProductWithNameDto dto = new StoreProductWithNameDto();
+        dto.setUPC("1234567890");
         dto.setProducts_number(storeProductDto1.getProducts_number());
         dto.setSelling_price(storeProductDto1.getSelling_price());
         dto.setProduct_name(productDto.getProduct_name());
-        dto.setProduct_characteristics(productDto.getProduct_characteristics());
 
         when(storeProductService.findByUPC("1234567890")).thenReturn(dto);
 
-        mockMvc.perform(get("/store-products/1234567890")
-                        .param("selling_price", "true")
-                        .param("quantity", "true")
-                        .param("name", "true")
-                        .param("characteristics", "true"))
+        mockMvc.perform(get("/store-products/1234567890"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.selling_price").value(100.0))
                 .andExpect(jsonPath("$.products_number").value(50))
-                .andExpect(jsonPath("$.product_name").value("product_name"))
-                .andExpect(jsonPath("$.product_characteristics").value("product_characteristics"));
+                .andExpect(jsonPath("$.product_name").value("product_name"));
 
         verify(storeProductService, times(1)).findByUPC("1234567890");
-    }
-
-    @Test
-    @WithMockUser(authorities = "CASHIER")
-    @DisplayName("GET /store-products/{upc}?selling_price=true&quantity=true&name=true&characteristics=true - Cashier should get forbidden")
-    void findByUpc_fullInfo_asCashier_Forbidden() throws Exception {
-        mockMvc.perform(get("/store-products/1234567890")
-                        .param("selling_price", "true")
-                        .param("quantity", "true")
-                        .param("name", "true")
-                        .param("characteristics", "true"))
-                .andExpect(status().isForbidden());
-
-        verify(storeProductService, never()).findByUPC(anyString());
     }
 
     @Test
@@ -367,31 +325,6 @@ class StoreProductControllerTest {
                 .andExpect(jsonPath("$.products_number").value(50));
 
         verify(storeProductService, times(1)).findPriceAndQuantityByUPC("1234567890");
-    }
-
-    @Test
-    @WithMockUser(authorities = "MANAGER")
-    @DisplayName("GET /store-products/{upc}?selling_price=true&quantity=true"
-            + " - Manager should get forbidden for price and quantity only")
-    void findByUpc_priceAndQuantity_asManager_Forbidden() throws Exception {
-        mockMvc.perform(get("/store-products/1234567890")
-                        .param("selling_price", "true")
-                        .param("quantity", "true"))
-                .andExpect(status().isForbidden());
-
-        verify(storeProductService, never()).findPriceAndQuantityByUPC(anyString());
-    }
-
-    @Test
-    @WithMockUser(authorities = "MANAGER")
-    @DisplayName("GET /store-products/{upc} - should return bad request for invalid parameter combination")
-    void findByUpc_invalidParameters_BadRequest() throws Exception {
-        mockMvc.perform(get("/store-products/1234567890")
-                        .param("selling_price", "true"))
-                .andExpect(status().isBadRequest());
-
-        verify(storeProductService, never()).findByUPC(anyString());
-        verify(storeProductService, never()).findPriceAndQuantityByUPC(anyString());
     }
 
     @Test

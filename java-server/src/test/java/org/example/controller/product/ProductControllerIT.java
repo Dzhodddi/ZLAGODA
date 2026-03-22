@@ -47,7 +47,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    @DisplayName("GET /products?categoryId=1 returns products from this category")
+    @DisplayName("GET /products?category_id=1 returns products from this category")
     void searchProductsByCategory_ReturnsExpectedProducts() {
         EmployeeLoginRequestDto loginRequest = new EmployeeLoginRequestDto();
         loginRequest.setId_employee("EMP0001");
@@ -65,7 +65,7 @@ public class ProductControllerIT {
         String token = loginResponse.accessToken();
 
         ResponseEntity<RestPage<ProductDto>> response = restClient.get()
-                .uri("/products?categoryId=1")
+                .uri("/products?category_id=1")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<RestPage<ProductDto>>() {});

@@ -26,9 +26,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageResponseDto<ProductDto> getDeleted(String checkNumber,
-                                                   Pageable pageable) {
-        return repository.findDeleted(checkNumber, pageable);
+    public PageResponseDto<ProductDto> getSold(Pageable pageable) {
+        return repository.findSold(pageable);
     }
 
     @Override

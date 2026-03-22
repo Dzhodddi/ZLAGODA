@@ -44,7 +44,7 @@ public class StoreProductControllerIT {
     }
 
     @Test
-    @DisplayName("GET /store-products?sortedBy=quantity returns store products sorted by quantity")
+    @DisplayName("GET /store-products?sorted_by=quantity returns store products sorted by quantity")
     void getStoreProductsByQuantity_ReturnsExpectedList() {
         EmployeeLoginRequestDto loginRequest = new EmployeeLoginRequestDto();
         loginRequest.setId_employee("EMP0001");
@@ -62,7 +62,7 @@ public class StoreProductControllerIT {
         String token = loginResponse.accessToken();
 
         ResponseEntity<RestPage<StoreProductDto>> response = restClient.get()
-                .uri("/store-products?sortedBy=quantity")
+                .uri("/store-products?sorted_by=quantity")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<RestPage<StoreProductDto>>() {});

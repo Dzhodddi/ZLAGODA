@@ -7,8 +7,10 @@ import {
     getStoreProduct,
     getStoreProductPriceAndQuantity,
     deleteExpired,
-    downloadStoreProductPdf
+    downloadStoreProductPdf, receiveNewBatch
 } from "@/features/store_product/api/storeProductApi.ts";
+import {staleTime} from "@/constants/constants.ts";
+import type {BatchRequest, CreateStoreProduct} from "@/features/store_product/types/types.ts";
 
 const QUERY_KEY = "store-products";
 
@@ -27,13 +29,11 @@ export const useCreateStoreProduct = () => {
 export const useUpdateStoreProduct = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ upc, data }: { upc: string; data: Parameters<typeof updateStoreProduct>[1] }) =>
-            updateStoreProduct(upc, data),
+        mutationFn: (payload: CreateStoreProduct & { upc: string }) =>
+            updateStoreProduct(payload.upc, payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Successfully updated store product!");
         },
-        onError: (error) => alert(error),
     });
 };
 
@@ -50,13 +50,18 @@ export const useDeleteStoreProduct = () => {
 };
 
 export const useAllStoreProducts = (
-    sortedBy?: "name" | "quantity",
-    prom?: boolean
+    {sortedBy, prom, page, enabled = true}: {
+        sortedBy?: "name" | "quantity",
+        prom?: boolean,
+        page: number,
+        enabled?: boolean
+    }
 ) => {
     return useQuery({
-        queryKey: [QUERY_KEY, sortedBy, prom],
-        queryFn: () => getAllStoreProducts(sortedBy, prom),
-        staleTime: 1000 * 30,
+        queryKey: [QUERY_KEY, sortedBy, prom, page],
+        queryFn: () => getAllStoreProducts(sortedBy, prom, page),
+        enabled,
+        staleTime: staleTime,
     });
 };
 
@@ -65,7 +70,7 @@ export const useStoreProduct = (upc: string) => {
         queryKey: [QUERY_KEY, upc],
         queryFn: () => getStoreProduct(upc),
         enabled: !!upc,
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
     });
 };
 
@@ -74,7 +79,7 @@ export const useStoreProductPriceAndQuantity = (upc: string) => {
         queryKey: [QUERY_KEY, upc, "price-quantity"],
         queryFn: () => getStoreProductPriceAndQuantity(upc),
         enabled: !!upc,
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
     });
 };
 
@@ -100,5 +105,15 @@ export const useDeleteExpired = () => {
             alert("Expired products deleted!");
         },
         onError: (error) => alert(error),
+    });
+};
+
+export const useReceiveNewBatch = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: BatchRequest) => receiveNewBatch(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["store-products"] });
+        },
     });
 };

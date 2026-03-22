@@ -5,9 +5,11 @@ import {
     getAllProducts,
     deleteProduct,
     downloadProductPdf,
-    getDeletedProducts, getProduct,
+    getSoldProducts,
+    getProduct,
 } from "@/features/product/api/productApi";
 import type {CreateProduct} from "@/features/product/types/types.ts";
+import {staleTime} from "@/constants/constants.ts";
 
 const QUERY_KEY = "products";
 
@@ -16,16 +18,15 @@ export const useProduct = (id: number) => {
         queryKey: [QUERY_KEY, id],
         queryFn: () => getProduct(id),
         enabled: !!id,
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
     });
 };
 
-export const useDeletedProducts = (checkNumber: string | undefined, page: number, enabled = true) => {
+export const useSoldProducts = (page: number, enabled = true) => {
     return useQuery({
-        queryKey: ["deleted", checkNumber, page],
-        queryFn: () => getDeletedProducts(checkNumber, page),
-        enabled: !!checkNumber && enabled,
-        staleTime: 1000 * 30,
+        queryKey: ["sold", page],
+        queryFn: () => getSoldProducts(page),
+        staleTime: staleTime,
     });
 };
 
@@ -33,7 +34,7 @@ export const useProducts = (name?: string, categoryId?: number, page = 0) => {
     return useQuery({
         queryKey: [QUERY_KEY, name, categoryId, page],
         queryFn: () => getAllProducts(name, categoryId, page),
-        staleTime: 1000 * 30,
+        staleTime: staleTime,
     });
 };
 
