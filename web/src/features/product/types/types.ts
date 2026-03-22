@@ -4,7 +4,7 @@ export const BaseProductSchema = z.object({
     idProduct: z
         .coerce
         .number("Некоректне число")
-        .min(1, "Число має бути додатним")
+        .min(0, "Число має бути додатним")
         .max(999999, "Число занадто велике"),
     categoryNumber: z
         .coerce
@@ -13,8 +13,9 @@ export const BaseProductSchema = z.object({
         .max(999999, "Номер категорії завеликий"),
     categoryName: z
         .string()
-        .min(1, "Назва занадто коротка")
-        .max(50, "Назва занадто довга"),
+        .nullable()
+        .optional()
+        .default(""),
     producer: z
         .string()
         .min(1, "Ім'я виробника занадто коротке")
@@ -32,6 +33,7 @@ export const BaseProductSchema = z.object({
 export const CreateProductSchema = BaseProductSchema
     .omit({
         idProduct: true,
+        categoryName: true,
     });
 
 export type CreateProduct = z.infer<typeof CreateProductSchema>;

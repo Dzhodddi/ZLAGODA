@@ -21,4 +21,3 @@ public class ProductRequestDto {
     @NotNull
     private int category_number;
 }
-
