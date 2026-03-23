@@ -99,10 +99,9 @@ export const useDownloadStoreProductPdf = () => {
 export const useDeleteExpired = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: deleteExpired,
+        mutationFn: () => deleteExpired(),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Expired products deleted!");
         },
         onError: (error) => alert(error),
     });
@@ -113,7 +112,11 @@ export const useReceiveNewBatch = () => {
     return useMutation({
         mutationFn: (data: BatchRequest) => receiveNewBatch(data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["store-products"] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
         },
+        onError: (error: any) => {
+            console.error("Mutation error:", error);
+            alert("Помилка при збереженні партії");
+        }
     });
 };

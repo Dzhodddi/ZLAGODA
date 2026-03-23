@@ -7,7 +7,6 @@ import {
     StoreProductPriceAndQuantitySchema,
     BaseStoreProductSchema,
     type BatchRequest,
-    BatchDtoSchema,
     type BatchDto,
 } from "@/features/store_product/types/types.ts";
 
@@ -70,16 +69,5 @@ export const deleteExpired = async (): Promise<void> => {
 
 export const receiveNewBatch = async (data: BatchRequest): Promise<BatchDto> => {
     const response = await javaApiClient.post(prefix + "/receive", data);
-    return BatchDtoSchema.parse(response.data);
+    return response.data;
 }
-
-export const getStoreProductForRole = async (
-    upc: string,
-    isManager: boolean
-): Promise<StoreProduct | StoreProductPriceAndQuantity> => {
-    const response = await javaApiClient.get(prefix + "/" + upc);
-    if (isManager) {
-        return BaseStoreProductSchema.parse(response.data);
-    }
-    return StoreProductPriceAndQuantitySchema.parse(response.data);
-};

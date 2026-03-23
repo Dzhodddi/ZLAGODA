@@ -2,7 +2,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
     type BatchRequest,
     BatchRequestFormSchema,
-    type BatchDto,
 } from "@/features/store_product/types/types.ts";
 import { useReceiveNewBatch } from "@/features/store_product/hooks/useStoreProduct.ts";
 import { GenericUpsertForm } from "@/components/ui/GenericUpsertForm.tsx";
@@ -11,6 +10,7 @@ import { InputField } from "@/components/ui/InputFields.tsx";
 export const UpsertBatchForm = () => {
     const { upc } = useParams<{ upc: string }>();
     const navigate = useNavigate();
+    const receiveBatchMutation = useReceiveNewBatch();
 
     const defaultValues: BatchRequest = {
         UPC: upc ?? "",
@@ -25,8 +25,10 @@ export const UpsertBatchForm = () => {
             <GenericUpsertForm<BatchRequest, BatchRequest, BatchRequest>
                 schema={BatchRequestFormSchema}
                 initialData={defaultValues}
-                createMutation={useReceiveNewBatch()}
-                onSuccessAction={() => navigate("/store-product")}
+                createMutation={receiveBatchMutation}
+                onSuccessAction={() => {
+                    navigate("/store-product");
+                }}
                 className="grid grid-cols-12 gap-4"
             >
                 {(_methods, { isSaving }) => (
@@ -39,7 +41,7 @@ export const UpsertBatchForm = () => {
                         <InputField type="date" name="delivery_date" label="Дата доставки" />
                         <InputField type="date" name="expiring_date" label="Термін придатності" />
                         <InputField type="number" name="quantity" label="Кількість одиниць" min="1" />
-                        <InputField type="number" name="price" label="Базова ціна" min="0.01" step="0.01" />
+                        <InputField type="number" name="price" label="Базова ціна, грн" min="0.01" step="0.01" />
 
                         <div className="col-span-12 flex justify-end mt-4">
                             <button

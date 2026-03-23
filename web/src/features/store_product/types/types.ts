@@ -60,13 +60,6 @@ export const StoreProductPriceAndQuantitySchema = z.object({
 
 export type StoreProductPriceAndQuantity = z.infer<typeof StoreProductPriceAndQuantitySchema>;
 
-export const PageStoreProductPriceAndQuantitySchema = z.object({
-    content: z.array(StoreProductPriceAndQuantitySchema),
-    pageSize: z.number(),
-    totalElements: z.number(),
-    hasNext: z.boolean(),
-});
-
 export const BatchRequestSchema = z.object({
     UPC: z
         .string()
@@ -91,9 +84,10 @@ export const BatchRequestSchema = z.object({
 
 export type BatchRequest = z.infer<typeof BatchRequestSchema>;
 
-export const BatchRequestFormSchema = BatchRequestSchema.refine(
+export const BatchRequestFormSchema
+    = BatchRequestSchema.refine(
     data => data.expiring_date > data.delivery_date,
-    { message: "Дата закінчення має бути пізніше дати доставки", path: ["expiring_date"] }
+    { message: "Дата закінчення має бути пізніше за дату доставки", path: ["expiring_date"] }
 );
 
 export const BatchDtoSchema = z.object({

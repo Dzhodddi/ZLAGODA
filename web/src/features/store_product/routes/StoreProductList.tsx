@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-    useAllStoreProducts,
+    useAllStoreProducts, useDeleteExpired,
     useDeleteStoreProduct,
     useDownloadStoreProductPdf,
     useStoreProductPriceAndQuantity,
@@ -30,6 +30,7 @@ const SortToggle = ({
 
             <button
                 onClick={() => onToggle(value)}
+                title="Сортувати товари у магазині"
                 className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
                     isActive ? "bg-green-500" : "bg-blue-200"
                 }`}
@@ -69,6 +70,7 @@ export const StoreProductList = () => {
 
     const deleteMutation = useDeleteStoreProduct();
     const pdfMutation = useDownloadStoreProductPdf();
+    const deleteExpiredMutation = useDeleteExpired();
 
     const resetPagination = () => setCurrentIndex(0);
 
@@ -116,10 +118,30 @@ export const StoreProductList = () => {
         });
     };
 
+    const handleDeleteExpired = () => {
+        toast("Видалити товари з магазину?", {
+            actionButtonStyle: { backgroundColor: "#e45757", color: "white" },
+            cancelButtonStyle: { color: "#5c5c5c" },
+            action: {
+                label: "ТАК",
+                onClick: () =>
+                    deleteExpiredMutation.mutate(undefined, {
+                        onSuccess: () => {
+                            toast.success("Протерміновані товари успішно видалено");
+                            resetPagination();
+                        },
+                        onError: () => toast.error("Помилка під час видалення товарів"),
+                    }),
+            },
+            cancel: { label: "Скасувати", onClick: () => {} },
+        });
+    };
+
     const renderPagination = () => (
         <div className="flex justify-between items-center p-3 bg-zinc-50 text-xs">
             <button
                 onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
+                title="Попередня сторінка"
                 disabled={currentIndex === 0 || isFetching}
                 className={`transition-opacity ${currentIndex === 0 || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
             >
@@ -130,6 +152,7 @@ export const StoreProductList = () => {
             <span className="text-zinc-500">Сторінка {currentIndex + 1}</span>
             <button
                 onClick={() => { if (!isLastPage && !isFetching) setCurrentIndex(prev => prev + 1); }}
+                title="Наступна сторінка"
                 disabled={isLastPage || isFetching}
                 className={`transition-opacity ${isLastPage || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
             >
@@ -183,6 +206,7 @@ export const StoreProductList = () => {
                                 value={upcInput}
                                 onChange={e => setUpcInput(e.target.value)}
                                 placeholder="Введіть UPC"
+                                title="Шукати ціну і кількість товару у магазині за його UPC"
                                 className="w-full border rounded px-3 py-1.5 text-sm pr-9 text-zinc-900"
                                 onKeyDown={e => { if (e.key === "Enter") handleUpcSearch(); }}
                             />
@@ -206,7 +230,15 @@ export const StoreProductList = () => {
 
                 {isManager && (
                     <div className="flex items-center">
-                        <button onClick={() => navigate("/store-product/create")}>
+                        <button onClick={() => handleDeleteExpired()}
+                                disabled={deleteExpiredMutation.isPending}
+                                className="bg-red-100 border-1 border-red-300 text-zinc-950 px-3 py-2 rounded hover:bg-red-200 hover:border-red-200 text-xs whitespace-nowrap"
+                        >
+                            Видалити протерміновані
+                        </button>
+                        <button onClick={() => navigate("/store-product/create")}
+                                title="Додати новий товар у магазині"
+                        >
                             <div className="hover:scale-110 transition-transform flex justify-center px-2">
                                 <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
                             </div>
@@ -289,6 +321,7 @@ export const StoreProductList = () => {
                                         <tr
                                             key={product.upc}
                                             onClick={() => navigate(`/store-product/${product.upc}`)}
+                                            title="Переглянути інформацію про товар у магазині"
                                             className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                         >
                                             <td className="px-3 py-2 font-mono border border-blue-200">{product.upc}</td>
@@ -316,7 +349,9 @@ export const StoreProductList = () => {
                                                     className="px-1 py-2 border border-blue-200 text-center w-8"
                                                     onClick={e => e.stopPropagation()}
                                                 >
-                                                    <button onClick={() => navigate(`/store-product/edit/${product.upc}`)}>
+                                                    <button onClick={() => navigate(`/store-product/edit/${product.upc}`)}
+                                                            title="Редагувати товар у магазині"
+                                                    >
                                                         <div className="hover:scale-110 transition-transform flex justify-center w-full">
                                                             <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
                                                         </div>
@@ -328,7 +363,9 @@ export const StoreProductList = () => {
                                                     className="px-1 py-2 border border-blue-200 text-center w-8"
                                                     onClick={e => e.stopPropagation()}
                                                 >
-                                                    <button onClick={() => handleDelete(product.upc)}>
+                                                    <button onClick={() => handleDelete(product.upc)}
+                                                            title="Видалити товар у магазині"
+                                                    >
                                                         <div className="hover:scale-110 transition-transform flex justify-center w-full">
                                                             <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
                                                         </div>
