@@ -12,18 +12,11 @@ import {
 import { GenericUpsertForm } from "@/components/ui/GenericUpsertForm.tsx";
 import { InputField, CheckboxField } from "@/components/ui/InputFields.tsx";
 import { useWatch, useFormContext } from "react-hook-form";
-import {SelectField, type SelectFieldProps} from "@/components/ui/SelectField.tsx";
-import {useProducts} from "@/features/product/hooks/useProduct.ts";
+import {ProductComboboxField} from "@/features/product/routes/Combobox.tsx";
 
 interface Props {
     initialData?: StoreProduct;
 }
-export const ProductSelect = (props: Omit<SelectFieldProps, 'name' | 'label' | 'options' | 'valueAsNumber'>) => {
-    const { data: products } = useProducts();
-    const options = products?.content?.map(c => ({ value: c.idProduct, label: c.productName })) ?? [];
-
-    return <SelectField name="idProduct" label="Товар" options={options} valueAsNumber {...props} />;
-};
 
 const StoreProductFormFields = ({ isEditMode }: { isEditMode: boolean }) => {
     const { control } = useFormContext<CreateStoreProduct>();
@@ -32,7 +25,7 @@ const StoreProductFormFields = ({ isEditMode }: { isEditMode: boolean }) => {
     return (
         <>
             <div className="col-span-12"><InputField name="upc" label="UPC" disabled={isEditMode} /></div>
-            <div className="col-span-12"><ProductSelect required /></div>
+            <div className="col-span-12"><ProductComboboxField /></div>
             <div className="col-span-12"><InputField type="number" name="sellingPrice" label="Ціна продажу" min="0" step="0.01" /></div>
             <div className="col-span-12"><InputField type="number" name="productsNumber" label="Кількість одиниць" min="0" /></div>
             <div className="col-span-12 my-2">

@@ -8,19 +8,11 @@ import {
     BaseProductSchema,
 } from "@/features/product/types/types.ts";
 import { useNavigate } from "react-router-dom";
-import {useAllCategories} from "@/features/category/hooks/useCategory.ts";
-import {SelectField, type SelectFieldProps} from "@/components/ui/SelectField.tsx";
+import {CategoryComboboxField} from "@/features/product/routes/Combobox.tsx";
 
 interface Props {
     initialData?: Product;
 }
-
-export const CategorySelect = (props: Omit<SelectFieldProps, 'name' | 'label' | 'options' | 'valueAsNumber'>) => {
-    const { data: categories } = useAllCategories();
-    const options = categories?.map(c => ({ value: c.categoryNumber, label: c.categoryName })) ?? [];
-
-    return <SelectField name="categoryNumber" label="Категорія" options={options} valueAsNumber {...props} />;
-};
 
 export const UpsertProductForm = ({ initialData }: Props) => {
     const navigate = useNavigate();
@@ -45,7 +37,7 @@ export const UpsertProductForm = ({ initialData }: Props) => {
                             {isEditMode ? "Редагувати товар" : "Додати товар"}
                         </h2>
                         <InputField name="productName" label="Назва товару" />
-                        <CategorySelect required />
+                        <div className="col-span-12"><CategoryComboboxField /></div>
                         <InputField name="producer" label="Виробник" />
                         <InputField name="productCharacteristics" label="Характеристики" />
 

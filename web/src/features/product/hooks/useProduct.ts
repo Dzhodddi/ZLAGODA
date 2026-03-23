@@ -84,3 +84,22 @@ export const useDownloadProductPdf = () => {
         onError: (error) => alert(error),
     });
 };
+
+export const useAllProducts = () => {
+    return useQuery({
+        queryKey: [QUERY_KEY, "all"],
+        queryFn: async () => {
+            const results = [];
+            let page = 0;
+            let hasNext = true;
+            while (hasNext) {
+                const data = await getAllProducts(undefined, undefined, page);
+                results.push(...data.content);
+                hasNext = data.hasNext;
+                page++;
+            }
+            return results;
+        },
+        staleTime: staleTime,
+    });
+};

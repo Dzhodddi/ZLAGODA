@@ -8,7 +8,7 @@ import {
     useDownloadProductPdf,
 } from "@/features/product/hooks/useProduct.ts";
 import { useAllCategories } from "@/features/category/hooks/useCategory.ts";
-import {CategoryCombobox} from "@/features/product/routes/CategoryCombobox.tsx";
+import {Combobox} from "@/features/product/routes/Combobox.tsx";
 
 type View = "all" | "byName" | "byCategory";
 
@@ -154,7 +154,7 @@ export const ProductList = () => {
                     </div>
                 )}
 
-                <CategoryCombobox
+                <Combobox
                     categories={categories}
                     value={searchCategoryId}
                     onChange={(id) => {
