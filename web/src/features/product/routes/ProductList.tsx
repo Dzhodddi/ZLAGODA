@@ -8,6 +8,7 @@ import {
     useDownloadProductPdf,
 } from "@/features/product/hooks/useProduct.ts";
 import { useAllCategories } from "@/features/category/hooks/useCategory.ts";
+import {CategoryCombobox} from "@/features/product/routes/CategoryCombobox.tsx";
 
 type View = "all" | "byName" | "byCategory";
 
@@ -153,22 +154,16 @@ export const ProductList = () => {
                     </div>
                 )}
 
-                <div className="relative flex-1">
-                    <select
-                        value={searchCategoryId ?? ""}
-                        onChange={handleCategoryChange}
-                        className="w-full border rounded px-3 py-1.5 text-sm text-zinc-900 bg-green-50 appearance-none pr-6 cursor-pointer"
-                    >
-                        <option value="">Усі категорії</option>
-                        {categories?.map((cat) => (
-                            <option key={cat.categoryNumber}
-                                    value={cat.categoryNumber}>
-                                {cat.categoryName}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-zinc-900 text-xm">▽</div>
-                </div>
+                <CategoryCombobox
+                    categories={categories}
+                    value={searchCategoryId}
+                    onChange={(id) => {
+                        setSearchName("");
+                        setNameInput("");
+                        setCurrentIndex(0);
+                        setSearchCategoryId(id);
+                    }}
+                />
 
                 {isManager && (
                     <div className="flex items-center gap-2 ml-auto">
