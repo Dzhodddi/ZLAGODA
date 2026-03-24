@@ -3,6 +3,7 @@ import { Form } from "@/components/ui/Form.tsx";
 import { InputField } from "@/components/ui/InputFields.tsx";
 import {type Login, LoginSchema} from "@/features/auth/types/types.ts";
 import {useLogin} from "@/features/auth/hooks/useAuth.ts";
+import {Link} from "react-router-dom";
 
 export const LoginForm = () => {
     const resetFormRef = useRef<() => void>(null);
@@ -35,7 +36,10 @@ export const LoginForm = () => {
                             <InputField name="idEmployee" label="ID" />
                             <InputField name="password" label="Пароль" type="password"/>
 
-                            <div className="col-span-12 flex justify-end mt-4">
+                            <div className="col-span-12 flex justify-between items-center mt-4">
+                                <Link to="/registration" className="text-blue-600 hover:underline text-sm">
+                                    Не маєте акаунту? Зареєструватися
+                                </Link>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}

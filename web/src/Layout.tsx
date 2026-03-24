@@ -93,25 +93,23 @@ export const Layout = () => {
                 {isGuest &&
                     <button
                         onClick={handleLogin}
-                        className="px-3 py-1 flex items-center gap-1 group relative hover:text-zinc-300"
+                        className="px-3 py-1 flex items-center gap-1 group relative hover:opacity-80"
                     >
-                        <div className="relative w-4 h-4 group">
-                            <img src="/src/logos/exit.png" alt="exit" className="w-4 h-4 group-hover:opacity-0" />
-                            <img src="/src/logos/exit-hover.png" alt="exit" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                        <div className="relative w-6 h-6 group">
+                            <img src="/src/logos/login.png" alt="login" />
                         </div>
-                        Логін
+                        Увійти
                     </button>
                 }
                 {isGuest &&
                     <button
                         onClick={handleRegistration}
-                        className="px-3 py-1 flex items-center gap-1 group relative hover:text-zinc-300"
+                        className="px-3 py-1 flex items-center gap-1 group relative hover:opacity-80"
                     >
-                        <div className="relative w-4 h-4 group">
-                            <img src="/src/logos/exit.png" alt="exit" className="w-4 h-4 group-hover:opacity-0" />
-                            <img src="/src/logos/exit-hover.png" alt="exit" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                        <div className="relative w-6 h-6 group">
+                            <img src="/src/logos/register.png" alt="register" />
                         </div>
-                        Реєстрація
+                        Зареєструватися
                     </button>
                 }
 
