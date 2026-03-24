@@ -5,5 +5,6 @@ export const useRole = () => {
     return {
         isManager: role === "MANAGER",
         isCashier: role === "CASHIER",
+        isGuest: role === null,
     };
 };

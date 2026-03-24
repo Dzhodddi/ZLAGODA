@@ -13,13 +13,21 @@ const navItems = [
 
 export const Layout = () => {
     const { clearTokens, role } = useAuthStore();
-    const { isManager, isCashier } = useRole();
+    const { isManager, isCashier, isGuest } = useRole();
     const navigate = useNavigate();
     const location = useLocation();
 
     const handleLogout = () => {
         clearTokens();
+        navigate("/");
+    };
+
+    const handleLogin = () => {
         navigate("/login");
+    };
+
+    const handleRegistration = () => {
+        navigate("/registration");
     };
 
     const isActive = (path: string) =>
@@ -49,9 +57,11 @@ export const Layout = () => {
                     </div>
                 </Link>
                 <div className="flex flex-1 overflow-hidden">
-                    <span className="text-xs px-2 py-2 rounded font-mono text-zinc-400">
-                        {isManager ? "Менеджер" : "Касир"}
-                    </span>
+                    {!isGuest &&
+                        <span className="text-xs px-2 py-2 rounded font-mono text-zinc-400">
+                            {isManager ? "Менеджер" : "Касир"}
+                        </span>
+                    }
                     {isCashier && (
                         <Link
                             to="/employee/me"
@@ -68,20 +78,47 @@ export const Layout = () => {
                         </Link>
                     )}
                 </div>
-                <button
-                    onClick={handleLogout}
-                    className="px-3 py-1 flex items-center gap-1 group relative hover:text-zinc-300"
-                >
-                    <div className="relative w-4 h-4 group">
-                        <img src="/src/logos/exit.png" alt="exit" className="w-4 h-4 group-hover:opacity-0" />
-                        <img src="/src/logos/exit-hover.png" alt="exit" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
-                    </div>
-                    Вийти
-                </button>
-            </header>
+                {!isGuest &&
+                    <button
+                        onClick={handleLogout}
+                        className="px-3 py-1 flex items-center gap-1 group relative hover:text-zinc-300"
+                    >
+                        <div className="relative w-4 h-4 group">
+                            <img src="/src/logos/exit.png" alt="exit" className="w-4 h-4 group-hover:opacity-0" />
+                            <img src="/src/logos/exit-hover.png" alt="exit" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                        </div>
+                        Вийти
+                    </button>
+                }
+                {isGuest &&
+                    <button
+                        onClick={handleLogin}
+                        className="px-3 py-1 flex items-center gap-1 group relative hover:text-zinc-300"
+                    >
+                        <div className="relative w-4 h-4 group">
+                            <img src="/src/logos/exit.png" alt="exit" className="w-4 h-4 group-hover:opacity-0" />
+                            <img src="/src/logos/exit-hover.png" alt="exit" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                        </div>
+                        Логін
+                    </button>
+                }
+                {isGuest &&
+                    <button
+                        onClick={handleRegistration}
+                        className="px-3 py-1 flex items-center gap-1 group relative hover:text-zinc-300"
+                    >
+                        <div className="relative w-4 h-4 group">
+                            <img src="/src/logos/exit.png" alt="exit" className="w-4 h-4 group-hover:opacity-0" />
+                            <img src="/src/logos/exit-hover.png" alt="exit" className="w-4 h-4 absolute inset-0 opacity-0 group-hover:opacity-100" />
+                        </div>
+                        Реєстрація
+                    </button>
+                }
 
+            </header>
             <div className="flex flex-1 overflow-hidden">
-                <aside className="w-52 bg-zinc-800 text-white flex flex-col py-6 px-3 gap-1 shrink-0 shadow-lg">
+                {!isGuest &&
+                    <aside className="w-52 bg-zinc-800 text-white flex flex-col py-6 px-3 gap-1 shrink-0 shadow-lg">
                     {navItems
                         .filter(({ isHidden }) => {
                             return !isHidden || !isHidden(role);
@@ -99,8 +136,7 @@ export const Layout = () => {
                                 {label}
                             </Link>
                         ))}
-                </aside>
-
+                </aside>}
                 <main className="flex-1 overflow-y-auto p-6">
                     <Outlet />
                 </main>
