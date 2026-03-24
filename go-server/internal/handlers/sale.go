@@ -57,7 +57,7 @@ func (h *SaleHandler) getAllSales(c echo.Context) error {
 	}
 	startDate, endDate, err := h.validateQueryParams(&q)
 	if err != nil {
-		return nil
+		return err
 	}
 	sales, err := h.saleService.GetAllSalesWithinDate(c.Request().Context(), *startDate, *endDate, q.LastCheckNumber)
 	if err != nil {

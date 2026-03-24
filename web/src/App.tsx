@@ -4,7 +4,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Layout } from "@/Layout";
 import { Home } from "@/Home";
-import { PublicRoute } from "@/components/publicRoutes";
 import { ProtectedRoute } from "@/components/protectedRoutes";
 import { categoryRoutes } from "@/features/category/routes";
 import {employeeRoutes} from "@/features/employee/routes.tsx";
@@ -27,13 +26,13 @@ export function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route element={<PublicRoute />}>
+                <Route element={<Layout />}>
+                    <Route path="/" element={<Home />} />
                     {authRoutes}
                 </Route>
 
                 <Route element={<ProtectedRoute />}>
                     <Route element={<Layout />}>
-                        <Route path="/" element={<Home />} />
                         {categoryRoutes}
                         {employeeRoutes}
                         {storeProductRoutes}
