@@ -16,13 +16,13 @@ public interface EmployeeService {
 
     EmployeeResponseDto register(EmployeeRegistrationRequestDto request) throws RegistrationException;
 
-    PageResponseDto<EmployeeResponseDto> getAll(Pageable pageable);
+    PageResponseDto<EmployeeResponseDto> getAll(Pageable pageable, boolean sortedBySurname);
 
     EmployeeResponseDto updateEmployeeById(String id, EmployeeUpdateRequestDto requestDto);
 
     void deleteEmployeeById(String id);
 
-    PageResponseDto<EmployeeResponseDto> getAllCashiers(Pageable pageable);
+    PageResponseDto<EmployeeResponseDto> getAllCashiers(Pageable pageable, boolean sortedBySurname);
 
     EmployeeResponseDto getMe();
 

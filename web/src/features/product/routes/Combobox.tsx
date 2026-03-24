@@ -71,6 +71,7 @@ export const Combobox = ({
                 }}
                 onFocus={() => setIsOpen(true)}
                 placeholder={placeholder}
+                title="Шукати інформацію про товар за його категорією"
                 className={`w-full border rounded px-3 py-1.5 text-sm text-zinc-900 pr-7 cursor-pointer ${inputClassName}`}
             />
             <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-zinc-900 text-xm">

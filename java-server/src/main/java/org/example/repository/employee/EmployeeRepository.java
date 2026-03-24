@@ -70,7 +70,7 @@ public class EmployeeRepository {
                        empl_role, empl_salary, date_of_birth, date_of_start,
                        phone_number, city, street, zip_code, password
                 FROM employee
-                ORDER BY empl_surname, id_employee
+                ORDER BY id_employee
                 OFFSET ? ROWS
                 FETCH NEXT ? ROWS ONLY
                 """,
@@ -78,6 +78,30 @@ public class EmployeeRepository {
                 offset,
                 pageable.getPageSize()
         ).stream()
+                .map(employeeMapper::toEmployeeResponseDto)
+                .toList();
+
+        long total = getTotalCount();
+        boolean hasNext = offset + employees.size() < total;
+        return PageResponseDto.of(employees, pageable.getPageSize(), total, hasNext);
+    }
+
+    public PageResponseDto<EmployeeResponseDto> findAllSortedBySurname(Pageable pageable) {
+        long offset = pageable.getOffset();
+        List<EmployeeResponseDto> employees = jdbcTemplate.query(
+                        """
+                        SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+                               empl_role, empl_salary, date_of_birth, date_of_start,
+                               phone_number, city, street, zip_code, password
+                        FROM employee
+                        ORDER BY empl_surname
+                        OFFSET ? ROWS
+                        FETCH NEXT ? ROWS ONLY
+                        """,
+                        employeeRowMapper,
+                        offset,
+                        pageable.getPageSize()
+                ).stream()
                 .map(employeeMapper::toEmployeeResponseDto)
                 .toList();
 
@@ -95,14 +119,41 @@ public class EmployeeRepository {
                        phone_number, city, street, zip_code, password
                 FROM employee
                 WHERE empl_role = 'CASHIER'
-                ORDER BY empl_surname, id_employee
+                ORDER BY id_employee
                 OFFSET ? ROWS
                 FETCH NEXT ? ROWS ONLY
                 """,
                 employeeRowMapper,
                 offset,
                 pageable.getPageSize()
-        ).stream().map(employeeMapper::toEmployeeResponseDto).toList();
+        ).stream()
+                .map(employeeMapper::toEmployeeResponseDto)
+                .toList();
+
+        long total = getCashierCount();
+        boolean hasNext = offset + employees.size() < total;
+        return PageResponseDto.of(employees, pageable.getPageSize(), total, hasNext);
+    }
+
+    public PageResponseDto<EmployeeResponseDto> findAllCashiersSortedBySurname(Pageable pageable) {
+        long offset = pageable.getOffset();
+        List<EmployeeResponseDto> employees = jdbcTemplate.query(
+                """
+                SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+                       empl_role, empl_salary, date_of_birth, date_of_start,
+                       phone_number, city, street, zip_code, password
+                FROM employee
+                WHERE empl_role = 'CASHIER'
+                ORDER BY empl_surname
+                OFFSET ? ROWS
+                FETCH NEXT ? ROWS ONLY
+                """,
+                employeeRowMapper,
+                offset,
+                pageable.getPageSize()
+        ).stream()
+                .map(employeeMapper::toEmployeeResponseDto)
+                .toList();
 
         long total = getCashierCount();
         boolean hasNext = offset + employees.size() < total;
@@ -150,7 +201,7 @@ public class EmployeeRepository {
                                empl_role, empl_salary, date_of_birth, date_of_start,
                                phone_number, city, street, zip_code, password
                         FROM employee
-                        ORDER BY empl_surname
+                        ORDER BY id_employee
                         """,
                         employeeRowMapper)
                 .stream()

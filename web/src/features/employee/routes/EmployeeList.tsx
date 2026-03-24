@@ -13,6 +13,37 @@ import { useState } from "react";
 
 type View = "all" | "cashiers" | "search";
 
+const SortToggle = ({
+                        label,
+                        value,
+                        sortedBy,
+                        onToggle,
+                    }: {
+    label: string;
+    value: "surname";
+    sortedBy: "surname" | undefined;
+    onToggle: (value: "surname") => void;
+}) => {
+    const isActive = sortedBy === value;
+    return (
+        <div className="flex items-center gap-1.5">
+            <span className="text-sm text-zinc-700 font-medium">{label}</span>
+
+            <button
+                onClick={() => onToggle(value)}
+                title="Сортувати працівників"
+                className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
+                    isActive ? "bg-green-500" : "bg-blue-200"
+                }`}
+            >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                    isActive ? "translate-x-5" : "translate-x-0"
+                }`} />
+            </button>
+        </div>
+    );
+};
+
 export const EmployeeList = () => {
     const navigate = useNavigate();
     const { isManager } = useRole();
@@ -23,8 +54,10 @@ export const EmployeeList = () => {
 
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const allQuery = useAllEmployees(currentIndex, view === "all");
-    const cashierQuery = useAllCashiers(currentIndex, view === "cashiers");
+    const [sortedBy, setSortedBy] = useState<"surname" | undefined>(undefined);
+
+    const allQuery = useAllEmployees(currentIndex, view === "all", sortedBy === "surname");
+    const cashierQuery = useAllCashiers(currentIndex, view === "cashiers", sortedBy === "surname");
     const searchQuery = useEmployeePhoneAndAddress(searchSurname, currentIndex, view === "search");
 
     const deleteMutation = useDeleteEmployee();
@@ -64,6 +97,11 @@ export const EmployeeList = () => {
         }
     };
 
+    const handleSortToggle = (value: "surname") => {
+        setSortedBy(prev => prev === value ? undefined : value);
+        setCurrentIndex(0);
+    };
+
     const handleDelete = (idEmployee: string) => {
         toast("Видалити працівника?", {
             actionButtonStyle: { backgroundColor: "#e45757", color: "white" },
@@ -89,6 +127,7 @@ export const EmployeeList = () => {
         <div className="flex justify-between items-center p-3 bg-zinc-50 text-xs">
             <button
                 onClick={handlePrevPage}
+                title="Попередня сторінка"
                 disabled={currentIndex === 0 || isFetching}
                 className={`transition-opacity ${currentIndex === 0 || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
             >
@@ -101,6 +140,7 @@ export const EmployeeList = () => {
 
             <button
                 onClick={handleNextPage}
+                title="Наступна сторінка"
                 disabled={isLastPage || isFetching}
                 className={`transition-opacity ${isLastPage || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
             >
@@ -116,7 +156,7 @@ export const EmployeeList = () => {
             <div className="flex justify-center items-center">
                 <h2 className="text-xl font-bold text-zinc-900">Працівники</h2>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-5">
                 <div className="flex gap-2">
                     {(["all", "cashiers"] as View[]).map((v) => (
                         <button
@@ -131,10 +171,13 @@ export const EmployeeList = () => {
                     ))}
                 </div>
 
+                <SortToggle label="Сортувати за прізвищем" value="surname" sortedBy={sortedBy} onToggle={handleSortToggle} />
+
                 <div className="relative flex-1">
                     <input
                         value={surnameInput}
                         onChange={(e) => setSurnameInput(e.target.value)}
+                        title="Шукати телефон та адресу працівника за його прізвищем"
                         placeholder="Введіть прізвище"
                         className="w-full border rounded px-3 py-1.5 text-sm pr-9 text-zinc-900"
                         onKeyDown={(e) => {
@@ -160,6 +203,7 @@ export const EmployeeList = () => {
                                 setSearchSurname("");
                                 handleSetView("all");
                             }}
+                            title="Скинути пошук"
                             className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 text-sm px-1"
                         >
                             ✕
@@ -169,7 +213,9 @@ export const EmployeeList = () => {
 
                 {isManager && (
                     <div className="flex items-center gap-2">
-                        <button onClick={() => navigate("/employee/create")}>
+                        <button onClick={() => navigate("/employee/create")}
+                                title="Додати працівника"
+                        >
                             <div className="hover:scale-110 transition-transform flex justify-center">
                                 <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
                             </div>
@@ -211,6 +257,7 @@ export const EmployeeList = () => {
                                 <tr
                                     key={i}
                                     onClick={() => navigate(`/employee/${c.idEmployee}`)}
+                                    title="Переглянути інформацію про працівника"
                                     className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer"
                                 >
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.idEmployee}</td>
@@ -253,6 +300,7 @@ export const EmployeeList = () => {
                                 <tr
                                     key={emp.idEmployee}
                                     onClick={() => navigate(`/employee/${emp.idEmployee}`)}
+                                    title="Переглянути інформацію про працівника"
                                     className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer"
                                 >
                                     <td className="px-3 py-2 font-mono text-xs border border-blue-200 wrap-break-word">{emp.idEmployee}</td>
@@ -270,7 +318,9 @@ export const EmployeeList = () => {
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8"
                                             onClick={(e) => e.stopPropagation()}>
-                                            <button onClick={() => navigate(`/employee/edit/${emp.idEmployee}`)}>
+                                            <button onClick={() => navigate(`/employee/edit/${emp.idEmployee}`)}
+                                                    title="Редагувати працівника"
+                                            >
                                                 <div className="hover:scale-110 transition-transform flex justify-center w-full">
                                                     <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
                                                 </div>
@@ -279,7 +329,9 @@ export const EmployeeList = () => {
                                     )}
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8" onClick={(e) => e.stopPropagation()}>
-                                            <button onClick={() => handleDelete(emp.idEmployee)}>
+                                            <button onClick={() => handleDelete(emp.idEmployee)}
+                                                    title="Видалити працівника"
+                                            >
                                                 <div className="hover:scale-110 transition-transform flex justify-center w-full">
                                                     <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
                                                 </div>

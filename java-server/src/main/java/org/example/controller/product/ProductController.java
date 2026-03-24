@@ -73,7 +73,10 @@ public class ProductController {
     public PageResponseDto<ProductDto> getAll(@RequestParam(required = false) String name,
                                               @RequestParam(value = "category_id",
                                                       required = false) Integer categoryId,
-                                              @RequestParam(defaultValue = "0") int page) {
+                                              @RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(required = false,
+                                                      defaultValue = "false",
+                                                      name = "sorted_by_name") boolean sortedByName) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isCashier = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CASHIER"));
@@ -87,7 +90,7 @@ public class ProductController {
         if (categoryId != null) {
             return productService.findByCategoryId(categoryId, pageable);
         }
-        return productService.getAll(pageable);
+        return productService.getAll(pageable, sortedByName);
     }
 
     @PostMapping

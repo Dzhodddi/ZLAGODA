@@ -14,13 +14,17 @@ export const getEmployee = async (idEmployee: string): Promise<Employee> => {
     return BaseEmployeeSchema.parse(response.data);
 }
 
-export const getAllEmployees = async (page = 0) => {
-    const response = await javaApiClient.get(prefix, { params: { page } });
+export const getAllEmployees = async (page = 0, sortedBySurname = false) => {
+    const response = await javaApiClient.get(prefix, {
+        params: { page, ...(sortedBySurname && { sortedBySurname: true }) },
+    });
     return PageEmployeeSchema.parse(response.data);
 };
 
-export const getAllCashiers = async (page = 0) => {
-    const response = await javaApiClient.get(prefix + "/cashiers", { params: { page } });
+export const getAllCashiers = async (page = 0, sortedBySurname = false) => {
+    const response = await javaApiClient.get(prefix + "/cashiers", {
+        params: { page, ...(sortedBySurname && { sortedBySurname: true }) },
+    });
     return PageEmployeeSchema.parse(response.data);
 };
 

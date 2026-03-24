@@ -72,13 +72,37 @@ public class ProductRepository {
                 FROM product p
                 INNER JOIN category c
                 ON p.category_number = c.category_number
-                ORDER BY p.product_name
+                ORDER BY p.id_product
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
                 rowMapper,
                 offset,
                 pageable.getPageSize()
         ).stream()
+                .map(productMapper::toDto)
+                .toList();
+
+        long total = getTotalCount();
+        return PageResponseDto.of(products, pageable.getPageSize(), total,
+                offset + products.size() < total);
+    }
+
+    public PageResponseDto<ProductDto> findAllSortedByName(Pageable pageable) {
+        long offset = pageable.getOffset();
+        List<ProductDto> products = jdbcTemplate.query(
+                        """
+                        SELECT p.id_product, p.product_name, p.producer, p.product_characteristics,
+                               c.category_number, c.category_name
+                        FROM product p
+                        INNER JOIN category c
+                        ON p.category_number = c.category_number
+                        ORDER BY p.product_name
+                        OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                        """,
+                        rowMapper,
+                        offset,
+                        pageable.getPageSize()
+                ).stream()
                 .map(productMapper::toDto)
                 .toList();
 
@@ -277,9 +301,9 @@ public class ProductRepository {
 
     public List<ProductDto> findAllNoPagination() {
         return jdbcTemplate.query("""
-                            SELECT product_name, producer, product_characteristics
+                            SELECT id_product, product_name, producer, product_characteristics
                             FROM product
-                            ORDER BY product_name
+                            ORDER BY id_product
                             """,
                         rowMapper)
                 .stream()

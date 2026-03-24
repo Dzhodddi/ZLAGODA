@@ -12,6 +12,37 @@ import {Combobox} from "@/features/product/routes/Combobox.tsx";
 
 type View = "all" | "byName" | "byCategory";
 
+const SortToggle = ({
+                        label,
+                        value,
+                        sortedBy,
+                        onToggle,
+                    }: {
+    label: string;
+    value: "name";
+    sortedBy: "name" | undefined;
+    onToggle: (value: "name") => void;
+}) => {
+    const isActive = sortedBy === value;
+    return (
+        <div className="flex items-center gap-1.5">
+            <span className="text-sm text-zinc-700 font-medium">{label}</span>
+
+            <button
+                onClick={() => onToggle(value)}
+                title="Сортувати товари"
+                className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
+                    isActive ? "bg-green-500" : "bg-blue-200"
+                }`}
+            >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                    isActive ? "translate-x-5" : "translate-x-0"
+                }`} />
+            </button>
+        </div>
+    );
+};
+
 export const ProductList = () => {
     const navigate = useNavigate();
     const { isManager, isCashier } = useRole();
@@ -20,6 +51,7 @@ export const ProductList = () => {
 
     const [nameInput, setNameInput] = useState("");
     const [searchName, setSearchName] = useState("");
+    const [sortedBy, setSortedBy] = useState<"name" | undefined>(undefined);
 
     const [searchCategoryId, setSearchCategoryId] = useState<number | undefined>(undefined);
 
@@ -31,6 +63,7 @@ export const ProductList = () => {
         searchName || undefined,
         searchCategoryId,
         currentIndex,
+        sortedBy === "name",
     );
 
     const products = productsQuery.data?.content;
@@ -49,6 +82,11 @@ export const ProductList = () => {
         setCurrentIndex(prev => Math.max(0, prev - 1));
     };
 
+    const handleSortToggle = (value: "name") => {
+        setSortedBy(prev => prev === value ? undefined : value);
+        setCurrentIndex(0);
+    };
+
     const resetPagination = () => setCurrentIndex(0);
 
     const handleSetView = (v: View) => {
@@ -56,14 +94,6 @@ export const ProductList = () => {
             setView(v);
             resetPagination();
         }
-    };
-
-    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const val = e.target.value;
-        setSearchName("");
-        setNameInput("");
-        setCurrentIndex(0);
-        setSearchCategoryId(val ? Number(val) : undefined);
     };
 
     const handleDelete = (id: number) => {
@@ -88,6 +118,7 @@ export const ProductList = () => {
         <div className="flex justify-between items-center p-3 bg-zinc-50 text-xs">
             <button
                 onClick={handlePrevPage}
+                title="Попередня сторінка"
                 disabled={currentIndex === 0 || isFetching}
                 className={`transition-opacity ${currentIndex === 0 || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
             >
@@ -98,6 +129,7 @@ export const ProductList = () => {
             <span className="text-zinc-500">Сторінка {currentIndex + 1}</span>
             <button
                 onClick={handleNextPage}
+                title="Наступна сторінка"
                 disabled={isLastPage || isFetching}
                 className={`transition-opacity ${isLastPage || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
             >
@@ -114,7 +146,7 @@ export const ProductList = () => {
                 <h2 className="text-xl font-bold text-zinc-900">Товари</h2>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-5">
                 {isManager && (
                     <button
                         onClick={() => navigate("/product/sold")}
@@ -124,12 +156,15 @@ export const ProductList = () => {
                     </button>
                 )}
 
+                <SortToggle label="Сортувати за назвою" value="name" sortedBy={sortedBy} onToggle={handleSortToggle} />
+
                 {isCashier && (
                     <div className="relative flex-1 min-w-[160px]">
                         <input
                             value={nameInput}
                             onChange={(e) => setNameInput(e.target.value)}
                             placeholder="Введіть назву"
+                            title="Шукати інформацію про товар за його назвою"
                             className="w-full border rounded px-3 py-1.5 text-sm pr-9 text-zinc-900"
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
@@ -148,6 +183,7 @@ export const ProductList = () => {
                         {view === "byName" && (
                             <button
                                 onClick={() => { setNameInput(""); setSearchName(""); handleSetView("all"); }}
+                                title="Скинути пошук"
                                 className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 text-sm px-1"
                             >✕</button>
                         )}
@@ -167,7 +203,9 @@ export const ProductList = () => {
 
                 {isManager && (
                     <div className="flex items-center gap-2 ml-auto">
-                        <button onClick={() => navigate("/product/create")}>
+                        <button onClick={() => navigate("/product/create")}
+                                title="Додати новий товар"
+                        >
                             <div className="hover:scale-110 transition-transform flex justify-center">
                                 <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
                             </div>
@@ -209,6 +247,7 @@ export const ProductList = () => {
                                 <tr
                                     key={product.idProduct}
                                     onClick={() => navigate(`/product/${product.idProduct}`)}
+                                    title="Переглянути інформацію про товар"
                                     className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer"
                                 >
                                     <td className="px-3 py-2 font-mono text-xs border border-blue-200 wrap-break-word">{product.idProduct}</td>
@@ -219,7 +258,9 @@ export const ProductList = () => {
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8"
                                             onClick={(e) => e.stopPropagation()}>
-                                            <button onClick={() => navigate(`/product/edit/${product.idProduct}`)}>
+                                            <button onClick={() => navigate(`/product/edit/${product.idProduct}`)}
+                                                    title="Редагувати товар"
+                                            >
                                                 <div className="hover:scale-110 transition-transform flex justify-center w-full">
                                                     <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
                                                 </div>
@@ -230,7 +271,9 @@ export const ProductList = () => {
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8"
                                             onClick={(e) => e.stopPropagation()}>
-                                            <button onClick={() => handleDelete(product.idProduct)}>
+                                            <button onClick={() => handleDelete(product.idProduct)}
+                                                    title="Видалити товар"
+                                            >
                                                 <div className="hover:scale-110 transition-transform flex justify-center w-full">
                                                     <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
                                                 </div>

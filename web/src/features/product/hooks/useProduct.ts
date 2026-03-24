@@ -30,10 +30,10 @@ export const useSoldProducts = (page: number, enabled = true) => {
     });
 };
 
-export const useProducts = (name?: string, categoryId?: number, page = 0) => {
+export const useProducts = (name?: string, categoryId?: number, page = 0, sortedByName = false) => {
     return useQuery({
-        queryKey: [QUERY_KEY, name, categoryId, page],
-        queryFn: () => getAllProducts(name, categoryId, page),
+        queryKey: [QUERY_KEY, name, categoryId, page, sortedByName],
+        queryFn: () => getAllProducts(name, categoryId, page, sortedByName),
         staleTime: staleTime,
     });
 };
@@ -93,7 +93,7 @@ export const useAllProducts = () => {
             let page = 0;
             let hasNext = true;
             while (hasNext) {
-                const data = await getAllProducts(undefined, undefined, page);
+                const data = await getAllProducts(undefined, undefined, page, undefined);
                 results.push(...data.content);
                 hasNext = data.hasNext;
                 page++;

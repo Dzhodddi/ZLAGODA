@@ -47,18 +47,18 @@ export const useDeleteEmployee = () => {
     });
 };
 
-export const useAllEmployees = (page: number, enabled = true) =>
+export const useAllEmployees = (page: number, enabled = true, sortedBySurname: boolean) =>
     useQuery({
-        queryKey: ["employees-list", page],
-        queryFn: () => getAllEmployees(page),
+        queryKey: ["employees-list", page, sortedBySurname],
+        queryFn: () => getAllEmployees(page, sortedBySurname),
         enabled,
         staleTime: staleTime,
     });
 
-export const useAllCashiers = (page: number, enabled = true) =>
+export const useAllCashiers = (page: number, enabled = true, sortedBySurname: boolean) =>
     useQuery({
-        queryKey: ["cashiers-list", page],
-        queryFn: () => getAllCashiers(page),
+        queryKey: ["cashiers-list", page, sortedBySurname],
+        queryFn: () => getAllCashiers(page, sortedBySurname),
         enabled,
         staleTime: staleTime,
     });

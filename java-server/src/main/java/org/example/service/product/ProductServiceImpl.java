@@ -36,7 +36,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageResponseDto<ProductDto> getAll(Pageable pageable) {
+    public PageResponseDto<ProductDto> getAll(Pageable pageable, boolean sortedByName) {
+        if (sortedByName) {
+            return repository.findAllSortedByName(pageable);
+        }
         return repository.findAll(pageable);
     }
 

@@ -460,6 +460,7 @@ public class StoreProductRepository {
                     products_number, promotional_product
              FROM store_product
              WHERE is_deleted = false
+             ORDER BY UPC
              """,
                         rowMapper)
                 .stream()

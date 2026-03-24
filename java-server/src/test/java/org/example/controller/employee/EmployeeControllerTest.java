@@ -145,7 +145,7 @@ class EmployeeControllerTest {
     void getAll_asManager_Ok() throws Exception {
         PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
                 List.of(employeeDto1, employeeDto2), 10, 2, true);
-        when(employeeService.getAll(any(Pageable.class))).thenReturn(page);
+        when(employeeService.getAll(any(Pageable.class),eq(false))).thenReturn(page);
 
         mockMvc.perform(get("/employees").param("page", "0"))
                 .andExpect(status().isOk())
@@ -153,7 +153,7 @@ class EmployeeControllerTest {
                 .andExpect(jsonPath("$.content[1].empl_surname").value("Johnson"))
                 .andExpect(jsonPath("$.content.length()").value(2));
 
-        verify(employeeService, times(1)).getAll(any(Pageable.class));
+        verify(employeeService, times(1)).getAll(any(Pageable.class), eq(false));
     }
 
     @Test
@@ -162,7 +162,7 @@ class EmployeeControllerTest {
     void getAll_asCashier_Forbidden() throws Exception {
         mockMvc.perform(get("/employees"))
                 .andExpect(status().isForbidden());
-        verify(employeeService, never()).getAll(any(Pageable.class));
+        verify(employeeService, never()).getAll(any(Pageable.class), eq(false));
     }
 
     @Test
@@ -171,13 +171,13 @@ class EmployeeControllerTest {
     void getAll_noEmployees_Ok() throws Exception {
         PageResponseDto<EmployeeResponseDto> emptyPage = PageResponseDto.of(
                 new ArrayList<>(), 10, 0, false);
-        when(employeeService.getAll(any(Pageable.class))).thenReturn(emptyPage);
+        when(employeeService.getAll(any(Pageable.class),eq(false))).thenReturn(emptyPage);
 
         mockMvc.perform(get("/employees"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty());
 
-        verify(employeeService, times(1)).getAll(any(Pageable.class));
+        verify(employeeService, times(1)).getAll(any(Pageable.class), eq(false));
     }
 
     @Test
@@ -306,14 +306,14 @@ class EmployeeControllerTest {
         PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
                 List.of(employeeDto1), 10, 1, false);
         // ← прибрано isNull(), сервіс більше не приймає lastSeenId
-        when(employeeService.getAllCashiers(any(Pageable.class))).thenReturn(page);
+        when(employeeService.getAllCashiers(any(Pageable.class), eq(false))).thenReturn(page);
 
         mockMvc.perform(get("/employees/cashiers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].role").value("CASHIER"))
                 .andExpect(jsonPath("$.content.length()").value(1));
 
-        verify(employeeService, times(1)).getAllCashiers(any(Pageable.class));
+        verify(employeeService, times(1)).getAllCashiers(any(Pageable.class), eq(false));
     }
 
     @Test
@@ -323,7 +323,7 @@ class EmployeeControllerTest {
         mockMvc.perform(get("/employees/cashiers"))
                 .andExpect(status().isForbidden());
 
-        verify(employeeService, never()).getAllCashiers(any(Pageable.class));
+        verify(employeeService, never()).getAllCashiers(any(Pageable.class), eq(false));
     }
 
     @Test
@@ -332,13 +332,13 @@ class EmployeeControllerTest {
     void getAllCashiers_noCashiers_Ok() throws Exception {
         PageResponseDto<EmployeeResponseDto> emptyPage = PageResponseDto.of(
                 new ArrayList<>(), 10, 0, false);
-        when(employeeService.getAllCashiers(any(Pageable.class))).thenReturn(emptyPage);
+        when(employeeService.getAllCashiers(any(Pageable.class), eq(false))).thenReturn(emptyPage);
 
         mockMvc.perform(get("/employees/cashiers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty());
 
-        verify(employeeService, times(1)).getAllCashiers(any(Pageable.class));
+        verify(employeeService, times(1)).getAllCashiers(any(Pageable.class), eq(false));
     }
 
     @Test

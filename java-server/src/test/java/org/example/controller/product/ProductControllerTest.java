@@ -77,11 +77,9 @@ class ProductControllerTest {
                 10,
                 false
         );
-        when(productService.getAll(any(Pageable.class))).thenReturn(page);
+        when(productService.getAll(any(Pageable.class), eq(false))).thenReturn(page);
 
-        mockMvc.perform(get("/products")
-                        .param("lastSeenName", "")
-                        .param("lastSeenId", "0"))
+        mockMvc.perform(get("/products"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.content[0].product_name").value("Apple"))
@@ -89,7 +87,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[1].product_name").value("Banana"))
                 .andExpect(jsonPath("$.content[1].producer").value("Producer B"));
 
-        verify(productService).getAll(any(Pageable.class));
+        verify(productService).getAll(any(Pageable.class),eq(false));
     }
 
     @Test

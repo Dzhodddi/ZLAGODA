@@ -196,14 +196,14 @@ class EmployeeServiceTest {
         Pageable pageable = Pageable.ofSize(10);
         PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
                 List.of(employeeResponseDto), 10, 1, false);
-        when(employeeRepository.findAll(pageable)).thenReturn(page);
+        when(employeeRepository.findAllSortedBySurname(pageable)).thenReturn(page);
 
-        PageResponseDto<EmployeeResponseDto> result = service.getAll(pageable);
+        PageResponseDto<EmployeeResponseDto> result = service.getAll(pageable, true);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("EMP001", result.getContent().get(0).getId_employee());
-        verify(employeeRepository, times(1)).findAll(pageable);
+        verify(employeeRepository, times(1)).findAllSortedBySurname(pageable);
     }
 
     @Test
@@ -271,13 +271,13 @@ class EmployeeServiceTest {
         Pageable pageable = Pageable.ofSize(10);
         PageResponseDto<EmployeeResponseDto> page = PageResponseDto.of(
                 List.of(employeeResponseDto), 10, 1, false);
-        when(employeeRepository.findAllCashiers(pageable)).thenReturn(page);
+        when(employeeRepository.findAllCashiersSortedBySurname(pageable)).thenReturn(page);
 
-        PageResponseDto<EmployeeResponseDto> result = service.getAllCashiers(pageable);
+        PageResponseDto<EmployeeResponseDto> result = service.getAllCashiers(pageable, true);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        verify(employeeRepository, times(1)).findAllCashiers(pageable);
+        verify(employeeRepository, times(1)).findAllCashiersSortedBySurname(pageable);
     }
 
     @Test

@@ -141,6 +141,7 @@ export const CustomerCardListPage = () => {
 
                     <button
                         onClick={handleSortToggle}
+                        title="Сортувати картки клієнтів"
                         className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
                             isSorted ? "bg-green-500" : "bg-blue-200"
                         }`}
@@ -157,6 +158,7 @@ export const CustomerCardListPage = () => {
                         value={percentInput}
                         onChange={(e) => setPercentInput(e.target.value)}
                         placeholder="Введіть % знижки"
+                        title="Шукати картки клієнтів за відсотками їхньої знижки"
                         min="1"
                         max="100"
                         className="w-full border rounded px-3 py-1.5 text-sm pr-16 text-zinc-900"
@@ -175,6 +177,7 @@ export const CustomerCardListPage = () => {
                     {appliedPercent !== undefined && (
                         <button
                             onClick={handleClearPercent}
+                            title="Скинути пошук"
                             className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 text-sm px-1 hover:scale-110 transition-transform"
                         >
                             ✕
@@ -182,11 +185,11 @@ export const CustomerCardListPage = () => {
                     )}
                 </div> }
                 {isCashier &&
-                    <div className="relative flex-1 max-w-sm">
+                    <div className="relative flex-1">
                         <input
                             value={surnameInput}
                             onChange={(e) => setSurnameInput(e.target.value)}
-                            placeholder="Пошук за прізвищем"
+                            placeholder="Введіть прізвище"
                             min="1"
                             max="100"
                             className="w-full border rounded px-3 py-1.5 text-sm pr-16 text-zinc-900"
@@ -198,6 +201,7 @@ export const CustomerCardListPage = () => {
                         />
                         <button
                             onClick={handleSearchSurname}
+                            title="Шукати картки клієнтів за їхніми прізвищами"
                             className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center"
                         >
                             <img src="/src/logos/search.png" alt="search" className="w-5 h-5 hover:scale-110 transition-transform" />
@@ -205,6 +209,7 @@ export const CustomerCardListPage = () => {
                         {surnameInput !== undefined && surnameInput !== "" && (
                             <button
                                 onClick={handleClearSurname}
+                                title="Скинути пошук"
                                 className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 text-sm px-1 hover:scale-110 transition-transform"
                             >
                                 ✕
@@ -213,7 +218,8 @@ export const CustomerCardListPage = () => {
                     </div> }
                 {isManager &&
                 <div className="flex items-center gap-5 shrink-0">
-                    <Link to="/customer-card/create">
+                    <Link to="/customer-card/create"
+                          title="Додати картку клієнта">
                         <div className="hover:scale-110 transition-transform flex justify-center">
                             <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
                         </div>
@@ -259,6 +265,7 @@ export const CustomerCardListPage = () => {
                                 <tr
                                     key={card.cardNumber}
                                     onClick={() => navigate(`/customer-card/${card.cardNumber}`)}
+                                    title="Переглянути інформацію про картку клієнта"
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
                                     <td className="px-3 py-2 font-mono text-xs border border-blue-200 text-center">{card.cardNumber}</td>
@@ -268,6 +275,7 @@ export const CustomerCardListPage = () => {
                                     <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => navigate(`/customer-card/edit/${card.cardNumber}`)}
+                                            title="Редагувати картку клієнта"
                                             className="hover:scale-110 transition-transform flex justify-center w-full"
                                         >
                                             <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
@@ -276,6 +284,7 @@ export const CustomerCardListPage = () => {
                                     <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => handleDelete(card.cardNumber)}
+                                            title="Видалити картку клієнта"
                                             className="hover:scale-110 transition-transform flex justify-center w-full"
                                         >
                                             <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
@@ -291,6 +300,7 @@ export const CustomerCardListPage = () => {
                     <div className="flex justify-between items-center p-3 bg-zinc-50 text-xs">
                         <button
                             onClick={handlePrevPage}
+                            title="Попередня сторінка"
                             disabled={currentIndex === 0 || isFetching}
                             className={`transition-opacity ${currentIndex === 0 || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
                         >
@@ -305,6 +315,7 @@ export const CustomerCardListPage = () => {
 
                         <button
                             onClick={handleNextPage}
+                            title="Наступна сторінка"
                             disabled={isLastPage || isFetching}
                             className={`transition-opacity ${isLastPage || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
                         >

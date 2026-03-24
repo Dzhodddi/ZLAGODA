@@ -76,7 +76,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public PageResponseDto<EmployeeResponseDto> getAll(Pageable pageable) {
+    public PageResponseDto<EmployeeResponseDto> getAll(Pageable pageable, boolean sortedBySurname) {
+        if (sortedBySurname) {
+            return employeeRepository.findAllSortedBySurname(pageable);
+        }
         return employeeRepository.findAll(pageable);
     }
 
@@ -103,7 +106,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public PageResponseDto<EmployeeResponseDto> getAllCashiers(Pageable pageable) {
+    public PageResponseDto<EmployeeResponseDto> getAllCashiers(Pageable pageable,
+                                                               boolean sortedBySurname) {
+        if (sortedBySurname) {
+            return employeeRepository.findAllCashiersSortedBySurname(pageable);
+        }
         return employeeRepository.findAllCashiers(pageable);
     }
 

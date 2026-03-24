@@ -97,6 +97,7 @@ export const CategoryListPage = () => {
 
                     <button
                         onClick={handleSortToggle}
+                        title="Сортувати категорії"
                         className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
                             isSorted ? "bg-green-500" : "bg-blue-200"
                         }`}
@@ -107,12 +108,16 @@ export const CategoryListPage = () => {
                     </button>
                 </div>
                 <div className="flex items-center gap-5">
-                    <Link to="/categories/top">
+                    <Link to="/categories/top"
+                          title="Переглянути дві найпопулярніші категорії"
+                    >
                         <div className="hover:scale-110 transition-transform flex justify-center">
                             <img src="/src/logos/top-2.png" alt="top" className="h-6" />
                         </div>
                     </Link>
-                    <Link to="/categories/create">
+                    <Link to="/categories/create"
+                          title="Додати нову категорію"
+                    >
                         <div className="hover:scale-110 transition-transform flex justify-center">
                             <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
                         </div>
@@ -151,6 +156,7 @@ export const CategoryListPage = () => {
                                 <tr
                                     key={category.categoryNumber}
                                     onClick={() => navigate(`/categories/${category.categoryNumber}`)}
+                                    title="Переглянути інформацію про категорію"
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
                                     <td className="px-3 py-2 font-mono text-xs border border-blue-200">{category.categoryNumber}</td>
@@ -158,6 +164,7 @@ export const CategoryListPage = () => {
                                     <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => navigate(`/categories/edit/${category.categoryNumber}`)}
+                                            title="Редагувати категорію"
                                             className="hover:scale-110 transition-transform flex justify-center w-full"
                                         >
                                             <img src="/src/logos/edit.png" alt="edit" className="w-4 h-4" />
@@ -166,6 +173,7 @@ export const CategoryListPage = () => {
                                     <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => handleDelete(category.categoryNumber)}
+                                            title="Видалити категорію"
                                             className="hover:scale-110 transition-transform flex justify-center w-full"
                                         >
                                             <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
@@ -180,6 +188,7 @@ export const CategoryListPage = () => {
                     <div className="flex justify-between items-center p-3 bg-zinc-50 text-xs">
                         <button
                             onClick={handlePrevPage}
+                            title="Попередня сторінка"
                             disabled={currentIndex === 0 || isFetching}
                             className={`transition-opacity ${currentIndex === 0 || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
                         >
@@ -194,6 +203,7 @@ export const CategoryListPage = () => {
 
                         <button
                             onClick={handleNextPage}
+                            title="Наступна сторінка"
                             disabled={isLastPage || isFetching}
                             className={`transition-opacity ${isLastPage || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
                         >

@@ -62,9 +62,12 @@ public class EmployeeController {
     )
     @PreAuthorize("hasAuthority('MANAGER')")
     public PageResponseDto<EmployeeResponseDto> getAll(
+            @RequestParam(required = false,
+                    defaultValue = "false",
+                    name = "sorted_by_surname") boolean sortedBySurname,
             @RequestParam(required = false, defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("empl_surname").and(Sort.by("id_employee")));
-        return employeeService.getAll(pageable);
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        return employeeService.getAll(pageable, sortedBySurname);
     }
 
     @PostMapping
@@ -125,9 +128,12 @@ public class EmployeeController {
     )
     @PreAuthorize("hasAuthority('MANAGER')")
     public PageResponseDto<EmployeeResponseDto> getAllCashiers(
+            @RequestParam(required = false,
+                    defaultValue = "false",
+                    name = "sorted_by_surname") boolean sortedBySurname,
             @RequestParam(required = false, defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("empl_surname").and(Sort.by("id_employee")));
-        return employeeService.getAllCashiers(pageable);
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        return employeeService.getAllCashiers(pageable, sortedBySurname);
     }
 
     @GetMapping("/me")

@@ -219,6 +219,7 @@ export const StoreProductList = () => {
                             {isUpcSearch && (
                                 <button
                                     onClick={() => { setUpcInput(""); setSearchUpc(""); }}
+                                    title="Скинути пошук"
                                     className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 text-sm px-1"
                                 >
                                     ✕

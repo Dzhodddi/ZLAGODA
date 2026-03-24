@@ -96,11 +96,11 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         Font titleFont = getTitleFont();
         document.add(new Paragraph("ЗВІТ ПРО ТОВАРИ\n\n", titleFont));
 
-        PdfPTable table = new PdfPTable(3);
+        PdfPTable table = new PdfPTable(4);
         table.setWidthPercentage(100);
-        table.setWidths(new float[]{2, 2, 5});
+        table.setWidths(new float[]{2, 2, 2, 5});
 
-        for (String header : new String[]{"Назва", "Виробник", "Характеристики"}) {
+        for (String header : new String[]{"ID товару", "Назва", "Виробник", "Характеристики"}) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
             cell.setBackgroundColor(new BaseColor(59, 130, 246));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -110,6 +110,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
 
         for (ProductDto p : products) {
             for (String value : new String[]{
+                    String.valueOf(p.getId_product()),
                     p.getProduct_name(),
                     p.getProducer(),
                     p.getProduct_characteristics()

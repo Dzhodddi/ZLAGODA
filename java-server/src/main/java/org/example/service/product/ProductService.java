@@ -14,7 +14,7 @@ public interface ProductService {
 
     List<ProductDto> getAllNoPagination();
 
-    PageResponseDto<ProductDto> getAll(Pageable pageable);
+    PageResponseDto<ProductDto> getAll(Pageable pageable, boolean sortedByName);
 
     ProductDto save(ProductRequestDto requestDto);
 

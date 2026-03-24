@@ -29,12 +29,16 @@ export const updateProduct = async (idProduct: number, data: CreateProduct): Pro
 export const getAllProducts = async (
     name?: string,
     categoryId?: number,
-    page = 0
+    page = 0,
+    sortedByName = false
 ): Promise<PageProduct> => {
     const response = await javaApiClient.get(prefix, {
-        params: { name,
+        params: {
+            name,
             category_id: categoryId,
-            page },
+            page,
+            ...(sortedByName && { sortedByName: true }),
+        },
     });
     return PageProductSchema.parse(response.data);
 };

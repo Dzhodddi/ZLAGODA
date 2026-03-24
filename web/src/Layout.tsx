@@ -56,6 +56,7 @@ export const Layout = () => {
                         <Link
                             to="/employee/me"
                             className="group text-sm py-2 hover:text-blue-300 transition-colors"
+                            title="Мій профіль"
                         >
                             <div className="hover:scale-110 transition-transform flex justify-center w-full">
                                 <img

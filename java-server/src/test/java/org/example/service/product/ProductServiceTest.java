@@ -60,15 +60,15 @@ class ProductServiceTest {
         PageResponseDto<ProductDto> page = PageResponseDto.of(
                 List.of(productDto), 0, 10, false);
 
-        when(repository.findAll(pageable)).thenReturn(page);
+        when(repository.findAllSortedByName(pageable)).thenReturn(page);
 
-        PageResponseDto<ProductDto> result = service.getAll(pageable);
+        PageResponseDto<ProductDto> result = service.getAll(pageable, true);
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertEquals("TestProduct", result.getContent().get(0).getProduct_name());
 
-        verify(repository).findAll(pageable);
+        verify(repository).findAllSortedByName(pageable);
         verifyNoInteractions(mapper);
     }
 
