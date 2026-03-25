@@ -132,9 +132,9 @@ export const RegistrationForm = () => {
 
                                 <div className={`contents ${step !== 1 ? "hidden" : ""}`}>
                                     <RoleSelect />
-                                    <InputField name="salary" label="Зарплата" />
-                                    <InputField type="date" name="dateOfStart" label="Дата прийому на роботу" />
-                                    <InputField name="phoneNumber" label="Номер телефону" />
+                                    <InputField type="number" name="salary" label="Зарплата, грн" min="0" step="0.01"/>
+                                    <InputField type="date" name="dateOfStart" label="Дата початку роботи" />
+                                    <InputField name="phoneNumber" label="Контактний телефон" />
                                 </div>
 
                                 <div className={`contents ${step !== 2 ? "hidden" : ""}`}>
