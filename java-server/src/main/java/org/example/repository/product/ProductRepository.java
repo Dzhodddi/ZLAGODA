@@ -146,7 +146,7 @@ public class ProductRepository {
                 INNER JOIN category c
                 ON p.category_number = c.category_number
                 WHERE p.category_number = ?
-                ORDER BY product_name
+                ORDER BY id_product
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
                 rowMapper,
@@ -154,6 +154,34 @@ public class ProductRepository {
                 offset,
                 pageable.getPageSize()
         )
+                .stream()
+                .map(productMapper::toDto)
+                .toList();
+
+        long total = getCategoryIdCount(categoryNumber);
+        return PageResponseDto.of(products, pageable.getPageSize(), total,
+                offset + products.size() < total);
+    }
+
+    public PageResponseDto<ProductDto> findByCategoryIdSortedByName(int categoryNumber,
+                                                        Pageable pageable) {
+        long offset = pageable.getOffset();
+        List<ProductDto> products = jdbcTemplate.query(
+                        """
+                        SELECT p.id_product, p.product_name, p.producer, p.product_characteristics,
+                               c.category_number, c.category_name
+                        FROM product p
+                        INNER JOIN category c
+                        ON p.category_number = c.category_number
+                        WHERE p.category_number = ?
+                        ORDER BY product_name
+                        OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                        """,
+                        rowMapper,
+                        categoryNumber,
+                        offset,
+                        pageable.getPageSize()
+                )
                 .stream()
                 .map(productMapper::toDto)
                 .toList();

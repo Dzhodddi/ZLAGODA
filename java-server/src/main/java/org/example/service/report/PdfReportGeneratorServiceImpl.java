@@ -98,7 +98,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
 
         PdfPTable table = new PdfPTable(4);
         table.setWidthPercentage(100);
-        table.setWidths(new float[]{2, 2, 2, 5});
+        table.setWidths(new float[]{1, 2, 2, 5});
 
         for (String header : new String[]{"ID товару", "Назва", "Виробник", "Характеристики"}) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));

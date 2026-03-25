@@ -136,7 +136,7 @@ class ProductControllerTest {
                 10,
                 false
         );
-        when(productService.findByCategoryId(eq(10), any(Pageable.class)))
+        when(productService.findByCategoryId(eq(10), any(Pageable.class), eq(false)))
                 .thenReturn(page);
 
         mockMvc.perform(get("/products")
@@ -146,7 +146,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[0].producer").value("Producer A"))
                 .andExpect(jsonPath("$.content[1].producer").value("Producer B"));
 
-        verify(productService).findByCategoryId(eq(10), any(Pageable.class));
+        verify(productService).findByCategoryId(eq(10), any(Pageable.class), eq(false));
     }
 
     @Test

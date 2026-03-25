@@ -93,12 +93,22 @@ export const EmployeeList = () => {
     const handleSetView = (v: View) => {
         if (v !== view) {
             setView(v);
+            if (v !== "search") {
+                setSurnameInput("");
+                setSearchSurname("");
+            }
+            setSortedBy(undefined);
             resetPagination();
         }
     };
 
     const handleSortToggle = (value: "surname") => {
         setSortedBy(prev => prev === value ? undefined : value);
+        setSurnameInput("");
+        setSearchSurname("");
+        if (view === "search") {
+            setView("all");
+        }
         setCurrentIndex(0);
     };
 
@@ -260,12 +270,12 @@ export const EmployeeList = () => {
                                     title="Переглянути інформацію про працівника"
                                     className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer"
                                 >
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.idEmployee}</td>
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{c.idEmployee}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">
                                         {c.emplSurname} {c.emplName} {c.emplPatronymic ?? ""}
                                     </td>
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.phoneNumber}</td>
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">{c.city}, {"вул."} {c.street}, {c.zipCode}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{c.phoneNumber}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{c.city}, {"вул."} {c.street}, {c.zipCode}</td>
                                 </tr>
                             ))}
                             </tbody>
@@ -303,18 +313,18 @@ export const EmployeeList = () => {
                                     title="Переглянути інформацію про працівника"
                                     className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 wrap-break-word">{emp.idEmployee}</td>
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">
+                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 break-words">{emp.idEmployee}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">
                                         {emp.emplSurname} {emp.emplName} {emp.emplPatronymic ?? ""}
                                     </td>
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">
+                                    <td className="px-3 py-2 border border-blue-200 break-words">
                                         {emp.role === "MANAGER" ? "Менеджер" : "Касир"}
                                     </td>
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">{emp.salary}</td>
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">{emp.dateOfBirth}</td>
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">{emp.dateOfStart}</td>
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">{emp.phoneNumber}</td>
-                                    <td className="px-3 py-2 border border-blue-200 wrap-break-word">{emp.city}, {"вул."} {emp.street}, {emp.zipCode}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{emp.salary}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{emp.dateOfBirth}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{emp.dateOfStart}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{emp.phoneNumber}</td>
+                                    <td className="px-3 py-2 border border-blue-200 break-words">{emp.city}, {"вул."} {emp.street}, {emp.zipCode}</td>
                                     {isManager && (
                                         <td className="px-2 py-2 border border-blue-200 text-center w-8"
                                             onClick={(e) => e.stopPropagation()}>

@@ -127,7 +127,7 @@ class ProductServiceTest {
 
         when(repository.findByCategoryId(10, pageable)).thenReturn(page);
 
-        PageResponseDto<ProductDto> result = service.findByCategoryId(10, pageable);
+        PageResponseDto<ProductDto> result = service.findByCategoryId(10, pageable, false);
 
         assertEquals(1, result.getContent().size());
         verify(repository).findByCategoryId(10, pageable);

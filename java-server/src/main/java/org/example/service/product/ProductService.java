@@ -24,7 +24,8 @@ public interface ProductService {
                                            Pageable pageable);
 
     PageResponseDto<ProductDto> findByCategoryId(int category_number,
-                                                 Pageable pageable);
+                                                 Pageable pageable,
+                                                 boolean sortedByName);
 
     void deleteProductById(int id);
 }

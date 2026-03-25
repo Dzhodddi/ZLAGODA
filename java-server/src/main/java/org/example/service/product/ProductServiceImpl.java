@@ -62,7 +62,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageResponseDto<ProductDto> findByCategoryId(int category_number,
-                                                        Pageable pageable) {
+                                                        Pageable pageable, boolean sortedByName) {
+        if (sortedByName) {
+            return repository.findByCategoryIdSortedByName(category_number, pageable);
+        }
         return repository.findByCategoryId(category_number, pageable);
     }
 

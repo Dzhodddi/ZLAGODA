@@ -88,7 +88,7 @@ public class ProductController {
             return productService.findByName(name, pageable);
         }
         if (categoryId != null) {
-            return productService.findByCategoryId(categoryId, pageable);
+            return productService.findByCategoryId(categoryId, pageable, sortedByName);
         }
         return productService.getAll(pageable, sortedByName);
     }

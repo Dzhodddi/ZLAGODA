@@ -34,7 +34,7 @@ export const UpsertBatchForm = () => {
                 {(_methods, { isSaving }) => (
                     <>
                         <h2 className="col-span-12 text-xl font-bold mb-4">
-                            Отримати нову партію
+                            Отримати нову партію товару у магазин
                         </h2>
 
                         <InputField name="UPC" label="UPC" disabled={!!upc} />

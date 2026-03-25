@@ -80,6 +80,11 @@ export const CustomerCardListPage = () => {
 
     const handleSortToggle = () => {
         setIsSorted((prev) => !prev);
+        if (isCashier) {
+            setSurnameInput("");
+        }
+        setPercentInput("");
+        setAppliedPercent(undefined);
         resetPagination();
     };
 
@@ -88,9 +93,9 @@ export const CustomerCardListPage = () => {
             handleClearPercent();
             return;
         }
-
         const parsed = parseInt(percentInput, 10);
         if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+            setIsSorted(false);
             setAppliedPercent(parsed);
             resetPagination();
         } else {
@@ -104,6 +109,7 @@ export const CustomerCardListPage = () => {
             return;
         }
         setSurnameInput(surnameInput);
+        setIsSorted(false);
     }
 
     const handleClearPercent = () => {
@@ -124,7 +130,7 @@ export const CustomerCardListPage = () => {
     }
 
     if (isError) {
-        return <div className="p-6 text-center text-red-500">Помилка завантаження карток.</div>;
+        return <div className="p-6 text-center text-red-500">Помилка завантаження карток</div>;
     }
 
     return (
@@ -136,7 +142,7 @@ export const CustomerCardListPage = () => {
             <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-1.5 shrink-0">
                     <span className="text-sm text-zinc-700 font-medium">
-                        Сортувати за ім'ям
+                        Сортувати за прізвищем
                     </span>
 
                     <button
@@ -231,7 +237,7 @@ export const CustomerCardListPage = () => {
                 <p className="text-zinc-400 text-sm">
                     {appliedPercent !== undefined
                         ? `Карток зі знижкою ${appliedPercent} % не знайдено`
-                        : 'Карток не знайдено. Натисніть "Додати картку", щоб створити нову.'}
+                        : 'Карток не знайдено'}
                 </p>
             ) : (
                 <div className="overflow-x-auto bg-white border border-blue-300 relative">
