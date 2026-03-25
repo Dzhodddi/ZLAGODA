@@ -24,11 +24,13 @@ export const BaseEmployeeSchema = z.object({
         .enum(
             ["MANAGER", "CASHIER"]
         ),
-    salary: z
-        .coerce
-        .number("Введіть число")
-        .min(0, "Зарплата має бути позитивною")
-        .max(999999999.9999, "Зарплата завелика"),
+    salary: z.preprocess(
+        (val) => (val === "" || val === null || val === undefined ? undefined : val),
+        z.coerce
+            .number({ message: "Введіть число" })
+            .min(0, "Зарплата не може набувати від'ємних значень")
+            .max(999999999.9999, "Зарплата завелика")
+    ),
     dateOfBirth: z
         .iso
         .date("Неправильний формат дати"),
@@ -64,17 +66,17 @@ export const EmployeeSchema = BaseEmployeeSchema.refine(
     }
 ).refine(
     (data) => new Date(data.dateOfStart) < new Date(), {
-        message: "Дата старту має бути в минулому",
+        message: "Дата початку роботи має бути в минулому",
         path: ["dateOfStart"]
     }
 ).refine(
     (data) => new Date().getFullYear() - new Date(data.dateOfBirth).getFullYear() >= 18, {
-        message: "Вік працівника_ці має бути більше за 18 років",
+        message: "Вік працівника_ці має бути більшим за 18 років",
         path: ["dateOfBirth"]
     }
 ).refine(
     (data) => new Date(data.dateOfStart).getFullYear() > 1900, {
-        message: "Дата має бути пізніше за 1900 рік",
+        message: "Дата має бути пізнішою за 1900 рік",
         path: ["dateOfStart"]
     }
 );
@@ -94,22 +96,22 @@ export const CreateEmployeeSchema = BaseEmployeeSchema
     })
     .refine(
         (data) => new Date(data.dateOfBirth).getFullYear() > 1900, {
-            message: "Дата має бути пізніше за 1900",
+            message: "Дата має бути пізнішою за 1900",
             path: ["dateOfBirth"]
         }
     ).refine(
         (data) => new Date(data.dateOfStart) < new Date(), {
-            message: "Дата старту має бути в минулому",
+            message: "Дата початку роботи має бути в минулому",
             path: ["dateOfStart"]
         }
     ).refine(
         (data) => new Date().getFullYear() - new Date(data.dateOfBirth).getFullYear() >= 18, {
-            message: "Вік працівника_ці має бути більше за 18 років",
+            message: "Вік працівника_ці має бути більшим за 18 років",
             path: ["dateOfBirth"]
         }
     ).refine(
         (data) => new Date(data.dateOfStart).getFullYear() > 1900, {
-            message: "Дата має бути пізніше за 1900 рік",
+            message: "Дата має бути пізнішою за 1900 рік",
             path: ["dateOfStart"]
         }
     )
@@ -141,15 +143,9 @@ export const EmployeeContactSchema = z.object({
     zipCode: z.string(),
 });
 
-export type EmployeeContact = z.infer<typeof EmployeeContactSchema>;
-
 export const PageEmployeeContactSchema = z.object({
     content: z.array(EmployeeContactSchema),
     pageSize: z.number(),
     totalElements: z.number(),
     hasNext: z.boolean(),
 });
-
-export type PageResponse<T> = z.infer<typeof PageEmployeeSchema>;
-
-export type PageResponseContact<T> = z.infer<typeof PageEmployeeContactSchema>;

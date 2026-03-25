@@ -68,10 +68,6 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new InvalidRoleException("Invalid role name: " + request.getRole());
         }
 
-        if (employee.getSalary() == null) {
-            employee.setSalary(BigDecimal.ZERO);
-        }
-
         return employeeRepository.save(employee);
     }
 

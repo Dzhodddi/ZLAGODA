@@ -173,24 +173,6 @@ class EmployeeServiceTest {
     }
 
     @Test
-    @DisplayName("register should set salary to zero if null")
-    void register_nullSalary_shouldSetToZero() throws RegistrationException {
-        registrationRequestDto.setSalary(null);
-        employee.setSalary(null);
-
-        when(employeeRepository.existsByIdEmployee("EMP001")).thenReturn(false);
-        when(employeeMapper.toEmployeeEntity(registrationRequestDto)).thenReturn(employee);
-        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
-        when(employeeRepository.save(any(Employee.class))).thenReturn(employeeResponseDto);
-
-        service.register(registrationRequestDto);
-
-        verify(employeeRepository, times(1)).save(argThat(emp ->
-                emp.getSalary() != null && emp.getSalary().compareTo(BigDecimal.ZERO) == 0
-        ));
-    }
-
-    @Test
     @DisplayName("getAll should return list of employees")
     void getAll_shouldReturnList() {
         Pageable pageable = Pageable.ofSize(10);
