@@ -108,14 +108,14 @@ export const CategoryListPage = () => {
                     </button>
                 </div>
                 <div className="flex items-center gap-5">
-                    <Link to="/categories/top"
+                    <Link to="/category/top"
                           title="Переглянути дві найпопулярніші категорії"
                     >
                         <div className="hover:scale-110 transition-transform flex justify-center">
                             <img src="/src/logos/top-2.png" alt="top" className="h-6" />
                         </div>
                     </Link>
-                    <Link to="/categories/create"
+                    <Link to="/category/create"
                           title="Додати нову категорію"
                     >
                         <div className="hover:scale-110 transition-transform flex justify-center">
@@ -155,7 +155,7 @@ export const CategoryListPage = () => {
                             categories?.map((category) => (
                                 <tr
                                     key={category.categoryNumber}
-                                    onClick={() => navigate(`/categories/${category.categoryNumber}`)}
+                                    onClick={() => navigate(`/category/${category.categoryNumber}`)}
                                     title="Переглянути інформацію про категорію"
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
@@ -163,7 +163,7 @@ export const CategoryListPage = () => {
                                     <td className="px-3 py-2 border border-blue-200 truncate ">{category.categoryName}</td>
                                     <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                         <button
-                                            onClick={() => navigate(`/categories/edit/${category.categoryNumber}`)}
+                                            onClick={() => navigate(`/category/edit/${category.categoryNumber}`)}
                                             title="Редагувати категорію"
                                             className="hover:scale-110 transition-transform flex justify-center w-full"
                                         >

@@ -1,13 +1,86 @@
-import {useQuery} from "@tanstack/react-query";
-import {getAllChecks} from "@/features/checks/api/checkApi.ts";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {staleTime} from "@/constants/constants.ts";
+import {createCheck, deleteCheck, getCheck, listChecks, updateCheck} from "@/features/checks/api/checkApi.ts";
+import {isAxiosError} from "axios";
 
-const QUERY_KEY = "checks"
+export const useCreateCheck = () => {
+    const queryClient = useQueryClient();
 
-export const useAllChecks = () => {
+    return useMutation({
+        mutationFn: createCheck,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["checks"] });
+            toast.success("Чек успішно створено");
+        },
+        onError: (error) => {
+            toast.error("Помилка під час створення чеку");
+            console.error(error);
+        }
+    });
+};
+
+export const useUpdateCheck = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: updateCheck,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["checks"] });
+            toast.success("Чек успішно оновлено");
+        },
+        onError: (error) => {
+            toast.error("Помилка під час оновлення чеку");
+            console.error(error);
+        }
+    });
+};
+
+export const useDeleteCheck = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: deleteCheck,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["checks"] });
+        },
+        onError: (error) => {
+            if (error instanceof Error && error.message.includes("400")) {
+                toast.error("Чек використовується!");
+                return;
+            }
+            toast.error("Помилка під час видалення чеку");
+            console.error(error);
+        }
+    });
+};
+
+export const useCheckList = (
+    startDate: string,
+    endDate: string,
+    employeeId?: string
+) => {
     return useQuery({
-        queryKey: [QUERY_KEY, "all"],
-        queryFn: () => getAllChecks(),
+        queryKey: ["checks", startDate, endDate, employeeId],
+        queryFn: async () => {
+            try {
+                return await listChecks(startDate, endDate, employeeId);
+            } catch (error) {
+                if (employeeId && isAxiosError(error) && error.response?.status === 400) {
+                    toast.error(`Працівника з таким ${employeeId!} не знайдено або невірний формат`);
+                }
+                return []
+            }
+        },
+        placeholderData: (previousData) => previousData,
+    });
+};
+
+export const useCheck = (checkNumber: string) => {
+    return useQuery({
+        queryKey: ["checks", checkNumber],
+        queryFn: () => getCheck(checkNumber),
+        enabled: !!checkNumber,
         staleTime: staleTime,
     });
 };

@@ -9,7 +9,7 @@ export const Navbar = () => {
 
     const handleLogout = () => {
         clearTokens();
-        navigate("/login");
+        navigate("");
     };
 
     return (

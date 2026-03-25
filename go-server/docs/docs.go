@@ -425,7 +425,10 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/views.CheckListResponse"
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/views.CheckResponseWithProducts"
+                                }
                             }
                         }
                     },

@@ -5,7 +5,7 @@ import { useRole } from "@/hooks/useRole";
 const navItems = [
     { path: "/store-product", label: "Товари в магазині" },
     { path: "/product", label: "Товари" },
-    { path: "/categories", label: "Категорії", isHidden: (role: Role) => role === "CASHIER" },
+    { path: "/category", label: "Категорії", isHidden: (role: Role) => role === "CASHIER" },
     { path: "/employee", label: "Працівники", isHidden: (role: Role) => role === "CASHIER" },
     { path: "/customer-card", label: "Картки клієнтів" },
     { path: "/check", label: "Чеки" },

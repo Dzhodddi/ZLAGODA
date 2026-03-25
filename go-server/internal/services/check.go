@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
@@ -20,7 +21,7 @@ type CheckService interface {
 		ctx context.Context,
 		employeeID *string,
 		startDate, endDate time.Time,
-	) ([]views.CheckListResponse, error)
+	) (*[]views.CheckResponseWithProducts, error)
 	GetTotalCheckPrice(
 		ctx context.Context,
 		q views.CheckListQueryParams,
@@ -84,7 +85,7 @@ func (s *checkService) GetCheckList(
 	ctx context.Context,
 	employeeID *string,
 	startDate, endDate time.Time,
-) ([]views.CheckListResponse, error) {
+) (*[]views.CheckResponseWithProducts, error) {
 	var checkList []generated.CheckListView
 	var err error
 
@@ -106,11 +107,33 @@ func (s *checkService) GetCheckList(
 	if err != nil {
 		return nil, fmt.Errorf("failed to get checks: %w", err)
 	}
-	result := make([]views.CheckListResponse, 0, len(checkList))
-	for i := range checkList {
-		result = append(result, *mappers.CheckListViewToResponse(&checkList[i]))
+	mappedChecks := make(map[string]*views.CheckResponseWithProducts)
+	for _, row := range checkList {
+		if _, exists := mappedChecks[row.CheckNumber]; !exists {
+			mappedChecks[row.CheckNumber] = &views.CheckResponseWithProducts{
+				CheckResponse: views.CheckResponse{
+					CheckNumber: row.CheckNumber,
+					IDEmployee:  row.IDEmployee,
+					CardNumber:  row.CardNumber,
+					PrintDate:   row.PrintDate.Format(constants.DateLayout),
+					SumTotal:    row.SumTotal,
+					VAT:         row.Vat,
+				},
+				Products: make([]views.ProductResponse, 0),
+			}
+		}
+
+		mappedChecks[row.CheckNumber].Products = append(mappedChecks[row.CheckNumber].Products, views.ProductResponse{
+			Name:         row.ProductName,
+			SellingPrice: row.SellingPrice,
+			Quantity:     int(row.ProductNumber),
+		})
 	}
-	return result, nil
+	result := make([]views.CheckResponseWithProducts, 0, len(mappedChecks))
+	for _, check := range mappedChecks {
+		result = append(result, *check)
+	}
+	return &result, nil
 }
 
 func (s *checkService) GetTotalCheckPrice(

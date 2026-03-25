@@ -34,7 +34,7 @@ func (h *CheckHandler) RegisterRouts(e *echo.Group) {
 	check.GET("/price", h.getTotalPrice, h.auth.CheckRole(auth.Manager))
 	checkNumberGroup := check.Group("/:checkNumber")
 	checkNumberGroup.DELETE("", h.deleteCheck, h.auth.CheckRole(auth.Manager))
-	checkNumberGroup.GET("", h.getCheckWithProducts, h.auth.CheckRole(auth.Cashier))
+	checkNumberGroup.GET("", h.getCheckWithProducts)
 }
 
 // createCheck godoc
@@ -139,7 +139,7 @@ func (h *CheckHandler) getCheckWithProducts(c echo.Context) error {
 //
 //	@Param			end_date 	query		string	true	"end_date"
 //
-// @Success      200  {array}  views.CheckListResponse
+// @Success      200  {array}  []views.CheckResponseWithProducts
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure 400	{object}  map[string]any

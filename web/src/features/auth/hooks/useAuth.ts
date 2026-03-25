@@ -19,7 +19,7 @@ export const useRegister = () => {
         mutationFn: register,
         onSuccess: () => {
             toast.success("Успішно зареєстровано");
-            navigate("/login");
+            navigate("");
         },
         onError: (error) => {
             if (isAxiosError(error) && error.response?.data) {

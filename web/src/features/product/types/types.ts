@@ -8,7 +8,7 @@ export const BaseProductSchema = z.object({
         .max(999999, "Число занадто велике"),
     categoryNumber: z
         .coerce
-        .number()
+        .number("Виберіть категорію")
         .min(1, "Номер категорії має бути позитивним")
         .max(999999, "Номер категорії завеликий"),
     categoryName: z

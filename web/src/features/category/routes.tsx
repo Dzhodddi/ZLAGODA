@@ -9,11 +9,11 @@ import {TopCategoriesPage} from "@/features/category/routes/TopCategoriesPage.ts
 const categoryRoutes = (
     <>
         <Route element={<ProtectedRoute allowedRoles={["MANAGER"]} />}>
-            <Route path="/categories" element={<CategoryListPage />} />
-            <Route path="/categories/create" element={<CreateCategoryPage />} />
-            <Route path="/categories/top" element={<TopCategoriesPage />} />
-            <Route path="/categories/edit/:id" element={<EditCategoryPage />} />
-            <Route path="/categories/:id" element={<CategoryPage />} />
+            <Route path="/category" element={<CategoryListPage />} />
+            <Route path="/category/create" element={<CreateCategoryPage />} />
+            <Route path="/category/top" element={<TopCategoriesPage />} />
+            <Route path="/category/edit/:id" element={<EditCategoryPage />} />
+            <Route path="/category/:id" element={<CategoryPage />} />
         </Route>
     </>
 );
