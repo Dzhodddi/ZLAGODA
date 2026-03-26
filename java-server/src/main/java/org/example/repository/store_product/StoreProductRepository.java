@@ -468,6 +468,22 @@ public class StoreProductRepository {
                 .toList();
     }
 
+    public List<StoreProductWithNameDto> findAllWithNameNoPagination() {
+        return jdbcTemplate.query(
+             """
+             SELECT sp.UPC, sp.UPC_prom, sp.id_product, sp.selling_price,
+                       sp.products_number, sp.promotional_product, p.product_name
+                FROM store_product sp
+                INNER JOIN product p
+                ON sp.id_product = p.id_product
+                WHERE sp.is_deleted = false
+                ORDER BY sp.promotional_product DESC
+             """,
+                        withNameRowMapper)
+                .stream()
+                .toList();
+    }
+
     private long getTotalCount() {
         Integer count = jdbcTemplate.queryForObject(
                 """

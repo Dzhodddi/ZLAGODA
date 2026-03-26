@@ -14,6 +14,8 @@ public interface StoreProductService {
 
     List<StoreProductDto> getAllNoPagination();
 
+    List<StoreProductWithNameDto> getAllWithNameNoPagination();
+
     PageResponseDto<StoreProductWithNameDto> getAllSortedByQuantity(Pageable pageable);
 
     PageResponseDto<StoreProductWithNameDto> getAllSortedByName(Pageable pageable);

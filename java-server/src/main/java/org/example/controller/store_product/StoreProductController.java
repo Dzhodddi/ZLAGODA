@@ -11,6 +11,7 @@ import org.example.dto.page.PageResponseDto;
 import org.example.dto.store_product.batch.BatchRequestDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
+import org.example.dto.store_product.product.StoreProductWithNameDto;
 import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
@@ -70,6 +71,15 @@ public class StoreProductController {
             pageable = PageRequest.of(page, PAGE_SIZE);
         }
         return storeProductService.getAll(sortedBy, prom, pageable);
+    }
+
+    @GetMapping("/all")
+    @Operation(
+            summary = "Get all store products without pagination",
+            description = "Get all store products without pagination"
+    )
+    public List<StoreProductWithNameDto> getAllWithoutPagination() {
+        return storeProductService.getAllWithNameNoPagination();
     }
 
     @PostMapping

@@ -56,6 +56,11 @@ public class StoreProductServiceImpl implements StoreProductService {
     }
 
     @Override
+    public List<StoreProductWithNameDto> getAllWithNameNoPagination() {
+        return repository.findAllWithNameNoPagination();
+    }
+
+    @Override
     public PageResponseDto<StoreProductWithNameDto> getAllSortedByQuantity(
             Pageable pageable) {
         return repository.findAllSortedByQuantity(pageable);
