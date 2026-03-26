@@ -1,7 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {staleTime} from "@/constants/constants.ts";
-import {createCheck, deleteCheck, getCheck, listChecks, updateCheck} from "@/features/checks/api/checkApi.ts";
+import {
+    createCheck,
+    deleteCheck,
+    getCheck,
+    getChecksTotalSum,
+    listChecks,
+    updateCheck
+} from "@/features/checks/api/checkApi.ts";
 import {isAxiosError} from "axios";
 
 export const useCreateCheck = () => {
@@ -67,7 +74,7 @@ export const useCheckList = (
                 return await listChecks(startDate, endDate, employeeId);
             } catch (error) {
                 if (employeeId && isAxiosError(error) && error.response?.status === 400) {
-                    toast.error(`Працівника з таким ${employeeId!} не знайдено або невірний формат`);
+                    toast.error(`Касира з таким ${employeeId!} не знайдено або невірний формат`);
                 }
                 return []
             }
@@ -82,5 +89,27 @@ export const useCheck = (checkNumber: string) => {
         queryFn: () => getCheck(checkNumber),
         enabled: !!checkNumber,
         staleTime: staleTime,
+    });
+};
+
+export const useCheckTotalSum = (
+    startDate: string,
+    endDate: string,
+    employeeId?: string,
+    enabled: boolean = true
+) => {
+    return useQuery({
+        queryKey: ["checks-total-sum", startDate, endDate, employeeId],
+        queryFn: async () => {
+            try {
+                return await getChecksTotalSum(startDate, endDate, employeeId);
+            } catch (error) {
+                if (employeeId && isAxiosError(error) && error.response?.status === 400) {
+                    toast.error(`Касира з таким ${employeeId!} не знайдено або невірний формат`);
+                }
+                return 0
+            }
+        },
+        enabled: enabled && Boolean(startDate && endDate && new Date(startDate) <= new Date(endDate)),
     });
 };

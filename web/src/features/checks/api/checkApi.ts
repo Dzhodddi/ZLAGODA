@@ -46,3 +46,19 @@ export const listChecks = async (
     if (!response.data) return [];
     return z.array(CheckItemSchema).parse(response.data);
 };
+
+
+export const getChecksTotalSum = async (
+    startDate: string,
+    endDate: string,
+    employeeId?: string
+): Promise<number> => {
+    const params: Record<string, string> = {
+        start_date: startDate,
+        end_date: endDate
+    };
+    if (employeeId) params.employee_id = employeeId;
+
+    const response = await goApiClient.get(`${prefix}/price`, { params });
+    return Number(response.data?.totalPrice || 0);
+};

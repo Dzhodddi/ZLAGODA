@@ -29,7 +29,7 @@ func NewCheckHandler(checkService services.CheckService, auth auth.Authenticator
 func (h *CheckHandler) RegisterRouts(e *echo.Group) {
 	check := e.Group("/checks")
 	check.POST("", h.createCheck, h.auth.CheckRole(auth.Cashier))
-	check.GET("", h.getCheckList, h.auth.CheckRole(auth.Manager, auth.Cashier))
+	check.GET("", h.getCheckList)
 	check.GET("/today", h.getCheckListWithinToday, h.auth.CheckRole(auth.Cashier))
 	check.GET("/price", h.getTotalPrice, h.auth.CheckRole(auth.Manager))
 	checkNumberGroup := check.Group("/:checkNumber")

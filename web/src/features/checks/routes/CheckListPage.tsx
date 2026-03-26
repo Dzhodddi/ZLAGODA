@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useCheckList, useDeleteCheck } from "@/features/checks/hooks/useCheck.ts";
+import { useCheckList, useDeleteCheck, useCheckTotalSum } from "@/features/checks/hooks/useCheck.ts";
 import { useRole } from "@/hooks/useRole.ts";
 
 type Cursor = {
@@ -32,6 +32,13 @@ export const CheckListPage = () => {
         startDate!,
         endDate!,
         idEmployee || undefined
+    );
+
+    const { data: totalSum, isFetching: isTotalSumFetching } = useCheckTotalSum(
+        startDate!,
+        endDate!,
+        idEmployee || undefined,
+        !isCashier,
     );
 
     const deleteMutation = useDeleteCheck();
@@ -160,6 +167,19 @@ export const CheckListPage = () => {
                 <p className="text-red-500 text-sm">Кінцева дата не може бути меншою за початкову.</p>
             )}
 
+            {!isCashier && !isDateInvalid && (
+                <div className="flex justify-end px-2">
+                    <span className="text-sm font-semibold text-zinc-800 bg-white border border-blue-200 px-3 py-1.5 rounded shadow-sm">
+                        Загальна сума чеків: {" "}
+                        {isTotalSumFetching ? (
+                            <span className="text-zinc-500 animate-pulse">Рахуємо...</span>
+                        ) : (
+                            <span className="text-green-600">{Number(totalSum || 0).toFixed(2)} грн</span>
+                        )}
+                    </span>
+                </div>
+            )}
+
             {checks?.length === 0 && currentIndex === 0 ? (
                 <p className="text-zinc-400 text-sm">Чеків за вказаними фільтрами не знайдено.</p>
             ) : (
@@ -177,6 +197,7 @@ export const CheckListPage = () => {
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Працівник</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Картка</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Дата</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Сума</th>
                             <th className="px-3 py-2 font-semibold w-20 border border-blue-500 text-center">ПДВ</th>
                             {isManager &&
                                 <th className="px-1 py-2 font-semibold w-10 border border-blue-500"></th>
@@ -206,7 +227,8 @@ export const CheckListPage = () => {
                                             hour: '2-digit', minute: '2-digit'
                                         })}
                                     </td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center font-medium">{check.check.vat}</td>
+                                    <td className="px-3 py-2 border border-blue-200 text-center font-medium">{check.check.sumTotal}</td>
+                                    <td className="px-3 py-2 border border-blue-200 text-center text-zinc-600">{check.check.vat}</td>
                                     {isManager &&
                                         <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                             <button
