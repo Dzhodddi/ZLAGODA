@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
-import {javaApiClient} from "@/lib/axios.ts";
+import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 export const useSilentRefresh = () => {
@@ -9,8 +9,7 @@ export const useSilentRefresh = () => {
 
     useEffect(() => {
         if (refreshToken && !accessToken) {
-            javaApiClient
-                .post("/auth/refresh", { refreshToken })
+            axios.post(`http://localhost:8081/api/v1/auth/refresh`, { refreshToken })
                 .then(({ data }) => {
                     const decoded = jwtDecode<{ roles: ("MANAGER" | "CASHIER")[] }>(data.accessToken);
                     setTokens(data.accessToken, data.refreshToken, decoded.roles[0]!);

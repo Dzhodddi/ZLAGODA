@@ -39,7 +39,7 @@ export const TopCategoriesPage = () => {
                     <tbody>
                     {categories?.map((category, index) => (
                         <tr key={index}
-                            onClick={() => navigate(`/categories/${category.categoryNumber}`)}
+                            onClick={() => navigate(`/category/${category.categoryNumber}`)}
                             className="bg-green-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-green-200 transition-colors">
                             <td className="px-3 py-2 font-mono text-xs border border-green-300">{category.categoryNumber}</td>
                             <td className="px-3 py-2 border border-green-300 truncate ">{category.categoryName}</td>

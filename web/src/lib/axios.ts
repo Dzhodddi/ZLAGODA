@@ -67,22 +67,15 @@ const createAuthInterceptor = (client: AxiosInstance) => async (error: any) => {
 
         try {
             const { refreshToken, setTokens, role } = useAuthStore.getState();
-            if (!refreshToken) {
-                throw new Error("No refresh token available");
-            }
+            if (!refreshToken) throw new Error("No refresh token");
 
-            const response = await javaApiClient.post("/auth/refresh", {
-                refreshToken,
-            });
+            const { data } = await axios.post(`http://localhost:8081/api/v1/auth/refresh`, { refreshToken });
 
-            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
-            if (!role) {
-                throw new Error("No role");
-            }
+            if (!role) throw new Error("No role");
 
-            setTokens(newAccessToken, newRefreshToken, role);
-            processQueue(null, newAccessToken);
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            setTokens(data.accessToken, data.refreshToken, role);
+            processQueue(null, data.accessToken);
+            originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
             return client(originalRequest);
 
         } catch (refreshError) {
