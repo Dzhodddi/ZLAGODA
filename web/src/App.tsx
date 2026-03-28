@@ -13,15 +13,22 @@ import {authRoutes} from "@/features/auth/routes.tsx";
 import {checkRoutes} from "@/features/checks/routes.tsx";
 import {customerCardRoutes} from "@/features/customer-card/routes.tsx";
 import { useEffect } from "react";
+import {useSilentRefresh} from "@/hooks/useSilentRefresh.ts";
 
 const Toaster = lazy(() =>
     import("@/components/ui/sonner").then((module) => ({ default: module.Toaster }))
 );
 
 export function App() {
+    const { isReady } = useSilentRefresh();
+
     useEffect(() => {
         document.title = "Zlagoda Shop";
     }, []);
+
+    if (!isReady) {
+        return null;
+    }
 
     return (
         <BrowserRouter>

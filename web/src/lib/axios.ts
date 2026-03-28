@@ -1,6 +1,6 @@
-import axios from 'axios';
 import applyCaseMiddleware from 'axios-case-converter';
 import { useAuthStore } from "@/store/authStore.ts";
+import axios, { type AxiosInstance } from 'axios';
 
 export const goApiClient = applyCaseMiddleware(axios.create({
     baseURL: "http://localhost:8080/api/v1",
@@ -41,7 +41,7 @@ const processQueue = (error: any, token: string | null = null) => {
     failedQueue = [];
 };
 
-const authInterceptor = async (error: any) => {
+const createAuthInterceptor = (client: AxiosInstance) => async (error: any) => {
     const originalRequest = error.config;
 
     if (originalRequest.url?.includes('/login') || originalRequest.url?.includes('/refresh')) {
@@ -56,7 +56,7 @@ const authInterceptor = async (error: any) => {
                     failedQueue.push({ resolve, reject });
                 });
                 originalRequest.headers.Authorization = `Bearer ${token}`;
-                return axios(originalRequest);
+                return client(originalRequest);
             } catch (err) {
                 return Promise.reject(err);
             }
@@ -83,7 +83,7 @@ const authInterceptor = async (error: any) => {
             setTokens(newAccessToken, newRefreshToken, role);
             processQueue(null, newAccessToken);
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-            return axios(originalRequest);
+            return client(originalRequest);
 
         } catch (refreshError) {
             processQueue(refreshError, null);
@@ -101,10 +101,10 @@ const authInterceptor = async (error: any) => {
 
 goApiClient.interceptors.response.use(
     (response) => response,
-    (error) => authInterceptor(error)
+    createAuthInterceptor(goApiClient)
 );
 
 javaApiClient.interceptors.response.use(
     (response) => response,
-    (error) => authInterceptor(error)
+    createAuthInterceptor(javaApiClient)
 );
