@@ -139,7 +139,7 @@ func (h *CheckHandler) getCheckWithProducts(c echo.Context) error {
 //
 //	@Param			end_date 	query		string	true	"end_date"
 //
-// @Success      200  {array}  []views.CheckResponseWithProducts
+// @Success      200  {array}  []views.CheckResponse
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure 400	{object}  map[string]any
@@ -178,7 +178,7 @@ func (h *CheckHandler) getCheckList(c echo.Context) error {
 //
 //	@Param			employee_id 	query		string	true	"employee_id"
 //
-// @Success      200  {array}  views.CheckListResponse
+// @Success      200  {array}  views.CheckResponse
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure 400	{object}  map[string]any
@@ -197,7 +197,12 @@ func (h *CheckHandler) getCheckListWithinToday(c echo.Context) error {
 	}
 	timeNow := time.Now()
 	today := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 0, 0, 0, 0, timeNow.Location())
-	checkList, err := h.checkService.GetCheckList(c.Request().Context(), &q.EmployeeID, today, today.Add(24*time.Hour-time.Nanosecond))
+	checkList, err := h.checkService.GetCheckList(
+		c.Request().Context(),
+		&q.EmployeeID,
+		today,
+		today.Add(24*time.Hour-time.Nanosecond),
+	)
 	if err != nil {
 		return err
 	}

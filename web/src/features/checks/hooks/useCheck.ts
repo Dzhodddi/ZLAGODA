@@ -6,6 +6,7 @@ import {
     deleteCheck,
     getCheck,
     getChecksTotalSum,
+    getTodayChecks,
     listChecks,
     updateCheck
 } from "@/features/checks/api/checkApi.ts";
@@ -65,7 +66,8 @@ export const useDeleteCheck = () => {
 export const useCheckList = (
     startDate: string,
     endDate: string,
-    employeeId?: string
+    employeeId?: string,
+    enabled: boolean = true
 ) => {
     return useQuery({
         queryKey: ["checks", startDate, endDate, employeeId],
@@ -80,6 +82,7 @@ export const useCheckList = (
             }
         },
         placeholderData: (previousData) => previousData,
+        enabled: enabled,
     });
 };
 
@@ -111,5 +114,23 @@ export const useCheckTotalSum = (
             }
         },
         enabled: enabled && Boolean(startDate && endDate && new Date(startDate) <= new Date(endDate)),
+    });
+};
+
+export const useTodayCheckList = (employeeId: string, enabled: boolean) => {
+    return useQuery({
+        queryKey: ["checks-today", employeeId],
+        queryFn: async () => {
+            try {
+                return await getTodayChecks(employeeId);
+            } catch (error) {
+                if (employeeId && isAxiosError(error) && error.response?.status === 400) {
+                    toast.error(`Касира з таким ${employeeId!} не знайдено або невірний формат`);
+                }
+                return []
+            }
+        },
+        enabled: enabled && Boolean(employeeId),
+        placeholderData: (previousData) => previousData,
     });
 };

@@ -6,7 +6,6 @@ type CreateNewCheck struct {
 	CardNumber  string         `json:"card_number" validate:"required,min=1,max=13"`
 	PrintDate   string         `json:"print_date" validate:"required,datetime=2006-01-02T15:04:05Z07:00"`
 	Products    []StoreProduct `json:"products" validate:"required,min=1"`
-	VAT         float64        `json:"vat" validate:"required,gte=0,lte=999999999.9999"`
 }
 
 type CheckResponse struct {
@@ -27,11 +26,6 @@ type CheckListQueryParams struct {
 	EmployeeID *string `query:"employee_id" validate:"omitempty,min=1,max=10"`
 	StartDate  string  `query:"start_date" validate:"required,datetime=2006-01-02"`
 	EndDate    string  `query:"end_date" validate:"required,datetime=2006-01-02"`
-}
-
-type CheckListResponse struct {
-	CheckResponse   `json:"check"`
-	ProductResponse `json:"product"`
 }
 
 type CheckListQueryWithThisDayParams struct {

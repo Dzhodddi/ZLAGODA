@@ -7,13 +7,6 @@ definitions:
       category_number:
         type: integer
     type: object
-  views.CheckListResponse:
-    properties:
-      check:
-        $ref: '#/definitions/views.CheckResponse'
-      product:
-        $ref: '#/definitions/views.ProductResponse'
-    type: object
   views.CheckResponse:
     properties:
       card_number:
@@ -68,17 +61,12 @@ definitions:
           $ref: '#/definitions/views.StoreProduct'
         minItems: 1
         type: array
-      vat:
-        maximum: 9.999999999999e+08
-        minimum: 0
-        type: number
     required:
     - card_number
     - check_number
     - id_employee
     - print_date
     - products
-    - vat
     type: object
   views.CreateNewCustomerCard:
     properties:
@@ -497,7 +485,7 @@ paths:
           schema:
             items:
               items:
-                $ref: '#/definitions/views.CheckResponseWithProducts'
+                $ref: '#/definitions/views.CheckResponse'
               type: array
             type: array
         "400":
@@ -735,7 +723,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/views.CheckListResponse'
+              $ref: '#/definitions/views.CheckResponse'
             type: array
         "400":
           description: Bad Request

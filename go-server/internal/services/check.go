@@ -21,7 +21,7 @@ type CheckService interface {
 		ctx context.Context,
 		employeeID *string,
 		startDate, endDate time.Time,
-	) (*[]views.CheckResponseWithProducts, error)
+	) (*[]views.CheckResponse, error)
 	GetTotalCheckPrice(
 		ctx context.Context,
 		q views.CheckListQueryParams,
@@ -85,7 +85,7 @@ func (s *checkService) GetCheckList(
 	ctx context.Context,
 	employeeID *string,
 	startDate, endDate time.Time,
-) (*[]views.CheckResponseWithProducts, error) {
+) (*[]views.CheckResponse, error) {
 	var checkList []generated.CheckListView
 	var err error
 

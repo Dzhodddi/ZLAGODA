@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useCheckList, useDeleteCheck, useCheckTotalSum } from "@/features/checks/hooks/useCheck.ts";
+import {useCheckList, useDeleteCheck, useCheckTotalSum, useTodayCheckList} from "@/features/checks/hooks/useCheck.ts";
 import { useRole } from "@/hooks/useRole.ts";
 
 type Cursor = {
@@ -22,23 +22,45 @@ export const CheckListPage = () => {
     const [endDate, setEndDate] = useState(getTodayDateString());
     const [idEmployee, setIdEmployee] = useState("");
 
+    const [isShowTodayOnly, setIsShowTodayOnly] = useState(false);
+
     const [cursorHistory, setCursorHistory] = useState<Cursor[]>([{ checkNumber: "" }]);
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const currentCursor = cursorHistory[currentIndex] ?? { checkNumber: "" };
 
-    const { data: checks, isLoading, isError, isFetching } = useCheckList(
-        // currentCursor.checkNumber,
+    const {
+        data: allChecks,
+        isLoading: isAllLoading,
+        isError: isAllError,
+        isFetching: isAllFetching
+    } = useCheckList(
         startDate!,
         endDate!,
-        idEmployee || undefined
+        idEmployee || undefined,
+        !isShowTodayOnly
     );
+
+    const {
+        data: todayChecks,
+        isLoading: isTodayLoading,
+        isError: isTodayError,
+        isFetching: isTodayFetching
+    } = useTodayCheckList(
+        idEmployee,
+        isShowTodayOnly
+    );
+
+    const checks = isShowTodayOnly ? todayChecks : allChecks;
+    const isLoading = isShowTodayOnly ? isTodayLoading : isAllLoading;
+    const isError = isShowTodayOnly ? isTodayError : isAllError;
+    const isFetching = isShowTodayOnly ? isTodayFetching : isAllFetching;
 
     const { data: totalSum, isFetching: isTotalSumFetching } = useCheckTotalSum(
         startDate!,
         endDate!,
         idEmployee || undefined,
-        !isCashier,
+        !isCashier && !isShowTodayOnly
     );
 
     const deleteMutation = useDeleteCheck();
@@ -93,7 +115,7 @@ export const CheckListPage = () => {
 
     const isDateInvalid = Boolean(startDate && endDate && new Date(startDate) > new Date(endDate));
 
-    if (isLoading && currentIndex === 0) {
+    if (isLoading && currentIndex === 0 && (!isShowTodayOnly || idEmployee)) {
         return <div className="p-6 text-center text-zinc-500">Завантаження чеків...</div>;
     }
 
@@ -104,40 +126,67 @@ export const CheckListPage = () => {
     return (
         <div className="bg-zinc-100 p-2 mx-auto space-y-4">
             <div className="flex flex-wrap justify-center items-center">
-                <h2 className="text-xl font-bold text-zinc-900">Список чеків</h2>
+                <h2 className="text-xl font-bold text-zinc-900">
+                    {isShowTodayOnly ? "Чеки за сьогодні" : "Список чеків"}
+                </h2>
             </div>
 
             <div className="bg-white p-4 rounded shadow-sm border border-blue-200 flex flex-col md:flex-row gap-4 items-end justify-between">
                 <div className="flex flex-wrap items-end gap-4">
-                    <div className="flex flex-col">
-                        <label className="text-xs text-zinc-600 font-medium mb-1">Від дати</label>
-                        <input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => {
-                                setStartDate(e.target.value);
-                                resetPagination();
-                            }}
-                            className={`border rounded px-2 py-1.5 text-sm text-zinc-800 focus:outline-none focus:ring-1 ${isDateInvalid ? 'border-red-500 focus:ring-red-500' : 'border-blue-300 focus:ring-blue-500'}`}
-                        />
-                    </div>
+                    {isCashier &&
+                        <div className="flex items-center gap-2 mb-1 mr-4">
+                            <span className="text-sm text-zinc-700 font-medium">Тільки за сьогодні</span>
+                            <button
+                                onClick={() => {
+                                    setIsShowTodayOnly(!isShowTodayOnly);
+                                    resetPagination();
+                                }}
+                                className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
+                                    isShowTodayOnly ? "bg-green-500" : "bg-blue-200"
+                                }`}
+                            >
+                                <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                                    isShowTodayOnly ? "translate-x-5" : "translate-x-0"
+                                }`} />
+                            </button>
+                        </div>
+                    }
+
+                    {!isShowTodayOnly && (
+                        <>
+                            <div className="flex flex-col">
+                                <label className="text-xs text-zinc-600 font-medium mb-1">Від дати</label>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => {
+                                        setStartDate(e.target.value);
+                                        resetPagination();
+                                    }}
+                                    className={`border rounded px-2 py-1.5 text-sm text-zinc-800 focus:outline-none focus:ring-1 ${isDateInvalid ? 'border-red-500 focus:ring-red-500' : 'border-blue-300 focus:ring-blue-500'}`}
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label className="text-xs text-zinc-600 font-medium mb-1">До дати</label>
+                                <input
+                                    type="date"
+                                    min={startDate}
+                                    value={endDate}
+                                    onChange={(e) => {
+                                        setEndDate(e.target.value);
+                                        resetPagination();
+                                    }}
+                                    className={`border rounded px-2 py-1.5 text-sm text-zinc-800 focus:outline-none focus:ring-1 ${isDateInvalid ? 'border-red-500 focus:ring-red-500' : 'border-blue-300 focus:ring-blue-500'}`}
+                                />
+                            </div>
+                        </>
+                    )}
 
                     <div className="flex flex-col">
-                        <label className="text-xs text-zinc-600 font-medium mb-1">До дати</label>
-                        <input
-                            type="date"
-                            min={startDate}
-                            value={endDate}
-                            onChange={(e) => {
-                                setEndDate(e.target.value);
-                                resetPagination();
-                            }}
-                            className={`border rounded px-2 py-1.5 text-sm text-zinc-800 focus:outline-none focus:ring-1 ${isDateInvalid ? 'border-red-500 focus:ring-red-500' : 'border-blue-300 focus:ring-blue-500'}`}
-                        />
-                    </div>
-
-                    <div className="flex flex-col">
-                        <label className="text-xs text-zinc-600 font-medium mb-1">ID Працівника</label>
+                        <label className="text-xs text-zinc-600 font-medium mb-1">
+                            ID Працівника {isShowTodayOnly && <span className="text-red-500">*</span>}
+                        </label>
                         <input
                             type="text"
                             placeholder="Усі працівники"
@@ -146,10 +195,21 @@ export const CheckListPage = () => {
                                 setIdEmployee(e.target.value);
                                 resetPagination();
                             }}
-                            className="border border-blue-300 rounded px-2 py-1.5 text-sm text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500 w-36"
+                            className={`border rounded px-2 py-1.5 text-sm text-zinc-800 focus:outline-none focus:ring-1 w-36 ${isShowTodayOnly && !idEmployee ? 'border-red-400 focus:ring-red-400' : 'border-blue-300 focus:ring-blue-500'}`}
                         />
                     </div>
-
+                    {!isCashier && !isShowTodayOnly && !isDateInvalid && (
+                        <div className="flex justify-end px-2">
+                            <span className="text-sm font-semibold text-zinc-800 bg-white border border-blue-200 px-3 py-1.5 rounded shadow-sm">
+                                Загальна сума чеків: {" "}
+                                {isTotalSumFetching ? (
+                                    <span className="text-zinc-500 animate-pulse">Рахуємо...</span>
+                                ) : (
+                                    <span className="text-green-600">{Number(totalSum || 0).toFixed(2)} грн</span>
+                                )}
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-5 mb-1">
@@ -163,25 +223,18 @@ export const CheckListPage = () => {
                 </div>
             </div>
 
-            {isDateInvalid && (
+            {!isShowTodayOnly && isDateInvalid && (
                 <p className="text-red-500 text-sm">Кінцева дата не може бути меншою за початкову.</p>
             )}
 
-            {!isCashier && !isDateInvalid && (
-                <div className="flex justify-end px-2">
-                    <span className="text-sm font-semibold text-zinc-800 bg-white border border-blue-200 px-3 py-1.5 rounded shadow-sm">
-                        Загальна сума чеків: {" "}
-                        {isTotalSumFetching ? (
-                            <span className="text-zinc-500 animate-pulse">Рахуємо...</span>
-                        ) : (
-                            <span className="text-green-600">{Number(totalSum || 0).toFixed(2)} грн</span>
-                        )}
-                    </span>
-                </div>
-            )}
-
-            {checks?.length === 0 && currentIndex === 0 ? (
-                <p className="text-zinc-400 text-sm">Чеків за вказаними фільтрами не знайдено.</p>
+            {isShowTodayOnly && !idEmployee ? (
+                <p className="text-zinc-500 text-sm text-center bg-white p-4 rounded border border-blue-200">
+                    Будь ласка, введіть ID працівника, щоб переглянути його чеки за сьогодні.
+                </p>
+            ) : checks?.length === 0 && currentIndex === 0 ? (
+                <p className="text-zinc-400 text-sm text-center bg-white p-4 rounded border border-blue-200">
+                    Чеків не знайдено.
+                </p>
             ) : (
                 <div className="overflow-x-auto bg-white border border-blue-300 relative">
                     {isFetching && currentIndex > 0 && (
@@ -207,7 +260,7 @@ export const CheckListPage = () => {
                         <tbody>
                         {checks?.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="px-3 py-8 text-center text-zinc-500 bg-white">
+                                <td colSpan={isManager ? 7 : 6} className="px-3 py-8 text-center text-zinc-500 bg-white">
                                     Ви досягли кінця списку. Більше чеків немає
                                 </td>
                             </tr>
@@ -262,8 +315,8 @@ export const CheckListPage = () => {
 
                         <button
                             onClick={handleNextPage}
-                            disabled={isLastPage || isFetching || isDateInvalid}
-                            className={`transition-opacity ${isLastPage || isFetching || isDateInvalid ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
+                            disabled={isLastPage || isFetching || (!isShowTodayOnly && isDateInvalid)}
+                            className={`transition-opacity ${isLastPage || isFetching || (!isShowTodayOnly && isDateInvalid) ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
                         >
                             <div className="hover:scale-110 transition-transform flex justify-center w-full">
                                 <img src="/src/logos/arrow-right.png" alt="next" className="w-5 h-5" />

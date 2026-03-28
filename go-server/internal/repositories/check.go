@@ -225,7 +225,7 @@ func (r *checkRepository) CreateNewCheck(
 			CardNumber:  check.CardNumber,
 			PrintDate:   printTime,
 			SumTotal:    totalPrice,
-			Vat:         check.VAT,
+			Vat:         totalPrice * constants.Vat,
 		},
 	)
 	if err != nil {

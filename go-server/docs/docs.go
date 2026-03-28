@@ -427,7 +427,7 @@ const docTemplate = `{
                             "items": {
                                 "type": "array",
                                 "items": {
-                                    "$ref": "#/definitions/views.CheckResponseWithProducts"
+                                    "$ref": "#/definitions/views.CheckResponse"
                                 }
                             }
                         }
@@ -653,7 +653,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/views.CheckListResponse"
+                                "$ref": "#/definitions/views.CheckResponse"
                             }
                         }
                     },
@@ -1257,17 +1257,6 @@ const docTemplate = `{
                 }
             }
         },
-        "views.CheckListResponse": {
-            "type": "object",
-            "properties": {
-                "check": {
-                    "$ref": "#/definitions/views.CheckResponse"
-                },
-                "product": {
-                    "$ref": "#/definitions/views.ProductResponse"
-                }
-            }
-        },
         "views.CheckResponse": {
             "type": "object",
             "properties": {
@@ -1325,8 +1314,7 @@ const docTemplate = `{
                 "check_number",
                 "id_employee",
                 "print_date",
-                "products",
-                "vat"
+                "products"
             ],
             "properties": {
                 "card_number": {
@@ -1353,11 +1341,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/views.StoreProduct"
                     }
-                },
-                "vat": {
-                    "type": "number",
-                    "maximum": 999999999.9999,
-                    "minimum": 0
                 }
             }
         },
