@@ -28,7 +28,7 @@ type CheckStoreProduct struct {
 	CheckDate    time.Time `db:"check_date"`
 }
 
-type Check struct {
+type CheckWithProductList struct {
 	Check       *generated.Check
 	ProductList []generated.GetCheckProductsByNameRow
 }
@@ -43,16 +43,18 @@ type CheckRepository interface {
 		keys []string,
 	) (*generated.Check, error)
 	DeleteCheck(ctx context.Context, checkNumber string) error
-	GetCheckByNumber(ctx context.Context, checkNumber string) (*Check, error)
-	GetChecksWithProductsByCashierWithinDate(
+	GetCheckByNumber(ctx context.Context, checkNumber string) (*CheckWithProductList, error)
+	GetChecksByCashierWithinDate(
 		ctx context.Context,
+		lastCheckNumber string,
 		employeeID string,
 		startDate, endDate time.Time,
-	) ([]generated.CheckListView, error)
-	GetAllChecksWithProductsWithinDate(
+	) ([]generated.Check, error)
+	GetAllChecksWithinDate(
 		ctx context.Context,
+		lastCheckNumber string,
 		startDate, endDate time.Time,
-	) ([]generated.CheckListView, error)
+	) ([]generated.Check, error)
 	GetTotalPriceByCashierWithinDate(
 		ctx context.Context,
 		employeeID string,
@@ -115,11 +117,12 @@ func (r *checkRepository) GetTotalPriceByAllCashiersWithinDate(
 	)
 }
 
-func (r *checkRepository) GetChecksWithProductsByCashierWithinDate(
+func (r *checkRepository) GetChecksByCashierWithinDate(
 	ctx context.Context,
+	lastCheckNumber string,
 	employeeID string,
 	startDate, endDate time.Time,
-) ([]generated.CheckListView, error) {
+) ([]generated.Check, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
@@ -128,33 +131,38 @@ func (r *checkRepository) GetChecksWithProductsByCashierWithinDate(
 		return nil, err
 	}
 
-	return r.queries.GetChecksWithProductsByCashierWithinDate(
+	return r.queries.GetChecksByCashierWithinDate(
 		ctx,
-		generated.GetChecksWithProductsByCashierWithinDateParams{
+		generated.GetChecksByCashierWithinDateParams{
 			IDEmployee:  employeeID,
 			PrintDate:   startDate,
 			PrintDate_2: endDate,
+			CheckNumber: lastCheckNumber,
+			Limit:       constants.PaginationStep,
 		},
 	)
 }
 
-func (r *checkRepository) GetAllChecksWithProductsWithinDate(
+func (r *checkRepository) GetAllChecksWithinDate(
 	ctx context.Context,
+	lastCheckNumber string,
 	startDate, endDate time.Time,
-) ([]generated.CheckListView, error) {
+) ([]generated.Check, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
-	return r.queries.GetAllChecksWithProductsWithinDate(
+	return r.queries.GetAllChecksWithinDate(
 		ctx,
-		generated.GetAllChecksWithProductsWithinDateParams{
+		generated.GetAllChecksWithinDateParams{
 			PrintDate:   startDate,
 			PrintDate_2: endDate,
+			CheckNumber: lastCheckNumber,
+			Limit:       constants.PaginationStep,
 		},
 	)
 }
 
-func (r *checkRepository) GetCheckByNumber(ctx context.Context, checkNumber string) (*Check, error) {
+func (r *checkRepository) GetCheckByNumber(ctx context.Context, checkNumber string) (*CheckWithProductList, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
@@ -169,7 +177,7 @@ func (r *checkRepository) GetCheckByNumber(ctx context.Context, checkNumber stri
 		return nil, err
 	}
 
-	return &Check{
+	return &CheckWithProductList{
 		Check:       &check,
 		ProductList: products,
 	}, nil

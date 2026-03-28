@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
@@ -20,6 +19,7 @@ type CheckService interface {
 	GetCheckList(
 		ctx context.Context,
 		employeeID *string,
+		lastCheckNumber *string,
 		startDate, endDate time.Time,
 	) (*[]views.CheckResponse, error)
 	GetTotalCheckPrice(
@@ -84,22 +84,27 @@ func (s *checkService) GetCheck(ctx context.Context, checkNumber string) (*views
 func (s *checkService) GetCheckList(
 	ctx context.Context,
 	employeeID *string,
+	lastCheckNumber *string,
 	startDate, endDate time.Time,
 ) (*[]views.CheckResponse, error) {
-	var checkList []generated.CheckListView
+	var checkList []generated.Check
 	var err error
-
+	if lastCheckNumber == nil {
+		lastCheckNumber = new(string)
+	}
 	switch {
 	case employeeID != nil:
-		checkList, err = s.checkRepository.GetChecksWithProductsByCashierWithinDate(
+		checkList, err = s.checkRepository.GetChecksByCashierWithinDate(
 			ctx,
+			*lastCheckNumber,
 			*employeeID,
 			startDate,
 			endDate,
 		)
 	default:
-		checkList, err = s.checkRepository.GetAllChecksWithProductsWithinDate(
+		checkList, err = s.checkRepository.GetAllChecksWithinDate(
 			ctx,
+			*lastCheckNumber,
 			startDate,
 			endDate,
 		)
@@ -107,31 +112,9 @@ func (s *checkService) GetCheckList(
 	if err != nil {
 		return nil, fmt.Errorf("failed to get checks: %w", err)
 	}
-	mappedChecks := make(map[string]*views.CheckResponseWithProducts)
-	for _, row := range checkList {
-		if _, exists := mappedChecks[row.CheckNumber]; !exists {
-			mappedChecks[row.CheckNumber] = &views.CheckResponseWithProducts{
-				CheckResponse: views.CheckResponse{
-					CheckNumber: row.CheckNumber,
-					IDEmployee:  row.IDEmployee,
-					CardNumber:  row.CardNumber,
-					PrintDate:   row.PrintDate.Format(constants.DateLayout),
-					SumTotal:    row.SumTotal,
-					VAT:         row.Vat,
-				},
-				Products: make([]views.ProductResponse, 0),
-			}
-		}
-
-		mappedChecks[row.CheckNumber].Products = append(mappedChecks[row.CheckNumber].Products, views.ProductResponse{
-			Name:         row.ProductName,
-			SellingPrice: row.SellingPrice,
-			Quantity:     int(row.ProductNumber),
-		})
-	}
-	result := make([]views.CheckResponseWithProducts, 0, len(mappedChecks))
-	for _, check := range mappedChecks {
-		result = append(result, *check)
+	result := make([]views.CheckResponse, 0, len(checkList))
+	for i := range checkList {
+		result = append(result, *mappers.CheckModelToResponse(&checkList[i]))
 	}
 	return &result, nil
 }

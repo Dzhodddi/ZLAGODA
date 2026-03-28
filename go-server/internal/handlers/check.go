@@ -139,6 +139,8 @@ func (h *CheckHandler) getCheckWithProducts(c echo.Context) error {
 //
 //	@Param			end_date 	query		string	true	"end_date"
 //
+//	@Param			check_number 	query		string	false	"check_number"
+//
 // @Success      200  {array}  []views.CheckResponse
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Forbidden"
@@ -161,7 +163,13 @@ func (h *CheckHandler) getCheckList(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	checkList, err := h.checkService.GetCheckList(c.Request().Context(), q.EmployeeID, *startDate, *endDate)
+	checkList, err := h.checkService.GetCheckList(
+		c.Request().Context(),
+		q.EmployeeID,
+		q.LastCheckNumber,
+		*startDate,
+		*endDate,
+	)
 	if err != nil {
 		return err
 	}
@@ -177,6 +185,8 @@ func (h *CheckHandler) getCheckList(c echo.Context) error {
 // @Produce      json
 //
 //	@Param			employee_id 	query		string	true	"employee_id"
+//
+//	@Param			check_number 	query		string	false	"check_number"
 //
 // @Success      200  {array}  views.CheckResponse
 // @Failure      401  {object}  map[string]any  "Unauthorized"
@@ -200,6 +210,7 @@ func (h *CheckHandler) getCheckListWithinToday(c echo.Context) error {
 	checkList, err := h.checkService.GetCheckList(
 		c.Request().Context(),
 		&q.EmployeeID,
+		q.LastCheckNumber,
 		today,
 		today.Add(24*time.Hour-time.Nanosecond),
 	)

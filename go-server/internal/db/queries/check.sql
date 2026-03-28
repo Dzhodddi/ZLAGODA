@@ -69,7 +69,8 @@ WHERE
   AND print_date BETWEEN $2 AND $3
   AND check_number > $4
 ORDER BY
-    check_number;
+    check_number
+FETCH FIRST $5 ROWS ONLY;
 
 -- name: GetAllChecksWithinDate :many
 SELECT
@@ -85,7 +86,8 @@ WHERE
     print_date BETWEEN $1 AND $2
   AND check_number > $3
 ORDER BY
-    check_number;
+    check_number
+FETCH FIRST $4 ROWS ONLY;
 
 -- name: GetTotalPriceByCashierWithinDate :one
 SELECT

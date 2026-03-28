@@ -417,6 +417,12 @@ const docTemplate = `{
                         "name": "end_date",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "check_number",
+                        "name": "check_number",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -645,6 +651,12 @@ const docTemplate = `{
                         "name": "employee_id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "check_number",
+                        "name": "check_number",
+                        "in": "query"
                     }
                 ],
                 "responses": {

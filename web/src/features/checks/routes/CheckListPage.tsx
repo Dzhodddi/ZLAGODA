@@ -38,6 +38,7 @@ export const CheckListPage = () => {
         startDate!,
         endDate!,
         idEmployee || undefined,
+        currentCursor.checkNumber,
         !isShowTodayOnly
     );
 
@@ -48,7 +49,8 @@ export const CheckListPage = () => {
         isFetching: isTodayFetching
     } = useTodayCheckList(
         idEmployee,
-        isShowTodayOnly
+        isShowTodayOnly,
+        currentCursor.checkNumber,
     );
 
     const checks = isShowTodayOnly ? todayChecks : allChecks;
@@ -95,7 +97,7 @@ export const CheckListPage = () => {
         if (!lastItem) return;
 
         const nextCursor: Cursor = {
-            checkNumber: lastItem.check.checkNumber
+            checkNumber: lastItem.checkNumber
         };
 
         const nextIndex = currentIndex + 1;
@@ -267,25 +269,25 @@ export const CheckListPage = () => {
                         ) : (
                             checks?.map((check) => (
                                 <tr
-                                    key={check.check.checkNumber}
-                                    onClick={() => navigate(`/check/${check.check.checkNumber}`)}
+                                    key={check.checkNumber}
+                                    onClick={() => navigate(`/check/${check.checkNumber}`)}
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 text-center">{check.check.checkNumber}</td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center">{check.check.idEmployee}</td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center truncate">{check.check.cardNumber || "-"}</td>
+                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 text-center">{check.checkNumber}</td>
+                                    <td className="px-3 py-2 border border-blue-200 text-center">{check.idEmployee}</td>
+                                    <td className="px-3 py-2 border border-blue-200 text-center truncate">{check.cardNumber || "-"}</td>
                                     <td className="px-3 py-2 border border-blue-200 text-center">
-                                        {new Date(check.check.printDate).toLocaleString('uk-UA', {
+                                        {new Date(check.printDate).toLocaleString('uk-UA', {
                                             year: 'numeric', month: '2-digit', day: '2-digit',
                                             hour: '2-digit', minute: '2-digit'
                                         })}
                                     </td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center font-medium">{check.check.sumTotal}</td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center text-zinc-600">{check.check.vat}</td>
+                                    <td className="px-3 py-2 border border-blue-200 text-center font-medium">{check.sumTotal}</td>
+                                    <td className="px-3 py-2 border border-blue-200 text-center text-zinc-600">{check.vat}</td>
                                     {isManager &&
                                         <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                             <button
-                                                onClick={() => handleDelete(check.check.checkNumber)}
+                                                onClick={() => handleDelete(check.checkNumber)}
                                                 className="hover:scale-110 transition-transform flex justify-center w-full"
                                             >
                                                 <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />

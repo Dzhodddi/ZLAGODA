@@ -23,11 +23,13 @@ type CheckResponseWithProducts struct {
 }
 
 type CheckListQueryParams struct {
-	EmployeeID *string `query:"employee_id" validate:"omitempty,min=1,max=10"`
-	StartDate  string  `query:"start_date" validate:"required,datetime=2006-01-02"`
-	EndDate    string  `query:"end_date" validate:"required,datetime=2006-01-02"`
+	EmployeeID      *string `query:"employee_id" validate:"omitempty,min=1,max=10"`
+	StartDate       string  `query:"start_date" validate:"required,datetime=2006-01-02"`
+	EndDate         string  `query:"end_date" validate:"required,datetime=2006-01-02"`
+	LastCheckNumber *string `query:"check_number" validate:"omitempty,min=1,max=10"`
 }
 
 type CheckListQueryWithThisDayParams struct {
-	EmployeeID string `query:"employee_id" validate:"required,min=1,max=10"`
+	EmployeeID      string  `query:"employee_id" validate:"required,min=1,max=10"`
+	LastCheckNumber *string `query:"check_number" validate:"omitempty,min=1,max=10"`
 }

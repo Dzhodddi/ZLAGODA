@@ -141,16 +141,23 @@ WHERE
   AND check_number > $3
 ORDER BY
     check_number
+FETCH FIRST $4 ROWS ONLY
 `
 
 type GetAllChecksWithinDateParams struct {
 	PrintDate   time.Time
 	PrintDate_2 time.Time
 	CheckNumber string
+	Limit       int32
 }
 
 func (q *Queries) GetAllChecksWithinDate(ctx context.Context, arg GetAllChecksWithinDateParams) ([]Check, error) {
-	rows, err := q.db.QueryContext(ctx, getAllChecksWithinDate, arg.PrintDate, arg.PrintDate_2, arg.CheckNumber)
+	rows, err := q.db.QueryContext(ctx, getAllChecksWithinDate,
+		arg.PrintDate,
+		arg.PrintDate_2,
+		arg.CheckNumber,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -255,6 +262,7 @@ WHERE
   AND check_number > $4
 ORDER BY
     check_number
+FETCH FIRST $5 ROWS ONLY
 `
 
 type GetChecksByCashierWithinDateParams struct {
@@ -262,6 +270,7 @@ type GetChecksByCashierWithinDateParams struct {
 	PrintDate   time.Time
 	PrintDate_2 time.Time
 	CheckNumber string
+	Limit       int32
 }
 
 func (q *Queries) GetChecksByCashierWithinDate(ctx context.Context, arg GetChecksByCashierWithinDateParams) ([]Check, error) {
@@ -270,6 +279,7 @@ func (q *Queries) GetChecksByCashierWithinDate(ctx context.Context, arg GetCheck
 		arg.PrintDate,
 		arg.PrintDate_2,
 		arg.CheckNumber,
+		arg.Limit,
 	)
 	if err != nil {
 		return nil, err

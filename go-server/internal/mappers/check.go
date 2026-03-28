@@ -4,6 +4,7 @@ import (
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
+	"time"
 )
 
 func CheckModelToResponse(check *generated.Check) *views.CheckResponse {
@@ -11,13 +12,13 @@ func CheckModelToResponse(check *generated.Check) *views.CheckResponse {
 		CheckNumber: check.CheckNumber,
 		IDEmployee:  check.IDEmployee,
 		CardNumber:  check.CardNumber,
-		PrintDate:   check.PrintDate.Format("2006-01-02"),
+		PrintDate:   check.PrintDate.Format(time.RFC3339),
 		SumTotal:    check.SumTotal,
 		VAT:         check.Vat,
 	}
 }
 
-func CheckModelWithProductsToResponse(check *repository.Check) *views.CheckResponseWithProducts {
+func CheckModelWithProductsToResponse(check *repository.CheckWithProductList) *views.CheckResponseWithProducts {
 	products := make([]views.ProductResponse, 0, len(check.ProductList))
 	for _, product := range check.ProductList {
 		products = append(products, *ProductModelToResponse(&product))

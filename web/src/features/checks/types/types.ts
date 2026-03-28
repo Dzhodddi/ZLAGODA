@@ -26,7 +26,7 @@ export const CheckSchema = z.object({
         .string()
         .min(1, "Номер картки занадто короткий")
         .max(13, "Номер картки занадто довгий"),
-    print_date: z
+    printDate: z
         .iso
         .datetime("Невірний формат дати"),
     products: z
@@ -38,6 +38,12 @@ export const CheckSchema = z.object({
         .min(0, "ПДВ не може бути від'ємним")
         .max(999999999.9999, "ПДВ занадто великий"),
 });
+
+export const CheckListItemSchema = CheckSchema.omit({ products: true }).extend(
+    {
+        sumTotal: z.number(),
+    }
+);
 
 const ProductInListSchema = z.object({
     name: z.string().min(1, "Назва обов'язкова"),
@@ -62,3 +68,4 @@ export const CheckItemSchema = z.object({
 export type StoreProduct = z.infer<typeof StoreProductSchema>;
 export type Check = z.infer<typeof CheckSchema>;
 export type CheckItem = z.infer<typeof CheckItemSchema>;
+export type CheckListItem = z.infer<typeof CheckListItemSchema>;

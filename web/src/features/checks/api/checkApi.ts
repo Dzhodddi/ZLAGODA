@@ -3,7 +3,10 @@ import { z } from 'zod';
 import {
     type Check,
     CheckSchema,
-    CheckItemSchema, type CheckItem
+    CheckItemSchema,
+    type CheckItem,
+    type CheckListItem,
+    CheckListItemSchema,
 } from "@/features/checks/types/types.ts";
 
 const prefix = '/checks';
@@ -30,8 +33,9 @@ export const deleteCheck = async (checkNumber: string): Promise<void> => {
 export const listChecks = async (
     startDate: string,
     endDate: string,
-    employeeId?: string
-): Promise<CheckItem[]> => {
+    employeeId?: string,
+    checkNumber?: string,
+): Promise<CheckListItem[]> => {
     const params: Record<string, string> = {
         StartDate: startDate,
         EndDate: endDate,
@@ -40,11 +44,19 @@ export const listChecks = async (
     if (employeeId) {
         params.employeeId = employeeId;
     }
+    if (checkNumber) {
+        params.checkNumber = checkNumber;
+    }
 
     const response = await goApiClient.get(prefix, { params });
 
     if (!response.data) return [];
-    return z.array(CheckItemSchema).parse(response.data);
+    try {
+        return z.array(CheckListItemSchema).parse(response.data);
+    } catch (error) {
+        console.error("Error parsing response data:", error);
+        return [];
+    }
 };
 
 
@@ -63,10 +75,21 @@ export const getChecksTotalSum = async (
     return Number(response.data?.totalPrice || 0);
 };
 
-export const getTodayChecks = async (employeeId: string): Promise<CheckItem[]> => {
+export const getTodayChecks = async (
+    employeeId: string,
+    checkNumber?: string
+): Promise<CheckListItem[]> => {
     const response = await goApiClient.get(`${prefix}/today`, {
-        params: { employee_id: employeeId }
+        params: {
+            employee_id: employeeId,
+            check_number: checkNumber
+        }
     });
     if (!response.data) return [];
-    return z.array(CheckItemSchema).parse(response.data);
+    try {
+        return z.array(CheckListItemSchema).parse(response.data);
+    } catch (error) {
+        console.error("Error parsing response data:", error);
+        return [];
+    }
 };

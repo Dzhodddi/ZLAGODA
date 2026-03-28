@@ -67,13 +67,14 @@ export const useCheckList = (
     startDate: string,
     endDate: string,
     employeeId?: string,
+    checkNumber?: string,
     enabled: boolean = true
 ) => {
     return useQuery({
-        queryKey: ["checks", startDate, endDate, employeeId],
+        queryKey: ["checks", startDate, endDate, employeeId, checkNumber],
         queryFn: async () => {
             try {
-                return await listChecks(startDate, endDate, employeeId);
+                return await listChecks(startDate, endDate, employeeId, checkNumber);
             } catch (error) {
                 if (employeeId && isAxiosError(error) && error.response?.status === 400) {
                     toast.error(`Касира з таким ${employeeId!} не знайдено або невірний формат`);
@@ -117,12 +118,16 @@ export const useCheckTotalSum = (
     });
 };
 
-export const useTodayCheckList = (employeeId: string, enabled: boolean) => {
+export const useTodayCheckList = (
+    employeeId: string,
+    enabled: boolean,
+    checkNumber?: string
+) => {
     return useQuery({
-        queryKey: ["checks-today", employeeId],
+        queryKey: ["checks-today", employeeId, checkNumber],
         queryFn: async () => {
             try {
-                return await getTodayChecks(employeeId);
+                return await getTodayChecks(employeeId, checkNumber);
             } catch (error) {
                 if (employeeId && isAxiosError(error) && error.response?.status === 400) {
                     toast.error(`Касира з таким ${employeeId!} не знайдено або невірний формат`);
