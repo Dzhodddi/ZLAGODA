@@ -189,6 +189,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
 
         PdfPTable table = new PdfPTable(9);
         table.setWidthPercentage(100);
+        table.setWidths(new float[]{1, 1, 1, 1, 1.5f, 1, 1, 1, 0.5f});
 
         for (String header : new String[]{
                 "Номер карти", "Прізвище", "Ім'я", "По батькові", "Контактний телефон", "Місто", "Вулиця", "Поштовий індекс", "Відсоток"
@@ -270,7 +271,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
 
     @Override
     public byte[] categoryToPdf(List<CategoryResponseDto> categories, String managerName) throws DocumentException, IOException {
-        Document document = new Document(PageSize.A4.rotate());
+        Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PdfWriter writer = PdfWriter.getInstance(document, out);
         Font font = getFont();
