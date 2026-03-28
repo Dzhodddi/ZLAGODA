@@ -1,8 +1,15 @@
-import {goApiClient} from "@/lib/axios.ts";
+import {goApiClient, javaApiClient} from "@/lib/axios.ts";
 import {type CreateCustomerCard, type CustomerCard, CustomerCardSchema} from "@/features/customer-card/types/types.ts";
 import {z} from "zod";
 
 const prefix = "/customer-cards"
+
+export const downloadCustomerCardPdf = async (): Promise<Blob> => {
+    const response = await javaApiClient.get(`${prefix}/report`, {
+        responseType: "blob",
+    });
+    return response.data;
+};
 
 export const createCustomerCard = async (data: CreateCustomerCard): Promise<CustomerCard> => {
     const response = await goApiClient.post(prefix, data);

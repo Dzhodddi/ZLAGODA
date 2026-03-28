@@ -16,8 +16,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-
 import org.example.dto.employee.registration.EmployeeResponseDto;
+import org.example.dto.helper.CategoryResponseDto;
+import org.example.dto.helper.CheckResponseDto;
+import org.example.dto.helper.CustomerCardResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.springframework.core.io.ClassPathResource;
@@ -29,15 +31,15 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
     private static final String FONT_PATH = "fonts/LiberationSans.ttf";
 
     @Override
-    public byte[] employeeToPdf(List<EmployeeResponseDto> employees)
+    public byte[] employeeToPdf(List<EmployeeResponseDto> employees, String managerName)
             throws DocumentException, IOException {
         Document document = new Document(PageSize.A4.rotate());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PdfWriter.getInstance(document, out);
-        document.open();
+        PdfWriter writer = PdfWriter.getInstance(document, out);
         Font font = getFont();
+        writer.setPageEvent(new HeaderAndFooterTexts(font, managerName));
+        document.open();
         Font headerFont = getHeaderFont();
-
         Font titleFont = getTitleFont();
         document.add(new Paragraph("ЗВІТ ПРО ПРАЦІВНИКІВ\n\n", titleFont));
 
@@ -84,13 +86,14 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
     }
 
     @Override
-    public byte[] productToPdf(List<ProductDto> products)
+    public byte[] productToPdf(List<ProductDto> products, String managerName)
             throws DocumentException, IOException {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PdfWriter.getInstance(document, out);
-        document.open();
+        PdfWriter writer = PdfWriter.getInstance(document, out);
         Font font = getFont();
+        writer.setPageEvent(new HeaderAndFooterTexts(font, managerName));
+        document.open();
         Font headerFont = getHeaderFont();
 
         Font titleFont = getTitleFont();
@@ -127,15 +130,15 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
     }
 
     @Override
-    public byte[] storeProductToPdf(List<StoreProductDto> storeProducts)
+    public byte[] storeProductToPdf(List<StoreProductDto> storeProducts, String managerName)
             throws DocumentException, IOException {
         Document document = new Document(PageSize.A4.rotate());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PdfWriter.getInstance(document, out);
-        document.open();
+        PdfWriter writer = PdfWriter.getInstance(document, out);
         Font font = getFont();
+        writer.setPageEvent(new HeaderAndFooterTexts(font, managerName));
+        document.open();
         Font headerFont = getHeaderFont();
-
         Font titleFont = getTitleFont();
         document.add(new Paragraph("ЗВІТ ПРО ТОВАРИ В МАГАЗИНІ\n\n", titleFont));
 
@@ -160,6 +163,141 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
                     String.valueOf(sp.getSelling_price()),
                     String.valueOf(sp.getProducts_number()),
                     sp.isPromotional_product() ? "Так" : "Ні"
+            }) {
+                PdfPCell cell = new PdfPCell(new Phrase(value, font));
+                cell.setPadding(3);
+                table.addCell(cell);
+            }
+        }
+
+        document.add(table);
+        document.close();
+        return out.toByteArray();
+    }
+
+    @Override
+    public byte[] cardToPdf(List<CustomerCardResponseDto> cards, String managerName) throws DocumentException, IOException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PdfWriter writer = PdfWriter.getInstance(document, out);
+        Font font = getFont();
+        writer.setPageEvent(new HeaderAndFooterTexts(font, managerName));
+        document.open();
+        Font headerFont = getHeaderFont();
+        Font titleFont = getTitleFont();
+        document.add(new Paragraph("ЗВІТ ПРО ПОСТІЙНИХ КЛІЄНТІВ\n\n", titleFont));
+
+        PdfPTable table = new PdfPTable(9);
+        table.setWidthPercentage(100);
+
+        for (String header : new String[]{
+                "Номер карти", "Прізвище", "Ім'я", "По батькові", "Контактний телефон", "Місто", "Вулиця", "Поштовий індекс", "Відсоток"
+        }) {
+            PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
+            cell.setBackgroundColor(new BaseColor(59, 130, 246));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setPadding(4);
+            table.addCell(cell);
+        }
+
+        for (CustomerCardResponseDto c : cards) {
+            for (String value : new String[]{
+                    c.getCard_number(),
+                    c.getCust_surname(),
+                    c.getCust_name(),
+                    c.getCust_patronymic(),
+                    c.getPhone_number(),
+                    c.getCity(),
+                    c.getStreet(),
+                    c.getZip_code(),
+                    String.valueOf(c.getPercent())
+            }) {
+                PdfPCell cell = new PdfPCell(new Phrase(value, font));
+                cell.setPadding(3);
+                table.addCell(cell);
+            }
+        }
+
+        document.add(table);
+        document.close();
+        return out.toByteArray();
+    }
+
+    @Override
+    public byte[] checkToPdf(List<CheckResponseDto> checks, String managerName) throws DocumentException, IOException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PdfWriter writer = PdfWriter.getInstance(document, out);
+        Font font = getFont();
+        writer.setPageEvent(new HeaderAndFooterTexts(font, managerName));
+        document.open();
+        Font headerFont = getHeaderFont();
+        Font titleFont = getTitleFont();
+        document.add(new Paragraph("ЗВІТ ПРО ЧЕКИ\n\n", titleFont));
+
+        PdfPTable table = new PdfPTable(6);
+        table.setWidthPercentage(100);
+
+        for (String header : new String[]{
+                "Номер чека", "ID працівника", "Номер карти", "Дата", "Загальна сума", "ПДВ"
+        }) {
+            PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
+            cell.setBackgroundColor(new BaseColor(59, 130, 246));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setPadding(4);
+            table.addCell(cell);
+        }
+
+        for (CheckResponseDto c : checks) {
+            for (String value : new String[]{
+                    c.getCheck_number(),
+                    c.getId_employee(),
+                    c.getCard_number(),
+                    String.valueOf(c.getPrint_date()),
+                    String.valueOf(c.getSum_total()),
+                    String.valueOf(c.getVat())
+            }) {
+                PdfPCell cell = new PdfPCell(new Phrase(value, font));
+                cell.setPadding(3);
+                table.addCell(cell);
+            }
+        }
+
+        document.add(table);
+        document.close();
+        return out.toByteArray();
+    }
+
+    @Override
+    public byte[] categoryToPdf(List<CategoryResponseDto> categories, String managerName) throws DocumentException, IOException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PdfWriter writer = PdfWriter.getInstance(document, out);
+        Font font = getFont();
+        writer.setPageEvent(new HeaderAndFooterTexts(font, managerName));
+        document.open();
+        Font headerFont = getHeaderFont();
+        Font titleFont = getTitleFont();
+        document.add(new Paragraph("ЗВІТ ПРО КАТЕГОРІЇ ТОВАРІВ\n\n", titleFont));
+
+        PdfPTable table = new PdfPTable(2);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{1, 5});
+
+        for (String header : new String[]{
+                "Номер категорії", "Назва"
+        }) {
+            PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
+            cell.setBackgroundColor(new BaseColor(59, 130, 246));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setPadding(4);
+            table.addCell(cell);
+        }
+
+        for (CategoryResponseDto c : categories) {
+            for (String value : new String[]{
+                    String.valueOf(c.getCategory_number()),
+                    c.getCategory_name()
             }) {
                 PdfPCell cell = new PdfPCell(new Phrase(value, font));
                 cell.setPadding(3);

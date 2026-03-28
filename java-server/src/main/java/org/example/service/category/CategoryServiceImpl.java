@@ -1,8 +1,8 @@
-package org.example.service.product.helper.category;
+package org.example.service.category;
 
 import lombok.RequiredArgsConstructor;
 import org.example.dto.helper.CategoryResponseDto;
-import org.example.repository.product.helper.CategoryRepository;
+import org.example.repository.category.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

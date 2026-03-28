@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import {useCheckList, useDeleteCheck, useCheckTotalSum, useTodayCheckList} from "@/features/checks/hooks/useCheck.ts";
 import { useRole } from "@/hooks/useRole.ts";
+import {useDownloadCheckPdf} from "@/features/checks/hooks/useCheck.ts";
 
 type Cursor = {
     checkNumber: string;
@@ -66,6 +67,8 @@ export const CheckListPage = () => {
     );
 
     const deleteMutation = useDeleteCheck();
+    const pdfMutation = useDownloadCheckPdf();
+
     const navigate = useNavigate();
 
     const handleDelete = (checkNumber: string) => {
@@ -134,7 +137,7 @@ export const CheckListPage = () => {
             </div>
 
             <div className="bg-white p-4 rounded shadow-sm border border-blue-200 flex flex-col md:flex-row gap-4 items-end justify-between">
-                <div className="flex flex-wrap items-end gap-4">
+                <div className="flex flex-wrap items-center gap-5">
                     {isCashier &&
                         <div className="flex items-center gap-2 mb-1 mr-4">
                             <span className="text-sm text-zinc-700 font-medium">Тільки за сьогодні</span>
@@ -223,6 +226,13 @@ export const CheckListPage = () => {
                         </Link>
                     )}
                 </div>
+                <button
+                    onClick={() => pdfMutation.mutate()}
+                    disabled={pdfMutation.isPending}
+                    className="bg-zinc-700 text-white px-3 py-2 rounded hover:bg-zinc-800 text-xs whitespace-nowrap"
+                >
+                    Друкувати звіт
+                </button>
             </div>
 
             {!isShowTodayOnly && isDateInvalid && (

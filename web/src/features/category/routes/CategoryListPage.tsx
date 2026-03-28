@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useCategoryList, useDeleteCategory } from "@/features/category/hooks/useCategory.ts";
+import {useCategoryList, useDeleteCategory, useDownloadCategoryPdf} from "@/features/category/hooks/useCategory.ts";
 import { toast } from "sonner";
 import { useState } from "react";
+import {useDownloadCheckPdf} from "@/features/checks/hooks/useCheck.ts";
 
 type Cursor = {
     id: number;
@@ -23,6 +24,8 @@ export const CategoryListPage = () => {
     );
 
     const deleteMutation = useDeleteCategory();
+    const pdfMutation = useDownloadCategoryPdf();
+
     const navigate = useNavigate();
 
     const handleDelete = (categoryNumber: number) => {
@@ -107,7 +110,7 @@ export const CategoryListPage = () => {
                         }`} />
                     </button>
                 </div>
-                <div className="flex items-center gap-5">
+                <div className="flex flex-wrap items-center gap-5">
                     <Link to="/category/top"
                           title="Переглянути дві найпопулярніші категорії"
                     >
@@ -115,13 +118,24 @@ export const CategoryListPage = () => {
                             <img src="/src/logos/top-2.png" alt="top" className="h-6" />
                         </div>
                     </Link>
-                    <Link to="/category/create"
-                          title="Додати нову категорію"
-                    >
-                        <div className="hover:scale-110 transition-transform flex justify-center">
-                            <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
-                        </div>
-                    </Link>
+
+                    <div className="flex items-center gap-2 ml-auto">
+                        <Link to="/category/create"
+                              title="Додати нову категорію"
+                         >
+                            <div className="hover:scale-110 transition-transform flex justify-center">
+                                <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
+                            </div>
+                        </Link>
+
+                        <button
+                            onClick={() => pdfMutation.mutate()}
+                            disabled={pdfMutation.isPending}
+                            className="bg-zinc-700 text-white px-3 py-2 rounded hover:bg-zinc-800 text-xs whitespace-nowrap"
+                        >
+                            Друкувати звіт
+                        </button>
+                    </div>
                 </div>
             </div>
 

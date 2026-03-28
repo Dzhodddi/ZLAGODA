@@ -1,6 +1,6 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
-    createCustomerCard, deleteCustomerCard,
+    createCustomerCard, deleteCustomerCard, downloadCustomerCardPdf,
     getCustomerCard,
     listCustomerCard,
     updateCustomerCard
@@ -10,6 +10,17 @@ import {AxiosError, isAxiosError} from "axios";
 import {staleTime} from "@/constants/constants.ts";
 
 const QUERY_KEY = "customer_cards"
+
+export const useDownloadCustomerCardPdf = () => {
+    return useMutation({
+        mutationFn: downloadCustomerCardPdf,
+        onSuccess: (blob) => {
+            const url = URL.createObjectURL(blob);
+            window.open(url);
+        },
+        onError: (error) => alert(error),
+    });
+};
 
 export const useCreateCustomerCard = () => {
     const queryClient = useQueryClient();

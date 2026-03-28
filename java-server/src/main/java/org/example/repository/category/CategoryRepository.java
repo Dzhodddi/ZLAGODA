@@ -1,4 +1,4 @@
-package org.example.repository.product.helper;
+package org.example.repository.category;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +52,7 @@ public class CategoryRepository {
                         """
                         SELECT category_number, category_name
                         FROM category
-                        ORDER BY category_name
+                        ORDER BY category_number
                         """,
                         simpleRowMapper
                 ).stream()

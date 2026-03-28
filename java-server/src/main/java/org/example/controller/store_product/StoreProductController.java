@@ -7,11 +7,13 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.store_product.batch.BatchRequestDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
 import org.example.dto.store_product.product.StoreProductWithNameDto;
+import org.example.service.employee.EmployeeService;
 import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
@@ -45,6 +47,7 @@ public class StoreProductController {
 
     private final static int PAGE_SIZE = 10;
     private final StoreProductService storeProductService;
+    private final EmployeeService employeeService;
     private final BatchService batchService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
 
@@ -175,7 +178,9 @@ public class StoreProductController {
     @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<byte[]> storeProductPdf() throws DocumentException, IOException {
         List<StoreProductDto> storeProduct = storeProductService.getAllNoPagination();
-        byte[] pdf = pdfReportGeneratorService.storeProductToPdf(storeProduct);
+        EmployeeResponseDto manager = employeeService.getMe();
+        byte[] pdf = pdfReportGeneratorService.storeProductToPdf(storeProduct,
+                manager.getEmpl_surname() + " " + manager.getEmpl_name());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=store_products.pdf")
                 .body(pdf);

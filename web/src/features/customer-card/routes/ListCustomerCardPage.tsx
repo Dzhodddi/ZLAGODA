@@ -1,5 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useCustomerCardList, useDeleteCustomerCard } from "@/features/customer-card/hooks/useCustomerCard.ts";
+import {
+    useCustomerCardList,
+    useDeleteCustomerCard,
+    useDownloadCustomerCardPdf
+} from "@/features/customer-card/hooks/useCustomerCard.ts";
 import { toast } from "sonner";
 import { useState } from "react";
 import {useRole} from "@/hooks/useRole.ts";
@@ -31,6 +35,8 @@ export const CustomerCardListPage = () => {
     );
 
     const deleteMutation = useDeleteCustomerCard();
+    const pdfMutation = useDownloadCustomerCardPdf();
+
     const navigate = useNavigate();
     const { isManager, isCashier } = useRole();
 
@@ -139,7 +145,7 @@ export const CustomerCardListPage = () => {
                 <h2 className="text-xl font-bold text-zinc-900">Картки клієнтів</h2>
             </div>
 
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-5">
                 <div className="flex items-center gap-1.5 shrink-0">
                     <span className="text-sm text-zinc-700 font-medium">
                         Сортувати за прізвищем
@@ -223,13 +229,20 @@ export const CustomerCardListPage = () => {
                         )}
                     </div> }
                 {isManager &&
-                <div className="flex items-center gap-5 shrink-0">
+                <div className="flex items-center gap-2 ml-auto">
                     <Link to="/customer-card/create"
                           title="Додати картку клієнта">
                         <div className="hover:scale-110 transition-transform flex justify-center">
                             <img src="/src/logos/add.png" alt="add" className="w-8 h-8" />
                         </div>
                     </Link>
+                    <button
+                        onClick={() => pdfMutation.mutate()}
+                        disabled={pdfMutation.isPending}
+                        className="bg-zinc-700 text-white px-3 py-2 rounded hover:bg-zinc-800 text-xs whitespace-nowrap"
+                    >
+                        Друкувати звіт
+                    </button>
                 </div> }
             </div>
 

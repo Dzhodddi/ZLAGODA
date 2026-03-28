@@ -1,4 +1,4 @@
-import { goApiClient } from '@/lib/axios.ts';
+import {goApiClient, javaApiClient} from '@/lib/axios.ts';
 import { z } from 'zod';
 import {
     type Check,
@@ -10,6 +10,13 @@ import {
 } from "@/features/checks/types/types.ts";
 
 const prefix = '/checks';
+
+export const downloadCheckPdf = async (): Promise<Blob> => {
+    const response = await javaApiClient.get(`${prefix}/report`, {
+        responseType: "blob",
+    });
+    return response.data;
+};
 
 export const createCheck = async (data: Check): Promise<Check> => {
     const response = await goApiClient.post(prefix, data);
