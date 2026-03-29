@@ -32,15 +32,22 @@ public class CategoryRepository {
     public List<CategoryResponseDto> findPopCategories() {
         return jdbcTemplate.query(
                         """
-                        SELECT c.category_number, c.category_name,
-                        SUM(s.product_number) AS total_sold
-                        FROM category c
-                        INNER JOIN product p ON c.category_number = p.category_number
-                        INNER JOIN store_product sp ON p.id_product = sp.id_product
-                        INNER JOIN sale s ON sp.upc = s.upc
-                        GROUP BY c.category_number, c.category_name
-                        ORDER BY SUM(s.product_number) DESC
-                        LIMIT 2
+                        WITH ranked AS (SELECT c.category_number, c.category_name,
+                                                SUM(s.product_number) AS total_sold,
+                                                DENSE_RANK() OVER (ORDER BY SUM(s.product_number) DESC) AS rnk
+                                        FROM category c
+                                        INNER JOIN product p ON c.category_number = p.category_number
+                                        INNER JOIN store_product sp ON p.id_product = sp.id_product
+                                        INNER JOIN sale s ON sp.upc = s.upc
+                                        GROUP BY c.category_number, c.category_name
+                                        ),
+                            leader_count AS (SELECT COUNT(*) AS cnt
+                                            FROM ranked
+                                            WHERE rnk = 1
+                                            )
+                        SELECT r.category_number, r.category_name, r.total_sold
+                        FROM ranked r, leader_count lc
+                        WHERE r.rnk = 1 OR (lc.cnt = 1 AND r.rnk = 2);
                         """,
                         fullRowMapper
                 ).stream()
