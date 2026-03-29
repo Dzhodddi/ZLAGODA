@@ -1,11 +1,10 @@
 package org.example.service.category;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.helper.CategoryResponseDto;
 import org.example.repository.category.CategoryRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service

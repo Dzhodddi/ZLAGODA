@@ -5,8 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.util.List;
+import java.util.Optional;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
@@ -22,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.example.exception.custom_exception.InvalidProductException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Product Service Tests")
@@ -158,5 +164,79 @@ class ProductServiceTest {
 
         verify(repository).findAllNoPagination();
         verifyNoInteractions(mapper);
+    }
+
+    @Test
+    @DisplayName("getById should return ProductDto when product exists")
+    void getById_existingId_shouldReturnDto() {
+        when(repository.findById(1)).thenReturn(Optional.of(productDto));
+
+        ProductDto result = service.getById(1);
+
+        assertNotNull(result);
+        assertEquals("TestProduct", result.getProduct_name());
+        verify(repository).findById(1);
+    }
+
+    @Test
+    @DisplayName("getById should throw InvalidProductException when product not found")
+    void getById_notFound_shouldThrow() {
+        when(repository.findById(99)).thenReturn(Optional.empty());
+
+        assertThrows(
+                InvalidProductException.class,
+                () -> service.getById(99)
+        );
+        verify(repository).findById(99);
+    }
+
+    @Test
+    @DisplayName("getSold should return page of sold products")
+    void getSold_ok() {
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                List.of(productDto), 0, 10, false);
+
+        when(repository.findSold(pageable, 100.0)).thenReturn(page);
+
+        PageResponseDto<ProductDto> result = service.getSold(pageable, 100.0);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        verify(repository).findSold(pageable, 100.0);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    @DisplayName("getAll with sortedByName=false should call findAll")
+    void getAll_notSorted_shouldCallFindAll() {
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                List.of(productDto), 0, 10, false);
+
+        when(repository.findAll(pageable)).thenReturn(page);
+
+        PageResponseDto<ProductDto> result = service.getAll(pageable, false);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        verify(repository).findAll(pageable);
+        verify(repository, never()).findAllSortedByName(any());
+    }
+
+    @Test
+    @DisplayName("findByCategoryId with sortedByName=true should call findByCategoryIdSortedByName")
+    void findByCategory_sorted_shouldCallSortedMethod() {
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<ProductDto> page = PageResponseDto.of(
+                List.of(productDto), 0, 10, false);
+
+        when(repository.findByCategoryIdSortedByName(10, pageable)).thenReturn(page);
+
+        PageResponseDto<ProductDto> result = service.findByCategoryId(10, pageable, true);
+
+        assertEquals(1, result.getContent().size());
+        verify(repository).findByCategoryIdSortedByName(10, pageable);
+        verify(repository, never()).findByCategoryId(anyInt(), any());
     }
 }

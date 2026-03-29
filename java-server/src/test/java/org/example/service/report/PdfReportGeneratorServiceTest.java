@@ -7,6 +7,7 @@ import com.itextpdf.text.DocumentException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
@@ -20,6 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.example.dto.helper.CategoryResponseDto;
+import org.example.dto.helper.CheckResponseDto;
+import org.example.dto.helper.CustomerCardResponseDto;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PDF Report Generator Service Tests")
@@ -31,6 +35,9 @@ class PdfReportGeneratorServiceTest {
     private EmployeeResponseDto employeeDto;
     private ProductDto productDto;
     private StoreProductDto storeProductDto;
+    private CustomerCardResponseDto cardDto;
+    private CheckResponseDto checkDto;
+    private CategoryResponseDto categoryDto;
 
     @BeforeEach
     void setUp() {
@@ -61,6 +68,29 @@ class PdfReportGeneratorServiceTest {
         storeProductDto.setSelling_price(new BigDecimal("12.00"));
         storeProductDto.setProducts_number(50);
         storeProductDto.setPromotional_product(false);
+
+        cardDto = new CustomerCardResponseDto();
+        cardDto.setCard_number("1234567890123");
+        cardDto.setCust_surname("Коваленко");
+        cardDto.setCust_name("Олена");
+        cardDto.setCust_patronymic("Василівна");
+        cardDto.setPhone_number("+380671234567");
+        cardDto.setCity("Одеса");
+        cardDto.setStreet("Дерибасівська 5");
+        cardDto.setZip_code("65000");
+        cardDto.setPercent(5);
+
+        checkDto = new CheckResponseDto();
+        checkDto.setCheck_number("CHK0001");
+        checkDto.setId_employee("EMP001");
+        checkDto.setCard_number("1234567890123");
+        checkDto.setPrint_date(LocalDateTime.of(2024, 1, 15, 10, 30));
+        checkDto.setSum_total(new BigDecimal("250.00"));
+        checkDto.setVat(new BigDecimal("50.00"));
+
+        categoryDto = new CategoryResponseDto();
+        categoryDto.setCategory_number(1);
+        categoryDto.setCategory_name("Молочні продукти");
     }
 
     @Test
@@ -186,6 +216,132 @@ class PdfReportGeneratorServiceTest {
     void storeProductToPdf_promotionalProduct_shouldGeneratePdf() throws DocumentException, IOException {
         storeProductDto.setPromotional_product(true);
         storeProductDto.setUPC_prom("987654321098");
+
+        byte[] result = service.storeProductToPdf(List.of(storeProductDto), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("cardToPdf should generate PDF with customer cards")
+    void cardToPdf_withCards_shouldGeneratePdf() throws DocumentException, IOException {
+        byte[] result = service.cardToPdf(List.of(cardDto), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("cardToPdf should generate PDF with multiple customer cards")
+    void cardToPdf_withMultipleCards_shouldGeneratePdf() throws DocumentException, IOException {
+        CustomerCardResponseDto card2 = new CustomerCardResponseDto();
+        card2.setCard_number("9876543210123");
+        card2.setCust_surname("Мельник");
+        card2.setCust_name("Тарас");
+        card2.setCust_patronymic("Олегович");
+        card2.setPhone_number("+380931234567");
+        card2.setCity("Харків");
+        card2.setStreet("Сумська 10");
+        card2.setZip_code("61000");
+        card2.setPercent(10);
+
+        byte[] result = service.cardToPdf(List.of(cardDto, card2), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("cardToPdf should generate PDF with empty list")
+    void cardToPdf_emptyList_shouldGeneratePdf() throws DocumentException, IOException {
+        byte[] result = service.cardToPdf(Collections.emptyList(), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("checkToPdf should generate PDF with checks")
+    void checkToPdf_withChecks_shouldGeneratePdf() throws DocumentException, IOException {
+        byte[] result = service.checkToPdf(List.of(checkDto), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("checkToPdf should generate PDF with multiple checks")
+    void checkToPdf_withMultipleChecks_shouldGeneratePdf() throws DocumentException, IOException {
+        CheckResponseDto check2 = new CheckResponseDto();
+        check2.setCheck_number("CHK0002");
+        check2.setId_employee("EMP002");
+        check2.setCard_number(null);
+        check2.setPrint_date(LocalDateTime.of(2024, 2, 20, 14, 0));
+        check2.setSum_total(new BigDecimal("100.00"));
+        check2.setVat(new BigDecimal("20.00"));
+
+        byte[] result = service.checkToPdf(List.of(checkDto, check2), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("checkToPdf should generate PDF with empty list")
+    void checkToPdf_emptyList_shouldGeneratePdf() throws DocumentException, IOException {
+        byte[] result = service.checkToPdf(Collections.emptyList(), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("categoryToPdf should generate PDF with categories")
+    void categoryToPdf_withCategories_shouldGeneratePdf() throws DocumentException, IOException {
+        byte[] result = service.categoryToPdf(List.of(categoryDto), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("categoryToPdf should generate PDF with multiple categories")
+    void categoryToPdf_withMultipleCategories_shouldGeneratePdf() throws DocumentException, IOException {
+        CategoryResponseDto category2 = new CategoryResponseDto();
+        category2.setCategory_number(2);
+        category2.setCategory_name("Хлібобулочні вироби");
+
+        byte[] result = service.categoryToPdf(List.of(categoryDto, category2), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("categoryToPdf should generate PDF with empty list")
+    void categoryToPdf_emptyList_shouldGeneratePdf() throws DocumentException, IOException {
+        byte[] result = service.categoryToPdf(Collections.emptyList(), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("employeeToPdf should handle CASHIER role")
+    void employeeToPdf_cashierRole_shouldGeneratePdf() throws DocumentException, IOException {
+        employeeDto.setRole("CASHIER");
+
+        byte[] result = service.employeeToPdf(List.of(employeeDto), "Test Manager");
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("storeProductToPdf should handle null UPC_prom")
+    void storeProductToPdf_nullUpcProm_shouldGeneratePdf() throws DocumentException, IOException {
+        storeProductDto.setUPC_prom(null);
 
         byte[] result = service.storeProductToPdf(List.of(storeProductDto), "Test Manager");
 
