@@ -58,13 +58,15 @@ public class ProductController {
 
     @GetMapping("/sold")
     @Operation(
-            summary = "Get products' names which were sold",
-            description = "Get products' names which were sold"
+            summary = "Get products' names which cost is more than param",
+            description = "Get products' names which were sold and which cost is more than param"
     )
     @PreAuthorize("hasAuthority('MANAGER')")
-    public PageResponseDto<ProductDto> getSold(@RequestParam(defaultValue = "0") int page) {
+    public PageResponseDto<ProductDto> getSold(@RequestParam(defaultValue = "0") int page,
+                                               @RequestParam(value = "min_total_sold",
+                                                       required = false) Double minTotalSold) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        return productService.getSold(pageable);
+        return productService.getSold(pageable, minTotalSold != null ? minTotalSold : 0.0);
     }
 
     @GetMapping

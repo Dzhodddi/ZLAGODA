@@ -10,7 +10,7 @@ public interface ProductService {
 
     ProductDto getById(int id);
 
-    PageResponseDto<ProductDto> getSold(Pageable pageable);
+    PageResponseDto<ProductDto> getSold(Pageable pageable, Double minTotalSold);
 
     List<ProductDto> getAllNoPagination();
 

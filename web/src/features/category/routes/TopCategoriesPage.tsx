@@ -26,7 +26,10 @@ export const TopCategoriesPage = () => {
                     ← До всіх категорій
                 </button>
             </div>
-
+            {categories && (
+                categories.length === 0 ? (
+                    <p className="text-zinc-400 text-sm">Нічого не знайдено</p>
+                ) : (
             <div className="overflow-x-auto bg-white border border-green-300 relative">
                 <table className="w-full text-xs border-collapse table-fixed border-b border-green-300">
                     <thead>
@@ -49,6 +52,8 @@ export const TopCategoriesPage = () => {
                     </tbody>
                 </table>
             </div>
+                )
+            )}
         </div>
     );
 };

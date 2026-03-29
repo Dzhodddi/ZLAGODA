@@ -1,13 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useSoldProducts } from "@/features/product/hooks/useProduct.ts";
+import {toast} from "sonner";
 
 export const SoldProductsPage = () => {
     const navigate = useNavigate();
 
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const soldQuery = useSoldProducts(currentIndex);
+    const [minTotalSoldInput, setMinTotalSoldInput] = useState("");
+    const [appliedMinTotalSold, setAppliedMinTotalSold] = useState<number | undefined>(undefined);
+
+    const soldQuery = useSoldProducts(currentIndex, appliedMinTotalSold);
 
     const products = soldQuery.data?.content;
     const isLastPage = !(soldQuery.data?.hasNext ?? false);
@@ -21,6 +25,28 @@ export const SoldProductsPage = () => {
 
     const handlePrevPage = () => {
         setCurrentIndex(prev => Math.max(0, prev - 1));
+    };
+
+    const resetPagination = () => setCurrentIndex(0);
+
+    const handleClearMinTotalSold = () => {
+        setMinTotalSoldInput("");
+        setAppliedMinTotalSold(undefined);
+        resetPagination();
+    };
+
+    const handleSearchSum = () => {
+        if (minTotalSoldInput.trim() === "") {
+            handleClearMinTotalSold();
+            return;
+        }
+        const parsed = parseInt(minTotalSoldInput, 10);
+        if (!isNaN(parsed) && parsed >= 0) {
+            setAppliedMinTotalSold(parsed);
+            resetPagination();
+        } else {
+            toast.error("Введіть коректну мінімальну суму, грн (від 0)");
+        }
     };
 
     return (
@@ -44,7 +70,38 @@ export const SoldProductsPage = () => {
             {soldQuery.error && (
                 <p className="text-red-500 text-sm">Помилка: {(soldQuery.error as Error).message}</p>
             )}
-
+            <div className="relative flex-1">
+                <input
+                    type="number"
+                    value={minTotalSoldInput}
+                    onChange={(e) => setMinTotalSoldInput(e.target.value)}
+                    placeholder="Введіть мінімальну суму проданих товарів, грн"
+                    title="Шукати товари за сумою проданих одиниць"
+                    min="1"
+                    max="100"
+                    className="w-full border rounded px-3 py-1.5 text-sm pr-16 text-zinc-900"
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            handleSearchSum();
+                        }
+                    }}
+                />
+                <button
+                    onClick={handleSearchSum}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center"
+                >
+                    <img src="/src/logos/search.png" alt="search" className="w-5 h-5 hover:scale-110 transition-transform" />
+                </button>
+                {appliedMinTotalSold !== undefined && (
+                    <button
+                        onClick={handleClearMinTotalSold}
+                        title="Скинути пошук"
+                        className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 text-sm px-1 hover:scale-110 transition-transform"
+                    >
+                        ✕
+                    </button>
+                )}
+            </div>
             {products && (
                 products.length === 0 ? (
                     <p className="text-zinc-400 text-sm">Нічого не знайдено</p>

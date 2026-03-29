@@ -26,8 +26,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageResponseDto<ProductDto> getSold(Pageable pageable) {
-        return repository.findSold(pageable);
+    public PageResponseDto<ProductDto> getSold(Pageable pageable, Double minTotalSold) {
+        return repository.findSold(pageable, minTotalSold);
     }
 
     @Override

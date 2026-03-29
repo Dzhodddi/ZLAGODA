@@ -47,7 +47,8 @@ public class CategoryRepository {
                                             )
                         SELECT r.category_number, r.category_name, r.total_sold
                         FROM ranked r, leader_count lc
-                        WHERE r.rnk = 1 OR (lc.cnt = 1 AND r.rnk = 2);
+                        WHERE (r.rnk = 1 OR (lc.cnt = 1 AND r.rnk = 2)) AND r.total_sold > 0
+                        ORDER BY r.total_sold DESC, r.category_number ASC;
                         """,
                         fullRowMapper
                 ).stream()

@@ -22,10 +22,10 @@ export const useProduct = (id: number) => {
     });
 };
 
-export const useSoldProducts = (page: number, enabled = true) => {
+export const useSoldProducts = (page: number, minTotalSold: number | undefined) => {
     return useQuery({
-        queryKey: ["sold", page],
-        queryFn: () => getSoldProducts(page),
+        queryKey: ["sold", page, minTotalSold],
+        queryFn: () => getSoldProducts(page, minTotalSold),
         staleTime: staleTime,
     });
 };

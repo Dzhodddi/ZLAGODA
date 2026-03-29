@@ -25,7 +25,7 @@ public class ProductRepository {
     private final ProductRowMapper rowMapper;
     private final ProductMapper productMapper;
 
-    public PageResponseDto<ProductDto> findSold(Pageable pageable) {
+    public PageResponseDto<ProductDto> findSold(Pageable pageable, double minTotalSold) {
         long offset = pageable.getOffset();
         List<ProductDto> products = jdbcTemplate.query(
                 """
@@ -48,17 +48,19 @@ public class ProductRepository {
                         )
                       )
                 GROUP BY p.id_product, p.product_name
+                HAVING SUM(s1.selling_price * s1.product_number) >= ?
                 ORDER BY p.id_product
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
                 rowMapper,
+                minTotalSold,
                 offset,
                 pageable.getPageSize()
         ).stream()
                 .map(productMapper::toDto)
                 .toList();
 
-        long total = getSoldCount();
+        long total = getSoldCount(minTotalSold);
         return PageResponseDto.of(products, pageable.getPageSize(), total,
                 offset + products.size() < total);
     }
@@ -376,27 +378,30 @@ public class ProductRepository {
         return count != null ? count : 0;
     }
 
-    private long getSoldCount() {
+    private long getSoldCount(double minTotalSold) {
         Integer count = jdbcTemplate.queryForObject(
                 """
-                SELECT COUNT(DISTINCT p.id_product)
-                FROM product p
-                WHERE EXISTS (
-                        SELECT 1
-                        FROM store_product sp
-                        WHERE sp.id_product = p.id_product
-                      ) AND NOT EXISTS(
-                        SELECT 1
-                        FROM store_product sp
-                        WHERE sp.id_product = p.id_product
-                        AND NOT EXISTS(
-                            SELECT 1
-                            FROM sale s
-                            WHERE s.UPC = sp.UPC
-                        )
+                SELECT COUNT(*)
+                FROM (SELECT p.id_product
+                      FROM product p
+                      INNER JOIN store_product sp1
+                          ON sp1.id_product = p.id_product
+                      INNER JOIN sale s1
+                          ON s1.UPC = sp1.UPC
+                      WHERE NOT EXISTS(SELECT 1
+                                       FROM store_product sp3
+                                       WHERE sp3.id_product = p.id_product
+                                             AND NOT EXISTS(SELECT 1
+                                                            FROM sale s2
+                                                            WHERE s2.UPC = sp3.UPC
+                                                            )
+                                       )
+                      GROUP BY p.id_product
+                      HAVING SUM(s1.selling_price * s1.product_number) >= ?
                       )
                 """,
-                Integer.class
+                Integer.class,
+                minTotalSold
         );
         return count != null ? count : 0;
     }

@@ -55,10 +55,14 @@ export const downloadProductPdf = async (): Promise<Blob> => {
 };
 
 export const getSoldProducts = async (
-    page = 0
+    page = 0,
+    minTotalSold?: number,
 ): Promise<PageSoldProduct> => {
     const response = await javaApiClient.get(`${prefix}/sold`, {
-        params: { page },
+        params: {
+            page,
+            min_total_sold: minTotalSold
+        },
     });
     return PageSoldProductSchema.parse(response.data);
 };
