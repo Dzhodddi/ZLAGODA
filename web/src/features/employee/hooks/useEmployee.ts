@@ -93,9 +93,7 @@ export const useDownloadEmployeePdf = () => {
         mutationFn: downloadEmployeePdf,
         onSuccess: (blob) => {
             const url = URL.createObjectURL(blob);
-            const win = window.open(url);
-            win?.print();
-            URL.revokeObjectURL(url);
+            window.open(url);
         },
         onError: (error) => {
             console.error(error.message);

@@ -25,14 +25,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.store_product.batch.BatchRequestDto;
-import org.example.dto.store_product.product.StoreProductCharacteristicsDto;
 import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
 import org.example.dto.store_product.product.StoreProductWithNameDto;
+import org.example.service.employee.EmployeeService;
 import org.example.service.report.PdfReportGeneratorService;
 import org.example.service.store_product.BatchService;
 import org.example.service.store_product.StoreProductService;
@@ -69,6 +71,9 @@ class StoreProductControllerTest {
 
     @MockBean
     private BatchService batchService;
+
+    @MockBean
+    private EmployeeService employeeService;
 
     @MockBean
     private PdfReportGeneratorService pdfReportGeneratorService;
@@ -402,7 +407,9 @@ class StoreProductControllerTest {
     void storeProductPdf_asManager_Ok() throws Exception {
         byte[] pdfBytes = "PDF content".getBytes();
         when(storeProductService.getAllNoPagination()).thenReturn(List.of(storeProductDto1, storeProductDto2));
-        when(pdfReportGeneratorService.storeProductToPdf(anyList())).thenReturn(pdfBytes);
+        when(employeeService.getMe())
+                .thenReturn(new EmployeeResponseDto());
+        when(pdfReportGeneratorService.storeProductToPdf(anyList(), anyString())).thenReturn(pdfBytes);
 
         mockMvc.perform(get("/store-products/report"))
                 .andExpect(status().isOk())
@@ -412,7 +419,8 @@ class StoreProductControllerTest {
                 .andExpect(content().bytes(pdfBytes));
 
         verify(storeProductService, times(1)).getAllNoPagination();
-        verify(pdfReportGeneratorService, times(1)).storeProductToPdf(anyList());
+        verify(employeeService, times(1)).getMe();
+        verify(pdfReportGeneratorService, times(1)).storeProductToPdf(anyList(), anyString());
     }
 
     @Test
@@ -423,6 +431,6 @@ class StoreProductControllerTest {
                 .andExpect(status().isForbidden());
 
         verify(storeProductService, never()).getAllNoPagination();
-        verify(pdfReportGeneratorService, never()).storeProductToPdf(anyList());
+        verify(pdfReportGeneratorService, never()).storeProductToPdf(anyList(), anyString());
     }
 }

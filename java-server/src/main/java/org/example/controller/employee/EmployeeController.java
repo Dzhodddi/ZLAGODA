@@ -115,7 +115,9 @@ public class EmployeeController {
     @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<byte[]> employeePdf() throws DocumentException, IOException {
         List<EmployeeResponseDto> employees = employeeService.findAllNoPagination();
-        byte[] pdf = pdfReportGeneratorService.employeeToPdf(employees);
+        EmployeeResponseDto manager = employeeService.getMe();
+        byte[] pdf = pdfReportGeneratorService.employeeToPdf(employees,
+                manager.getEmpl_surname() + " " + manager.getEmpl_name());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=employees.pdf")
                 .body(pdf);

@@ -9,9 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
+import org.example.service.employee.EmployeeService;
 import org.example.service.product.ProductService;
 import org.example.service.report.PdfReportGeneratorService;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +46,9 @@ class ProductControllerTest {
 
     @MockBean
     private PdfReportGeneratorService pdfReportGeneratorService;
+
+    @MockBean
+    private EmployeeService employeeService;
 
     private ProductDto productDto1;
     private ProductDto productDto2;
@@ -222,7 +228,9 @@ class ProductControllerTest {
         byte[] pdf = "PDF".getBytes();
 
         when(productService.getAllNoPagination()).thenReturn(List.of(productDto1, productDto2));
-        when(pdfReportGeneratorService.productToPdf(anyList())).thenReturn(pdf);
+        when(employeeService.getMe())
+                .thenReturn(new EmployeeResponseDto());
+        when(pdfReportGeneratorService.productToPdf(anyList(), anyString())).thenReturn(pdf);
 
         mockMvc.perform(get("/products/report"))
                 .andExpect(status().isOk())
@@ -231,6 +239,7 @@ class ProductControllerTest {
                 .andExpect(content().bytes(pdf));
 
         verify(productService).getAllNoPagination();
-        verify(pdfReportGeneratorService).productToPdf(anyList());
+        verify(employeeService, times(1)).getMe();
+        verify(pdfReportGeneratorService).productToPdf(anyList(), anyString());
     }
 }

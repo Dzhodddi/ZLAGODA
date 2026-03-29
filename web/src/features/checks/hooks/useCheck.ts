@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import {staleTime} from "@/constants/constants.ts";
 import {
     createCheck,
-    deleteCheck,
+    deleteCheck, downloadCheckPdf,
     getCheck,
     getChecksTotalSum,
     getTodayChecks,
@@ -11,6 +11,17 @@ import {
     updateCheck
 } from "@/features/checks/api/checkApi.ts";
 import {isAxiosError} from "axios";
+
+export const useDownloadCheckPdf = () => {
+    return useMutation({
+        mutationFn: downloadCheckPdf,
+        onSuccess: (blob) => {
+            const url = URL.createObjectURL(blob);
+            window.open(url);
+        },
+        onError: (error) => alert(error),
+    });
+};
 
 export const useCreateCheck = () => {
     const queryClient = useQueryClient();

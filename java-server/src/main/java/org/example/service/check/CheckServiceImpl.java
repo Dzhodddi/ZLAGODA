@@ -1,9 +1,9 @@
-package org.example.service.product.helper.check;
+package org.example.service.check;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.helper.CheckResponseDto;
-import org.example.repository.product.helper.CheckRepository;
+import org.example.repository.check.CheckRepository;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor

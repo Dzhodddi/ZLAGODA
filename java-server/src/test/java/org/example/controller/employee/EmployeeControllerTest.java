@@ -276,7 +276,9 @@ class EmployeeControllerTest {
         byte[] pdfBytes = "PDF content".getBytes();
         when(employeeService.findAllNoPagination())
                 .thenReturn(List.of(employeeDto1, employeeDto2));
-        when(pdfReportGeneratorService.employeeToPdf(anyList())).thenReturn(pdfBytes);
+        when(employeeService.getMe())
+                .thenReturn(employeeDto1);
+       when(pdfReportGeneratorService.employeeToPdf(anyList(), anyString())).thenReturn(pdfBytes);
 
         mockMvc.perform(get("/employees/report"))
                 .andExpect(status().isOk())
@@ -285,7 +287,8 @@ class EmployeeControllerTest {
                 .andExpect(content().bytes(pdfBytes));
 
         verify(employeeService, times(1)).findAllNoPagination();
-        verify(pdfReportGeneratorService, times(1)).employeeToPdf(anyList());
+        verify(employeeService, times(1)).getMe();
+        verify(pdfReportGeneratorService, times(1)).employeeToPdf(anyList(), anyString());
     }
 
     @Test
@@ -296,7 +299,7 @@ class EmployeeControllerTest {
                 .andExpect(status().isForbidden());
 
         verify(employeeService, never()).findAllNoPagination();
-        verify(pdfReportGeneratorService, never()).employeeToPdf(anyList());
+        verify(pdfReportGeneratorService, never()).employeeToPdf(anyList(), anyString());
     }
 
     @Test

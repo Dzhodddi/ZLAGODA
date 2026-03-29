@@ -9,6 +9,13 @@ import {z} from "zod";
 
 const prefix = "/categories"
 
+export const downloadCategoryPdf = async (): Promise<Blob> => {
+    const response = await javaApiClient.get(`${prefix}/report`, {
+        responseType: "blob",
+    });
+    return response.data;
+};
+
 export const createCategory = async (data: CreateCategory): Promise<Category> => {
     const response = await goApiClient.post(prefix, data);
     return CategorySchema.parse(response.data);

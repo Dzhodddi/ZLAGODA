@@ -7,15 +7,16 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
 import org.example.exception.custom_exception.AuthorizationException;
+import org.example.service.employee.EmployeeService;
 import org.example.service.product.ProductService;
 import org.example.service.report.PdfReportGeneratorService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -43,6 +44,7 @@ public class ProductController {
 
     private final static int PAGE_SIZE = 10;
     private final ProductService productService;
+    private final EmployeeService employeeService;
     private final PdfReportGeneratorService pdfReportGeneratorService;
 
     @GetMapping("/{id}")
@@ -138,7 +140,9 @@ public class ProductController {
     @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<byte[]> productPdf() throws DocumentException, IOException {
         List<ProductDto> products = productService.getAllNoPagination();
-        byte[] pdf = pdfReportGeneratorService.productToPdf(products);
+        EmployeeResponseDto manager = employeeService.getMe();
+        byte[] pdf = pdfReportGeneratorService.productToPdf(products,
+                manager.getEmpl_surname() + " " + manager.getEmpl_name());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=products.pdf")

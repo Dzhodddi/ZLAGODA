@@ -1,7 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     createCategory,
-    deleteCategory, getAllCategories, getCategory, getTopCategories,
+    deleteCategory, downloadCategoryPdf, getAllCategories, getCategory, getTopCategories,
     listCategories,
     updateCategory
 } from "@/features/category/api/categoryApi.ts";
@@ -10,6 +10,17 @@ import {AxiosError, isAxiosError} from "axios";
 import {staleTime} from "@/constants/constants.ts";
 
 const QUERY_KEY = "categories"
+
+export const useDownloadCategoryPdf = () => {
+    return useMutation({
+        mutationFn: downloadCategoryPdf,
+        onSuccess: (blob) => {
+            const url = URL.createObjectURL(blob);
+            window.open(url);
+        },
+        onError: (error) => alert(error),
+    });
+};
 
 export const useCreateCategory = () => {
     const queryClient = useQueryClient();

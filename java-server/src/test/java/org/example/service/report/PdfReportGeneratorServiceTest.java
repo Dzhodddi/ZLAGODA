@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.itextpdf.text.DocumentException;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -67,7 +66,7 @@ class PdfReportGeneratorServiceTest {
     @Test
     @DisplayName("employeeToPdf should generate PDF with employees")
     void employeeToPdf_withEmployees_shouldGeneratePdf() throws DocumentException, IOException {
-        byte[] result = service.employeeToPdf(List.of(employeeDto));
+        byte[] result = service.employeeToPdf(List.of(employeeDto), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -90,7 +89,7 @@ class PdfReportGeneratorServiceTest {
         employee2.setStreet("Проспект Свободи 1");
         employee2.setZip_code("79000");
 
-        byte[] result = service.employeeToPdf(List.of(employeeDto, employee2));
+        byte[] result = service.employeeToPdf(List.of(employeeDto, employee2), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -99,7 +98,7 @@ class PdfReportGeneratorServiceTest {
     @Test
     @DisplayName("employeeToPdf should generate PDF with empty list")
     void employeeToPdf_emptyList_shouldGeneratePdf() throws DocumentException, IOException {
-        byte[] result = service.employeeToPdf(Collections.emptyList());
+        byte[] result = service.employeeToPdf(Collections.emptyList(), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -108,7 +107,7 @@ class PdfReportGeneratorServiceTest {
     @Test
     @DisplayName("productToPdf should generate PDF with products")
     void productToPdf_withProducts_shouldGeneratePdf() throws DocumentException, IOException {
-        byte[] result = service.productToPdf(List.of(productDto));
+        byte[] result = service.productToPdf(List.of(productDto), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -121,7 +120,7 @@ class PdfReportGeneratorServiceTest {
         product2.setProduct_name("Another Product");
         product2.setProduct_characteristics("Other characteristics");
 
-        byte[] result = service.productToPdf(List.of(productDto, product2));
+        byte[] result = service.productToPdf(List.of(productDto, product2), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -130,7 +129,7 @@ class PdfReportGeneratorServiceTest {
     @Test
     @DisplayName("productToPdf should generate PDF with empty list")
     void productToPdf_emptyList_shouldGeneratePdf() throws DocumentException, IOException {
-        byte[] result = service.productToPdf(Collections.emptyList());
+        byte[] result = service.productToPdf(Collections.emptyList(), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -139,7 +138,7 @@ class PdfReportGeneratorServiceTest {
     @Test
     @DisplayName("storeProductToPdf should generate PDF with store products")
     void storeProductToPdf_withStoreProducts_shouldGeneratePdf() throws DocumentException, IOException {
-        byte[] result = service.storeProductToPdf(List.of(storeProductDto));
+        byte[] result = service.storeProductToPdf(List.of(storeProductDto), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -156,7 +155,7 @@ class PdfReportGeneratorServiceTest {
         storeProduct2.setProducts_number(30);
         storeProduct2.setPromotional_product(true);
 
-        byte[] result = service.storeProductToPdf(List.of(storeProductDto, storeProduct2));
+        byte[] result = service.storeProductToPdf(List.of(storeProductDto, storeProduct2), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -165,7 +164,7 @@ class PdfReportGeneratorServiceTest {
     @Test
     @DisplayName("storeProductToPdf should generate PDF with empty list")
     void storeProductToPdf_emptyList_shouldGeneratePdf() throws DocumentException, IOException {
-        byte[] result = service.storeProductToPdf(Collections.emptyList());
+        byte[] result = service.storeProductToPdf(Collections.emptyList(), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -176,7 +175,7 @@ class PdfReportGeneratorServiceTest {
     void employeeToPdf_nullPatronymic_shouldGeneratePdf() throws DocumentException, IOException {
         employeeDto.setEmpl_patronymic(null);
 
-        byte[] result = service.employeeToPdf(List.of(employeeDto));
+        byte[] result = service.employeeToPdf(List.of(employeeDto), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -188,7 +187,7 @@ class PdfReportGeneratorServiceTest {
         storeProductDto.setPromotional_product(true);
         storeProductDto.setUPC_prom("987654321098");
 
-        byte[] result = service.storeProductToPdf(List.of(storeProductDto));
+        byte[] result = service.storeProductToPdf(List.of(storeProductDto), "Test Manager");
 
         assertNotNull(result);
         assertTrue(result.length > 0);
