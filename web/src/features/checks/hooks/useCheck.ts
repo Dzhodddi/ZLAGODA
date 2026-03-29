@@ -8,7 +8,6 @@ import {
     getChecksTotalSum,
     getTodayChecks,
     listChecks,
-    updateCheck
 } from "@/features/checks/api/checkApi.ts";
 import {isAxiosError} from "axios";
 
@@ -34,22 +33,6 @@ export const useCreateCheck = () => {
         },
         onError: (error) => {
             toast.error("Помилка під час створення чеку");
-            console.error(error);
-        }
-    });
-};
-
-export const useUpdateCheck = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: updateCheck,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["checks"] });
-            toast.success("Чек успішно оновлено");
-        },
-        onError: (error) => {
-            toast.error("Помилка під час оновлення чеку");
             console.error(error);
         }
     });

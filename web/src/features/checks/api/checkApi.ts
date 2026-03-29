@@ -18,14 +18,9 @@ export const downloadCheckPdf = async (): Promise<Blob> => {
     return response.data;
 };
 
-export const createCheck = async (data: Check): Promise<Check> => {
+export const createCheck = async (data: Check): Promise<CheckListItem> => {
     const response = await goApiClient.post(prefix, data);
-    return CheckSchema.parse(response.data);
-};
-
-export const updateCheck = async (data: Check): Promise<Check> => {
-    const response = await goApiClient.put(`${prefix}/${data}`, data);
-    return CheckSchema.parse(response.data);
+    return CheckListItemSchema.parse(response.data);
 };
 
 export const getCheck = async (checkNumber: string): Promise<CheckItem> => {

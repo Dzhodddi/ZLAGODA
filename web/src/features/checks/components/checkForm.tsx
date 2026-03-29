@@ -1,9 +1,12 @@
 import { useFieldArray } from "react-hook-form";
 import { InputField } from "@/components/ui/InputFields.tsx";
-import { type Check, CheckSchema } from "@/features/checks/types/types.ts";
+import {type Check, CreateCheckSchema} from "@/features/checks/types/types.ts";
 import { GenericUpsertForm } from "@/components/ui/GenericUpsertForm.tsx";
-import { useCreateCheck, useUpdateCheck } from "@/features/checks/hooks/useCheck.ts";
+import { useCreateCheck} from "@/features/checks/hooks/useCheck.ts";
 import { useNavigate } from "react-router-dom";
+import { EmployeeComboboxField } from "@/features/employee/components/EmployeeDropBox.tsx";
+import { CustomerCardComboboxField } from "@/features/customer-card/components/CustomerCardDropBox.tsx";
+import { StoreProductComboboxField } from "@/features/store_product/components/StoreProductDropBox.tsx";
 
 interface Props {
     initialData?: Check;
@@ -15,14 +18,14 @@ export const UpsertCheckForm = ({ initialData }: Props) => {
     return (
         <div className="p-6 bg-white rounded text-zinc-900 shadow-md max-w-4xl mx-auto">
             <GenericUpsertForm
-                schema={CheckSchema}
+                schema={CreateCheckSchema}
                 initialData={initialData}
                 createMutation={useCreateCheck()}
-                updateMutation={useUpdateCheck()}
-                onSuccessAction={() => navigate("/checks")}
+                onSuccessAction={() => navigate("/check")}
                 prepareUpdatePayload={(formData, initial) => ({
                     ...formData,
-                    checkNumber: initial.checkNumber
+                    checkNumber: initial.checkNumber,
+                    printDate: new Date(formData.printDate).toISOString(),
                 })}
                 className="grid grid-cols-12 gap-4"
             >
@@ -43,44 +46,32 @@ export const UpsertCheckForm = ({ initialData }: Props) => {
                                 label="Номер чеку"
                                 disabled={isEditMode}
                             />
-                            <InputField
-                                name="idEmployee"
-                                label="ID працівника"
-                            />
-                            <InputField
-                                name="cardNumber"
-                                label="Номер картки клієнта"
-                            />
+                            <div className="col-span-12"><EmployeeComboboxField /></div>
+                            <div className="col-span-12"><CustomerCardComboboxField /></div>
+
                             <InputField
                                 name="printDate"
                                 label="Дата друку"
                                 type="datetime-local"
                             />
-                            <InputField
-                                name="vat"
-                                label="Сума ПДВ"
-                                type="number"
-                                step="0.0001"
-                            />
-
                             <div className="col-span-12 mt-4">
                                 <h3 className="font-semibold mb-2">Товари</h3>
 
                                 {fields.map((field, index) => (
                                     <div key={field.id} className="flex gap-4 items-end mb-3 bg-zinc-50 p-2 rounded border border-zinc-200">
                                         <div className="flex-1">
-                                            <InputField
-                                                name={`products.${index}.upc`}
-                                                label="UPC"
-                                            />
+                                            <StoreProductComboboxField name={`products.${index}.upc`} />
                                         </div>
+
                                         <div className="w-32">
                                             <InputField
                                                 name={`products.${index}.quantity`}
                                                 label="Кількість"
                                                 type="number"
+                                                min="1"
                                             />
                                         </div>
+
                                         <button
                                             type="button"
                                             onClick={() => remove(index)}

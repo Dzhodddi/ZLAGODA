@@ -12,7 +12,7 @@ import {
 import { GenericUpsertForm } from "@/components/ui/GenericUpsertForm.tsx";
 import { InputField, CheckboxField } from "@/components/ui/InputFields.tsx";
 import { useWatch, useFormContext } from "react-hook-form";
-import {ProductComboboxField} from "@/features/product/routes/Combobox.tsx";
+import {ProductComboboxField} from "@/features/product/components/ProductComboBox.tsx";
 
 interface Props {
     initialData?: StoreProduct;

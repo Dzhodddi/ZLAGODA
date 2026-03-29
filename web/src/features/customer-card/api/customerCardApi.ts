@@ -1,6 +1,12 @@
 import {goApiClient, javaApiClient} from "@/lib/axios.ts";
-import {type CreateCustomerCard, type CustomerCard, CustomerCardSchema} from "@/features/customer-card/types/types.ts";
+import {
+    type CreateCustomerCard,
+    type CustomerCard,
+    type CustomerCardDropdownItem, CustomerCardDropdownItemSchema,
+    CustomerCardSchema
+} from "@/features/customer-card/types/types.ts";
 import {z} from "zod";
+import {type EmployeeDropdownItem, EmployeeDropdownItemSchema} from "@/features/employee/types/types.ts";
 
 const prefix = "/customer-cards"
 
@@ -49,4 +55,9 @@ export const listCustomerCard = async (
     if (!response.data)
         return []
     return z.array(CustomerCardSchema).parse(response.data);
+}
+
+export const getCustomerCardIDList = async (): Promise<CustomerCardDropdownItem[]> => {
+    const response =  await goApiClient.get(prefix + "/list")
+    return CustomerCardDropdownItemSchema.array().parse(response.data);
 }

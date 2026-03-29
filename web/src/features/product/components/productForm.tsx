@@ -8,7 +8,7 @@ import {
     BaseProductSchema,
 } from "@/features/product/types/types.ts";
 import { useNavigate } from "react-router-dom";
-import {CategoryComboboxField} from "@/features/product/routes/Combobox.tsx";
+import {CategoryComboboxField} from "@/features/category/components/CategoryComboBox.tsx";
 
 interface Props {
     initialData?: Product;

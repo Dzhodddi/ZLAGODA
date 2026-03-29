@@ -223,23 +223,28 @@ func (q *Queries) GetCustomerCardByID(ctx context.Context, cardNumber string) (C
 }
 
 const getCustomerCardIDList = `-- name: GetCustomerCardIDList :many
-SELECT card_number
+SELECT card_number, CONCAT(customer_surname, ' ', customer_name)::VARCHAR as full_name
 FROM customer_card
 `
 
-func (q *Queries) GetCustomerCardIDList(ctx context.Context) ([]string, error) {
+type GetCustomerCardIDListRow struct {
+	CardNumber string
+	FullName   string
+}
+
+func (q *Queries) GetCustomerCardIDList(ctx context.Context) ([]GetCustomerCardIDListRow, error) {
 	rows, err := q.db.QueryContext(ctx, getCustomerCardIDList)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []string
+	var items []GetCustomerCardIDListRow
 	for rows.Next() {
-		var card_number string
-		if err := rows.Scan(&card_number); err != nil {
+		var i GetCustomerCardIDListRow
+		if err := rows.Scan(&i.CardNumber, &i.FullName); err != nil {
 			return nil, err
 		}
-		items = append(items, card_number)
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

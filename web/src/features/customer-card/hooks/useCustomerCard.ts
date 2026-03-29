@@ -1,7 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     createCustomerCard, deleteCustomerCard, downloadCustomerCardPdf,
-    getCustomerCard,
+    getCustomerCard, getCustomerCardIDList,
     listCustomerCard,
     updateCustomerCard
 } from "@/features/customer-card/api/customerCardApi.ts";
@@ -112,4 +112,12 @@ export const useDeleteCustomerCard = () => {
             console.error(error);
         }
     });
+}
+
+export const useCustomerCardIDList = () => {
+    return useQuery({
+        queryKey: [QUERY_KEY, "id-list"],
+        queryFn: () => getCustomerCardIDList(),
+        staleTime: staleTime,
+    })
 }

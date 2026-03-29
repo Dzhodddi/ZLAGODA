@@ -78,6 +78,7 @@ func (s *Server) SetupAllRoutes() *Server {
 
 	publicV1 := s.Echo.Group("/api/v1")
 	s.setupEmployeeRouts(publicV1)
+	s.setupStoreProductRouts(publicV1)
 
 	protectedV1 := s.Echo.Group("/api/v1", s.authenticator.AuthMiddleware(repository.NewEmployeeRepository(s.DB)))
 	s.setupCategoryRouts(protectedV1)
@@ -121,6 +122,13 @@ func (s *Server) setupEmployeeRouts(router *echo.Group) {
 	repo := repository.NewEmployeeRepository(s.DB)
 	service := services.NewEmployeeService(repo)
 	handler := handlers.NewEmployeeHandler(service)
+	handler.RegisterRouts(router)
+}
+
+func (s *Server) setupStoreProductRouts(router *echo.Group) {
+	repo := repository.NewStoreProductRepository(s.DB)
+	service := services.NewStoreProductService(repo)
+	handler := handlers.NewStoreProductHandler(service)
 	handler.RegisterRouts(router)
 }
 

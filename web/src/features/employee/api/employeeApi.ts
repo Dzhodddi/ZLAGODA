@@ -4,7 +4,7 @@ import {
     type CreateEmployee,
     PageEmployeeSchema,
     PageEmployeeContactSchema,
-    BaseEmployeeSchema
+    BaseEmployeeSchema, type EmployeeDropdownItem, EmployeeDropdownItemSchema,
 } from "@/features/employee/types/types.ts";
 
 const prefix = "/employees"
@@ -60,7 +60,7 @@ export const getMe = async (): Promise<Employee> => {
 };
 
 
-export const getEmployeeIDList = async (): Promise<string[]> => {
+export const getEmployeeIDList = async (): Promise<EmployeeDropdownItem[]> => {
     const response =  await goApiClient.get(prefix + "/list")
-    return response.data;
+    return EmployeeDropdownItemSchema.array().parse(response.data);
 }

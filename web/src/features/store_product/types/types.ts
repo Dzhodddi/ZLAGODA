@@ -100,3 +100,12 @@ export const BatchDtoSchema = z.object({
 });
 
 export type BatchDto = z.infer<typeof BatchDtoSchema>;
+
+export const StoreProductItemSchema = z.object({
+    upc: z.string(),
+    sellingPrice: z.number(),
+    quantity: z.number(),
+    productName: z.string()
+});
+
+export type StoreProductItem = z.infer<typeof StoreProductItemSchema>;

@@ -236,7 +236,7 @@ func (r *checkRepository) CreateNewCheck(
 			IDEmployee:  check.IDEmployee,
 			CardNumber:  check.CardNumber,
 			PrintDate:   printTime,
-			SumTotal:    totalPrice * float64(1-customerCard.CustomerPercent),
+			SumTotal:    totalPrice * (1 - float64(customerCard.CustomerPercent)/100.0),
 			Vat:         totalPrice * constants.Vat,
 		},
 	)

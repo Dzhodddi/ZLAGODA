@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
@@ -35,7 +36,7 @@ type CardRepository interface {
 		lastCardNumber string,
 		lastCustomerSurname string,
 	) ([]generated.CustomerCard, error)
-	GetCustomerCardIDList(ctx context.Context) ([]string, error)
+	GetCustomerCardIDList(ctx context.Context) ([]generated.GetCustomerCardIDListRow, error)
 }
 
 type cardRepository struct {
@@ -43,7 +44,10 @@ type cardRepository struct {
 	queries *generated.Queries
 }
 
-func (r *cardRepository) GetCustomerCardIDList(ctx context.Context) ([]string, error) {
+func (r *cardRepository) GetCustomerCardIDList(ctx context.Context) ([]generated.GetCustomerCardIDListRow, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
 	return r.queries.GetCustomerCardIDList(ctx)
 }
 

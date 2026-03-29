@@ -55,3 +55,10 @@ export type CustomerCard = z.infer<typeof CustomerCardSchema>;
 export const CreateCustomerCardSchema = CustomerCardSchema
 
 export type CreateCustomerCard = z.infer<typeof CreateCustomerCardSchema>;
+
+export const CustomerCardDropdownItemSchema = z.object({
+    cardNumber: z.string(),
+    fullName: z.string(),
+})
+
+export type CustomerCardDropdownItem = z.infer<typeof CustomerCardDropdownItemSchema>

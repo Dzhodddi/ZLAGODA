@@ -49,23 +49,28 @@ func (q *Queries) GetEmployeeByID(ctx context.Context, idEmployee string) (GetEm
 }
 
 const getEmployeeIDList = `-- name: GetEmployeeIDList :many
-SELECT id_employee
+SELECT id_employee, CONCAT(empl_surname, ' ', empl_name)::VARCHAR as full_name
 FROM employee
 `
 
-func (q *Queries) GetEmployeeIDList(ctx context.Context) ([]string, error) {
+type GetEmployeeIDListRow struct {
+	IDEmployee string
+	FullName   string
+}
+
+func (q *Queries) GetEmployeeIDList(ctx context.Context) ([]GetEmployeeIDListRow, error) {
 	rows, err := q.db.QueryContext(ctx, getEmployeeIDList)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []string
+	var items []GetEmployeeIDListRow
 	for rows.Next() {
-		var id_employee string
-		if err := rows.Scan(&id_employee); err != nil {
+		var i GetEmployeeIDListRow
+		if err := rows.Scan(&i.IDEmployee, &i.FullName); err != nil {
 			return nil, err
 		}
-		items = append(items, id_employee)
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

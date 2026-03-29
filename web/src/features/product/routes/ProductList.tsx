@@ -8,7 +8,7 @@ import {
     useDownloadProductPdf,
 } from "@/features/product/hooks/useProduct.ts";
 import { useAllCategories } from "@/features/category/hooks/useCategory.ts";
-import {Combobox} from "@/features/product/routes/Combobox.tsx";
+import {Combobox, type ComboboxOption} from "@/components/ui/ComboBox.tsx";
 
 type View = "all" | "byName" | "byCategory";
 
@@ -95,6 +95,10 @@ export const ProductList = () => {
             resetPagination();
         }
     };
+    const options: ComboboxOption[] | undefined = categories?.map((c) => ({
+        value: c.categoryNumber,
+        label: c.categoryName,
+    }));
 
     const handleDelete = (id: number) => {
         toast("Видалити товар?", {
@@ -191,7 +195,7 @@ export const ProductList = () => {
                 )}
 
                 <Combobox
-                    categories={categories}
+                    options={options}
                     value={searchCategoryId}
                     onChange={(id) => {
                         setSearchName("");

@@ -1,4 +1,4 @@
-import {javaApiClient} from "@/lib/axios.ts";
+import {goApiClient, javaApiClient} from "@/lib/axios.ts";
 import {
     type StoreProduct,
     type CreateStoreProduct,
@@ -7,7 +7,7 @@ import {
     StoreProductPriceAndQuantitySchema,
     BaseStoreProductSchema,
     type BatchRequest,
-    type BatchDto,
+    type BatchDto, type StoreProductItem, StoreProductItemSchema,
 } from "@/features/store_product/types/types.ts";
 
 const prefix = "/store-products"
@@ -71,3 +71,8 @@ export const receiveNewBatch = async (data: BatchRequest): Promise<BatchDto> => 
     const response = await javaApiClient.post(prefix + "/receive", data);
     return response.data;
 }
+
+export const getStoreProductsList = async (): Promise<StoreProductItem[]> => {
+    const response = await goApiClient.get(`${prefix}/list`);
+    return StoreProductItemSchema.array().parse(response.data);
+};

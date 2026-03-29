@@ -7,7 +7,7 @@ import {
     getStoreProduct,
     getStoreProductPriceAndQuantity,
     deleteExpired,
-    downloadStoreProductPdf, receiveNewBatch
+    downloadStoreProductPdf, receiveNewBatch, getStoreProductsList
 } from "@/features/store_product/api/storeProductApi.ts";
 import {staleTime} from "@/constants/constants.ts";
 import type {BatchRequest, CreateStoreProduct} from "@/features/store_product/types/types.ts";
@@ -116,5 +116,12 @@ export const useReceiveNewBatch = () => {
             console.error("Mutation error:", error);
             alert("Помилка при збереженні партії");
         }
+    });
+};
+
+export const useStoreProductsList = () => {
+    return useQuery({
+        queryKey: [QUERY_KEY, "list"],
+        queryFn: () => getStoreProductsList(),
     });
 };

@@ -275,7 +275,7 @@ export const CustomerCardListPage = () => {
                         <tbody>
                         {customerCards?.length === 0 ? (
                             <tr>
-                                <td colSpan={5} className="px-3 py-8 text-center text-zinc-500 bg-white">
+                                <td colSpan={isCashier ? 3 : 5} className="px-3 py-8 text-center text-zinc-500 bg-white">
                                     Ви досягли кінця списку. Більше карток немає
                                 </td>
                             </tr>

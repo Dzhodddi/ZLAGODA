@@ -16,15 +16,26 @@ type CardService interface {
 	UpdateCustomerCard(ctx context.Context, card views.UpdateCustomerCard, cardNumber string) (*views.CustomerCardResponse, error)
 	DeleteCustomerCard(ctx context.Context, cardNumber string) error
 	ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]views.CustomerCardResponse, error)
-	GetCustomerCardIDList(ctx context.Context) ([]string, error)
+	GetCustomerCardIDList(ctx context.Context) (*[]views.DropdownCardItem, error)
 }
 
 type cardService struct {
 	cardRepository repository.CardRepository
 }
 
-func (s *cardService) GetCustomerCardIDList(ctx context.Context) ([]string, error) {
-	return s.cardRepository.GetCustomerCardIDList(ctx)
+func (s *cardService) GetCustomerCardIDList(ctx context.Context) (*[]views.DropdownCardItem, error) {
+	items, err := s.cardRepository.GetCustomerCardIDList(ctx)
+	if err != nil {
+		return nil, err
+	}
+	response := make([]views.DropdownCardItem, 0, len(items))
+	for i := range items {
+		response = append(response, views.DropdownCardItem{
+			CardNumber: items[i].CardNumber,
+			FullName:   items[i].FullName,
+		})
+	}
+	return &response, nil
 }
 
 func NewCardService(cardRepository repository.CardRepository) CardService {

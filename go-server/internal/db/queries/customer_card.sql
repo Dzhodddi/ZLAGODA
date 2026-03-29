@@ -121,5 +121,5 @@ ORDER BY card_number
 FETCH FIRST $3 ROWS ONLY;
 
 -- name: GetCustomerCardIDList :many
-SELECT card_number
+SELECT card_number, CONCAT(customer_surname, ' ', customer_name)::VARCHAR as full_name
 FROM customer_card;

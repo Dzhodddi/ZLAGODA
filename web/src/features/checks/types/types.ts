@@ -19,16 +19,20 @@ export const CheckSchema = z.object({
         .min(1, "Номер чеку занадто короткий")
         .max(10, "Номер чеку занадто довгий"),
     idEmployee: z
-        .string()
+        .string("Оберіть працівника")
         .min(1, "ID працівника занадто короткий")
         .max(10, "ID працівника занадто довгий"),
     cardNumber: z
-        .string()
+        .string("Оберіть картку клієнта")
         .min(1, "Номер картки занадто короткий")
         .max(13, "Номер картки занадто довгий"),
     printDate: z
-        .iso
-        .datetime("Невірний формат дати"),
+        .string()
+        .min(1, "Вкажіть дату друку")
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: "Невірний формат дати",
+        })
+        .transform((val) => new Date(val).toISOString()),
     products: z
         .array(StoreProductSchema)
         .min(1, "Додайте хоча б один товар"),
@@ -38,6 +42,8 @@ export const CheckSchema = z.object({
         .min(0, "ПДВ не може бути від'ємним")
         .max(999999999.9999, "ПДВ занадто великий"),
 });
+
+export const CreateCheckSchema = CheckSchema.omit({vat: true})
 
 export const CheckListItemSchema = CheckSchema.omit({ products: true }).extend(
     {

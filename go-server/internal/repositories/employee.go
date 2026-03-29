@@ -2,14 +2,15 @@ package repository
 
 import (
 	"context"
+
+	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/jmoiron/sqlx"
-	"time"
 )
 
 type EmployeeRepository interface {
 	GetEmployeeByID(ctx context.Context, employeeID string) (generated.GetEmployeeByIDRow, error)
-	GetEmployeeIDList(ctx context.Context) ([]string, error)
+	GetEmployeeIDList(ctx context.Context) ([]generated.GetEmployeeIDListRow, error)
 }
 
 type employeeRepository struct {
@@ -25,14 +26,14 @@ func NewEmployeeRepository(db *sqlx.DB) EmployeeRepository {
 }
 
 func (r *employeeRepository) GetEmployeeByID(ctx context.Context, employeeID string) (generated.GetEmployeeByIDRow, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
 	return r.queries.GetEmployeeByID(ctx, employeeID)
 }
 
-func (r *employeeRepository) GetEmployeeIDList(ctx context.Context) ([]string, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func (r *employeeRepository) GetEmployeeIDList(ctx context.Context) ([]generated.GetEmployeeIDListRow, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
 	return r.queries.GetEmployeeIDList(ctx)

@@ -42,3 +42,8 @@ type ListCustomerCardsQueryParams struct {
 	LastCardNumber *string `query:"card_number" validate:"omitempty,max=50"`
 	SearchSurname  *string `query:"search_surname" validate:"omitempty,max=50"`
 }
+
+type DropdownCardItem struct {
+	CardNumber string `json:"card_number"`
+	FullName   string `json:"full_name"`
+}

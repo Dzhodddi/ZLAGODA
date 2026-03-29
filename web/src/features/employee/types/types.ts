@@ -149,3 +149,10 @@ export const PageEmployeeContactSchema = z.object({
     totalElements: z.number(),
     hasNext: z.boolean(),
 });
+
+export const EmployeeDropdownItemSchema = z.object({
+    idEmployee: z.string(),
+    fullName: z.string(),
+})
+
+export type EmployeeDropdownItem = z.infer<typeof EmployeeDropdownItemSchema>

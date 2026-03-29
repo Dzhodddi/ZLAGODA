@@ -16,5 +16,5 @@ FROM employee
 WHERE id_employee = $1;
 
 -- name: GetEmployeeIDList :many
-SELECT id_employee
+SELECT id_employee, CONCAT(empl_surname, ' ', empl_name)::VARCHAR as full_name
 FROM employee;
