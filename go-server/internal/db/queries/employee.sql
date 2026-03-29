@@ -14,3 +14,7 @@ SELECT
 SELECT id_employee, empl_name, empl_role
 FROM employee
 WHERE id_employee = $1;
+
+-- name: GetEmployeeIDList :many
+SELECT id_employee
+FROM employee;

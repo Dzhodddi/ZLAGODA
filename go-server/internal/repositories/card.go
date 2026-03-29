@@ -35,11 +35,16 @@ type CardRepository interface {
 		lastCardNumber string,
 		lastCustomerSurname string,
 	) ([]generated.CustomerCard, error)
+	GetCustomerCardIDList(ctx context.Context) ([]string, error)
 }
 
 type cardRepository struct {
 	db      *sqlx.DB
 	queries *generated.Queries
+}
+
+func (r *cardRepository) GetCustomerCardIDList(ctx context.Context) ([]string, error) {
+	return r.queries.GetCustomerCardIDList(ctx)
 }
 
 func NewCardRepository(db *sqlx.DB) CardRepository {

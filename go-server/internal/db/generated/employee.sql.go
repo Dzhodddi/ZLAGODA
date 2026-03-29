@@ -47,3 +47,31 @@ func (q *Queries) GetEmployeeByID(ctx context.Context, idEmployee string) (GetEm
 	err := row.Scan(&i.IDEmployee, &i.EmplName, &i.EmplRole)
 	return i, err
 }
+
+const getEmployeeIDList = `-- name: GetEmployeeIDList :many
+SELECT id_employee
+FROM employee
+`
+
+func (q *Queries) GetEmployeeIDList(ctx context.Context) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getEmployeeIDList)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var id_employee string
+		if err := rows.Scan(&id_employee); err != nil {
+			return nil, err
+		}
+		items = append(items, id_employee)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

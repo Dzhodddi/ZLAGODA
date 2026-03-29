@@ -90,18 +90,26 @@ ORDER BY
 FETCH FIRST $4 ROWS ONLY;
 
 -- name: GetTotalPriceByCashierWithinDate :one
-SELECT
-    sum(selling_price * product_number)::DOUBLE PRECISION as total_price
-FROM
-    check_list_view
-WHERE
-    id_employee = $1
-    AND print_date BETWEEN $2 AND $3;
+SELECT sum(total_price)::DOUBLE PRECISION as total_price from (
+    SELECT
+        (sum(c.sum_total) / count(c.check_number))::DOUBLE PRECISION as total_price
+    FROM
+        checks c
+            JOIN sale s ON c.check_number = s.check_number
+    WHERE
+        id_employee = $1 AND
+        print_date BETWEEN $2 AND $3
+    GROUP BY c.check_number
+);
 
 -- name: GetTotalPriceByAllCashiersWithinDate :one
-SELECT
-    sum(selling_price * product_number)::DOUBLE PRECISION as total_price
-FROM
-    check_list_view
-WHERE
-    print_date BETWEEN $1 AND $2;
+SELECT sum(total_price)::DOUBLE PRECISION as total_price from (
+    SELECT
+       (sum(c.sum_total) / count(c.check_number))::DOUBLE PRECISION as total_price
+    FROM
+        checks c
+            JOIN sale s ON c.check_number = s.check_number
+    WHERE
+        print_date BETWEEN $1 AND $2
+    GROUP BY c.check_number
+);

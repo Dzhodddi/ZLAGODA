@@ -195,3 +195,11 @@ func (h *CardHandler) listCustomerCards(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, cards)
 }
+
+func (h *CardHandler) ListCustomerCardsID(c echo.Context) error {
+	list, err := h.service.GetCustomerCardIDList(c.Request().Context())
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, list)
+}

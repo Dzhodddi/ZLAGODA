@@ -1,4 +1,4 @@
-import {javaApiClient} from "@/lib/axios.ts";
+import {goApiClient, javaApiClient} from "@/lib/axios.ts";
 import {
     type Employee,
     type CreateEmployee,
@@ -58,3 +58,9 @@ export const getMe = async (): Promise<Employee> => {
     const response = await javaApiClient.get(prefix + "/me");
     return BaseEmployeeSchema.parse(response.data);
 };
+
+
+export const getEmployeeIDList = async (): Promise<string[]> => {
+    const response =  await goApiClient.get(prefix + "/list")
+    return response.data;
+}

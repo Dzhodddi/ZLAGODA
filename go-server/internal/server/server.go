@@ -75,11 +75,16 @@ func (s *Server) SetupAllRoutes() *Server {
 	s.Echo.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "ok")
 	})
-	v1 := s.Echo.Group("/api/v1", s.authenticator.AuthMiddleware(repository.NewEmployeeRepository(s.DB)))
-	s.setupCategoryRouts(v1)
-	s.setupCustomerCardRouts(v1)
-	s.setupChecksRouts(v1)
-	s.setupSaleRouts(v1)
+
+	publicV1 := s.Echo.Group("/api/v1")
+	s.setupEmployeeRouts(publicV1)
+
+	protectedV1 := s.Echo.Group("/api/v1", s.authenticator.AuthMiddleware(repository.NewEmployeeRepository(s.DB)))
+	s.setupCategoryRouts(protectedV1)
+	s.setupCustomerCardRouts(protectedV1, publicV1)
+	s.setupChecksRouts(protectedV1)
+	s.setupSaleRouts(protectedV1)
+
 	return s
 }
 
@@ -90,11 +95,12 @@ func (s *Server) setupCategoryRouts(router *echo.Group) {
 	handler.RegisterRouts(router)
 }
 
-func (s *Server) setupCustomerCardRouts(router *echo.Group) {
+func (s *Server) setupCustomerCardRouts(router *echo.Group, publicRouter *echo.Group) {
 	repo := repository.NewCardRepository(s.DB)
 	service := services.NewCardService(repo)
 	handler := handlers.NewCardHandler(service, s.authenticator)
 	handler.RegisterRouts(router)
+	publicRouter.GET("/customer-cards/list", handler.ListCustomerCardsID)
 }
 
 func (s *Server) setupChecksRouts(router *echo.Group) {
@@ -108,6 +114,13 @@ func (s *Server) setupSaleRouts(router *echo.Group) {
 	repo := repository.NewSaleRepository(s.DB)
 	service := services.NewSaleService(repo)
 	handler := handlers.NewSaleHandler(service, s.authenticator)
+	handler.RegisterRouts(router)
+}
+
+func (s *Server) setupEmployeeRouts(router *echo.Group) {
+	repo := repository.NewEmployeeRepository(s.DB)
+	service := services.NewEmployeeService(repo)
+	handler := handlers.NewEmployeeHandler(service)
 	handler.RegisterRouts(router)
 }
 

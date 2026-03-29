@@ -1,62 +1,62 @@
 import { useState, useRef, useEffect } from "react";
-import { useAllProducts } from "@/features/product/hooks/useProduct.ts";
 import { Controller, useFormContext } from "react-hook-form";
+import { useAllProducts } from "@/features/product/hooks/useProduct.ts";
 import { useAllCategories } from "@/features/category/hooks/useCategory.ts";
 
-type Category = {
-    categoryNumber: number;
-    categoryName: string;
+export type ComboboxOption<TValue extends string | number = number> = {
+    value: TValue;
+    label: string;
 };
 
-type Props = {
-    categories: Category[] | undefined;
-    value: number | undefined;
-    onChange: (id: number | undefined) => void;
+type ComboboxProps<TValue extends string | number> = {
+    options: ComboboxOption<TValue>[] | undefined;
+    value: TValue | undefined;
+    onChange: (value: TValue | undefined) => void;
     placeholder?: string;
     inputClassName?: string;
     showAllOption?: boolean;
 };
 
-export const Combobox = ({
-                                     categories,
-                                     value,
-                                     onChange,
-                                     placeholder = "Усі категорії",
-                                     inputClassName = "bg-green-50",
-                                     showAllOption = true,
-                                 }: Props) => {
+export const Combobox = <TValue extends string | number>({
+                                                             options,
+                                                             value,
+                                                             onChange,
+                                                             placeholder = "Оберіть значення",
+                                                             inputClassName = "bg-green-50",
+                                                             showAllOption = true,
+                                                         }: ComboboxProps<TValue>) => {
     const [inputValue, setInputValue] = useState("");
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const selectedCategory = categories?.find(c => c.categoryNumber === value);
+    const selectedOption = options?.find((o) => o.value === value);
 
     useEffect(() => {
         if (!isOpen) {
-            setInputValue(selectedCategory?.categoryName ?? "");
+            setInputValue(selectedOption?.label ?? "");
         }
-    }, [selectedCategory, isOpen]);
+    }, [selectedOption, isOpen]);
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (!containerRef.current?.contains(e.target as Node)) {
                 setIsOpen(false);
-                setInputValue(selectedCategory?.categoryName ?? "");
+                setInputValue(selectedOption?.label ?? "");
             }
         };
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
-    }, [selectedCategory]);
+    }, [selectedOption]);
 
     const filtered = inputValue
-        ? categories?.filter(c =>
-            c.categoryName.toLowerCase().includes(inputValue.toLowerCase())
+        ? options?.filter((o) =>
+            o.label.toLowerCase().includes(inputValue.toLowerCase())
         )
-        : categories;
+        : options;
 
-    const handleSelect = (cat: Category | null) => {
-        onChange(cat?.categoryNumber ?? undefined);
-        setInputValue(cat?.categoryName ?? "");
+    const handleSelect = (opt: ComboboxOption<TValue> | null) => {
+        onChange(opt?.value ?? undefined);
+        setInputValue(opt?.label ?? "");
         setIsOpen(false);
     };
 
@@ -71,7 +71,6 @@ export const Combobox = ({
                 }}
                 onFocus={() => setIsOpen(true)}
                 placeholder={placeholder}
-                title="Шукати інформацію про товар за його категорією"
                 className={`w-full border rounded px-3 py-1.5 text-sm text-zinc-900 pr-7 cursor-pointer ${inputClassName}`}
             />
             <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-zinc-900 text-xm">
@@ -91,15 +90,17 @@ export const Combobox = ({
                     {filtered?.length === 0 && (
                         <li className="px-3 py-1.5 text-zinc-400">Нічого не знайдено</li>
                     )}
-                    {filtered?.map((cat) => (
+                    {filtered?.map((opt) => (
                         <li
-                            key={cat.categoryNumber}
-                            onMouseDown={() => handleSelect(cat)}
+                            key={opt.value}
+                            onMouseDown={() => handleSelect(opt)}
                             className={`px-3 py-1.5 cursor-pointer hover:bg-zinc-100 ${
-                                cat.categoryNumber === value ? "bg-zinc-100 font-medium text-zinc-900" : "text-zinc-800"
+                                opt.value === value
+                                    ? "bg-zinc-100 font-medium text-zinc-900"
+                                    : "text-zinc-800"
                             }`}
                         >
-                            {cat.categoryName}
+                            {opt.label}
                         </li>
                     ))}
                 </ul>
@@ -112,9 +113,9 @@ export const CategoryComboboxField = ({ name = "categoryNumber" }: { name?: stri
     const { data: categories } = useAllCategories();
     const { control } = useFormContext();
 
-    const items = categories?.map(c => ({
-        categoryNumber: c.categoryNumber,
-        categoryName: c.categoryName,
+    const options: ComboboxOption[] | undefined = categories?.map((c) => ({
+        value: c.categoryNumber,
+        label: "#" + c.categoryNumber.toString() + " " + c.categoryName,
     }));
 
     return (
@@ -123,11 +124,13 @@ export const CategoryComboboxField = ({ name = "categoryNumber" }: { name?: stri
             name={name}
             render={({ field, fieldState }) => (
                 <div className="col-span-12 flex flex-col gap-1 py-1.5">
-                    <label className="text-sm font-medium text-zinc-700">Категорія <span className="text-red-500">*</span></label>
+                    <label className="text-sm font-medium text-zinc-700">
+                        Категорія <span className="text-red-500">*</span>
+                    </label>
                     <Combobox
-                        categories={items}
+                        options={options}
                         value={field.value}
-                        onChange={(id) => field.onChange(id ?? null)}
+                        onChange={(val) => field.onChange(val ?? null)}
                         placeholder="Оберіть категорію"
                         inputClassName="bg-white"
                         showAllOption={false}
@@ -145,9 +148,9 @@ export const ProductComboboxField = ({ name = "idProduct" }: { name?: string }) 
     const { data: products } = useAllProducts();
     const { control } = useFormContext();
 
-    const items = products?.map(p => ({
-        categoryNumber: p.idProduct,
-        categoryName: p.productName,
+    const options: ComboboxOption<number>[] | undefined = products?.map((p) => ({
+        value: p.idProduct,
+        label: p.productName,
     }));
 
     return (
@@ -156,11 +159,13 @@ export const ProductComboboxField = ({ name = "idProduct" }: { name?: string }) 
             name={name}
             render={({ field, fieldState }) => (
                 <div className="col-span-12 flex flex-col gap-1 py-1.5">
-                    <label className="text-sm font-medium text-zinc-700">Товар <span className="text-red-500">*</span></label>
+                    <label className="text-sm font-medium text-zinc-700">
+                        Товар <span className="text-red-500">*</span>
+                    </label>
                     <Combobox
-                        categories={items}
+                        options={options}
                         value={field.value}
-                        onChange={(id) => field.onChange(id ?? null)}
+                        onChange={(val) => field.onChange(val ?? null)}
                         placeholder="Оберіть товар"
                         inputClassName="bg-white"
                         showAllOption={false}

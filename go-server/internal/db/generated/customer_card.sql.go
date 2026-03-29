@@ -222,6 +222,34 @@ func (q *Queries) GetCustomerCardByID(ctx context.Context, cardNumber string) (C
 	return i, err
 }
 
+const getCustomerCardIDList = `-- name: GetCustomerCardIDList :many
+SELECT card_number
+FROM customer_card
+`
+
+func (q *Queries) GetCustomerCardIDList(ctx context.Context) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getCustomerCardIDList)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var card_number string
+		if err := rows.Scan(&card_number); err != nil {
+			return nil, err
+		}
+		items = append(items, card_number)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCustomerCardsByPercentSorted = `-- name: GetCustomerCardsByPercentSorted :many
 SELECT
     card_number,

@@ -119,3 +119,7 @@ FROM customer_card
 WHERE card_number > $1 and customer_surname ILIKE $2
 ORDER BY card_number
 FETCH FIRST $3 ROWS ONLY;
+
+-- name: GetCustomerCardIDList :many
+SELECT card_number
+FROM customer_card;

@@ -9,6 +9,7 @@ import (
 
 type EmployeeRepository interface {
 	GetEmployeeByID(ctx context.Context, employeeID string) (generated.GetEmployeeByIDRow, error)
+	GetEmployeeIDList(ctx context.Context) ([]string, error)
 }
 
 type employeeRepository struct {
@@ -28,4 +29,11 @@ func (r *employeeRepository) GetEmployeeByID(ctx context.Context, employeeID str
 	defer cancel()
 
 	return r.queries.GetEmployeeByID(ctx, employeeID)
+}
+
+func (r *employeeRepository) GetEmployeeIDList(ctx context.Context) ([]string, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	return r.queries.GetEmployeeIDList(ctx)
 }

@@ -7,7 +7,7 @@ import {
     getAllCashiers,
     getMe,
     getEmployeePhoneAndAddress,
-    downloadEmployeePdf, getEmployee,
+    downloadEmployeePdf, getEmployee, getEmployeeIDList,
 } from "@/features/employee/api/employeeApi.ts";
 import {staleTime} from "@/constants/constants.ts";
 
@@ -102,3 +102,12 @@ export const useDownloadEmployeePdf = () => {
         },
     });
 };
+
+
+export const useEmployeeIDList = () => {
+    return useQuery({
+        queryKey: [QUERY_KEY, "id-list"],
+        queryFn: () => getEmployeeIDList(),
+        staleTime: staleTime,
+    })
+}
