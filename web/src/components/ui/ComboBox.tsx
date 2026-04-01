@@ -18,7 +18,7 @@ export const Combobox = <TValue extends string | number>({
                                                              options,
                                                              value,
                                                              onChange,
-                                                             placeholder = "Оберіть значення",
+                                                             placeholder = "Усі",
                                                              inputClassName = "bg-green-50",
                                                              showAllOption = true,
                                                          }: ComboboxProps<TValue>) => {
