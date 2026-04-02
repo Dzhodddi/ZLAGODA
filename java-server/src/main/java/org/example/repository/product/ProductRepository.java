@@ -230,7 +230,7 @@ public class ProductRepository {
                             product_characteristics,
                             category_number
                         ) VALUES (?, ?, ?, ?)
-                        RETURNING category_number, product_name, producer, product_characteristics
+                        RETURNING id_product, category_number, product_name, producer, product_characteristics
                         """,
                         rowMapper,
                         product.getProduct_name(),
