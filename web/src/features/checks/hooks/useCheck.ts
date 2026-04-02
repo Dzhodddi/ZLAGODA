@@ -18,7 +18,10 @@ export const useDownloadCheckPdf = () => {
             const url = URL.createObjectURL(blob);
             window.open(url);
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            toast.error("Не вдалося відкрити звіт");
+            console.error(error.message);
+        },
     });
 };
 

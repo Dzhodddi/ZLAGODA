@@ -10,6 +10,8 @@ import {
     downloadEmployeePdf, getEmployee, getEmployeeIDList,
 } from "@/features/employee/api/employeeApi.ts";
 import {staleTime} from "@/constants/constants.ts";
+import {toast} from "sonner";
+import {isAxiosError} from "axios";
 
 const QUERY_KEY = "employees";
 
@@ -20,7 +22,18 @@ export const useCreateEmployee = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["employees-list"] });
             queryClient.invalidateQueries({ queryKey: ["cashiers-list"] });
+            toast.success("Успішно створено працівника");
         },
+        onError: (error) => {
+            if (isAxiosError(error) && error.response?.data) {
+                if (error.response.status === 409) {
+                    toast.error("Працівник з таким ID уже існує");
+                    return;
+                }
+            }
+            toast.error("Не вдалося створити працівника");
+            console.error(error);
+        }
     });
 };
 
@@ -32,7 +45,12 @@ export const useUpdateEmployee = () => {
             queryClient.invalidateQueries({ queryKey: ["employees-list"] });
             queryClient.invalidateQueries({ queryKey: ["cashiers-list"] });
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+            toast.success("Успішно оновлено працівника")
         },
+        onError: (error) => {
+            toast.error("Не вдалося оновити працівника")
+            console.error(error);
+        }
     });
 };
 
@@ -44,6 +62,15 @@ export const useDeleteEmployee = () => {
             queryClient.invalidateQueries({ queryKey: ["employees-list"] });
             queryClient.invalidateQueries({ queryKey: ["cashiers-list"] });
         },
+        onError: (error) => {
+            if (isAxiosError(error) && error.response?.data) {
+                toast.error("Не вдалося видалити працівника")
+                console.error(error);
+                return;
+            }
+            toast.error("Помилка підключення до сервера");
+            console.error(error);
+        }
     });
 };
 
@@ -96,6 +123,7 @@ export const useDownloadEmployeePdf = () => {
             window.open(url);
         },
         onError: (error) => {
+            toast.error("Не вдалося відкрити звіт");
             console.error(error.message);
         },
     });

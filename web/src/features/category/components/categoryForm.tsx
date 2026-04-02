@@ -19,7 +19,7 @@ export const UpsertCategoryForm = ({ initialData }: Props) => {
                 initialData={initialData}
                 createMutation={useCreateCategory()}
                 updateMutation={useUpdateCategory()}
-                onSuccessAction={() => navigate("/categories")}
+                onSuccessAction={() => navigate("/category")}
                 prepareUpdatePayload={(formData, initial) => ({
                     ...formData,
                     categoryNumber: initial.categoryNumber

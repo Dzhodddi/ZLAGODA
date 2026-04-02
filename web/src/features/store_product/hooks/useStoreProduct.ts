@@ -11,6 +11,8 @@ import {
 } from "@/features/store_product/api/storeProductApi.ts";
 import {staleTime} from "@/constants/constants.ts";
 import type {BatchRequest, CreateStoreProduct} from "@/features/store_product/types/types.ts";
+import {toast} from "sonner";
+import {isAxiosError} from "axios";
 
 const QUERY_KEY = "store-products";
 
@@ -20,9 +22,12 @@ export const useCreateStoreProduct = () => {
         mutationFn: createStoreProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Successfully created store product!");
+            toast.success("Успішно створено товар у магазині");
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            toast.error("Не вдалося створити товар у магазині");
+            console.error(error);
+        }
     });
 };
 
@@ -33,7 +38,12 @@ export const useUpdateStoreProduct = () => {
             updateStoreProduct(payload.upc, payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+            toast.success("Успішно оновлено товар у магазині")
         },
+        onError: (error) => {
+            toast.error("Не вдалося оновити товар у магазині")
+            console.error(error);
+        }
     });
 };
 
@@ -43,9 +53,20 @@ export const useDeleteStoreProduct = () => {
         mutationFn: deleteStoreProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            alert("Successfully deleted store product!");
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            if (isAxiosError(error) && error.response?.data) {
+                if (error.response.status === 400) {
+                    toast.error("Товар у магазині використовується");
+                    return;
+                }
+                toast.error("Не вдалося видалити товар у магазині")
+                console.error(error);
+                return;
+            }
+            toast.error("Помилка підключення до сервера");
+            console.error(error);
+        }
     });
 };
 
@@ -90,7 +111,10 @@ export const useDownloadStoreProductPdf = () => {
             const url = URL.createObjectURL(blob);
             window.open(url);
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            toast.error("Не вдалося відкрити звіт");
+            console.error(error.message);
+        },
     });
 };
 
@@ -101,7 +125,10 @@ export const useDeleteExpired = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            toast.error("Не вдалося видалити протерміновані товари у магазині");
+            console.error(error.message);
+        },
     });
 };
 
@@ -111,10 +138,11 @@ export const useReceiveNewBatch = () => {
         mutationFn: (data: BatchRequest) => receiveNewBatch(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+            toast.success("Успішно створено партію товарів")
         },
-        onError: (error: any) => {
-            console.error("Mutation error:", error);
-            alert("Помилка при збереженні партії");
+        onError: (error) => {
+            toast.error("Не вдалося створити партію товарів")
+            console.error(error);
         }
     });
 };

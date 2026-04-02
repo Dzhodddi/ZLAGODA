@@ -18,7 +18,10 @@ export const useDownloadCategoryPdf = () => {
             const url = URL.createObjectURL(blob);
             window.open(url);
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            toast.error("Не вдалося відкрити звіт");
+            console.error(error.message);
+        },
     });
 };
 
@@ -32,7 +35,7 @@ export const useCreateCategory = () => {
             toast.success("Успішно створено категорію");
         },
         onError: (error) => {
-            toast.error("Помилка під час створення категорії");
+            toast.error("Не вдалося створити категорію");
             console.error(error);
         }
     })
@@ -48,7 +51,7 @@ export const useUpdateCategory = () => {
             toast.success("Успішно оновлено категорію")
         },
         onError: (error) => {
-            toast.error("Помилка під час оновлення категорії")
+            toast.error("Не вдалося оновити категорію")
             console.error(error);
         }
     })
@@ -77,10 +80,11 @@ export const useDeleteCategory = () => {
         onError: (error) => {
             if (isAxiosError(error) && error.response?.data) {
                 if (error.response.status === 400) {
-                    toast.error("Категорія використовується!");
+                    toast.error("Категорія використовується");
                     return;
                 }
-                toast.error("Помилка під час видалення категорії")
+                toast.error("Не вдалося видалити категорію")
+                console.error(error);
                 return;
             }
             toast.error("Помилка підключення до сервера");

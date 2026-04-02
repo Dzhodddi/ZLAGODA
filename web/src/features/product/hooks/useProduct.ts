@@ -10,6 +10,8 @@ import {
 } from "@/features/product/api/productApi";
 import type {CreateProduct} from "@/features/product/types/types.ts";
 import {staleTime} from "@/constants/constants.ts";
+import {isAxiosError} from "axios";
+import {toast} from "sonner";
 
 const QUERY_KEY = "products";
 
@@ -44,8 +46,12 @@ export const useCreateProduct = () => {
         mutationFn: createProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+            toast.success("Успішно створено товар");
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            toast.error("Не вдалося створити товар");
+            console.error(error);
+        }
     });
 };
 
@@ -56,8 +62,12 @@ export const useUpdateProduct = () => {
             updateProduct(id, data as CreateProduct),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+            toast.success("Успішно оновлено товар")
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            toast.error("Не вдалося оновити товар")
+            console.error(error);
+        }
     });
 };
 
@@ -68,7 +78,19 @@ export const useDeleteProduct = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            if (isAxiosError(error) && error.response?.data) {
+                if (error.response.status === 400) {
+                    toast.error("Товар використовується");
+                    return;
+                }
+                toast.error("Не вдалося видалити товар")
+                console.error(error);
+                return;
+            }
+            toast.error("Помилка підключення до сервера");
+            console.error(error);
+        }
     });
 };
 
@@ -79,7 +101,10 @@ export const useDownloadProductPdf = () => {
             const url = URL.createObjectURL(blob);
             window.open(url);
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            toast.error("Не вдалося відкрити звіт");
+            console.error(error.message);
+        },
     });
 };
 
