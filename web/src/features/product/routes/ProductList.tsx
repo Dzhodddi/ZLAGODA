@@ -111,7 +111,6 @@ export const ProductList = () => {
                         toast.success("Товар успішно видалений");
                         resetPagination();
                     },
-                    onError: () => toast.error("Помилка під час видалення товару"),
                 }),
             },
             cancel: { label: "Скасувати", onClick: () => {} },

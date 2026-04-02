@@ -78,7 +78,7 @@ export const CheckListPage = () => {
             action: {
                 label: "ТАК",
                 onClick: () => deleteMutation.mutate(checkNumber, {
-                    onSuccess: () => toast.success("Чек успішно видалено")
+                    onSuccess: () => toast.success("Чек успішно видалений")
                 }),
             },
             cancel: {
@@ -125,7 +125,7 @@ export const CheckListPage = () => {
     }
 
     if (isError) {
-        return <div className="p-6 text-center text-red-500">Помилка завантаження чеків.</div>;
+        return <div className="p-6 text-center text-red-500">Помилка завантаження чеків</div>;
     }
 
     return (

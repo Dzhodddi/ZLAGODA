@@ -10,6 +10,7 @@ import {
     listChecks,
 } from "@/features/checks/api/checkApi.ts";
 import {isAxiosError} from "axios";
+import {getErrorMessage} from "@/lib/errorUtils.ts";
 
 export const useDownloadCheckPdf = () => {
     return useMutation({
@@ -19,8 +20,7 @@ export const useDownloadCheckPdf = () => {
             window.open(url);
         },
         onError: (error) => {
-            toast.error("Не вдалося відкрити звіт");
-            console.error(error.message);
+            toast.error(getErrorMessage(error, "Не вдалося відкрити звіт"));
         },
     });
 };
@@ -32,11 +32,10 @@ export const useCreateCheck = () => {
         mutationFn: createCheck,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["checks"] });
-            toast.success("Чек успішно створено");
+            toast.success("Чек успішно створений");
         },
         onError: (error) => {
-            toast.error("Помилка під час створення чеку");
-            console.error(error);
+            toast.error(getErrorMessage(error, "Не вдалося створити чек"));
         }
     });
 };
@@ -50,12 +49,7 @@ export const useDeleteCheck = () => {
             queryClient.invalidateQueries({ queryKey: ["checks"] });
         },
         onError: (error) => {
-            if (error instanceof Error && error.message.includes("400")) {
-                toast.error("Чек використовується!");
-                return;
-            }
-            toast.error("Помилка під час видалення чеку");
-            console.error(error);
+            toast.error(getErrorMessage(error, "Не вдалося видалити чек"));
         }
     });
 };
@@ -74,7 +68,7 @@ export const useCheckList = (
                 return await listChecks(startDate, endDate, employeeId, checkNumber);
             } catch (error) {
                 if (employeeId && isAxiosError(error) && error.response?.status === 400) {
-                    toast.error(`Касира з таким ${employeeId!} не знайдено або невірний формат`);
+                    toast.error(`Касира з ID ${employeeId!} не знайдено, або неправильний формат`);
                 }
                 return []
             }
@@ -106,7 +100,7 @@ export const useCheckTotalSum = (
                 return await getChecksTotalSum(startDate, endDate, employeeId);
             } catch (error) {
                 if (employeeId && isAxiosError(error) && error.response?.status === 400) {
-                    toast.error(`Касира з таким ${employeeId!} не знайдено або невірний формат`);
+                    toast.error(`Касира з ID ${employeeId!} не знайдено, або неправильний формат`);
                 }
                 return 0
             }
@@ -127,7 +121,7 @@ export const useTodayCheckList = (
                 return await getTodayChecks(employeeId, checkNumber);
             } catch (error) {
                 if (employeeId && isAxiosError(error) && error.response?.status === 400) {
-                    toast.error(`Касира з таким ${employeeId!} не знайдено або невірний формат`);
+                    toast.error(`Касира з ID ${employeeId!} не знайдено, або неправильний формат`);
                 }
                 return []
             }

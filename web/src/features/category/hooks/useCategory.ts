@@ -6,8 +6,9 @@ import {
     updateCategory
 } from "@/features/category/api/categoryApi.ts";
 import {toast} from "sonner";
-import {AxiosError, isAxiosError} from "axios";
+import {AxiosError} from "axios";
 import {staleTime} from "@/constants/constants.ts";
+import {getErrorMessage} from "@/lib/errorUtils.ts";
 
 const QUERY_KEY = "categories"
 
@@ -19,8 +20,7 @@ export const useDownloadCategoryPdf = () => {
             window.open(url);
         },
         onError: (error) => {
-            toast.error("Не вдалося відкрити звіт");
-            console.error(error.message);
+            toast.error(getErrorMessage(error, "Не вдалося відкрити звіт"));
         },
     });
 };
@@ -32,11 +32,10 @@ export const useCreateCategory = () => {
         mutationFn: createCategory,
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: [QUERY_KEY]})
-            toast.success("Успішно створено категорію");
+            toast.success("Категорія успішно створена");
         },
         onError: (error) => {
-            toast.error("Не вдалося створити категорію");
-            console.error(error);
+            toast.error(getErrorMessage(error, "Не вдалося створити категорію"));
         }
     })
 }
@@ -48,11 +47,10 @@ export const useUpdateCategory = () => {
         mutationFn: updateCategory,
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: [QUERY_KEY]})
-            toast.success("Успішно оновлено категорію")
+            toast.success("Категорія успішно оновлена")
         },
         onError: (error) => {
-            toast.error("Не вдалося оновити категорію")
-            console.error(error);
+            toast.error(getErrorMessage(error, "Не вдалося оновити категорію"))
         }
     })
 }
@@ -78,17 +76,7 @@ export const useDeleteCategory = () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
         },
         onError: (error) => {
-            if (isAxiosError(error) && error.response?.data) {
-                if (error.response.status === 400) {
-                    toast.error("Категорія використовується");
-                    return;
-                }
-                toast.error("Не вдалося видалити категорію")
-                console.error(error);
-                return;
-            }
-            toast.error("Помилка підключення до сервера");
-            console.error(error);
+            toast.error(getErrorMessage(error, "Не вдалося видалити категорію"))
         }
     });
 };

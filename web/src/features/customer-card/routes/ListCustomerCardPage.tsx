@@ -47,7 +47,7 @@ export const CustomerCardListPage = () => {
             action: {
                 label: "ТАК",
                 onClick: () => deleteMutation.mutate(cardNumber, {
-                    onSuccess: () => toast.success("Картку успішно видалено"),
+                    onSuccess: () => toast.success("Картка клієнта успішно видалена"),
                 }),
             },
             cancel: { label: "Скасувати", onClick: () => {} },

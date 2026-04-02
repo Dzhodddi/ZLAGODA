@@ -10,8 +10,8 @@ import {
 } from "@/features/product/api/productApi";
 import type {CreateProduct} from "@/features/product/types/types.ts";
 import {staleTime} from "@/constants/constants.ts";
-import {isAxiosError} from "axios";
 import {toast} from "sonner";
+import {getErrorMessage} from "@/lib/errorUtils.ts";
 
 const QUERY_KEY = "products";
 
@@ -46,11 +46,10 @@ export const useCreateProduct = () => {
         mutationFn: createProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            toast.success("Успішно створено товар");
+            toast.success("Товар успішно створений");
         },
         onError: (error) => {
-            toast.error("Не вдалося створити товар");
-            console.error(error);
+            toast.error(getErrorMessage(error, "Не вдалося створити товар"));
         }
     });
 };
@@ -62,11 +61,10 @@ export const useUpdateProduct = () => {
             updateProduct(id, data as CreateProduct),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-            toast.success("Успішно оновлено товар")
+            toast.success("Товар успішно оновлений")
         },
         onError: (error) => {
-            toast.error("Не вдалося оновити товар")
-            console.error(error);
+            toast.error(getErrorMessage(error, "Не вдалося оновити товар"));
         }
     });
 };
@@ -79,17 +77,7 @@ export const useDeleteProduct = () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
         },
         onError: (error) => {
-            if (isAxiosError(error) && error.response?.data) {
-                if (error.response.status === 400) {
-                    toast.error("Товар використовується");
-                    return;
-                }
-                toast.error("Не вдалося видалити товар")
-                console.error(error);
-                return;
-            }
-            toast.error("Помилка підключення до сервера");
-            console.error(error);
+            toast.error(getErrorMessage(error, "Не вдалося видалити товар"));
         }
     });
 };
@@ -102,8 +90,7 @@ export const useDownloadProductPdf = () => {
             window.open(url);
         },
         onError: (error) => {
-            toast.error("Не вдалося відкрити звіт");
-            console.error(error.message);
+            toast.error(getErrorMessage(error, "Не вдалося відкрити звіт"));
         },
     });
 };

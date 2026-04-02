@@ -108,10 +108,9 @@ export const StoreProductList = () => {
                 onClick: () =>
                     deleteMutation.mutate(upc, {
                         onSuccess: () => {
-                            toast.success("Товар успішно видалено");
+                            toast.success("Товар у магазині успішно видалений");
                             resetPagination();
                         },
-                        onError: () => toast.error("Помилка під час видалення товару"),
                     }),
             },
             cancel: { label: "Скасувати", onClick: () => {} },
@@ -130,7 +129,6 @@ export const StoreProductList = () => {
                             toast.success("Протерміновані товари успішно видалено");
                             resetPagination();
                         },
-                        onError: () => toast.error("Помилка під час видалення товарів"),
                     }),
             },
             cancel: { label: "Скасувати", onClick: () => {} },

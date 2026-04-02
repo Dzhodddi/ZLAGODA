@@ -8,6 +8,7 @@ import {
 import {toast} from "sonner";
 import {AxiosError, isAxiosError} from "axios";
 import {staleTime} from "@/constants/constants.ts";
+import {getErrorMessage} from "@/lib/errorUtils.ts";
 
 const QUERY_KEY = "customer_cards"
 
@@ -19,8 +20,7 @@ export const useDownloadCustomerCardPdf = () => {
             window.open(url);
         },
         onError: (error) => {
-            toast.error("Не вдалося відкрити звіт");
-            console.error(error.message);
+            toast.error(getErrorMessage(error, "Не вдалося відкрити звіт"));
         },
     });
 };
@@ -32,19 +32,10 @@ export const useCreateCustomerCard = () => {
         mutationFn: createCustomerCard,
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: [QUERY_KEY]})
-            toast.success("Успішно створено картку клієнта!")
+            toast.success("Картка клієнта успішно створена")
         },
         onError: (error) => {
-            if (isAxiosError(error) && error.response?.data) {
-                if (error.response.status === 400) {
-                    toast.error("Картка з таким ID вже існує!");
-                    return;
-                }
-                toast.error("Помилка під час створення картки клієнта")
-                return;
-            }
-            toast.error("Помилка підключення до сервера");
-            console.error(error);
+            toast.error(getErrorMessage(error, "Не вдалося створити картку клієнта"))
         }
     })
 }
@@ -56,11 +47,10 @@ export const useUpdateCustomerCard = () => {
         mutationFn: updateCustomerCard,
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: [QUERY_KEY]})
-            toast.success("Успішно оновлено картку клієнта!")
+            toast.success("Картка клієнта успішно оновлена")
         },
         onError: (error) => {
-            toast.error("Помилка під час оновлення картки клієнта")
-            console.log(error)
+            toast.error(getErrorMessage(error, "Не вдалося оновити картку клієнта"))
         }
     })
 }
@@ -103,16 +93,7 @@ export const useDeleteCustomerCard = () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
         },
         onError: (error) => {
-            if (isAxiosError(error) && error.response?.data) {
-                if (error.response.status === 400) {
-                    toast.error("Картка використовується!");
-                    return;
-                }
-                toast.error("Помилка під час видалення картки клієнта")
-                return;
-            }
-            toast.error("Помилка підключення до сервера");
-            console.error(error);
+            toast.error(getErrorMessage(error, "Не вдалося видалити картку клієнта"))
         }
     });
 }

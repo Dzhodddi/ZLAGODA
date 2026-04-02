@@ -123,7 +123,6 @@ export const EmployeeList = () => {
                         toast.success("Працівник успішно видалений");
                         resetPagination();
                     },
-                    onError: () => toast.error("Помилка під час видалення працівника"),
                 }),
             },
             cancel: {

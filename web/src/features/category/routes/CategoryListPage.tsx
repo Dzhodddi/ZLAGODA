@@ -35,7 +35,7 @@ export const CategoryListPage = () => {
             action: {
                 label: "ТАК",
                 onClick: () => deleteMutation.mutate(categoryNumber, {
-                    onSuccess: () => toast.success("Категорію успішно видалено")
+                    onSuccess: () => toast.success("Категорія успішно видалена")
                 }),
             },
             cancel: {
@@ -83,7 +83,7 @@ export const CategoryListPage = () => {
     }
 
     if (isError) {
-        return <div className="p-6 text-center text-red-500">Помилка завантаження категорій.</div>;
+        return <div className="p-6 text-center text-red-500">Помилка завантаження категорій</div>;
     }
 
     return (
