@@ -126,7 +126,7 @@ export const StoreProductList = () => {
                 onClick: () =>
                     deleteExpiredMutation.mutate(undefined, {
                         onSuccess: () => {
-                            toast.success("Протерміновані товари успішно видалено");
+                            toast.success("Протерміновані товари успішно видалені");
                             resetPagination();
                         },
                     }),
