@@ -270,13 +270,13 @@ class StoreProductControllerTest {
     @WithMockUser(authorities = "MANAGER")
     @DisplayName("DELETE /store-products/{upc} - Manager should delete store product successfully")
     void deleteStoreProduct_asManager_NoContent() throws Exception {
-        doNothing().when(storeProductService).softDeleteByUPC("1234567890");
+        doNothing().when(storeProductService).deleteByUPC("1234567890");
 
         mockMvc.perform(delete("/store-products/1234567890")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        verify(storeProductService, times(1)).softDeleteByUPC("1234567890");
+        verify(storeProductService, times(1)).deleteByUPC("1234567890");
     }
 
     @Test
@@ -287,7 +287,7 @@ class StoreProductControllerTest {
                         .with(csrf()))
                 .andExpect(status().isForbidden());
 
-        verify(storeProductService, never()).softDeleteByUPC(anyString());
+        verify(storeProductService, never()).deleteByUPC(anyString());
     }
 
     @Test

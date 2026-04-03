@@ -221,11 +221,11 @@ class StoreProductServiceTest {
     @Test
     @DisplayName("softDeleteByUPC should call repository softDelete")
     void softDeleteByUPC_shouldCallRepository() {
-        doNothing().when(repository).softDeleteByUPC("123456789012");
+        doNothing().when(repository).deleteByUPC("123456789012");
 
-        service.softDeleteByUPC("123456789012");
+        service.deleteByUPC("123456789012");
 
-        verify(repository, times(1)).softDeleteByUPC("123456789012");
+        verify(repository, times(1)).deleteByUPC("123456789012");
     }
 
     @Test

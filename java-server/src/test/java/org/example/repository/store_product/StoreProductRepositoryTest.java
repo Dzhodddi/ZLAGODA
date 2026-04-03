@@ -312,7 +312,7 @@ class StoreProductRepositoryTest {
     @DisplayName("save should insert new store product with VAT calculated")
     void save_newStoreProduct_shouldReturnSavedProduct() {
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(), anyBoolean()))
+                anyString(), any(), anyInt(), any(), anyInt(), anyBoolean()))
                 .thenReturn(storeProduct);
 
         StoreProduct result = repository.save(requestDto);
@@ -326,7 +326,7 @@ class StoreProductRepositoryTest {
     void save_promotionalProduct_shouldCalculatePromotionalPrice() {
         requestDto.setPromotional_product(true);
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(), anyBoolean()))
+                anyString(), any(), anyInt(), any(), anyInt(), anyBoolean()))
                 .thenReturn(storeProduct);
 
         assertNotNull(repository.save(requestDto));
@@ -336,7 +336,7 @@ class StoreProductRepositoryTest {
     @DisplayName("save should throw InvalidProductException on data integrity violation")
     void save_invalidProduct_shouldThrowException() {
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper),
-                anyString(), any(), anyInt(), any(), anyInt(), anyBoolean(), anyBoolean()))
+                anyString(), any(), anyInt(), any(), anyInt(), anyBoolean()))
                 .thenThrow(DataIntegrityViolationException.class);
 
         assertThrows(InvalidProductException.class, () -> repository.save(requestDto));
@@ -412,13 +412,14 @@ class StoreProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("softDeleteByUPC should mark product as deleted")
-    void softDeleteByUPC_shouldMarkAsDeleted() {
-        when(jdbcTemplate.update(anyString(), eq("123456789012"))).thenReturn(1);
+    @DisplayName("deleteByUPC should throw EntityNotFoundException when not found")
+    void deleteByUPC_notFound_shouldThrow() {
+        when(jdbcTemplate.queryForObject(anyString(),
+                eq(Integer.class),
+                eq("123456789012")))
+                .thenReturn(0);
 
-        repository.softDeleteByUPC("123456789012");
-
-        verify(jdbcTemplate, times(1)).update(anyString(), eq("123456789012"));
+        assertThrows(EntityNotFoundException.class, () -> repository.deleteByUPC("123456789012"));
     }
 
     @Test

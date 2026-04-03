@@ -10,6 +10,7 @@ import org.example.dto.store_product.product.StoreProductDto;
 import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
 import org.example.dto.store_product.product.StoreProductRequestDto;
 import org.example.dto.store_product.product.StoreProductWithNameDto;
+import org.example.exception.custom_exception.EntityHasRelationsException;
 import org.example.exception.custom_exception.EntityNotFoundException;
 import org.example.exception.custom_exception.InvalidProductException;
 import org.example.mapper.store_product.StoreProductMapper;
@@ -55,7 +56,7 @@ public class StoreProductRepository {
                             FROM store_product sp
                             INNER JOIN product p
                                 ON sp.id_product = p.id_product
-                            WHERE sp.is_deleted = false AND upc = ?
+                            WHERE upc = ?
                             """,
                             withNameRowMapper,
                             upc
@@ -74,7 +75,6 @@ public class StoreProductRepository {
                             SELECT selling_price, products_number
                             FROM store_product
                             WHERE UPC = ?
-                              AND is_deleted = false
                             """,
                             (rs, rowNum) -> {
                                 StoreProductPriceAndQuantityDto dto = new StoreProductPriceAndQuantityDto();
@@ -98,7 +98,6 @@ public class StoreProductRepository {
                        sp.products_number, sp.promotional_product, p.product_name
                 FROM store_product sp
                 INNER JOIN product p ON sp.id_product = p.id_product
-                WHERE sp.is_deleted = false
                 ORDER BY sp.UPC
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
@@ -119,7 +118,6 @@ public class StoreProductRepository {
                        sp.products_number, sp.promotional_product, p.product_name
                 FROM store_product sp
                 INNER JOIN product p ON sp.id_product = p.id_product
-                WHERE sp.is_deleted = false
                 ORDER BY p.product_name
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
@@ -140,7 +138,6 @@ public class StoreProductRepository {
                        sp.products_number, sp.promotional_product, p.product_name
                 FROM store_product sp
                 INNER JOIN product p ON sp.id_product = p.id_product
-                WHERE sp.is_deleted = false
                 ORDER BY sp.products_number
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
@@ -159,8 +156,7 @@ public class StoreProductRepository {
                        sp.products_number, sp.promotional_product, p.product_name
                 FROM store_product sp
                 INNER JOIN product p ON sp.id_product = p.id_product
-                WHERE sp.is_deleted = false
-                  AND sp.promotional_product = true
+                WHERE sp.promotional_product = true
                 ORDER BY sp.UPC
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
@@ -179,8 +175,7 @@ public class StoreProductRepository {
                        sp.products_number, sp.promotional_product, p.product_name
                 FROM store_product sp
                 INNER JOIN product p ON sp.id_product = p.id_product
-                WHERE sp.is_deleted = false
-                  AND sp.promotional_product = false
+                WHERE sp.promotional_product = false
                 ORDER BY sp.UPC
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
@@ -199,8 +194,7 @@ public class StoreProductRepository {
                        sp.products_number, sp.promotional_product, p.product_name
                 FROM store_product sp
                 INNER JOIN product p ON sp.id_product = p.id_product
-                WHERE sp.is_deleted = false
-                  AND sp.promotional_product = true
+                WHERE sp.promotional_product = true
                 ORDER BY sp.products_number, sp.UPC
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
@@ -219,8 +213,7 @@ public class StoreProductRepository {
                        sp.products_number, sp.promotional_product, p.product_name
                 FROM store_product sp
                 INNER JOIN product p ON sp.id_product = p.id_product
-                WHERE sp.is_deleted = false
-                  AND sp.promotional_product = false
+                WHERE sp.promotional_product = false
                 ORDER BY sp.products_number, sp.UPC
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
@@ -239,8 +232,7 @@ public class StoreProductRepository {
                        sp.products_number, sp.promotional_product, p.product_name
                 FROM store_product sp
                 INNER JOIN product p ON sp.id_product = p.id_product
-                WHERE sp.is_deleted = false
-                  AND sp.promotional_product = true
+                WHERE sp.promotional_product = true
                 ORDER BY p.product_name
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
@@ -259,8 +251,7 @@ public class StoreProductRepository {
                        sp.products_number, sp.promotional_product, p.product_name
                 FROM store_product sp
                 INNER JOIN product p ON sp.id_product = p.id_product
-                WHERE sp.is_deleted = false
-                  AND sp.promotional_product = false
+                WHERE sp.promotional_product = false
                 ORDER BY p.product_name
                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
@@ -291,11 +282,10 @@ public class StoreProductRepository {
                         id_product,
                         selling_price,
                         products_number,
-                        promotional_product,
-                        is_deleted
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                        promotional_product
+                    ) VALUES (?, ?, ?, ?, ?, ?)
                     RETURNING UPC, UPC_prom, id_product, selling_price,
-                              products_number, promotional_product, is_deleted
+                              products_number, promotional_product
                     """,
                     rowMapper,
                     requestDto.getUPC(),
@@ -303,8 +293,7 @@ public class StoreProductRepository {
                     requestDto.getId_product(),
                     priceWithVat,
                     requestDto.getProducts_number(),
-                    requestDto.isPromotional_product(),
-                    Boolean.FALSE
+                    requestDto.isPromotional_product()
             );
         } catch (DataIntegrityViolationException e) {
             throw new InvalidProductException(
@@ -335,7 +324,7 @@ public class StoreProductRepository {
                         selling_price = ?,
                         products_number = ?,
                         promotional_product = ?
-                    WHERE UPC = ? AND is_deleted = false
+                    WHERE UPC = ?
                     """,
                     requestDto.getUPC_prom(),
                     requestDto.getId_product(),
@@ -360,12 +349,20 @@ public class StoreProductRepository {
         }
     }
 
-    public void softDeleteByUPC(String upc) {
-        jdbcTemplate.update("""
-                                UPDATE store_product
-                                SET is_deleted = true
-                                WHERE UPC = ? AND is_deleted = false
-                                """, upc);
+    public void deleteByUPC(String upc) {
+        if (!existsByUPC(upc)) {
+            throw new EntityNotFoundException("Store product not found: " + upc);
+        }
+        try {
+            jdbcTemplate.update("""
+                                DELETE
+                                FROM store_product
+                                WHERE UPC = ?
+                                """,
+                    upc);
+        } catch (DataIntegrityViolationException e) {
+            throw new EntityHasRelationsException("Store product is used: " + upc);
+        }
     }
 
     public boolean existsByUPC(String upc) {
@@ -373,7 +370,7 @@ public class StoreProductRepository {
                 """
                 SELECT COUNT(*)
                 FROM store_product
-                WHERE UPC = ? AND is_deleted = false
+                WHERE UPC = ?
                 """,
                 Integer.class,
                 upc
@@ -388,7 +385,7 @@ public class StoreProductRepository {
                 """
                 UPDATE store_product
                 SET selling_price = ?, promotional_product = ?
-                WHERE UPC = ? AND is_deleted = false
+                WHERE UPC = ?
                 """,
                 price, promotional, upc
         );
@@ -405,8 +402,7 @@ public class StoreProductRepository {
                     SELECT UPC, UPC_prom, id_product, selling_price,
                            products_number, promotional_product
                     FROM store_product
-                    WHERE is_deleted = false
-                      AND UPC > ?
+                    WHERE UPC > ?
                     ORDER BY UPC
                     FETCH FIRST ? ROWS ONLY
                     """,
@@ -420,7 +416,6 @@ public class StoreProductRepository {
                     SELECT UPC, UPC_prom, id_product, selling_price,
                            products_number, promotional_product
                     FROM store_product
-                    WHERE is_deleted = false
                     ORDER BY UPC
                     FETCH FIRST ? ROWS ONLY
                     """,
@@ -442,7 +437,7 @@ public class StoreProductRepository {
                             SELECT UPC, UPC_prom, id_product, selling_price,
                                    products_number, promotional_product
                             FROM store_product
-                            WHERE UPC = ? AND is_deleted = false
+                            WHERE UPC = ?
                             """,
                             rowMapper,
                             upc
@@ -459,7 +454,6 @@ public class StoreProductRepository {
              SELECT UPC, UPC_prom, id_product, selling_price,
                     products_number, promotional_product
              FROM store_product
-             WHERE is_deleted = false
              ORDER BY UPC
              """,
                         rowMapper)
@@ -476,7 +470,6 @@ public class StoreProductRepository {
                 FROM store_product sp
                 INNER JOIN product p
                 ON sp.id_product = p.id_product
-                WHERE sp.is_deleted = false
                 ORDER BY sp.promotional_product DESC
              """,
                         withNameRowMapper)
@@ -489,7 +482,6 @@ public class StoreProductRepository {
                 """
                 SELECT COUNT(*)
                 FROM store_product
-                WHERE is_deleted = false
                 """,
                 Integer.class
         );
@@ -502,7 +494,6 @@ public class StoreProductRepository {
                 SELECT COUNT(*)
                 FROM store_product
                 WHERE promotional_product = true
-                  AND is_deleted = false
                 """,
                 Integer.class
         );
@@ -515,7 +506,6 @@ public class StoreProductRepository {
                 SELECT COUNT(*)
                 FROM store_product
                 WHERE promotional_product = false
-                  AND is_deleted = false
                 """,
                 Integer.class
         );

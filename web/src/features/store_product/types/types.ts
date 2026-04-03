@@ -30,7 +30,7 @@ export const BaseStoreProductSchema = z.object({
         .coerce
         .number()
         .int()
-        .min(1, "Кількість має бути позитивною")
+        .min(0, "Кількість має бути невід'ємною")
         .max(999999999, "Занадто багато товарів"),
     promotionalProduct: z
         .boolean()
@@ -46,7 +46,16 @@ export const PageStoreProductSchema = z.object({
 
 export type StoreProduct = z.infer<typeof BaseStoreProductSchema>;
 
-export const CreateStoreProductSchema = BaseStoreProductSchema.refine(
+export const CreateStoreProductSchema = BaseStoreProductSchema
+    .extend({
+        productsNumber: z
+            .coerce
+            .number()
+            .int()
+            .min(1, "Кількість має бути позитивною")
+            .max(999999999, "Занадто багато товарів"),
+    })
+    .refine(
     data => !data.promotionalProduct || data.upcProm !== null,
     { message: "Акційний товар повинен мати UPC промо", path: ["upcProm"] }
 );

@@ -36,7 +36,7 @@ public interface StoreProductService {
 
     StoreProductDto updateByUPC(String upc, StoreProductRequestDto requestDto);
 
-    void softDeleteByUPC(String upc);
+    void deleteByUPC(String upc);
 
     StoreProductWithNameDto findByUPC(String upc);
 

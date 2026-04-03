@@ -119,7 +119,7 @@ public class StoreProductController {
     )
     @PreAuthorize("hasAuthority('MANAGER')")
     public void deleteStoreProduct(@PathVariable String upc) {
-        storeProductService.softDeleteByUPC(upc);
+        storeProductService.deleteByUPC(upc);
     }
 
     @GetMapping("/{upc}")

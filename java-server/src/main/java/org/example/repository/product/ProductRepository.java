@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
+import org.example.exception.custom_exception.EntityHasRelationsException;
 import org.example.exception.custom_exception.EntityNotFoundException;
 import org.example.exception.custom_exception.InvalidCategoryException;
 import org.example.mapper.product.ProductMapper;
@@ -309,11 +310,17 @@ public class ProductRepository {
         if (!existsByIdProduct(id)) {
             throw new EntityNotFoundException("Product not found: " + id);
         }
-        jdbcTemplate.update("""
+        try {
+            jdbcTemplate.update("""
                         DELETE
                         FROM product
                         WHERE id_product = ?
                         """, id);
+        } catch (DataIntegrityViolationException e) {
+            throw new EntityHasRelationsException(
+                    "Product is used: " + id);
+        }
+
     }
 
     public boolean existsByIdProduct(int idProduct) {
