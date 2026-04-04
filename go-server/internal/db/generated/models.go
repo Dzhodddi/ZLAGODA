@@ -98,5 +98,4 @@ type StoreProduct struct {
 	SellingPrice       float64
 	ProductsNumber     int32
 	PromotionalProduct bool
-	IsDeleted          bool
 }
