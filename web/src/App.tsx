@@ -13,6 +13,7 @@ import {authRoutes} from "@/features/auth/routes.tsx";
 import {checkRoutes} from "@/features/checks/routes.tsx";
 import {customerCardRoutes} from "@/features/customer-card/routes.tsx";
 import { useEffect } from "react";
+import {saleRoutes} from "@/features/sales/routes.tsx";
 
 const Toaster = lazy(() =>
     import("@/components/ui/sonner").then((module) => ({ default: module.Toaster }))
@@ -39,6 +40,7 @@ export function App() {
                         {productRoutes}
                         {checkRoutes}
                         {customerCardRoutes}
+                        {saleRoutes}
                     </Route>
                 </Route>
                 <Route path="/unauthorized" element={<h1 className="p-8 text-2xl">403 Forbidden</h1>} />

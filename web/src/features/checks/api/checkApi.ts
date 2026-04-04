@@ -53,12 +53,7 @@ export const listChecks = async (
     const response = await goApiClient.get(prefix, { params });
 
     if (!response.data) return [];
-    try {
-        return z.array(CheckListItemSchema).parse(response.data);
-    } catch (error) {
-        console.error("Error parsing response data:", error);
-        return [];
-    }
+    return z.array(CheckListItemSchema).parse(response.data);
 };
 
 
@@ -88,10 +83,5 @@ export const getTodayChecks = async (
         }
     });
     if (!response.data) return [];
-    try {
-        return z.array(CheckListItemSchema).parse(response.data);
-    } catch (error) {
-        console.error("Error parsing response data:", error);
-        return [];
-    }
+    return z.array(CheckListItemSchema).parse(response.data);
 };

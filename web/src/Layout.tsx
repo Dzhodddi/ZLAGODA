@@ -9,6 +9,7 @@ const navItems = [
     { path: "/employee", label: "Працівники", isHidden: (role: Role) => role === "CASHIER" },
     { path: "/customer-card", label: "Картки клієнтів" },
     { path: "/check", label: "Чеки" },
+    { path: "/sale", label: "Продажі", isHidden: (role: Role) => role === "CASHIER" },
 ];
 
 export const Layout = () => {

@@ -12,19 +12,22 @@ import (
 
 const getSalesWithinDate = `-- name: GetSalesWithinDate :many
 SELECT s.product_number, s.upc, s.check_number, s.selling_price
-FROM sale s
+    FROM sale s
 JOIN checks c
-ON c.check_number = s.check_number
-WHERE c.print_date BETWEEN $1 AND $2 AND c.check_number > $3
+    ON c.check_number = s.check_number
+WHERE
+    c.print_date BETWEEN $1 AND $2
+    AND (c.check_number, s.upc) > ($3, $4)
 ORDER BY c.check_number
-FETCH FIRST $4 ROWS ONLY
+FETCH FIRST $5 ROWS ONLY
 `
 
 type GetSalesWithinDateParams struct {
-	PrintDate   time.Time
-	PrintDate_2 time.Time
-	CheckNumber string
-	Limit       int32
+	PrintDate     time.Time
+	PrintDate_2   time.Time
+	CheckNumber   string
+	CheckNumber_2 string
+	Limit         int32
 }
 
 func (q *Queries) GetSalesWithinDate(ctx context.Context, arg GetSalesWithinDateParams) ([]Sale, error) {
@@ -32,6 +35,7 @@ func (q *Queries) GetSalesWithinDate(ctx context.Context, arg GetSalesWithinDate
 		arg.PrintDate,
 		arg.PrintDate_2,
 		arg.CheckNumber,
+		arg.CheckNumber_2,
 		arg.Limit,
 	)
 	if err != nil {

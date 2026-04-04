@@ -1220,6 +1220,18 @@ const docTemplate = `{
                         "name": "end_date",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "check_number",
+                        "name": "check_number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "upc",
+                        "name": "upc",
+                        "in": "query"
                     }
                 ],
                 "responses": {

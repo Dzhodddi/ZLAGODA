@@ -41,6 +41,8 @@ func (h *SaleHandler) RegisterRouts(e *echo.Group) {
 //	@Param			start_date 	query		string	true	"start_date"
 //
 //	@Param			end_date 	query		string	true	"end_date"
+//	@Param			check_number 	query		string	false	"check_number"
+//	@Param			upc 	query		string	false	"upc"
 //
 // @Success      200  {array}  views.SaleResponse
 // @Failure      401  {object}  map[string]any  "Unauthorized"
@@ -59,7 +61,7 @@ func (h *SaleHandler) getAllSales(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	sales, err := h.saleService.GetAllSalesWithinDate(c.Request().Context(), *startDate, *endDate, q.LastCheckNumber)
+	sales, err := h.saleService.GetAllSalesWithinDate(c.Request().Context(), *startDate, *endDate, q)
 	if err != nil {
 		return nil
 	}

@@ -11,7 +11,7 @@ import (
 )
 
 type SaleService interface {
-	GetAllSalesWithinDate(ctx context.Context, startDate, endDate time.Time, lastCheckNumber *string) ([]views.SaleResponse, error)
+	GetAllSalesWithinDate(ctx context.Context, startDate, endDate time.Time, params views.SaleListQueryParams) ([]views.SaleResponse, error)
 }
 
 type saleService struct {
@@ -27,12 +27,15 @@ func NewSaleService(repository repository.SaleRepository) SaleService {
 func (s *saleService) GetAllSalesWithinDate(
 	ctx context.Context,
 	startDate, endDate time.Time,
-	lastCheckNumber *string,
+	params views.SaleListQueryParams,
 ) ([]views.SaleResponse, error) {
-	if lastCheckNumber == nil {
-		lastCheckNumber = new(string)
+	if params.LastCheckNumber == nil {
+		params.LastCheckNumber = new(string)
 	}
-	sales, err := s.repository.GetAllSalesWithinDate(ctx, startDate, endDate, *lastCheckNumber)
+	if params.LastUPC == nil {
+		params.LastUPC = new(string)
+	}
+	sales, err := s.repository.GetAllSalesWithinDate(ctx, startDate, endDate, *params.LastCheckNumber, *params.LastUPC)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sales: %w", err)
 	}
