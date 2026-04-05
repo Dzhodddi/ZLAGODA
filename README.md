@@ -65,8 +65,3 @@ npm start
 http://localhost:8080/swagger/index.html (Go)
 
 http://localhost:8081/api/v1/swagger-ui/index.html#/ (Java)
-
-## Тестування
-Міграції тестової бази даних доступні за покликанням:
-
-https://docs.google.com/document/d/16WzHEIiM2tU4Sa2LA9q5_7r9eKI5iFbqxo6qme7Srv8/edit?usp=sharing
