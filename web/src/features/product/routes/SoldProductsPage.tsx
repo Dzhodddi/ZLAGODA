@@ -112,7 +112,7 @@ export const SoldProductsPage = () => {
                             <tr className="bg-green-600 text-center text-white">
                                 <th className="px-3 py-2 font-semibold w-8 border border-green-700">ID</th>
                                 <th className="px-3 py-2 font-semibold w-40 border border-green-700">Назва</th>
-                                <th className="px-3 py-2 font-semibold w-32 border border-green-700">Кількість проданих одиниць</th>
+                                <th className="px-3 py-2 font-semibold w-32 border border-green-700">Кількість проданих одиниць, шт.</th>
                                 <th className="px-3 py-2 font-semibold w-32 border border-green-700">Сума проданих одиниць, грн</th>
                             </tr>
                             </thead>

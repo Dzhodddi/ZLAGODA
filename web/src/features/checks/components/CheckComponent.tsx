@@ -19,10 +19,10 @@ export const CheckComponent = ({ data }: Props) => {
 
             <div className="space-y-2 mb-6">
                 <p><span className="font-medium">Номер чеку:</span> {data.check.checkNumber}</p>
-                <p><span className="font-medium">ID працівника:</span> {data.check.idEmployee}</p>
-                <p><span className="font-medium">Номер картки клієнта:</span> {data.check.cardNumber}</p>
+                <p><span className="font-medium">ID працівника/-ці:</span> {data.check.idEmployee}</p>
+                <p><span className="font-medium">Номер картки клієнта/-ки:</span> {data.check.cardNumber}</p>
                 <p><span className="font-medium">Дата друку:</span> {formattedDate}</p>
-                <p><span className="font-medium">Сума чеку:</span> {data.check.sumTotal} грн</p>
+                <p><span className="font-medium">Сума чека:</span> {data.check.sumTotal} грн</p>
                 <p><span className="font-medium">ПДВ:</span> {data.check.vat} грн</p>
             </div>
 
@@ -36,7 +36,7 @@ export const CheckComponent = ({ data }: Props) => {
                                 className="flex justify-between bg-gray-50 p-3 rounded border border-gray-100"
                             >
                                 <span><span className="font-medium text-gray-600">Назва:</span> {product.name}</span>
-                                <span><span className="font-medium text-gray-600">Ціна:</span> {product.sellingPrice} грн.</span>
+                                <span><span className="font-medium text-gray-600">Ціна:</span> {product.sellingPrice} грн</span>
                                 <span><span className="font-medium text-gray-600">Кількість:</span> {product.quantity} шт.</span>
                             </li>
                         ))}

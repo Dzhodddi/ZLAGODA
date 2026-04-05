@@ -34,8 +34,8 @@ export const TopCategoriesPage = () => {
                 <table className="w-full text-xs border-collapse table-fixed border-b border-green-300">
                     <thead>
                     <tr className="bg-green-600 text-center text-white">
-                        <th className="px-3 py-2 font-semibold w-16 border border-green-700">Номер</th>
-                        <th className="px-3 py-2 font-semibold border border-green-700">Назва</th>
+                        <th className="px-3 py-2 font-semibold w-25 border border-green-700">Номер</th>
+                        <th className="px-3 py-2 font-semibold w-80 border border-green-700">Назва</th>
                         <th className="px-3 py-2 font-semibold w-60 border border-green-700">Продано одиниць</th>
                     </tr>
                     </thead>

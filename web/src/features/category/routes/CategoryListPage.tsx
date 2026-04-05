@@ -139,7 +139,7 @@ export const CategoryListPage = () => {
                     <Link to="/category/report"
                           title="Категорії без нульових продажів"
                     >
-                        <div className="hover:scale-200 transition-transform flex justify-center">
+                        <div className="px-1 scale-140 hover:scale-150 transition-transform flex justify-center">
                             <img src="/src/logos/report.png" alt="top" className="h-6" />
                         </div>
                     </Link>
@@ -185,7 +185,7 @@ export const CategoryListPage = () => {
                     <table className="w-full text-xs border-collapse table-fixed border-b border-blue-300">
                         <thead>
                         <tr className="bg-blue-700 text-left text-white">
-                            <th className="px-3 py-2 font-semibold w-16 border border-blue-500 text-center">Номер</th>
+                            <th className="px-3 py-2 font-semibold w-46 border border-blue-500 text-center">Номер</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Назва</th>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>

@@ -296,9 +296,9 @@ export const CustomerCardListPage = () => {
                     <table className="w-full text-xs border-collapse table-fixed border-b border-blue-300">
                         <thead>
                         <tr className="bg-blue-700 text-left text-white">
-                            <th className="px-15 py-2 font-semibold w-16 border border-blue-500 text-center">Номер</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">ПІБ</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Знижка (у відсотках %)</th>
+                            <th className="px-3 py-2 font-semibold w-60 border border-blue-500 text-center">Номер</th>
+                            <th className="px-3 py-2 font-semibold w-120 border border-blue-500 text-center">ПІБ</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Знижка, %</th>
                             {isManager && <>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
@@ -324,9 +324,9 @@ export const CustomerCardListPage = () => {
                                     title="Переглянути інформацію про картку клієнта"
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 text-center">{card.cardNumber}</td>
+                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200">{card.cardNumber}</td>
                                     <td className="px-3 py-2 border border-blue-200 truncate ">{card.customerSurname + " " + card.customerName + " " + (card.customerPatronymic ? card.customerPatronymic : "")}</td>
-                                    <td className="px-3 py-2 border border-blue-200 truncate text-center">{card.customerPercent}</td>
+                                    <td className="px-3 py-2 border border-blue-200 truncate">{card.customerPercent}</td>
                                     {isManager && <>
                                     <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                         <button

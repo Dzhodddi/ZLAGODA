@@ -43,7 +43,7 @@ export const UpsertCheckForm = ({ initialData }: Props) => {
 
                             <InputField
                                 name="checkNumber"
-                                label="Номер чеку"
+                                label="Номер чека"
                                 disabled={isEditMode}
                             />
                             <div className="col-span-12"><EmployeeComboboxField /></div>
@@ -66,7 +66,7 @@ export const UpsertCheckForm = ({ initialData }: Props) => {
                                         <div className="w-32">
                                             <InputField
                                                 name={`products.${index}.quantity`}
-                                                label="Кількість"
+                                                label="Кількість, шт."
                                                 type="number"
                                                 min="1"
                                             />

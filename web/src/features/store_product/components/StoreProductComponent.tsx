@@ -13,8 +13,8 @@ export const StoreProductComponent = ({ data }: Props) => {
                 <p><span className="font-medium">UPC промо:</span> {data.upcProm}</p>
             )}
             <p><span className="font-medium">Товар:</span> {data.idProduct} {data.productName}</p>
-            <p><span className="font-medium">Ціна продажу:</span> {data.sellingPrice}</p>
-            <p><span className="font-medium">Кількість:</span> {data.productsNumber}</p>
+            <p><span className="font-medium">Ціна продажу:</span> {data.sellingPrice} грн</p>
+            <p><span className="font-medium">Кількість:</span> {data.productsNumber} шт.</p>
         </div>
     );
 };

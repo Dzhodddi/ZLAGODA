@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { CustomerCard } from '@/features/customer-card/types/types.ts';
-import { useCustomerCardHistory } from "@/features/customer-card/hooks/useCustomerCard.ts"; // Ваш шлях до хука
+import { useCustomerCardHistory } from "@/features/customer-card/hooks/useCustomerCard.ts";
 
 interface Props {
     data: CustomerCard;
@@ -26,7 +26,7 @@ export const CustomerCardComponent = ({ data, isOwnProfile }: Props) => {
             <p><span className="font-medium">Місто:</span> {data.city ?? "—"}</p>
             <p><span className="font-medium">Вулиця:</span> {data.street ?? "—"}</p>
             <p><span className="font-medium">Поштовий індекс:</span> {data.zipCode ?? "—"}</p>
-            <p><span className="font-medium">Відсоток:</span> {data.customerPercent}%</p>
+            <p><span className="font-medium">Відсоток:</span> {data.customerPercent} %</p>
             </div>
 
             <div className="mt-6 pt-4 border-t border-gray-200">
@@ -34,7 +34,7 @@ export const CustomerCardComponent = ({ data, isOwnProfile }: Props) => {
                     onClick={() => setShowHistory((prev) => !prev)}
                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
-                    {showHistory ? "Сховати історію покупок" : "Детальніше (Історія покупок)"}
+                    {showHistory ? "Приховати історію покупок" : "Детальніше (історія покупок)"}
                 </button>
             </div>
 
@@ -45,7 +45,7 @@ export const CustomerCardComponent = ({ data, isOwnProfile }: Props) => {
                     {isLoading ? (
                         <p className="text-zinc-500 text-sm">Завантаження історії...</p>
                     ) : isError ? (
-                        <p className="text-red-500 text-sm">Не вдалося завантажити історію покупок.</p>
+                        <p className="text-red-500 text-sm">Не вдалося завантажити історію покупок</p>
                     ) : history && history.length > 0 ? (
                         <ul className="space-y-2">
                             {history.map((item, index) => (

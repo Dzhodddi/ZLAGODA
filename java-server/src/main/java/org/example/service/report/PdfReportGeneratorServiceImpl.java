@@ -49,7 +49,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
 
         for (String header : new String[]{
                 "ID", "Прізвище", "Ім'я", "По батькові", "Посада",
-                "Зарплата", "Контактний телефон", "Дата народження", "Дата початку роботи",
+                "Зарплата, грн", "Контактний телефон", "Дата народження", "Дата початку роботи",
                 "Місто", "Вулиця", "Поштовий індекс"
         }) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
@@ -146,7 +146,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         table.setWidthPercentage(100);
 
         for (String header : new String[]{
-                "UPC", "UPC промо", "ID товару", "Ціна продажу", "Кількість", "Акційність"
+                "UPC", "UPC промо", "ID товару", "Ціна продажу, грн", "Кількість, шт.", "Акційність"
         }) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
             cell.setBackgroundColor(new BaseColor(59, 130, 246));
@@ -192,7 +192,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         table.setWidths(new float[]{1, 1, 1, 1, 1.5f, 1, 1, 1, 0.5f});
 
         for (String header : new String[]{
-                "Номер карти", "Прізвище", "Ім'я", "По батькові", "Контактний телефон", "Місто", "Вулиця", "Поштовий індекс", "Відсоток"
+                "Номер карти", "Прізвище", "Ім'я", "По батькові", "Контактний телефон", "Місто", "Вулиця", "Поштовий індекс", "Відсоток, %"
         }) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
             cell.setBackgroundColor(new BaseColor(59, 130, 246));
@@ -240,7 +240,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         table.setWidthPercentage(100);
 
         for (String header : new String[]{
-                "Номер чека", "ID працівника", "Номер карти", "Дата", "Загальна сума", "ПДВ"
+                "Номер чека", "ID працівника", "Номер карти", "Дата", "Загальна сума, грн", "ПДВ, грн"
         }) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
             cell.setBackgroundColor(new BaseColor(59, 130, 246));

@@ -231,7 +231,7 @@ export const CheckListPage = () => {
                             <span className="text-sm font-semibold text-zinc-800 bg-white border border-blue-200 px-3 py-1.5 rounded shadow-sm">
                                 Загальна сума чеків: {" "}
                                 {isTotalSumFetching ? (
-                                    <span className="text-zinc-500 animate-pulse">Рахуємо...</span>
+                                    <span className="text-zinc-500 animate-pulse">Обчислюємо...</span>
                                 ) : (
                                     <span className="text-green-600">{Number(totalSum || 0).toFixed(2)} грн</span>
                                 )}
@@ -259,12 +259,12 @@ export const CheckListPage = () => {
             </div>
 
             {!isShowTodayOnly && isDateInvalid && (
-                <p className="text-red-500 text-sm">Кінцева дата не може бути меншою за початкову.</p>
+                <p className="text-red-500 text-sm">Кінцева дата не може бути меншою за початкову</p>
             )}
 
             {isShowTodayOnly && !idEmployee ? (
                 <p className="text-zinc-500 text-sm text-center bg-white p-4 rounded border border-blue-200">
-                    Будь ласка, введіть ID працівника, щоб переглянути його чеки за сьогодні.
+                    Будь ласка, введіть ID працівника, щоб переглянути його чеки за сьогодні
                 </p>
             ) : checks?.length === 0 && currentIndex === 0 ? (
                 <p className="text-zinc-400 text-sm text-center bg-white p-4 rounded border border-blue-200">
@@ -281,12 +281,12 @@ export const CheckListPage = () => {
                     <table className="w-full text-xs border-collapse table-fixed border-b border-blue-300">
                         <thead>
                         <tr className="bg-blue-700 text-left text-white">
-                            <th className="px-3 py-2 font-semibold w-24 border border-blue-500 text-center">Номер</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Працівник</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Картка</th>
+                            <th className="px-3 py-2 font-semibold w-46 border border-blue-500 text-center">Номер</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">ID працівника/-ці</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Картка клієнта/-ки</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Дата</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Сума</th>
-                            <th className="px-3 py-2 font-semibold w-20 border border-blue-500 text-center">ПДВ</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Сума, грн</th>
+                            <th className="px-3 py-2 font-semibold w-40 border border-blue-500 text-center">ПДВ, грн</th>
                             {isManager &&
                                 <th className="px-1 py-2 font-semibold w-10 border border-blue-500"></th>
                             }
@@ -306,17 +306,17 @@ export const CheckListPage = () => {
                                     onClick={() => navigate(`/check/${check.checkNumber}`)}
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 text-center">{check.checkNumber}</td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center">{check.idEmployee}</td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center truncate">{check.cardNumber || "-"}</td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center">
+                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200">{check.checkNumber}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{check.idEmployee}</td>
+                                    <td className="px-3 py-2 border border-blue-200 truncate">{check.cardNumber || "-"}</td>
+                                    <td className="px-3 py-2 border border-blue-200">
                                         {new Date(check.printDate).toLocaleString('uk-UA', {
                                             year: 'numeric', month: '2-digit', day: '2-digit',
                                             hour: '2-digit', minute: '2-digit'
                                         })}
                                     </td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center font-medium">{check.sumTotal}</td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center text-zinc-600">{check.vat}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{check.sumTotal}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{check.vat}</td>
                                     {isManager &&
                                         <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                             <button

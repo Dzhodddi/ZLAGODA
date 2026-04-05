@@ -165,10 +165,10 @@ export const SaleListPage = () => {
                     <table className="w-full text-xs border-collapse table-fixed border-b border-blue-300">
                         <thead>
                         <tr className="bg-blue-700 text-left text-white">
-                            <th className="px-3 py-2 font-semibold w-32 border border-blue-500 text-center">Номер чеку</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">UPC Товару</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Кількість</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Ціна продажу</th>
+                            <th className="px-3 py-2 font-semibold w-46 border border-blue-500 text-center">Номер чеку</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">UPC товару</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Кількість, шт.</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Ціна продажу, грн</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -179,10 +179,10 @@ export const SaleListPage = () => {
                                     onClick={() => navigate(`/check/${sale.checkNumber}`)}
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 text-center">{sale.checkNumber}</td>
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 text-center">{sale.upc}</td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center">{sale.productNumber} шт.</td>
-                                    <td className="px-3 py-2 border border-blue-200 text-center font-medium">{sale.sellingPrice} грн</td>
+                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200">{sale.checkNumber}</td>
+                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200">{sale.upc}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{sale.productNumber}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{sale.sellingPrice}</td>
                                 </tr>
                             ))
                         }
