@@ -136,6 +136,14 @@ export const CategoryListPage = () => {
                     </button>
                 </div>
                 <div className="flex flex-wrap items-center gap-5">
+                    <Link to="/category/report"
+                          title="Категорії без нульових продажів"
+                    >
+                        <div className="hover:scale-200 transition-transform flex justify-center">
+                            <img src="/src/logos/report.png" alt="top" className="h-6" />
+                        </div>
+                    </Link>
+
                     <Link to="/category/top"
                           title="Переглянути дві найпопулярніші категорії"
                     >

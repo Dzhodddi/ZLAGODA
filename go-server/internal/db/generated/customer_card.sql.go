@@ -8,6 +8,7 @@ package generated
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const createNewCustomerCard = `-- name: CreateNewCustomerCard :one
@@ -303,6 +304,63 @@ func (q *Queries) GetCustomerCardsByPercentSorted(ctx context.Context, arg GetCu
 			&i.Street,
 			&i.ZipCode,
 			&i.CustomerPercent,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCustomerPurchaseHistory = `-- name: GetCustomerPurchaseHistory :many
+SELECT
+    c.check_number,
+    p.product_name,
+    s.product_number AS quantity,
+    s.selling_price::DOUBLE PRECISION as selling_price,
+    c.print_date
+FROM
+    checks c
+        JOIN sale s ON c.check_number = s.check_number
+        JOIN store_product sp ON s.upc = sp.upc
+        JOIN product p ON sp.id_product = p.id_product
+WHERE
+    c.card_number = $1
+    AND c.print_date >= CURRENT_DATE - INTERVAL '5 years'
+ORDER BY
+    c.print_date DESC,
+    c.check_number
+`
+
+type GetCustomerPurchaseHistoryRow struct {
+	CheckNumber  string
+	ProductName  string
+	Quantity     int32
+	SellingPrice float64
+	PrintDate    time.Time
+}
+
+func (q *Queries) GetCustomerPurchaseHistory(ctx context.Context, cardNumber string) ([]GetCustomerPurchaseHistoryRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCustomerPurchaseHistory, cardNumber)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCustomerPurchaseHistoryRow
+	for rows.Next() {
+		var i GetCustomerPurchaseHistoryRow
+		if err := rows.Scan(
+			&i.CheckNumber,
+			&i.ProductName,
+			&i.Quantity,
+			&i.SellingPrice,
+			&i.PrintDate,
 		); err != nil {
 			return nil, err
 		}

@@ -16,6 +16,7 @@ type CategoryService interface {
 	DeleteCategory(ctx context.Context, id int64) error
 	GetCategoryByID(ctx context.Context, id int64) (*views.CategoryResponse, error)
 	GetAllCategories(ctx context.Context, q views.ListCategoryQueryParams) ([]views.CategoryResponse, error)
+	GetAllCategoriesWithNoUnsoldProducts(ctx context.Context) ([]views.CategoryResponse, error)
 }
 
 type categoryService struct {
@@ -26,6 +27,18 @@ func NewCategoryService(categoryRepository repository.CategoryRepository) Catego
 	return &categoryService{
 		categoryRepository: categoryRepository,
 	}
+}
+
+func (s *categoryService) GetAllCategoriesWithNoUnsoldProducts(ctx context.Context) ([]views.CategoryResponse, error) {
+	categories, err := s.categoryRepository.GetAllCategoriesWithNoUnsoldProducts(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("GetAllCategoriesWithNoUnsoldProducts: %w", err)
+	}
+	var categoryResponses []views.CategoryResponse
+	for i := range categories {
+		categoryResponses = append(categoryResponses, *mappers.CategoryModelToResponse(&categories[i]))
+	}
+	return categoryResponses, nil
 }
 
 func (s *categoryService) CreateCategory(ctx context.Context, category views.CreateNewCategory) (*views.CategoryResponse, error) {

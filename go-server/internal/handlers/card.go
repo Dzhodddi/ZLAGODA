@@ -31,6 +31,7 @@ func (h *CardHandler) RegisterRouts(route *echo.Group) {
 	card.GET("", h.listCustomerCards, h.auth.CheckRole(auth.Manager, auth.Cashier))
 	cardNumber := card.Group("/:cardNumber")
 	cardNumber.GET("", h.getCustomerCard, h.auth.CheckRole(auth.Manager))
+	cardNumber.GET("/history", h.getCustomerCardHistory, h.auth.CheckRole(auth.Manager))
 	cardNumber.PUT("", h.updateCustomerCard, h.auth.CheckRole(auth.Manager, auth.Cashier))
 	cardNumber.DELETE("", h.deleteCustomerCard, h.auth.CheckRole(auth.Manager))
 }
@@ -92,6 +93,32 @@ func (h *CardHandler) getCustomerCard(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, card)
+}
+
+// getCustomerCard godoc
+//
+// @Summary      Get a customer card by number
+// @Description  Retrieves a customer discount card by its number
+// @Tags         CustomerCard
+// @Accept       json
+// @Produce      json
+// @Param        cardNumber path string true "Customer card number"
+// @Success      200  {object}  []views.CustomerHistory
+// @Failure      401  {object}  map[string]any  "Unauthorized"
+// @Failure      403  {object}  map[string]any  "Forbidden"
+// @Failure      404  {object}  map[string]any  "Entity not found"
+// @Failure      500  {object}  map[string]any  "Internal server error"
+//
+//	@Security		ApiKeyAuth
+//
+// @Router       /customer-cards/{cardNumber}/history [get]
+func (h *CardHandler) getCustomerCardHistory(c echo.Context) error {
+	cardNumber := c.Param("cardNumber")
+	history, err := h.service.GetCustomerPurchaseHistory(c.Request().Context(), cardNumber)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, history)
 }
 
 // updateCustomerCard godoc

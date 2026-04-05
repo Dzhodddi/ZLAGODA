@@ -316,7 +316,11 @@ export const CustomerCardListPage = () => {
                             customerCards?.map((card) => (
                                 <tr
                                     key={card.cardNumber}
-                                    onClick={() => navigate(`/customer-card/${card.cardNumber}`)}
+                                    onClick={() => {
+                                        if (isManager) {
+                                            navigate(`/customer-card/${card.cardNumber}`);
+                                        }
+                                    }}
                                     title="Переглянути інформацію про картку клієнта"
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >

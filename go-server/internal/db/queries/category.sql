@@ -34,3 +34,23 @@ FROM category
 WHERE (category_name, category_number) > ($1, $2::bigint)
 ORDER BY category_name ASC, category_number ASC
 FETCH FIRST $3 ROWS ONLY;
+
+
+-- name: GetCategoriesWithNoUnsoldProduct :many
+SELECT
+    category_number,
+    category_name
+FROM
+    category с
+WHERE
+    NOT EXISTS (
+        SELECT p.id_product
+        FROM product p
+        WHERE p.category_number = с.category_number
+          AND NOT EXISTS (
+            SELECT 1
+            FROM sale s
+                     JOIN store_product sp ON s.upc = sp.upc
+            WHERE sp.id_product = p.id_product
+        )
+    );

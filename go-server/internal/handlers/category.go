@@ -29,6 +29,7 @@ func (h *CategoryHandler) RegisterRouts(e *echo.Group) {
 	category := e.Group("/categories")
 	category.POST("", h.createCategory, h.auth.CheckRole(auth.Manager))
 	category.GET("", h.getAllCategories, h.auth.CheckRole(auth.Manager))
+	category.GET("/report", h.getAllCategoriesForReport)
 
 	id := category.Group("/:id")
 	id.PUT("", h.updateCategory, h.auth.CheckRole(auth.Manager))
@@ -199,6 +200,27 @@ func (h *CategoryHandler) getAllCategories(c echo.Context) error {
 		return errorResponse.ValidationError(constants.ValidationError, err)
 	}
 	categories, err := h.categoryService.GetAllCategories(c.Request().Context(), q)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, categories)
+}
+
+// getAllCategoriesForReport godoc
+//
+// @Summary      Get all categories for report
+// @Description  Retrieves all product categories for report
+// @Tags         Category
+// @Accept       json
+// @Produce      json
+//
+// @Success      200  {array}  views.CategoryResponse
+// @Failure      500  {object}  map[string]any
+//	@Security		ApiKeyAuth
+//
+// @Router       /categories/report [get]
+func (h *CategoryHandler) getAllCategoriesForReport(c echo.Context) error {
+	categories, err := h.categoryService.GetAllCategoriesWithNoUnsoldProducts(c.Request().Context())
 	if err != nil {
 		return err
 	}

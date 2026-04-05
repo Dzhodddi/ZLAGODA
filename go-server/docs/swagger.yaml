@@ -130,6 +130,19 @@ definitions:
       zip_code:
         type: string
     type: object
+  views.CustomerHistory:
+    properties:
+      check_number:
+        type: string
+      print_date:
+        type: string
+      product_name:
+        type: string
+      quantity:
+        type: integer
+      selling_price:
+        type: number
+    type: object
   views.ProductResponse:
     properties:
       name:
@@ -455,6 +468,30 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update an existing category
+      tags:
+      - Category
+  /categories/report:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all product categories for report
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/views.CategoryResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all categories for report
       tags:
       - Category
   /checks:
@@ -996,6 +1033,51 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update a customer card
+      tags:
+      - CustomerCard
+  /customer-cards/{cardNumber}/history:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a customer discount card by its number
+      parameters:
+      - description: Customer card number
+        in: path
+        name: cardNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/views.CustomerHistory'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Entity not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a customer card by number
       tags:
       - CustomerCard
   /sales:

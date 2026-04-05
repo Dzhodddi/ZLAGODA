@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
@@ -37,6 +36,7 @@ type CardRepository interface {
 		lastCustomerSurname string,
 	) ([]generated.CustomerCard, error)
 	GetCustomerCardIDList(ctx context.Context) ([]generated.GetCustomerCardIDListRow, error)
+	GetCustomerPurchaseHistory(ctx context.Context, cardNumber string) ([]generated.GetCustomerPurchaseHistoryRow, error)
 }
 
 type cardRepository struct {
@@ -45,10 +45,24 @@ type cardRepository struct {
 }
 
 func (r *cardRepository) GetCustomerCardIDList(ctx context.Context) ([]generated.GetCustomerCardIDListRow, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
 	return r.queries.GetCustomerCardIDList(ctx)
+}
+
+func (r *cardRepository) GetCustomerPurchaseHistory(ctx context.Context, cardNumber string) ([]generated.GetCustomerPurchaseHistoryRow, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	card, err := r.queries.GetCustomerPurchaseHistory(ctx, cardNumber)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return card, nil
 }
 
 func NewCardRepository(db *sqlx.DB) CardRepository {

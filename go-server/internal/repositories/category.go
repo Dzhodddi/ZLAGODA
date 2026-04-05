@@ -20,6 +20,7 @@ type CategoryRepository interface {
 	GetCategoryByID(ctx context.Context, id int64) (*generated.Category, error)
 	GetAllCategories(ctx context.Context, lastCategoryNumber int64) ([]generated.Category, error)
 	GetAllCategoriesSortedByName(ctx context.Context, lastCategoryName string, lastCategoryNumber int64) ([]generated.Category, error)
+	GetAllCategoriesWithNoUnsoldProducts(ctx context.Context) ([]generated.Category, error)
 }
 
 type categoryRepository struct {
@@ -32,6 +33,13 @@ func NewCategoryRepository(db *sqlx.DB) CategoryRepository {
 		db:      db,
 		queries: generated.New(db.DB),
 	}
+}
+
+func (r *categoryRepository) GetAllCategoriesWithNoUnsoldProducts(ctx context.Context) ([]generated.Category, error) {
+	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
+	defer cancel()
+
+	return r.queries.GetCategoriesWithNoUnsoldProduct(ctx)
 }
 
 func (r *categoryRepository) CreateNewCategory(ctx context.Context, category views.CreateNewCategory) (*generated.Category, error) {

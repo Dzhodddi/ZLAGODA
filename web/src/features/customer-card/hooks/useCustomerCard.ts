@@ -1,7 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     createCustomerCard, deleteCustomerCard, downloadCustomerCardPdf,
-    getCustomerCard, getCustomerCardIDList,
+    getCustomerCard, getCustomerCardHistory, getCustomerCardIDList,
     listCustomerCard,
     updateCustomerCard
 } from "@/features/customer-card/api/customerCardApi.ts";
@@ -107,3 +107,11 @@ export const useCustomerCardIDList = () => {
         staleTime: staleTime,
     })
 }
+
+export const useCustomerCardHistory = (cardNumber: string, isEnabled: boolean) => {
+    return useQuery({
+        queryKey: ["customer-card-history", cardNumber],
+        queryFn: () => getCustomerCardHistory(cardNumber),
+        enabled: isEnabled,
+    });
+};

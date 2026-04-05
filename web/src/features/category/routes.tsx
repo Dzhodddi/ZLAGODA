@@ -5,6 +5,7 @@ import {EditCategoryPage} from "@/features/category/routes/EditCategoryPage.tsx"
 import {CategoryPage} from "@/features/category/routes/CategoryPage.tsx";
 import {ProtectedRoute} from "@/components/protectedRoutes.tsx";
 import {TopCategoriesPage} from "@/features/category/routes/TopCategoriesPage.tsx";
+import {ReportCategoriesPage} from "@/features/category/routes/ReportCategoriesPage.tsx";
 
 const categoryRoutes = (
     <>
@@ -12,6 +13,7 @@ const categoryRoutes = (
             <Route path="/category" element={<CategoryListPage />} />
             <Route path="/category/create" element={<CreateCategoryPage />} />
             <Route path="/category/top" element={<TopCategoriesPage />} />
+            <Route path="/category/report" element={<ReportCategoriesPage />} />
             <Route path="/category/edit/:id" element={<EditCategoryPage />} />
             <Route path="/category/:id" element={<CategoryPage />} />
         </Route>

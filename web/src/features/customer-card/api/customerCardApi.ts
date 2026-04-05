@@ -3,10 +3,9 @@ import {
     type CreateCustomerCard,
     type CustomerCard,
     type CustomerCardDropdownItem, CustomerCardDropdownItemSchema,
-    CustomerCardSchema
+    CustomerCardSchema, type PurchaseHistoryItem, PurchaseHistoryItemSchema
 } from "@/features/customer-card/types/types.ts";
 import {z} from "zod";
-import {type EmployeeDropdownItem, EmployeeDropdownItemSchema} from "@/features/employee/types/types.ts";
 
 const prefix = "/customer-cards"
 
@@ -61,3 +60,8 @@ export const getCustomerCardIDList = async (): Promise<CustomerCardDropdownItem[
     const response =  await goApiClient.get(prefix + "/list")
     return CustomerCardDropdownItemSchema.array().parse(response.data);
 }
+
+export const getCustomerCardHistory = async (cardNumber: string): Promise<PurchaseHistoryItem[]> => {
+    const response = await goApiClient.get(`${prefix}/${cardNumber}/history`);
+    return PurchaseHistoryItemSchema.array().parse(response.data);
+};

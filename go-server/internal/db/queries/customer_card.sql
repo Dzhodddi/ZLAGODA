@@ -123,3 +123,22 @@ FETCH FIRST $3 ROWS ONLY;
 -- name: GetCustomerCardIDList :many
 SELECT card_number, CONCAT(customer_surname, ' ', customer_name)::VARCHAR as full_name
 FROM customer_card;
+
+-- name: GetCustomerPurchaseHistory :many
+SELECT
+    c.check_number,
+    p.product_name,
+    s.product_number AS quantity,
+    s.selling_price::DOUBLE PRECISION as selling_price,
+    c.print_date
+FROM
+    checks c
+        JOIN sale s ON c.check_number = s.check_number
+        JOIN store_product sp ON s.upc = sp.upc
+        JOIN product p ON sp.id_product = p.id_product
+WHERE
+    c.card_number = $1
+    AND c.print_date >= CURRENT_DATE - INTERVAL '5 years'
+ORDER BY
+    c.print_date DESC,
+    c.check_number;

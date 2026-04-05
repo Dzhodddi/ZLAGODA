@@ -59,3 +59,10 @@ export const getAllCategories
     const response = await javaApiClient.get(prefix);
     return z.array(CategorySchema).parse(response.data);
 }
+
+
+export const getCategoriesForReport
+    = async (): Promise<Category[]> => {
+    const response = await goApiClient.get(prefix + "/report");
+    return z.array(CategorySchema).parse(response.data);
+}

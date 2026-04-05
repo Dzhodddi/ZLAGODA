@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
@@ -17,10 +18,29 @@ type CardService interface {
 	DeleteCustomerCard(ctx context.Context, cardNumber string) error
 	ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]views.CustomerCardResponse, error)
 	GetCustomerCardIDList(ctx context.Context) (*[]views.DropdownCardItem, error)
+	GetCustomerPurchaseHistory(ctx context.Context, cardNumber string) ([]views.CustomerHistory, error)
 }
 
 type cardService struct {
 	cardRepository repository.CardRepository
+}
+
+func (s *cardService) GetCustomerPurchaseHistory(ctx context.Context, cardNumber string) ([]views.CustomerHistory, error) {
+	items, err := s.cardRepository.GetCustomerPurchaseHistory(ctx, cardNumber)
+	if err != nil {
+		return nil, err
+	}
+	var response []views.CustomerHistory
+	for i := range items {
+		response = append(response, views.CustomerHistory{
+			PrintDate:    items[i].PrintDate.Format(constants.DateLayout),
+			CheckNumber:  items[i].CheckNumber,
+			ProductName:  items[i].ProductName,
+			Quantity:     items[i].Quantity,
+			SellingPrice: items[i].SellingPrice,
+		})
+	}
+	return response, nil
 }
 
 func (s *cardService) GetCustomerCardIDList(ctx context.Context) (*[]views.DropdownCardItem, error) {

@@ -112,6 +112,49 @@ func (q *Queries) GetAllCategoriesSortedByName(ctx context.Context, arg GetAllCa
 	return items, nil
 }
 
+const getCategoriesWithNoUnsoldProduct = `-- name: GetCategoriesWithNoUnsoldProduct :many
+SELECT
+    category_number,
+    category_name
+FROM
+    category с
+WHERE
+    NOT EXISTS (
+        SELECT p.id_product
+        FROM product p
+        WHERE p.category_number = с.category_number
+          AND NOT EXISTS (
+            SELECT 1
+            FROM sale s
+                     JOIN store_product sp ON s.upc = sp.upc
+            WHERE sp.id_product = p.id_product
+        )
+    )
+`
+
+func (q *Queries) GetCategoriesWithNoUnsoldProduct(ctx context.Context) ([]Category, error) {
+	rows, err := q.db.QueryContext(ctx, getCategoriesWithNoUnsoldProduct)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Category
+	for rows.Next() {
+		var i Category
+		if err := rows.Scan(&i.CategoryNumber, &i.CategoryName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCategoryByID = `-- name: GetCategoryByID :one
 SELECT category_number, category_name FROM category WHERE category_number = $1
 `
