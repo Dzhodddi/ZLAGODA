@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import {useCategoryList, useDeleteCategory, useDownloadCategoryPdf} from "@/features/category/hooks/useCategory.ts";
 import { toast } from "sonner";
-import { useState } from "react";
-import {useDownloadCheckPdf} from "@/features/checks/hooks/useCheck.ts";
+import {useEffect, useState} from "react";
+import {PAGE_SIZE} from "@/constants/constants.ts";
 
 type Cursor = {
     id: number;
@@ -17,11 +17,35 @@ export const CategoryListPage = () => {
 
     const currentCursor = cursorHistory[currentIndex] ?? { id: 0, name: "" };
 
+    const [hasNoMore, setHasNoMore] = useState(false);
+
     const { data: categories, isLoading, isError, isFetching } = useCategoryList(
         currentCursor.id,
         currentCursor.name,
         isSorted
     );
+
+    const lastItem = categories?.length ? categories[categories.length - 1] : null;
+    const nextPageCursor = lastItem
+        ? { id: lastItem.categoryNumber, name: lastItem.categoryName }
+        : { id: 0, name: "" };
+
+    const { data: nextPageCategories } = useCategoryList(
+        nextPageCursor.id, nextPageCursor.name, isSorted,
+        { enabled: !!categories && categories.length === PAGE_SIZE }
+    );
+
+    const isLastPage =
+        hasNoMore ||
+        (categories ? categories.length < PAGE_SIZE : true) ||
+        (nextPageCategories !== undefined && nextPageCategories.length === 0);
+
+    useEffect(() => {
+        if (!isFetching && categories?.length === 0 && currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
+            setHasNoMore(true);
+        }
+    }, [categories, isFetching]);
 
     const deleteMutation = useDeleteCategory();
     const pdfMutation = useDownloadCategoryPdf();
@@ -68,15 +92,16 @@ export const CategoryListPage = () => {
 
     const handlePrevPage = () => {
         setCurrentIndex((prev) => Math.max(0, prev - 1));
+        setHasNoMore(false);
     };
 
     const handleSortToggle = () => {
         setIsSorted((prev) => !prev);
         setCurrentIndex(0);
         setCursorHistory([{ id: 0, name: "" }]);
+        setHasNoMore(false);
     };
 
-    const isLastPage = categories ? categories.length < 10 : true;
 
     if (isLoading && currentIndex === 0) {
         return <div className="p-6 text-center text-zinc-500">Завантаження категорій...</div>;

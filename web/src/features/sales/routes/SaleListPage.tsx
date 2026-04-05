@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useSaleList } from "@/features/sales/hooks/useSale.ts";
+import {PAGE_SIZE} from "@/constants/constants.ts";
 
 type Cursor = {
     checkNumber: string | undefined;
@@ -34,13 +35,38 @@ export const SaleListPage = () => {
 
     const isDateInvalid = Boolean(startDate && endDate && new Date(startDate) > new Date(endDate));
 
+    const lastItem = sales && sales.length > 0 ? sales[sales.length - 1] : null;
+
+    const nextPageCursor: Cursor = lastItem
+        ? { checkNumber: lastItem.checkNumber, upc: lastItem.upc }
+        : { checkNumber: undefined, upc: undefined };
+
+    const { data: nextPageSales } = useSaleList(
+        startDate || "",
+        endDate || "",
+        nextPageCursor.checkNumber,
+        nextPageCursor.upc,
+        { enabled: !!sales && sales.length === PAGE_SIZE && !isDateInvalid }
+    );
+
+    const [hasNoMore, setHasNoMore] = useState(false);
+
     const resetPagination = () => {
         setCurrentIndex(0);
         setCursorHistory([{ checkNumber: undefined, upc: undefined }]);
+        setHasNoMore(false);
     };
 
+    const isLastPage =
+        hasNoMore ||
+        (sales ? sales.length < PAGE_SIZE : true) ||
+        (nextPageSales !== undefined && nextPageSales.length === 0);
+
     const handleNextPage = () => {
-        if (!sales || sales.length === 0) return;
+        if (!sales || sales.length < PAGE_SIZE) {
+            setHasNoMore(true);
+            return;
+        }
 
         const lastItem = sales[sales.length - 1];
         if (!lastItem) return;
@@ -53,7 +79,7 @@ export const SaleListPage = () => {
         const nextIndex = currentIndex + 1;
 
         if (nextIndex >= cursorHistory.length) {
-            setCursorHistory([...cursorHistory, nextCursor]);
+            setCursorHistory(prev => [...prev, nextCursor]);
         }
 
         setCurrentIndex(nextIndex);
@@ -61,9 +87,15 @@ export const SaleListPage = () => {
 
     const handlePrevPage = () => {
         setCurrentIndex((prev) => Math.max(0, prev - 1));
+        setHasNoMore(false);
     };
 
-    const isLastPage = sales ? sales.length < 10 : true;
+    useEffect(() => {
+        if (!isFetching && sales?.length === 0 && currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
+            setHasNoMore(true);
+        }
+    }, [sales, isFetching]);
 
     if (isLoading && currentIndex === 0) {
         return <div className="p-6 text-center text-zinc-500">Завантаження продажів...</div>;
@@ -115,12 +147,12 @@ export const SaleListPage = () => {
             </div>
 
             {isDateInvalid && (
-                <p className="text-red-500 text-sm">Кінцева дата не може бути меншою за початкову.</p>
+                <p className="text-red-500 text-sm">Кінцева дата не може бути меншою за початкову</p>
             )}
 
             {sales?.length === 0 && currentIndex === 0 ? (
                 <p className="text-zinc-400 text-sm text-center bg-white p-4 rounded border border-blue-200">
-                    Продажів за вказаний період не знайдено.
+                    Продажів за вказаний період не знайдено
                 </p>
             ) : (
                 <div className="overflow-x-auto bg-white border border-blue-300 relative">
@@ -140,14 +172,8 @@ export const SaleListPage = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {sales?.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} className="px-3 py-8 text-center text-zinc-500 bg-white">
-                                    Ви досягли кінця списку. Більше продажів немає
-                                </td>
-                            </tr>
-                        ) : (
-                            sales?.map((sale) => (
+
+                        {sales?.map((sale) => (
                                 <tr
                                     key={`${sale.upc}-${sale.checkNumber}`}
                                     onClick={() => navigate(`/check/${sale.checkNumber}`)}
@@ -159,7 +185,7 @@ export const SaleListPage = () => {
                                     <td className="px-3 py-2 border border-blue-200 text-center font-medium">{sale.sellingPrice} грн</td>
                                 </tr>
                             ))
-                        )}
+                        }
                         </tbody>
                     </table>
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import {useCheckList, useDeleteCheck, useCheckTotalSum, useTodayCheckList} from "@/features/checks/hooks/useCheck.ts";
 import { useRole } from "@/hooks/useRole.ts";
 import {useDownloadCheckPdf} from "@/features/checks/hooks/useCheck.ts";
+import {PAGE_SIZE} from "@/constants/constants.ts";
 
 type Cursor = {
     checkNumber: string;
@@ -40,7 +41,7 @@ export const CheckListPage = () => {
         endDate!,
         idEmployee || undefined,
         currentCursor.checkNumber,
-        !isShowTodayOnly
+        {enabled: !isShowTodayOnly},
     );
 
     const {
@@ -70,6 +71,28 @@ export const CheckListPage = () => {
     const pdfMutation = useDownloadCheckPdf();
 
     const navigate = useNavigate();
+
+    const isDateInvalid = Boolean(startDate && endDate && new Date(startDate) > new Date(endDate));
+
+    const lastCheck = checks && checks.length > 0 ? checks[checks.length - 1] : null;
+    const nextCheckNumber = lastCheck?.checkNumber ?? "";
+    const canPrefetch = !!checks && checks.length === PAGE_SIZE;
+
+    const { data: nextPageAllChecks } = useCheckList(
+        startDate || "",
+        endDate || "",
+        idEmployee || undefined,
+        nextCheckNumber,
+        { enabled: !isShowTodayOnly && canPrefetch && !isDateInvalid }
+    );
+
+    const { data: nextPageTodayChecks } = useTodayCheckList(
+        idEmployee,
+        isShowTodayOnly && canPrefetch,
+        nextCheckNumber,
+    );
+
+    const nextPageChecks = isShowTodayOnly ? nextPageTodayChecks : nextPageAllChecks;
 
     const handleDelete = (checkNumber: string) => {
         toast("Видалити чек?", {
@@ -116,9 +139,9 @@ export const CheckListPage = () => {
         setCurrentIndex((prev) => Math.max(0, prev - 1));
     };
 
-    const isLastPage = checks ? checks.length < 10 : true;
-
-    const isDateInvalid = Boolean(startDate && endDate && new Date(startDate) > new Date(endDate));
+    const isLastPage =
+        (checks ? checks.length < PAGE_SIZE : true) ||
+        (nextPageChecks !== undefined && nextPageChecks.length === 0);
 
     if (isLoading && currentIndex === 0 && (!isShowTodayOnly || idEmployee)) {
         return <div className="p-6 text-center text-zinc-500">Завантаження чеків...</div>;

@@ -5,8 +5,9 @@ import {
     useDownloadCustomerCardPdf
 } from "@/features/customer-card/hooks/useCustomerCard.ts";
 import { toast } from "sonner";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import {useRole} from "@/hooks/useRole.ts";
+import {PAGE_SIZE} from "@/constants/constants.ts";
 
 type Cursor = {
     cardNumber: string;
@@ -26,6 +27,8 @@ export const CustomerCardListPage = () => {
 
     const currentCursor = cursorHistory[currentIndex] ?? { cardNumber: "", customerSurname: undefined };
 
+    const [hasNoMore, setHasNoMore] = useState(false);
+
     const { data: customerCards, isLoading, isError, isFetching } = useCustomerCardList(
         currentCursor.cardNumber,
         currentCursor.customerSurname,
@@ -33,6 +36,32 @@ export const CustomerCardListPage = () => {
         appliedPercent,
         surnameInput,
     );
+
+    const lastItem = customerCards?.length ? customerCards[customerCards.length - 1] : null;
+    const nextPageCursor: Cursor = lastItem
+        ? {
+            cardNumber: lastItem.cardNumber,
+            customerSurname: (isSorted || appliedPercent !== undefined) ? lastItem.customerSurname : undefined
+        }
+        : { cardNumber: "", customerSurname: undefined };
+
+    const { data: nextPageCustomerCards } = useCustomerCardList(
+        nextPageCursor.cardNumber, nextPageCursor.customerSurname,
+        isSorted, appliedPercent, surnameInput,
+        { enabled: !!customerCards && customerCards.length === PAGE_SIZE }
+    );
+
+    const isLastPage =
+        hasNoMore ||
+        (customerCards ? customerCards.length < PAGE_SIZE : true) ||
+        (nextPageCustomerCards !== undefined && nextPageCustomerCards.length === 0);
+
+    useEffect(() => {
+        if (!isFetching && customerCards?.length === 0 && currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
+            setHasNoMore(true);
+        }
+    }, [customerCards, isFetching]);
 
     const deleteMutation = useDeleteCustomerCard();
     const pdfMutation = useDownloadCustomerCardPdf();
@@ -56,6 +85,10 @@ export const CustomerCardListPage = () => {
 
     const handleNextPage = () => {
         if (!customerCards || customerCards.length === 0) return;
+        if (customerCards.length < PAGE_SIZE) {
+            setHasNoMore(true);
+            return;
+        }
 
         const lastItem = customerCards[customerCards.length - 1];
 
@@ -77,11 +110,13 @@ export const CustomerCardListPage = () => {
 
     const handlePrevPage = () => {
         setCurrentIndex((prev) => Math.max(0, prev - 1));
+        setHasNoMore(false);
     };
 
     const resetPagination = () => {
         setCurrentIndex(0);
         setCursorHistory([{ cardNumber: "", customerSurname: undefined }]);
+        setHasNoMore(false);
     };
 
     const handleSortToggle = () => {
@@ -128,8 +163,6 @@ export const CustomerCardListPage = () => {
         setSurnameInput("")
         resetPagination()
     }
-
-    const isLastPage = customerCards ? customerCards.length < 10 : true;
 
     if (isLoading && currentIndex === 0) {
         return <div className="p-6 text-center text-zinc-500">Завантаження карток...</div>;

@@ -59,7 +59,7 @@ export const useCheckList = (
     endDate: string,
     employeeId?: string,
     checkNumber?: string,
-    enabled: boolean = true
+    options?: { enabled?: boolean }
 ) => {
     return useQuery({
         queryKey: ["checks", startDate, endDate, employeeId, checkNumber],
@@ -74,7 +74,7 @@ export const useCheckList = (
             }
         },
         placeholderData: (previousData) => previousData,
-        enabled: enabled,
+        enabled: options?.enabled ?? true,
     });
 };
 
