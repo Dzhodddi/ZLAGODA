@@ -324,7 +324,7 @@ export const CustomerCardListPage = () => {
                                     title="Переглянути інформацію про картку клієнта"
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200">{card.cardNumber}</td>
+                                    <td className="px-3 py-2 font-medium border border-blue-200">{card.cardNumber}</td>
                                     <td className="px-3 py-2 border border-blue-200 truncate ">{card.customerSurname + " " + card.customerName + " " + (card.customerPatronymic ? card.customerPatronymic : "")}</td>
                                     <td className="px-3 py-2 border border-blue-200 truncate">{card.customerPercent}</td>
                                     {isManager && <>

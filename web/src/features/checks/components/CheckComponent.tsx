@@ -18,7 +18,7 @@ export const CheckComponent = ({ data }: Props) => {
             <h2 className="text-xl font-bold mb-4">Інформація про чек</h2>
 
             <div className="space-y-2 mb-6">
-                <p><span className="font-medium">Номер чеку:</span> {data.check.checkNumber}</p>
+                <p><span className="font-medium">Номер чека:</span> {data.check.checkNumber}</p>
                 <p><span className="font-medium">ID працівника/-ці:</span> {data.check.idEmployee}</p>
                 <p><span className="font-medium">Номер картки клієнта/-ки:</span> {data.check.cardNumber}</p>
                 <p><span className="font-medium">Дата друку:</span> {formattedDate}</p>

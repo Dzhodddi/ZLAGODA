@@ -18,7 +18,7 @@ export const EmployeeComboboxField = ({ name = "idEmployee" }: { name?: string }
             render={({ field, fieldState }) => (
                 <div className="col-span-12 flex flex-col gap-1 py-1.5">
                     <label className="text-sm font-medium text-zinc-700">
-                        ID Працівника <span className="text-red-500">*</span>
+                        ID працівника/-ці <span className="text-red-500">*</span>
                     </label>
                     <Combobox
                         options={options}

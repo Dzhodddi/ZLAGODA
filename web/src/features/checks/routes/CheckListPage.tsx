@@ -213,11 +213,12 @@ export const CheckListPage = () => {
 
                     <div className="flex flex-col">
                         <label className="text-xs text-zinc-600 font-medium mb-1">
-                            ID Працівника {isShowTodayOnly && <span className="text-red-500">*</span>}
+                            ID працівника/-ці {isShowTodayOnly && <span className="text-red-500">*</span>}
                         </label>
                         <input
                             type="text"
                             placeholder="Усі працівники"
+                            title="Шукати чек за ID працівника/-ці, який його друкував"
                             value={idEmployee}
                             onChange={(e) => {
                                 setIdEmployee(e.target.value);
@@ -240,7 +241,7 @@ export const CheckListPage = () => {
                     )}
                 </div>
 
-                <div className="flex items-center gap-5 mb-1">
+                <div className="flex items-center gap-2 ml-auto">
                     {isCashier && (
                         <Link to="/check/create">
                             <div className="hover:scale-110 transition-transform flex justify-center">
@@ -268,7 +269,7 @@ export const CheckListPage = () => {
                 </p>
             ) : checks?.length === 0 && currentIndex === 0 ? (
                 <p className="text-zinc-400 text-sm text-center bg-white p-4 rounded border border-blue-200">
-                    Чеків не знайдено.
+                    Чеків не знайдено
                 </p>
             ) : (
                 <div className="overflow-x-auto bg-white border border-blue-300 relative">
@@ -304,9 +305,10 @@ export const CheckListPage = () => {
                                 <tr
                                     key={check.checkNumber}
                                     onClick={() => navigate(`/check/${check.checkNumber}`)}
+                                    title="Переглянути інформацію про чек"
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200">{check.checkNumber}</td>
+                                    <td className="px-3 py-2 font-medium border border-blue-200">{check.checkNumber}</td>
                                     <td className="px-3 py-2 border border-blue-200">{check.idEmployee}</td>
                                     <td className="px-3 py-2 border border-blue-200 truncate">{check.cardNumber || "-"}</td>
                                     <td className="px-3 py-2 border border-blue-200">
@@ -322,6 +324,7 @@ export const CheckListPage = () => {
                                             <button
                                                 onClick={() => handleDelete(check.checkNumber)}
                                                 className="hover:scale-110 transition-transform flex justify-center w-full"
+                                                title="Видалити чек"
                                             >
                                                 <img src="/src/logos/delete.png" alt="delete" className="w-4 h-4" />
                                             </button>
@@ -337,6 +340,7 @@ export const CheckListPage = () => {
                         <button
                             onClick={handlePrevPage}
                             disabled={currentIndex === 0 || isFetching}
+                            title="Попередня сторінка"
                             className={`transition-opacity ${currentIndex === 0 || isFetching ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
                         >
                             <div className="hover:scale-110 transition-transform flex justify-center w-full">
@@ -351,6 +355,7 @@ export const CheckListPage = () => {
                         <button
                             onClick={handleNextPage}
                             disabled={isLastPage || isFetching || (!isShowTodayOnly && isDateInvalid)}
+                            title="Наступна сторінка"
                             className={`transition-opacity ${isLastPage || isFetching || (!isShowTodayOnly && isDateInvalid) ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
                         >
                             <div className="hover:scale-110 transition-transform flex justify-center w-full">

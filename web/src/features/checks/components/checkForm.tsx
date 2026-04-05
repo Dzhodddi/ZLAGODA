@@ -38,7 +38,7 @@ export const UpsertCheckForm = ({ initialData }: Props) => {
                     return (
                         <>
                             <h2 className="col-span-12 text-xl font-bold mb-4">
-                                {isEditMode ? "Редагувати чек" : "Створити новий чек"}
+                                {isEditMode ? "Редагувати чек" : "Додати чек"}
                             </h2>
 
                             <InputField
@@ -77,7 +77,7 @@ export const UpsertCheckForm = ({ initialData }: Props) => {
                                             onClick={() => remove(index)}
                                             className="bg-red-500 text-white px-3 py-2 rounded h-10.5 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            Видалити
+                                            ✕
                                         </button>
                                     </div>
                                 ))}

@@ -323,8 +323,8 @@ export const StoreProductList = () => {
                                             title="Переглянути інформацію про товар у магазині"
                                             className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                         >
-                                            <td className="px-3 py-2 font-mono border border-blue-200">{product.upc}</td>
-                                            <td className="px-3 py-2 font-mono border border-blue-200">{product.productName}</td>
+                                            <td className="px-3 py-2 font-medium border border-blue-200">{product.upc}</td>
+                                            <td className="px-3 py-2 border border-blue-200">{product.productName}</td>
                                             <td className="px-3 py-2 border border-blue-200">{product.sellingPrice}</td>
                                             <td className="px-3 py-2 border border-blue-200">{product.productsNumber}</td>
                                             <td className="px-3 py-2 border border-blue-200">{product.promotionalProduct ? "Так" : "Ні"}</td>

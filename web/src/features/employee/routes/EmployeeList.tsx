@@ -292,9 +292,9 @@ export const EmployeeList = () => {
                         <table className="w-full text-xs border-collapse table-fixed border border-blue-300">
                             <thead>
                             <tr className="bg-blue-700 text-center text-white">
-                                <th className="px-3 py-2 font-semibold w-16 border border-blue-500">ID</th>
+                                <th className="px-3 py-2 font-semibold w-20 border border-blue-500">ID</th>
                                 <th className="px-3 py-2 font-semibold w-40 border border-blue-500">ПІБ</th>
-                                <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Посада</th>
+                                <th className="px-3 py-2 font-semibold w-20 border border-blue-500">Посада</th>
                                 <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Зарплата, грн</th>
                                 <th className="px-3 py-2 font-semibold w-32 border border-blue-500">Дата народження</th>
                                 <th className="px-3 py-2 font-semibold w-36 border border-blue-500">Дата початку роботи</th>
@@ -312,7 +312,7 @@ export const EmployeeList = () => {
                                     title="Переглянути інформацію про працівника"
                                     className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 break-words">{emp.idEmployee}</td>
+                                    <td className="px-3 py-2 font-medium border border-blue-200 break-words">{emp.idEmployee}</td>
                                     <td className="px-3 py-2 border border-blue-200 break-words">
                                         {emp.emplSurname} {emp.emplName} {emp.emplPatronymic ?? ""}
                                     </td>

@@ -27,7 +27,7 @@ export const CustomerCardSchema = z.object({
         .regex(phoneRegex, "Неправильний формат номеру телефону"),
     city: z
         .string()
-        .max(50, "Місто занадто довге")
+        .max(50, "Назва міста занадто довга")
         .nullable()
         .optional()
         .transform((val) => val === "" || val === undefined ? null : val),

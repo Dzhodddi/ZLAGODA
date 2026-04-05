@@ -206,7 +206,7 @@ export const CategoryListPage = () => {
                                     title="Переглянути інформацію про категорію"
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200">{category.categoryNumber}</td>
+                                    <td className="px-3 py-2 font-medium border border-blue-200">{category.categoryNumber}</td>
                                     <td className="px-3 py-2 border border-blue-200 truncate ">{category.categoryName}</td>
                                     <td className="px-1 py-2 border border-blue-200 text-center" onClick={(e) => e.stopPropagation()}>
                                         <button

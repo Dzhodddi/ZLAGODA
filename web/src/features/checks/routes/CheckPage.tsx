@@ -16,7 +16,7 @@ export const CheckPage = () => {
             <NotFoundEntity
                 title="Чек не знайдено"
                 redirectTiList="/check"
-                message={`Чек з номером ${id} не існує в базі даних.`}
+                message={`Чек з номером ${id} не існує в базі даних`}
             />
         );
     }

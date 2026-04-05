@@ -253,7 +253,7 @@ export const ProductList = () => {
                                     title="Переглянути інформацію про товар"
                                     className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer"
                                 >
-                                    <td className="px-3 py-2 font-mono text-xs border border-blue-200 wrap-break-word">{product.idProduct}</td>
+                                    <td className="px-3 py-2 font-medium border border-blue-200 wrap-break-word">{product.idProduct}</td>
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">{product.productName}</td>
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">{product.producer}</td>
                                     <td className="px-3 py-2 border border-blue-200 wrap-break-word">{product.productCharacteristics}</td>
