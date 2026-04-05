@@ -15,10 +15,26 @@ const QUERY_KEY = "customer_cards"
 export const useDownloadCustomerCardPdf = () => {
     return useMutation({
         mutationFn: downloadCustomerCardPdf,
-        onSuccess: (blob) => {
-            const url = URL.createObjectURL(blob);
-            window.open(url);
-        },
+            onSuccess: (blob) => {
+                const url = URL.createObjectURL(blob);
+                const newTab = window.open("", "_blank");
+                if (newTab) {
+                    newTab.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>customer-cards.pdf</title></head>
+                    <body style="margin:0">
+                        <iframe 
+                            src="${url}" 
+                            style="width:100vw; height:100vh; border:none"
+                            onload="this.contentWindow.print()"
+                        ></iframe>
+                    </body>
+                    </html>
+                `);
+                    newTab.document.close();
+                }
+            },
         onError: (error) => {
             toast.error(getErrorMessage(error, "Не вдалося відкрити звіт"));
         },
