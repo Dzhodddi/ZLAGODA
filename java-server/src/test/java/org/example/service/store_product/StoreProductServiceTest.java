@@ -200,6 +200,7 @@ class StoreProductServiceTest {
     @Test
     @DisplayName("save should save and return StoreProductDto")
     void save_shouldReturnDto() {
+        // repository.save() повертає StoreProduct, сервіс маппить через mapper
         when(repository.save(requestDto)).thenReturn(storeProduct);
         when(mapper.toDto(storeProduct)).thenReturn(storeProductDto);
 
@@ -207,6 +208,7 @@ class StoreProductServiceTest {
 
         assertEquals("123456789012", result.getUPC());
         verify(repository, times(1)).save(requestDto);
+        verify(mapper, times(1)).toDto(storeProduct);
     }
 
     @Test

@@ -19,9 +19,11 @@ import org.example.model.store_product.StoreProduct;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Repository
@@ -262,19 +264,18 @@ public class StoreProductRepository {
                 offset + items.size() < total);
     }
 
+    @Transactional
     public StoreProduct save(StoreProductRequestDto requestDto) {
-        BigDecimal priceWithVat;
-        if (requestDto.isPromotional_product()) {
-            priceWithVat = (requestDto.getSelling_price().multiply(PROM_RATE))
-                    .multiply(BigDecimal.ONE.add(VAT_RATE))
-                    .setScale(2, RoundingMode.HALF_UP);
-        } else {
-            priceWithVat = (requestDto.getSelling_price())
-                    .multiply(BigDecimal.ONE.add(VAT_RATE))
-                    .setScale(2, RoundingMode.HALF_UP);
-        }
+        BigDecimal priceWithVat = (requestDto.getSelling_price())
+                .multiply(BigDecimal.ONE.add(VAT_RATE))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal priceWithVatAndDiscount = (requestDto.getSelling_price().multiply(PROM_RATE))
+                .multiply(BigDecimal.ONE.add(VAT_RATE))
+                .setScale(2, RoundingMode.HALF_UP);
         try {
-            return jdbcTemplate.queryForObject(
+        if (requestDto.isPromotional_product()) {
+            jdbcTemplate.update(
                     """
                     INSERT INTO store_product (
                         UPC,
@@ -284,69 +285,210 @@ public class StoreProductRepository {
                         products_number,
                         promotional_product
                     ) VALUES (?, ?, ?, ?, ?, ?)
-                    RETURNING UPC, UPC_prom, id_product, selling_price,
-                              products_number, promotional_product
                     """,
-                    rowMapper,
+                    requestDto.getUPC(),
+                    null,
+                    requestDto.getId_product(),
+                    priceWithVatAndDiscount,
+                    requestDto.getProducts_number(),
+                    true
+            );
+        } else {
+            if (requestDto.getUPC_prom() != null) {
+                jdbcTemplate.update(
+                        """
+                        INSERT INTO store_product (
+                            UPC,
+                            UPC_prom,
+                            id_product,
+                            selling_price,
+                            products_number,
+                            promotional_product
+                        ) VALUES (?, ?, ?, ?, ?, ?)
+                        """,
+                        requestDto.getUPC_prom(),
+                        null,
+                        requestDto.getId_product(),
+                        priceWithVatAndDiscount,
+                        requestDto.getProducts_number(),
+                        true
+                );
+            }
+            jdbcTemplate.update(
+                    """
+                    INSERT INTO store_product (
+                        UPC,
+                        UPC_prom,
+                        id_product,
+                        selling_price,
+                        products_number,
+                        promotional_product
+                    ) VALUES (?, ?, ?, ?, ?, ?)
+                    """,
                     requestDto.getUPC(),
                     requestDto.getUPC_prom(),
                     requestDto.getId_product(),
                     priceWithVat,
                     requestDto.getProducts_number(),
-                    requestDto.isPromotional_product()
+                    false
             );
-        } catch (DataIntegrityViolationException e) {
+        }
+        } catch (DataIntegrityViolationException | UncategorizedSQLException e) {
             throw new InvalidProductException(
                     "Invalid product or UPC reference: " + requestDto.getId_product());
         }
+       return findAllInfoByUPC(requestDto.getUPC()).orElseThrow(() ->
+               new EntityNotFoundException("Not found store product after creating: " + requestDto.getUPC()));
     }
 
+    @Transactional
     public StoreProductDto updateByUPC(String upc, StoreProductRequestDto requestDto) {
         if (!existsByUPC(upc)) {
             throw new EntityNotFoundException("Store product not found: " + upc);
         }
-        BigDecimal priceWithVat;
+        if (requestDto.isPromotional_product() && requestDto.getUPC_prom() != null) {
+            throw new InvalidProductException("Promotional product cannot have UPC_prom");
+        }
+
+        BigDecimal priceWithVat = (requestDto.getSelling_price())
+                .multiply(BigDecimal.ONE.add(VAT_RATE))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal priceWithVatAndDiscount = (requestDto.getSelling_price()
+                .multiply(PROM_RATE))
+                .multiply(BigDecimal.ONE.add(VAT_RATE))
+                .setScale(2, RoundingMode.HALF_UP);
+
         if (requestDto.isPromotional_product()) {
-            priceWithVat = (requestDto.getSelling_price().multiply(PROM_RATE))
-                    .multiply(BigDecimal.ONE.add(VAT_RATE))
-                    .setScale(2, RoundingMode.HALF_UP);
-        } else {
-            priceWithVat = (requestDto.getSelling_price())
-                    .multiply(BigDecimal.ONE.add(VAT_RATE))
-                    .setScale(2, RoundingMode.HALF_UP);
-        }
-        try {
-            int updatedRows = jdbcTemplate.update(
-                    """
-                    UPDATE store_product
-                    SET UPC_prom = ?,
-                        id_product = ?,
-                        selling_price = ?,
-                        products_number = ?,
-                        promotional_product = ?
-                    WHERE UPC = ?
-                    """,
-                    requestDto.getUPC_prom(),
-                    requestDto.getId_product(),
-                    priceWithVat,
-                    requestDto.getProducts_number(),
-                    requestDto.isPromotional_product(),
-                    upc
-            );
-
-            if (updatedRows == 0) {
-                throw new EntityNotFoundException("Update failed, store product not found: " + upc);
+            Optional<StoreProduct> existingProm = findPromById_Product(requestDto.getId_product());
+            if (existingProm.isPresent() && !existingProm.get().getUPC().equals(upc)) {
+                throw new InvalidProductException(
+                        "Promotional record already exists for product: " + requestDto.getId_product());
             }
-
-            return findAllInfoByUPC(upc)
-                    .map(storeProductMapper::toDto)
-                    .orElseThrow(() -> new EntityNotFoundException(
-                            "Store product not found after update: " + upc));
-
-        } catch (DataIntegrityViolationException e) {
-            throw new InvalidProductException(
-                    "Invalid product or UPC reference: " + requestDto.getId_product());
         }
+
+        if (!requestDto.isPromotional_product() && requestDto.getUPC_prom() != null) {
+            try {
+                if (!existsByUPC(requestDto.getUPC_prom())) {
+                    jdbcTemplate.update(
+                            """
+                            INSERT INTO store_product (
+                                UPC,
+                                UPC_prom,
+                                id_product,
+                                selling_price,
+                                products_number,
+                                promotional_product
+                            ) VALUES (?, ?, ?, ?, ?, ?)
+                            """,
+                            requestDto.getUPC_prom(),
+                            null,
+                            requestDto.getId_product(),
+                            priceWithVatAndDiscount,
+                            requestDto.getProducts_number(),
+                            true
+                    );
+                } else {
+                    // not to remove the connection between prom and non-prom store product
+                    jdbcTemplate.update(
+                            """
+                                UPDATE store_product
+                                SET id_product = ?, selling_price = ?
+                                WHERE UPC = ?
+                                """,
+                            requestDto.getId_product(),
+                            priceWithVatAndDiscount,
+                            requestDto.getUPC_prom());
+                }
+
+                jdbcTemplate.update(
+                        """
+                        UPDATE store_product
+                        SET UPC_prom = ?,
+                            id_product = ?,
+                            selling_price = ?,
+                            products_number = ?,
+                            promotional_product = ?
+                        WHERE UPC = ?
+                        """,
+                        requestDto.getUPC_prom(),
+                        requestDto.getId_product(),
+                        priceWithVat,
+                        requestDto.getProducts_number(),
+                        false,
+                        upc
+                );
+
+            } catch (DataIntegrityViolationException | UncategorizedSQLException e) {
+                throw new InvalidProductException(
+                        "Invalid product or UPC reference: " + requestDto.getId_product());
+            }
+        } else if (requestDto.isPromotional_product() && requestDto.getUPC_prom() == null) {
+            try {
+
+                jdbcTemplate.update(
+                        """
+                        UPDATE store_product
+                        SET id_product = ?,
+                            selling_price = ?,
+                            products_number = ?,
+                            promotional_product = ?,
+                            UPC_prom = NULL
+                        WHERE UPC = ?
+                        """,
+                        requestDto.getId_product(),
+                        priceWithVatAndDiscount,
+                        requestDto.getProducts_number(),
+                        true,
+                        upc
+                );
+
+                findNonPromById_Product(requestDto.getId_product()).ifPresent(nonProm -> {
+                    if (!nonProm.getUPC().equals(upc)) {
+                        jdbcTemplate.update(
+                                """
+                                UPDATE store_product
+                                SET selling_price = ?, UPC_prom = ?
+                                WHERE UPC = ?
+                                """,
+                                priceWithVat,
+                                requestDto.getUPC(),
+                                nonProm.getUPC()
+                        );
+                    }
+                });
+
+            } catch (DataIntegrityViolationException | UncategorizedSQLException e) {
+                throw new InvalidProductException(
+                        "Invalid product or UPC reference: " + requestDto.getId_product());
+            }
+        } else {
+            try {
+                jdbcTemplate.update(
+                        """
+                        UPDATE store_product
+                        SET UPC_prom = NULL,
+                            id_product = ?,
+                            selling_price = ?,
+                            products_number = ?,
+                            promotional_product = false
+                        WHERE UPC = ?
+                        """,
+                        requestDto.getId_product(),
+                        priceWithVat,
+                        requestDto.getProducts_number(),
+                        upc
+                );
+            } catch (DataIntegrityViolationException | UncategorizedSQLException e) {
+                throw new InvalidProductException(
+                        "Invalid product or UPC reference: " + requestDto.getId_product());
+            }
+        }
+
+        return findAllInfoByUPC(upc)
+                .map(storeProductMapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Store product not found after update: " + upc));
     }
 
     public void deleteByUPC(String upc) {
@@ -378,16 +520,14 @@ public class StoreProductRepository {
         return count != null && count > 0;
     }
 
-    public void updateProductPriceAndPromotion(String upc,
-                                               BigDecimal price,
-                                               boolean promotional) {
+    public void updateProductPrice(String upc, BigDecimal price) {
         jdbcTemplate.update(
                 """
                 UPDATE store_product
-                SET selling_price = ?, promotional_product = ?
+                SET selling_price = ?
                 WHERE UPC = ?
                 """,
-                price, promotional, upc
+                price, upc
         );
     }
 
@@ -448,7 +588,6 @@ public class StoreProductRepository {
         }
     }
 
-
     public List<StoreProductDto> findAllNoPagination() {
         return jdbcTemplate.query("""
              SELECT UPC, UPC_prom, id_product, selling_price,
@@ -475,6 +614,25 @@ public class StoreProductRepository {
                         withNameRowMapper)
                 .stream()
                 .toList();
+    }
+
+    public Optional<StoreProduct> findPromById_Product(int id) {
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(
+                            """
+                            SELECT UPC, UPC_prom, id_product, selling_price,
+                                   products_number, promotional_product
+                            FROM store_product
+                            WHERE id_product = ? AND promotional_product = true
+                            """,
+                            rowMapper,
+                            id
+                    )
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     private long getTotalCount() {
@@ -510,5 +668,24 @@ public class StoreProductRepository {
                 Integer.class
         );
         return count != null ? count : 0;
+    }
+
+    private Optional<StoreProduct> findNonPromById_Product(int id) {
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(
+                            """
+                            SELECT UPC, UPC_prom, id_product, selling_price,
+                                   products_number, promotional_product
+                            FROM store_product
+                            WHERE id_product = ? AND promotional_product = false
+                            """,
+                            rowMapper,
+                            id
+                    )
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 }

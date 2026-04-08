@@ -24,8 +24,12 @@ export const useCreateStoreProduct = () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
             toast.success("Товар у магазині успішно створений");
         },
-        onError: (error) => {
-            toast.error(getErrorMessage(error, "Не вдалося створити товар у магазині"));
+        onError: (error: any) => {
+            if (error.response?.status === 422) {
+                toast.error("У магазині вже є звичайний та акційний товари цього виду")
+            } else {
+                toast.error(getErrorMessage(error, "Не вдалося створити товар у магазині"))
+            }
         }
     });
 };
@@ -39,8 +43,12 @@ export const useUpdateStoreProduct = () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
             toast.success("Товар у магазині успішно оновлений")
         },
-        onError: (error) => {
-            toast.error(getErrorMessage(error, "Не вдалося оновити товар у магазині"))
+        onError: (error: any) => {
+            if (error.response?.status === 422) {
+                toast.error("У магазині вже є звичайний та акційний товари цього виду")
+            } else {
+                toast.error(getErrorMessage(error, "Не вдалося оновити товар у магазині"))
+            }
         }
     });
 };

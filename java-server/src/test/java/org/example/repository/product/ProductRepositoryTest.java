@@ -125,12 +125,11 @@ class ProductRepositoryTest {
         savedProduct.setProduct_characteristics("TestChars");
         savedProduct.setCategory_number(10);
 
-        // eq(null) не працює — використовуємо isNull() для characteristics
         when(jdbcTemplate.queryForObject(
                 anyString(), eq(rowMapper),
                 eq("TestProduct"), eq("TestProducer"), eq("TestChars"), eq(10)))
                 .thenReturn(savedProduct);
-        when(productMapper.toDto(savedProduct)).thenReturn(productDto); // було відсутнє
+        when(productMapper.toDto(savedProduct)).thenReturn(productDto);
 
         ProductDto result = repository.save(newProduct);
 

@@ -327,8 +327,8 @@ export const StoreProductList = () => {
                                             <td className="px-3 py-2 border border-blue-200">{product.productName}</td>
                                             <td className="px-3 py-2 border border-blue-200">{product.sellingPrice}</td>
                                             <td className="px-3 py-2 border border-blue-200">{product.productsNumber}</td>
-                                            <td className="px-3 py-2 border border-blue-200">{product.promotionalProduct ? "Так" : "Ні"}</td>
-                                            {isManager && (
+                                            <td className="px-3 py-2 border border-blue-200">{product.promotionalProduct ? "✔" : "×"}</td>
+                                            {isManager && !product.promotionalProduct && (
                                                 <td
                                                     className="px-1 py-2 border border-blue-200 text-center w-8"
                                                     onClick={e => e.stopPropagation()}
@@ -341,6 +341,12 @@ export const StoreProductList = () => {
                                                             <img src="/src/logos/batch.png" alt="batch" className="h-4 w-5" />
                                                         </div>
                                                     </button>
+                                                </td>
+                                            )}
+                                            {isManager && product.promotionalProduct && (
+                                                <td
+                                                    className="px-1 py-2 border border-blue-200 text-center w-8"
+                                                >
                                                 </td>
                                             )}
                                             {isManager && (

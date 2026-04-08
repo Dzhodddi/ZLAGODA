@@ -30,8 +30,7 @@ export const BaseStoreProductSchema = z.object({
         .coerce
         .number()
         .int()
-        .min(0, "Кількість має бути невід'ємною")
-        .max(999999999, "Занадто багато товарів"),
+        .min(0, "Кількість має бути невід'ємною"),
     promotionalProduct: z
         .boolean()
         .default(false),
@@ -52,13 +51,8 @@ export const CreateStoreProductSchema = BaseStoreProductSchema
             .coerce
             .number()
             .int()
-            .min(1, "Кількість має бути позитивною")
-            .max(999999999, "Занадто багато товарів"),
-    })
-    .refine(
-    data => !data.promotionalProduct || data.upcProm !== null,
-    { message: "Акційний товар повинен мати UPC промо", path: ["upcProm"] }
-);
+            .min(1, "Кількість має бути позитивною"),
+    });
 
 export type CreateStoreProduct = z.infer<typeof CreateStoreProductSchema>;
 
@@ -94,7 +88,8 @@ export const BatchRequestSchema = z.object({
 export type BatchRequest = z.infer<typeof BatchRequestSchema>;
 
 export const BatchRequestFormSchema
-    = BatchRequestSchema.refine(
+    = BatchRequestSchema
+    .refine(
     data => data.expiring_date > data.delivery_date,
     { message: "Дата закінчення має бути пізніше за дату доставки", path: ["expiring_date"] }
 );

@@ -28,11 +28,11 @@ const StoreProductFormFields = ({ isEditMode }: { isEditMode: boolean }) => {
             <div className="col-span-12"><ProductComboboxField /></div>
             <div className="col-span-12"><InputField type="number" name="sellingPrice" label="Ціна продажу, грн" min="0" step="0.01" /></div>
             <div className="col-span-12"><InputField type="number" name="productsNumber" label="Кількість одиниць, шт." min="0" /></div>
-            <div className="col-span-12 my-2">
+            <div className="col-span-12 my-4">
                 <CheckboxField name="promotionalProduct" label="Акційний товар" />
             </div>
-            {isPromotional && (
-                <div className="col-span-12"><InputField name="upcProm" label="UPC промо" /></div>
+            {!isPromotional && (
+                <div className="col-span-12"><InputField required={false} name="upcProm" label="UPC акційного товару" /></div>
             )}
         </>
     );
