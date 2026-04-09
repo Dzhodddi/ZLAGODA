@@ -298,7 +298,7 @@ export const CustomerCardListPage = () => {
                         <tr className="bg-blue-700 text-left text-white">
                             <th className="px-3 py-2 font-semibold w-60 border border-blue-500 text-center">Номер</th>
                             <th className="px-3 py-2 font-semibold w-120 border border-blue-500 text-center">ПІБ</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Знижка, %</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Відсоток на знижку, %</th>
                             {isManager && <>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>
                             <th className="px-1 py-2 font-semibold w-12 border border-blue-500"></th>

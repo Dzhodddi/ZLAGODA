@@ -63,11 +63,11 @@ func (h *CheckHandler) createCheck(c echo.Context) error {
 	if err := validation.ValidateStruct(payload); err != nil {
 		return errorResponse.ValidationError(constants.ValidationError, err)
 	}
-	printTime, err := time.Parse(time.RFC3339, payload.PrintDate)
-	if err != nil {
-		return errorResponse.BadRequest(constants.InvalidTimeFormat, err)
+	id := auth.GetEmployeeIDFromCtx(c.Request())
+	if id == "" {
+		return errorResponse.UnAuthorized(fmt.Errorf("employee_id not found in context"))
 	}
-	check, err := h.checkService.CreateCheck(c.Request().Context(), payload, printTime)
+	check, err := h.checkService.CreateCheck(c.Request().Context(), payload, id)
 	if err != nil {
 		return err
 	}

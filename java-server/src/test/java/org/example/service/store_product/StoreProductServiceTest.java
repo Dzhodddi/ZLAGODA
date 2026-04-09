@@ -126,7 +126,7 @@ class StoreProductServiceTest {
     void findByUPC_existingProduct_shouldReturnCharacteristics() {
         when(repository.findByUPC("123456789012")).thenReturn(Optional.of(withNameDto));
 
-        assertEquals("Test Product", service.findByUPC("123456789012").getProduct_name());
+        assertEquals("Test Product", service.getByUPC("123456789012").getProduct_name());
         verify(repository, times(1)).findByUPC("123456789012");
     }
 
@@ -235,7 +235,7 @@ class StoreProductServiceTest {
     void findByUPC_nonExistingProduct_shouldThrowException() {
         when(repository.findByUPC("999999999999")).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> service.findByUPC("999999999999"));
+        assertThrows(EntityNotFoundException.class, () -> service.getByUPC("999999999999"));
     }
 
     @Test
@@ -245,7 +245,7 @@ class StoreProductServiceTest {
                 .thenReturn(Optional.of(priceAndQuantityDto));
 
         StoreProductPriceAndQuantityDto result =
-                service.findPriceAndQuantityByUPC("123456789012");
+                service.getPriceAndQuantityByUPC("123456789012");
 
         assertEquals(new BigDecimal("12.00"), result.getSelling_price());
         verify(repository, times(1)).findPriceAndQuantityByUPC("123456789012");
@@ -257,7 +257,7 @@ class StoreProductServiceTest {
         when(repository.findPriceAndQuantityByUPC("999999999999")).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
-                () -> service.findPriceAndQuantityByUPC("999999999999"));
+                () -> service.getPriceAndQuantityByUPC("999999999999"));
     }
 
     @Test

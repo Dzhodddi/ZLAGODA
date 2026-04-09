@@ -222,49 +222,23 @@ public class ProductRepository {
 
     public ProductDto save(Product product) {
         try {
-            if (product.getId_product() == 0) {
-                Product res = jdbcTemplate.queryForObject(
-                        """
-                        INSERT INTO product (
-                            product_name,
-                            producer,
-                            product_characteristics,
-                            category_number
-                        ) VALUES (?, ?, ?, ?)
-                        RETURNING id_product, category_number, product_name, producer, product_characteristics
-                        """,
-                        rowMapper,
-                        product.getProduct_name(),
-                        product.getProducer(),
-                        product.getProduct_characteristics(),
-                        product.getCategory_number()
-                );
-                return productMapper.toDto(res);
-            } else {
-                int updated = jdbcTemplate.update(
-                        """
-                        UPDATE product SET
-                            product_name = ?,
-                            producer = ?,
-                            product_characteristics = ?,
-                            category_number = ?
-                        WHERE id_product = ?
-                        """,
-                        product.getProduct_name(),
-                        product.getProducer(),
-                        product.getProduct_characteristics(),
-                        product.getCategory_number(),
-                        product.getId_product()
-                );
-
-                if (updated == 0) {
-                    throw new EntityNotFoundException("Product not found: " + product.getId_product());
-                }
-
-                return findById(product.getId_product())
-                        .orElseThrow(() -> new EntityNotFoundException(
-                                "Product not found after update: " + product.getId_product()));
-            }
+            Product res = jdbcTemplate.queryForObject(
+                    """
+                    INSERT INTO product (
+                        product_name,
+                        producer,
+                        product_characteristics,
+                        category_number
+                    ) VALUES (?, ?, ?, ?)
+                    RETURNING id_product, category_number, product_name, producer, product_characteristics
+                    """,
+                    rowMapper,
+                    product.getProduct_name(),
+                    product.getProducer(),
+                    product.getProduct_characteristics(),
+                    product.getCategory_number()
+            );
+            return productMapper.toDto(res);
         } catch (DataIntegrityViolationException e) {
             throw new InvalidCategoryException("Invalid category: "
                     + product.getCategory_number());

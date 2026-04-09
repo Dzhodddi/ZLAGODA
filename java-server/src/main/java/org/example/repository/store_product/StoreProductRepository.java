@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.page.PageResponseDto;
-import org.example.dto.store_product.product.StoreProductDto;
-import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
-import org.example.dto.store_product.product.StoreProductRequestDto;
-import org.example.dto.store_product.product.StoreProductWithNameDto;
+import org.example.dto.store_product.product.*;
 import org.example.exception.custom_exception.EntityHasRelationsException;
 import org.example.exception.custom_exception.EntityNotFoundException;
 import org.example.exception.custom_exception.InvalidProductException;
@@ -82,6 +79,33 @@ public class StoreProductRepository {
                                 StoreProductPriceAndQuantityDto dto = new StoreProductPriceAndQuantityDto();
                                 dto.setSelling_price(rs.getBigDecimal("selling_price"));
                                 dto.setProducts_number(rs.getInt("products_number"));
+                                return dto;
+                            },
+                            upc
+                    )
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<StoreProductCharacteristicsDto> findProductInfoByUPC(String upc) {
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(
+                            """
+                            SELECT sp.selling_price, sp.products_number, p.product_name, p.product_characteristics
+                            FROM store_product sp
+                            INNER JOIN product p
+                            ON sp.id_product = p.id_product
+                            WHERE sp.UPC = ?
+                            """,
+                            (rs, rowNum) -> {
+                                StoreProductCharacteristicsDto dto = new StoreProductCharacteristicsDto();
+                                dto.setSelling_price(rs.getBigDecimal("selling_price"));
+                                dto.setProducts_number(rs.getInt("products_number"));
+                                dto.setProduct_name(rs.getString("product_name"));
+                                dto.setProduct_characteristics(rs.getString("product_characteristics"));
                                 return dto;
                             },
                             upc

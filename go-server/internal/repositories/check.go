@@ -37,7 +37,7 @@ type CheckRepository interface {
 	CreateNewCheck(
 		ctx context.Context,
 		check views.CreateNewCheck,
-		printTime time.Time,
+		id string,
 		formattedSqlPayload string,
 		payload []interface{},
 		keys []string,
@@ -205,7 +205,7 @@ func (r *checkRepository) DeleteCheck(ctx context.Context, checkNumber string) e
 func (r *checkRepository) CreateNewCheck(
 	ctx context.Context,
 	check views.CreateNewCheck,
-	printTime time.Time,
+	id string,
 	formattedSqlPayload string,
 	payload []interface{},
 	keys []string,
@@ -233,9 +233,8 @@ func (r *checkRepository) CreateNewCheck(
 		ctx,
 		generated.CreateNewCheckParams{
 			CheckNumber: check.CheckNumber,
-			IDEmployee:  check.IDEmployee,
+			IDEmployee:  id,
 			CardNumber:  check.CardNumber,
-			PrintDate:   printTime,
 			SumTotal:    totalPrice * (1 - float64(customerCard.CustomerPercent)/100.0),
 			Vat:         totalPrice * constants.Vat,
 		},
@@ -259,7 +258,6 @@ func (r *checkRepository) CreateNewCheck(
 			UPC:          p.UPC,
 			SellingPrice: p.SellingPrice,
 			Quantity:     p.Quantity,
-			CheckDate:    printTime,
 		})
 	}
 	err = r.saveProducts(ctx, tx, storeProductList)

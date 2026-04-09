@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-    useAllStoreProducts, useDeleteExpired,
+    useAllStoreProducts,
+    useDeleteExpired,
     useDeleteStoreProduct,
     useDownloadStoreProductPdf,
-    useStoreProductPriceAndQuantity,
+    useStoreProductCahierSearch,
+    useStoreProductManagerSearch
 } from "@/features/store_product/hooks/useStoreProduct.ts";
 import { type StoreProduct } from "@/features/store_product/types/types.ts";
 import { useRole } from "@/hooks/useRole.ts";
@@ -54,9 +56,10 @@ export const StoreProductList = () => {
 
     const [upcInput, setUpcInput] = useState("");
     const [searchUpc, setSearchUpc] = useState("");
-    const isUpcSearch = isCashier && searchUpc.trim() !== "";
+    const isUpcSearch = searchUpc.trim() !== "";
 
-    const upcQuery = useStoreProductPriceAndQuantity(searchUpc);
+    const upcQueryCahier = useStoreProductCahierSearch(searchUpc);
+    const upcQueryManager = useStoreProductManagerSearch(searchUpc);
 
     const { data, isLoading, error, isFetching } = useAllStoreProducts({
         sortedBy,
@@ -197,7 +200,6 @@ export const StoreProductList = () => {
                         && <SortToggle label="Сортувати за назвою" value="name" sortedBy={sortedBy} onToggle={handleSortToggle} />}
                 </div>
 
-                {isCashier && (
                     <div className="relative flex-1 px-3">
                         <div className="relative flex items-center">
                             <input
@@ -225,7 +227,6 @@ export const StoreProductList = () => {
                             )}
                         </div>
                     </div>
-                )}
 
                 {isManager && (
                     <div className="flex items-center">
@@ -253,20 +254,22 @@ export const StoreProductList = () => {
                 )}
             </div>
 
-            {isUpcSearch && (
+            {isUpcSearch && isManager && (
                 <div>
-                    {upcQuery.isLoading && <p className="text-zinc-500">Завантаження…</p>}
-                    {upcQuery.error && (
+                    {upcQueryManager.isLoading && <p className="text-zinc-500">Завантаження…</p>}
+                    {upcQueryManager.error && (
                         <p className="text-red-500">Товар з UPC "{searchUpc}" не знайдено</p>
                     )}
-                    {upcQuery.data && (
+                    {upcQueryManager.data && (
                         <div className="overflow-x-auto bg-white border border-blue-300 relative">
                             <table className="w-full text-xs border-collapse table-fixed border-b border-blue-300">
                                 <thead>
                                 <tr className="bg-blue-700 text-center text-white">
-                                    <th className="px-3 py-2 font-semibold w-44 border border-blue-500">UPC</th>
-                                    <th className="px-3 py-2 font-semibold w-50 border border-blue-500">Ціна продажу, грн</th>
-                                    <th className="px-3 py-2 font-semibold w-50 border border-blue-500">Кількість</th>
+                                    <th className="px-3 py-2 font-semibold w-24 border border-blue-500">UPC</th>
+                                    <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Ціна продажу, грн</th>
+                                    <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Кількість одиниць</th>
+                                    <th className="px-3 py-2 font-semibold w-32 border border-blue-500">Назва товару</th>
+                                    <th className="px-3 py-2 font-semibold w-50 border border-blue-500">Характеристики</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -275,8 +278,42 @@ export const StoreProductList = () => {
                                     className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
                                 >
                                     <td className="px-3 py-2 font-mono border border-blue-200">{searchUpc}</td>
-                                    <td className="px-3 py-2 border border-blue-200">{upcQuery.data.sellingPrice}</td>
-                                    <td className="px-3 py-2 border border-blue-200">{upcQuery.data.productsNumber}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{upcQueryManager.data.sellingPrice}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{upcQueryManager.data.productsNumber}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{upcQueryManager.data.productName}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{upcQueryManager.data.productCharacteristics}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {isUpcSearch && isCashier && (
+                <div>
+                    {upcQueryCahier.isLoading && <p className="text-zinc-500">Завантаження…</p>}
+                    {upcQueryCahier.error && (
+                        <p className="text-red-500">Товар з UPC "{searchUpc}" не знайдено</p>
+                    )}
+                    {upcQueryCahier.data && (
+                        <div className="overflow-x-auto bg-white border border-blue-300 relative">
+                            <table className="w-full text-xs border-collapse table-fixed border-b border-blue-300">
+                                <thead>
+                                <tr className="bg-blue-700 text-center text-white">
+                                    <th className="px-3 py-2 font-semibold w-32 border border-blue-500">UPC</th>
+                                    <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Ціна продажу, грн</th>
+                                    <th className="px-3 py-2 font-semibold w-24 border border-blue-500">Кількість одиниць</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr
+                                    onClick={() => navigate(`/store-product/${searchUpc}`)}
+                                    className="bg-blue-100 text-left border-t text-zinc-900 cursor-pointer hover:bg-blue-200 transition-colors"
+                                >
+                                    <td className="px-3 py-2 font-mono border border-blue-200">{searchUpc}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{upcQueryCahier.data.sellingPrice}</td>
+                                    <td className="px-3 py-2 border border-blue-200">{upcQueryCahier.data.productsNumber}</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -308,7 +345,7 @@ export const StoreProductList = () => {
                                         <th className="px-3 py-2 font-semibold w-44 border border-blue-500">UPC</th>
                                         <th className="px-3 py-2 font-semibold w-44 border border-blue-500">Назва</th>
                                         <th className="px-3 py-2 font-semibold w-50 border border-blue-500">Ціна продажу, грн</th>
-                                        <th className="px-3 py-2 font-semibold w-50 border border-blue-500">Кількість</th>
+                                        <th className="px-3 py-2 font-semibold w-50 border border-blue-500">Кількість одиниць</th>
                                         <th className="px-3 py-2 font-semibold w-32 border border-blue-500">Акційний товар</th>
                                         {isManager && <th className="px-1 py-2 w-6 border border-blue-500" />}
                                         {isManager && <th className="px-1 py-2 w-6 border border-blue-500" />}

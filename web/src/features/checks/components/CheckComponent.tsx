@@ -29,18 +29,20 @@ export const CheckComponent = ({ data }: Props) => {
             <div>
                 <h3 className="text-lg font-semibold mb-3 border-b pb-2">Список товарів</h3>
                 {data.products.length > 0 ? (
-                    <ul className="space-y-2">
+                    <table className="w-full text-sm">
+                        <tbody>
                         {data.products.map((product, index) => (
-                            <li
+                            <tr
                                 key={`${product.name}-${index}`}
-                                className="flex justify-between bg-gray-50 p-3 rounded border border-gray-100"
+                                className="bg-gray-50 border border-gray-100"
                             >
-                                <span><span className="font-medium text-gray-600">Назва:</span> {product.name}</span>
-                                <span><span className="font-medium text-gray-600">Ціна:</span> {product.sellingPrice} грн</span>
-                                <span><span className="font-medium text-gray-600">Кількість:</span> {product.quantity} шт.</span>
-                            </li>
+                                <td className="font-medium text-gray-600 p-3">Назва: {product.name}</td>
+                                <td className="font-medium text-gray-600 p-3">Ціна: {product.sellingPrice} грн</td>
+                                <td className="font-medium text-gray-600 p-2">Кількість: {product.quantity} шт.</td>
+                            </tr>
                         ))}
-                    </ul>
+                        </tbody>
+                    </table>
                 ) : (
                     <p className="text-gray-500 italic">Товари відсутні</p>
                 )}

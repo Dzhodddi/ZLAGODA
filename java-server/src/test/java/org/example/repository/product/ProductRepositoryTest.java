@@ -339,48 +339,6 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("save should update existing product when id is not 0")
-    void save_existingProduct_shouldReturnUpdatedDto() {
-        when(jdbcTemplate.update(anyString(),
-                eq("TestProduct"), eq("TestProducer"), eq("TestChars"), eq(10), eq(1)))
-                .thenReturn(1);
-        when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), eq(1)))
-                .thenReturn(product);
-        when(productMapper.toDto(product)).thenReturn(productDto);
-
-        ProductDto result = repository.save(product);
-
-        assertNotNull(result);
-        assertEquals("TestProduct", result.getProduct_name());
-    }
-
-    @Test
-    @DisplayName("save should throw EntityNotFoundException when update affects 0 rows")
-    void save_existingProductNotFound_shouldThrow() {
-        when(jdbcTemplate.update(anyString(),
-                anyString(), anyString(), anyString(), anyInt(), anyInt()))
-                .thenReturn(0);
-
-        assertThrows(
-                EntityNotFoundException.class,
-                () -> repository.save(product)
-        );
-    }
-
-    @Test
-    @DisplayName("save should throw InvalidCategoryException on constraint violation during update")
-    void save_existingProductInvalidCategory_shouldThrow() {
-        when(jdbcTemplate.update(anyString(),
-                anyString(), anyString(), anyString(), anyInt(), anyInt()))
-                .thenThrow(new DataIntegrityViolationException("FK violation"));
-
-        assertThrows(
-                org.example.exception.custom_exception.InvalidCategoryException.class,
-                () -> repository.save(product)
-        );
-    }
-
-    @Test
     @DisplayName("updateProductById should throw InvalidCategoryException on FK violation")
     void updateProductById_invalidCategory_shouldThrow() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(1)))

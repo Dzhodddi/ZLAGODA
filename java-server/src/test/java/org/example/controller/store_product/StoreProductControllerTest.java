@@ -300,7 +300,7 @@ class StoreProductControllerTest {
         dto.setSelling_price(storeProductDto1.getSelling_price());
         dto.setProduct_name(productDto.getProduct_name());
 
-        when(storeProductService.findByUPC("1234567890")).thenReturn(dto);
+        when(storeProductService.getByUPC("1234567890")).thenReturn(dto);
 
         mockMvc.perform(get("/store-products/1234567890"))
                 .andExpect(status().isOk())
@@ -308,28 +308,28 @@ class StoreProductControllerTest {
                 .andExpect(jsonPath("$.products_number").value(50))
                 .andExpect(jsonPath("$.product_name").value("product_name"));
 
-        verify(storeProductService, times(1)).findByUPC("1234567890");
+        verify(storeProductService, times(1)).getByUPC("1234567890");
     }
 
     @Test
     @WithMockUser(authorities = "CASHIER")
-    @DisplayName("GET /store-products/{upc}?selling_price=true&quantity=true"
+    @DisplayName("GET /store-products/search/{upc}?selling_price=true&quantity=true"
             + " - Cashier should get price and quantity")
     void findByUpc_priceAndQuantity_asCashier_Ok() throws Exception {
         StoreProductPriceAndQuantityDto dto = new StoreProductPriceAndQuantityDto();
         dto.setSelling_price(BigDecimal.valueOf(100.0));
         dto.setProducts_number(50);
-        when(storeProductService.findPriceAndQuantityByUPC("1234567890"))
+        when(storeProductService.getPriceAndQuantityByUPC("1234567890"))
                 .thenReturn(dto);
 
-        mockMvc.perform(get("/store-products/1234567890")
+        mockMvc.perform(get("/store-products/search/1234567890")
                         .param("selling_price", "true")
                         .param("quantity", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.selling_price").value(100.0))
                 .andExpect(jsonPath("$.products_number").value(50));
 
-        verify(storeProductService, times(1)).findPriceAndQuantityByUPC("1234567890");
+        verify(storeProductService, times(1)).getPriceAndQuantityByUPC("1234567890");
     }
 
     @Test

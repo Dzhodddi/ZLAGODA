@@ -7,7 +7,7 @@ interface Props {
     isOwnProfile: boolean;
 }
 
-export const CustomerCardComponent = ({ data, isOwnProfile }: Props) => {
+const CustomerCardComponent = ({ data, isOwnProfile }: Props) => {
     const title = isOwnProfile ? "Мій профіль" : "Дані клієнта";
 
     const [showHistory, setShowHistory] = useState(false);
@@ -19,14 +19,14 @@ export const CustomerCardComponent = ({ data, isOwnProfile }: Props) => {
             <h2 className="text-xl font-bold mb-4">{title}</h2>
             <div className="space-y-1">
             <p><span className="font-medium">Номер карти:</span> {data.cardNumber}</p>
-            <p><span className="font-medium">Ім'я:</span> {data.customerName}</p>
             <p><span className="font-medium">Прізвище:</span> {data.customerSurname}</p>
+            <p><span className="font-medium">Ім'я:</span> {data.customerName}</p>
             <p><span className="font-medium">По батькові:</span> {data.customerPatronymic ?? "—"}</p>
-            <p><span className="font-medium">Номер телефону:</span> {data.phoneNumber}</p>
+            <p><span className="font-medium">Контактний телефон:</span> {data.phoneNumber}</p>
             <p><span className="font-medium">Місто:</span> {data.city ?? "—"}</p>
             <p><span className="font-medium">Вулиця:</span> {data.street ?? "—"}</p>
             <p><span className="font-medium">Поштовий індекс:</span> {data.zipCode ?? "—"}</p>
-            <p><span className="font-medium">Відсоток:</span> {data.customerPercent} %</p>
+            <p><span className="font-medium">Відсоток на знижку:</span> {data.customerPercent} %</p>
             </div>
 
             <div className="mt-6 pt-4 border-t border-gray-200">
@@ -53,14 +53,16 @@ export const CustomerCardComponent = ({ data, isOwnProfile }: Props) => {
                                     key={`${item.checkNumber}-${item.productName}-${index}`}
                                     className="flex flex-wrap justify-between items-center bg-gray-50 p-3 rounded border border-gray-100 gap-4"
                                 >
-                                    <div className="flex flex-col flex-1 min-w-50">
+                                    <div className="flex flex-col w-64">
                                         <span><span className="font-medium text-gray-600">Назва:</span> {item.productName}</span>
                                         <span className="text-xs text-gray-400 mt-0.5">
                                             Чек: {item.checkNumber} від {item.printDate}
                                         </span>
                                     </div>
-                                    <div className="flex flex-wrap gap-4 text-sm">
+                                    <div className="w-36">
                                         <span><span className="font-medium text-gray-600">Ціна:</span> {item.sellingPrice} грн.</span>
+                                    </div>
+                                    <div className="w-32">
                                         <span><span className="font-medium text-gray-600">Кількість:</span> {item.quantity} шт.</span>
                                     </div>
                                 </li>
@@ -74,3 +76,4 @@ export const CustomerCardComponent = ({ data, isOwnProfile }: Props) => {
         </div>
     );
 };
+export default CustomerCardComponent

@@ -14,6 +14,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import org.example.dto.employee.registration.EmployeeResponseDto;
@@ -29,6 +30,8 @@ import org.springframework.stereotype.Service;
 public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService {
 
     private static final String FONT_PATH = "fonts/LiberationSans.ttf";
+    private static final DateTimeFormatter formatter
+            = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @Override
     public byte[] employeeToPdf(List<EmployeeResponseDto> employees, String managerName)
@@ -146,7 +149,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         table.setWidthPercentage(100);
 
         for (String header : new String[]{
-                "UPC", "UPC промо", "ID товару", "Ціна продажу, грн", "Кількість, шт.", "Акційність"
+                "UPC", "UPC промо", "ID товару", "Ціна продажу, грн", "Кількість одиниць", "Акційність"
         }) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
             cell.setBackgroundColor(new BaseColor(59, 130, 246));
@@ -192,7 +195,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
         table.setWidths(new float[]{1, 1, 1, 1, 1.5f, 1, 1, 1, 0.5f});
 
         for (String header : new String[]{
-                "Номер карти", "Прізвище", "Ім'я", "По батькові", "Контактний телефон", "Місто", "Вулиця", "Поштовий індекс", "Відсоток, %"
+                "Номер карти", "Прізвище", "Ім'я", "По батькові", "Контактний телефон", "Місто", "Вулиця", "Поштовий індекс", "Відсоток на знижку, %"
         }) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
             cell.setBackgroundColor(new BaseColor(59, 130, 246));
@@ -254,7 +257,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
                     c.getCheck_number(),
                     c.getId_employee(),
                     c.getCard_number(),
-                    String.valueOf(c.getPrint_date()),
+                    c.getPrint_date().format(formatter),
                     String.valueOf(c.getSum_total()),
                     String.valueOf(c.getVat())
             }) {

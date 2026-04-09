@@ -2,13 +2,12 @@ package org.example.service.store_product;
 
 import java.util.List;
 import org.example.dto.page.PageResponseDto;
-import org.example.dto.store_product.product.StoreProductDto;
-import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
-import org.example.dto.store_product.product.StoreProductRequestDto;
-import org.example.dto.store_product.product.StoreProductWithNameDto;
+import org.example.dto.store_product.product.*;
 import org.springframework.data.domain.Pageable;
 
 public interface StoreProductService {
+
+    StoreProductCharacteristicsDto getProductInfoByUPC(String upc);
 
     PageResponseDto<StoreProductWithNameDto> getAll(Pageable pageable);
 
@@ -38,9 +37,9 @@ public interface StoreProductService {
 
     void deleteByUPC(String upc);
 
-    StoreProductWithNameDto findByUPC(String upc);
+    StoreProductWithNameDto getByUPC(String upc);
 
-    StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(String upc);
+    StoreProductPriceAndQuantityDto getPriceAndQuantityByUPC(String upc);
 
     PageResponseDto<?> getAll(String sortedBy, Boolean prom, Pageable pageable);
 }

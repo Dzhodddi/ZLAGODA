@@ -269,7 +269,7 @@ export const EmployeeList = () => {
                                     title="Переглянути інформацію про працівника"
                                     className="bg-blue-100 text-left border-t hover:bg-blue-200 text-zinc-900 cursor-pointer"
                                 >
-                                    <td className="px-3 py-2 border border-blue-200 break-words">{c.idEmployee}</td>
+                                    <td className="px-3 py-2 font-medium border border-blue-200 break-words">{c.idEmployee}</td>
                                     <td className="px-3 py-2 border border-blue-200 break-words">
                                         {c.emplSurname} {c.emplName} {c.emplPatronymic ?? ""}
                                     </td>

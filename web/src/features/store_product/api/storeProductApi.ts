@@ -3,11 +3,15 @@ import {
     type StoreProduct,
     type CreateStoreProduct,
     PageStoreProductSchema,
-    type StoreProductPriceAndQuantity,
-    StoreProductPriceAndQuantitySchema,
     BaseStoreProductSchema,
     type BatchRequest,
-    type BatchDto, type StoreProductItem, StoreProductItemSchema,
+    type BatchDto,
+    type StoreProductItem,
+    StoreProductItemSchema,
+    type StoreProductCashierSearch,
+    StoreProductSearchCashierSchema,
+    type StoreProductManagerSearch,
+    StoreProductSearchManagerSchema,
 } from "@/features/store_product/types/types.ts";
 
 const prefix = "/store-products"
@@ -49,11 +53,18 @@ export const getStoreProduct = async (upc: string): Promise<StoreProduct> => {
     return BaseStoreProductSchema.parse(response.data);
 }
 
-export const getStoreProductPriceAndQuantity = async (
+export const getStoreProductSearchCashier = async (
     upc: string,
-): Promise<StoreProductPriceAndQuantity> => {
-    const response = await javaApiClient.get(prefix + "/" + upc);
-    return StoreProductPriceAndQuantitySchema.parse(response.data);
+): Promise<StoreProductCashierSearch> => {
+    const response = await javaApiClient.get(prefix + "/search/" + upc);
+    return StoreProductSearchCashierSchema.parse(response.data);
+}
+
+export const getStoreProductSearchManager = async (
+    upc: string,
+): Promise<StoreProductManagerSearch> => {
+    const response = await javaApiClient.get(prefix + "/search/" + upc);
+    return StoreProductSearchManagerSchema.parse(response.data);
 }
 
 export const downloadStoreProductPdf = async (): Promise<Blob> => {
