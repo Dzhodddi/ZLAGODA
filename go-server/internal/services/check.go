@@ -13,7 +13,7 @@ import (
 )
 
 type CheckService interface {
-	CreateCheck(ctx context.Context, check views.CreateNewCheck, printTime time.Time) (*views.CheckResponse, error)
+	CreateCheck(ctx context.Context, check views.CreateNewCheck, id string) (*views.CheckResponse, error)
 	DeleteCheck(ctx context.Context, checkNumber string) error
 	GetCheck(ctx context.Context, checkNumber string) (*views.CheckResponseWithProducts, error)
 	GetCheckList(
@@ -39,7 +39,7 @@ func NewCheckService(checkRepository repository.CheckRepository) CheckService {
 	}
 }
 
-func (s *checkService) CreateCheck(ctx context.Context, check views.CreateNewCheck, printTime time.Time) (*views.CheckResponse, error) {
+func (s *checkService) CreateCheck(ctx context.Context, check views.CreateNewCheck, id string) (*views.CheckResponse, error) {
 	upcToQuantity := make(map[string]int)
 	for _, product := range check.Products {
 		_, ok := upcToQuantity[product.UPC]
@@ -58,7 +58,7 @@ func (s *checkService) CreateCheck(ctx context.Context, check views.CreateNewChe
 		rawPayloadSQL += "(?, ?::int),"
 	}
 	rawPayloadSQL = strings.TrimSuffix(rawPayloadSQL, ",")
-	newCheck, err := s.checkRepository.CreateNewCheck(ctx, check, printTime, rawPayloadSQL, payload, keys)
+	newCheck, err := s.checkRepository.CreateNewCheck(ctx, check, id, rawPayloadSQL, payload, keys)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create check: %w", err)
 	}

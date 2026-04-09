@@ -77,3 +77,8 @@ func GetRoleFromCtx(r *http.Request) string {
 	role, _ := r.Context().Value(RoleCtx).(string)
 	return role
 }
+
+func GetEmployeeIDFromCtx(r *http.Request) string {
+	id, _ := r.Context().Value(employeeCtx).(string)
+	return id
+}
