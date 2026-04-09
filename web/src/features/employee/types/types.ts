@@ -1,120 +1,48 @@
 import {z} from 'zod';
 import {phoneRegex} from "@/constants/constants.ts";
 
-export const BaseEmployeeSchema = z.object({
-    idEmployee: z
-        .string()
-        .min(1, "ID занадто короткий")
-        .max(10, "ID занадто довгий"),
-    emplSurname: z
-        .string()
-        .min(1, "Прізвище занадто коротке")
-        .max(50, "Прізвище занадто довге"),
-    emplName: z
-        .string()
-        .min(1, "Ім'я занадто коротке")
-        .max(50, "Ім'я занадто довге"),
-    emplPatronymic: z
-        .string()
-        .max(50, "По батькові занадто довге")
-        .nullable()
-        .optional()
-        .transform((val) => val?.trim() === "" || val === undefined ? null : val),
-    role: z
-        .enum(
-            ["MANAGER", "CASHIER"]
-        ),
+export const EmployeeSchema = z.object({
+    idEmployee: z.string().min(1, "ID занадто короткий").max(10, "ID занадто довгий"),
+    emplSurname: z.string().min(1, "Прізвище занадто коротке").max(50, "Прізвище занадто довге"),
+    emplName: z.string().min(1, "Ім'я занадто коротке").max(50, "Ім'я занадто довге"),
+    emplPatronymic: z.string().max(50, "По батькові занадто довге").nullable().optional().transform((val) => val?.trim() === "" || val === undefined ? null : val),
+    role: z.enum(["MANAGER", "CASHIER"]),
     salary: z.preprocess(
         (val) => (val === "" || val === null || val === undefined ? undefined : val),
-        z.coerce
-            .number({ message: "Введіть число" })
+        z.coerce.number({ message: "Введіть число" })
             .min(0, "Зарплата не може набувати від'ємних значень")
             .max(999999999.9999, "Зарплата завелика")
     ),
-    dateOfBirth: z
-        .iso
-        .date("Неправильний формат дати"),
-    dateOfStart: z
-        .iso
-        .date("Неправильний формат дати"),
-    phoneNumber: z
-        .string()
-        .regex(phoneRegex, "Неправильний формат номеру телефону"),
-    city: z
-        .string()
-        .min(1, "Назва міста занадто коротка")
-        .max(50, "Назва міста занадто довга"),
-    street: z
-        .string()
-        .min(1, "Назва вулиці занадто коротка")
-        .max(50, "Назва вулиці занадто довга"),
-    zipCode: z
-        .string()
-        .min(3, "Індекс занадто короткий")
-        .max(9, "Індекс занадто довгий"),
-})
 
-export const EmployeeSchema = BaseEmployeeSchema.refine(
-    (data) => new Date(data.dateOfBirth) < new Date(data.dateOfStart), {
-        message: "Дата народження має бути раніше ніж дата початку роботи",
-        path: ["dateOfStart"]
-    }
-).refine(
-    (data) => new Date(data.dateOfBirth).getFullYear() > 1900, {
-        message: "Дата має бути пізніше за 1900",
-        path: ["dateOfBirth"]
-    }
-).refine(
-    (data) => new Date(data.dateOfStart) < new Date(), {
-        message: "Дата початку роботи має бути в минулому",
-        path: ["dateOfStart"]
-    }
-).refine(
-    (data) => new Date().getFullYear() - new Date(data.dateOfBirth).getFullYear() >= 18, {
-        message: "Вік працівника_ці має бути більшим за 18 років",
-        path: ["dateOfBirth"]
-    }
-).refine(
-    (data) => new Date(data.dateOfStart).getFullYear() > 1900, {
-        message: "Дата має бути пізнішою за 1900 рік",
-        path: ["dateOfStart"]
-    }
-);
+    dateOfBirth: z
+        .string()
+        .refine((val) => new Date(val).getFullYear() > 1900, "Дата має бути пізніше за 1900")
+        .refine((val) => new Date().getFullYear() - new Date(val).getFullYear() >= 18, "Вік працівника має бути більшим за 18 років"),
+
+    dateOfStart: z
+        .string()
+        .refine((val) => new Date(val).getFullYear() > 1900, "Дата має бути пізнішою за 1900 рік")
+        .refine((val) => new Date(val) < new Date(), "Дата початку роботи має бути в минулому"),
+
+    phoneNumber: z.string().regex(phoneRegex, "Неправильний формат номеру телефону"),
+    city: z.string().min(1, "Назва міста занадто коротка").max(50, "Назва міста занадто довга"),
+    street: z.string().min(1, "Назва вулиці занадто коротка").max(50, "Назва вулиці занадто довга"),
+    zipCode: z.string().min(3, "Індекс занадто короткий").max(9, "Індекс занадто довгий"),
+});
 
 export type Employee = z.infer<typeof EmployeeSchema>;
 
-export const CreateEmployeeSchema = BaseEmployeeSchema
+export const CreateEmployeeSchema = EmployeeSchema
     .extend({
         password: z
             .string()
             .min(8, "Пароль занадто короткий")
-            .max(100, "Пароль занадто довгий"),
+            .max(20, "Пароль занадто довгий"),
         repeatPassword: z
             .string()
             .min(8, "Пароль занадто короткий")
-            .max(100, "Пароль занадто довгий"),
+            .max(20, "Пароль занадто довгий"),
     })
-    .refine(
-        (data) => new Date(data.dateOfBirth).getFullYear() > 1900, {
-            message: "Дата має бути пізнішою за 1900",
-            path: ["dateOfBirth"]
-        }
-    ).refine(
-        (data) => new Date(data.dateOfStart) < new Date(), {
-            message: "Дата початку роботи має бути в минулому",
-            path: ["dateOfStart"]
-        }
-    ).refine(
-        (data) => new Date().getFullYear() - new Date(data.dateOfBirth).getFullYear() >= 18, {
-            message: "Вік працівника_ці має бути більшим за 18 років",
-            path: ["dateOfBirth"]
-        }
-    ).refine(
-        (data) => new Date(data.dateOfStart).getFullYear() > 1900, {
-            message: "Дата має бути пізнішою за 1900 рік",
-            path: ["dateOfStart"]
-        }
-    )
     .refine(
     (data) => data.password === data.repeatPassword,
     {
@@ -126,7 +54,7 @@ export const CreateEmployeeSchema = BaseEmployeeSchema
 export type CreateEmployee = z.infer<typeof CreateEmployeeSchema>;
 
 export const PageEmployeeSchema = z.object({
-    content: z.array(BaseEmployeeSchema),
+    content: z.array(EmployeeSchema),
     pageSize: z.number(),
     totalElements: z.number(),
     hasNext: z.boolean(),

@@ -7,8 +7,8 @@ export  const LoginSchema = z.object({
         .max(50, "ID занадто довге"),
     password: z
         .string()
-        .min(1, "Пароль занадто короткий")
-        .max(50, "Пароль занадто довгий"),
+        .min(8, "Пароль занадто короткий")
+        .max(20, "Пароль занадто довгий"),
 })
 
 export type Login = z.infer<typeof LoginSchema>

@@ -1,5 +1,5 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { useCreateEmployee, useUpdateEmployee, useEmployee } from "@/features/employee/hooks/useEmployee.ts";
+import { useNavigate } from "react-router-dom";
+import { useCreateEmployee, useUpdateEmployee } from "@/features/employee/hooks/useEmployee.ts";
 import {
     type Employee,
     type CreateEmployee,

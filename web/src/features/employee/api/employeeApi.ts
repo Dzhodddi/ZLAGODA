@@ -4,14 +4,14 @@ import {
     type CreateEmployee,
     PageEmployeeSchema,
     PageEmployeeContactSchema,
-    BaseEmployeeSchema, type EmployeeDropdownItem, EmployeeDropdownItemSchema,
+    EmployeeSchema, type EmployeeDropdownItem, EmployeeDropdownItemSchema,
 } from "@/features/employee/types/types.ts";
 
 const prefix = "/employees"
 
 export const getEmployee = async (idEmployee: string): Promise<Employee> => {
     const response = await javaApiClient.get(prefix  + "/" + idEmployee);
-    return BaseEmployeeSchema.parse(response.data);
+    return EmployeeSchema.parse(response.data);
 }
 
 export const getAllEmployees = async (page = 0, sortedBySurname = false) => {
@@ -46,17 +46,17 @@ export const downloadEmployeePdf = async (): Promise<Blob> => {
 
 export const createEmployee = async (data: CreateEmployee): Promise<Employee> => {
     const response = await javaApiClient.post(prefix, data);
-    return BaseEmployeeSchema.parse(response.data);
+    return EmployeeSchema.parse(response.data);
 };
 
 export const updateEmployee = async (data: Employee): Promise<Employee> => {
     const response = await javaApiClient.put(prefix + "/" + data.idEmployee, data);
-    return BaseEmployeeSchema.parse(response.data);
+    return EmployeeSchema.parse(response.data);
 };
 
 export const getMe = async (): Promise<Employee> => {
     const response = await javaApiClient.get(prefix + "/me");
-    return BaseEmployeeSchema.parse(response.data);
+    return EmployeeSchema.parse(response.data);
 };
 
 

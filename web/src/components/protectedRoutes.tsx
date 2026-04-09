@@ -11,7 +11,7 @@ export const ProtectedRoute = ({ allowedRoles }: Props) => {
     if (!accessToken) return <Navigate to="/login" replace />;
 
     if (allowedRoles && !allowedRoles.includes(role as "MANAGER" | "CASHIER")) {
-        return <Navigate to="/unauthorized" replace />;
+        return <Navigate to="/" replace />;
     }
 
     return <Outlet />;
