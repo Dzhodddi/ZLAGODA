@@ -43,6 +43,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Employee Repository Tests")
@@ -164,8 +165,11 @@ class EmployeeRepositoryTest {
 
         when(jdbcTemplate.query(
                 anyString(),
-                any(org.springframework.jdbc.core.RowMapper.class),
-                eq("%" + surname + "%"), eq(0L), eq(10)
+                any(RowMapper.class),
+                eq(surname),
+                eq("%" + surname + "%"),
+                eq(0L),
+                eq(10)
         )).thenReturn(List.of(dto));
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("%" + surname + "%")))
                 .thenReturn(1);
@@ -186,8 +190,11 @@ class EmployeeRepositoryTest {
 
         when(jdbcTemplate.query(
                 anyString(),
-                any(org.springframework.jdbc.core.RowMapper.class),
-                eq("%" + surname + "%"), eq(0L), eq(10)
+                any(RowMapper.class),
+                eq(surname),
+                eq("%" + surname + "%"),
+                eq(0L),
+                eq(10)
         )).thenReturn(List.of());
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("%" + surname + "%")))
                 .thenReturn(0);

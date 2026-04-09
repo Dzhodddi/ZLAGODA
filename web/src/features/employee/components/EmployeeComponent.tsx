@@ -15,7 +15,7 @@ export const EmployeeComponent = ({data, isOwnProfile}: Props) =>  {
             <p><span className="font-medium">Ім'я:</span> {data.emplName}</p>
             <p><span className="font-medium">По батькові:</span> {data.emplPatronymic ?? "—"}</p>
             <p><span className="font-medium">Посада:</span> {data.role == "MANAGER" ? "менеджер" : "касир"} </p>
-            <p><span className="font-medium">Зарплата:</span> {data.salary}</p>
+            <p><span className="font-medium">Зарплата:</span> {data.salary} грн</p>
             <p><span className="font-medium">Дата народження:</span> {data.dateOfBirth}</p>
             <p><span className="font-medium">Дата початку роботи:</span> {data.dateOfStart}</p>
             <p><span className="font-medium">Контактний телефон:</span> {data.phoneNumber}</p>

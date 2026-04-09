@@ -167,7 +167,7 @@ export const SaleListPage = () => {
                         <tr className="bg-blue-700 text-left text-white">
                             <th className="px-3 py-2 font-semibold w-80 border border-blue-500 text-center">Номер чека</th>
                             <th className="px-3 py-2 font-semibold w-80 border border-blue-500 text-center">UPC товару</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Кількість, шт.</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Кількість одиниць</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Ціна продажу, грн</th>
                         </tr>
                         </thead>

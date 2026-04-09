@@ -60,7 +60,7 @@ export const CheckListPage = () => {
     const isError = isShowTodayOnly ? isTodayError : isAllError;
     const isFetching = isShowTodayOnly ? isTodayFetching : isAllFetching;
 
-    const { data: totalSum, isFetching: isTotalSumFetching } = useCheckTotalSum(
+    const { data: totalSum } = useCheckTotalSum(
         startDate!,
         endDate!,
         idEmployee || undefined,
@@ -213,12 +213,12 @@ export const CheckListPage = () => {
 
                     <div className="flex flex-col">
                         <label className="text-xs text-zinc-600 font-medium mb-1">
-                            ID працівника/-ці {isShowTodayOnly && <span className="text-red-500">*</span>}
+                            ID касира/-ки {isShowTodayOnly && <span className="text-red-500">*</span>}
                         </label>
                         <input
                             type="text"
-                            placeholder="Усі працівники"
-                            title="Шукати чек за ID працівника/-ці, який його друкував"
+                            placeholder="Усі касири"
+                            title="Шукати чек за ID касира/-ки, який(-а) його надрукував(-ла)"
                             value={idEmployee}
                             onChange={(e) => {
                                 setIdEmployee(e.target.value);
@@ -231,11 +231,7 @@ export const CheckListPage = () => {
                         <div className="flex justify-end px-2">
                             <span className="text-sm font-semibold text-zinc-800 bg-white border border-blue-200 px-3 py-1.5 rounded shadow-sm">
                                 Загальна сума чеків: {" "}
-                                {isTotalSumFetching ? (
-                                    <span className="text-zinc-500 animate-pulse">Обчислюємо...</span>
-                                ) : (
                                     <span className="text-green-600">{Number(totalSum || 0).toFixed(2)} грн</span>
-                                )}
                             </span>
                         </div>
                     )}
@@ -265,7 +261,7 @@ export const CheckListPage = () => {
 
             {isShowTodayOnly && !idEmployee ? (
                 <p className="text-zinc-500 text-sm text-center bg-white p-4 rounded border border-blue-200">
-                    Будь ласка, введіть ID працівника, щоб переглянути його чеки за сьогодні
+                    Будь ласка, введіть ID касира/-ки, щоб переглянути його чеки за сьогодні
                 </p>
             ) : checks?.length === 0 && currentIndex === 0 ? (
                 <p className="text-zinc-400 text-sm text-center bg-white p-4 rounded border border-blue-200">
@@ -283,7 +279,7 @@ export const CheckListPage = () => {
                         <thead>
                         <tr className="bg-blue-700 text-left text-white">
                             <th className="px-3 py-2 font-semibold w-46 border border-blue-500 text-center">Номер</th>
-                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">ID працівника/-ці</th>
+                            <th className="px-3 py-2 font-semibold border border-blue-500 text-center">ID касира/-ки</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Картка клієнта/-ки</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Дата</th>
                             <th className="px-3 py-2 font-semibold border border-blue-500 text-center">Сума, грн</th>

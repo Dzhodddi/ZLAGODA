@@ -38,10 +38,10 @@ export const UpsertCustomerCardForm = ({ initialData }: Props) => {
                             {isEditMode ? "Редагувати картку клієнта" : "Додати картку клієнта"}
                         </h2>
                         <InputField name="cardNumber" label="Номер карти" disabled={isEditMode} />
-                        <InputField name="customerName" label="Ім'я" />
                         <InputField name="customerSurname" label="Прізвище" />
+                        <InputField name="customerName" label="Ім'я" />
                         <InputField name="customerPatronymic" label="По батькові" required={false} />
-                        <InputField type="number" name="customerPercent" label="Відсоток, %" min="0.01" step="0.01"/>
+                        <InputField type="number" name="customerPercent" label="Відсоток на знижку, %" min="0.01" step="0.01"/>
                         <InputField name="phoneNumber" label="Контактний телефон" />
                         <InputField name="city" label="Місто" required={false}/>
                         <InputField name="street" label="Вулиця" required={false}/>

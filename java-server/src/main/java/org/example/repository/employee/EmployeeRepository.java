@@ -163,15 +163,15 @@ public class EmployeeRepository {
     public PageResponseDto<EmployeeContactDto> findPhoneAndAddressBySurname(String surname,
                                                                             Pageable pageable) {
         long offset = pageable.getOffset();
+
         List<EmployeeContactDto> employees = jdbcTemplate.query(
                 """
                 SELECT id_employee, empl_surname, empl_name, empl_patronymic,
                        phone_number, city, street, zip_code
                 FROM employee
-                WHERE empl_surname ILIKE ?
+                WHERE (? IS NULL OR empl_surname ILIKE ?)
                 ORDER BY id_employee
-                OFFSET ? ROWS
-                FETCH NEXT ? ROWS ONLY
+                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """,
                 (rs, rowNum) -> {
                     EmployeeContactDto dto = new EmployeeContactDto();
@@ -185,14 +185,15 @@ public class EmployeeRepository {
                     dto.setZip_code(rs.getString("zip_code"));
                     return dto;
                 },
-                "%" + surname + "%",
+                surname,
+                surname == null ? null : "%" + surname + "%",
                 offset,
                 pageable.getPageSize()
         );
 
         long total = getSurnameCount(surname);
-        boolean hasNext = offset + employees.size() < total;
-        return PageResponseDto.of(employees, pageable.getPageSize(), total, hasNext);
+        return PageResponseDto.of(employees, pageable.getPageSize(), total,
+                offset + employees.size() < total);
     }
 
     public List<EmployeeResponseDto> findAllNoPagination() {

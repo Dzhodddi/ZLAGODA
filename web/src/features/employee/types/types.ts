@@ -65,14 +65,18 @@ export const EmployeeSchema = BaseEmployeeSchema.refine(
         path: ["dateOfBirth"]
     }
 ).refine(
-    (data) => new Date(data.dateOfStart) < new Date(), {
-        message: "Дата початку роботи має бути в минулому",
+    (data) => {
+        const birth = new Date(data.dateOfBirth);
+        const start = new Date(data.dateOfStart);
+        const ageAtStart = start.getFullYear() - birth.getFullYear();
+        const hadBirthdayByStart =
+            start.getMonth() > birth.getMonth() ||
+            (start.getMonth() === birth.getMonth() && start.getDate() >= birth.getDate());
+        return ageAtStart - (hadBirthdayByStart ? 0 : 1) >= 18;
+    },
+    {
+        message: "Працівнику/-ці повинно бути принаймні 18 років під час влаштування на роботу",
         path: ["dateOfStart"]
-    }
-).refine(
-    (data) => new Date().getFullYear() - new Date(data.dateOfBirth).getFullYear() >= 18, {
-        message: "Вік працівника_ці має бути більшим за 18 років",
-        path: ["dateOfBirth"]
     }
 ).refine(
     (data) => new Date(data.dateOfStart).getFullYear() > 1900, {
@@ -100,13 +104,8 @@ export const CreateEmployeeSchema = BaseEmployeeSchema
             path: ["dateOfBirth"]
         }
     ).refine(
-        (data) => new Date(data.dateOfStart) < new Date(), {
-            message: "Дата початку роботи має бути в минулому",
-            path: ["dateOfStart"]
-        }
-    ).refine(
         (data) => new Date().getFullYear() - new Date(data.dateOfBirth).getFullYear() >= 18, {
-            message: "Вік працівника_ці має бути більшим за 18 років",
+            message: "Вік працівника/-ці має бути більшим за 18 років",
             path: ["dateOfBirth"]
         }
     ).refine(
@@ -120,8 +119,22 @@ export const CreateEmployeeSchema = BaseEmployeeSchema
     {
         message: "Паролі не збігаються",
         path: ["repeatPassword"]
-    }
-)
+    })
+    .refine(
+        (data) => {
+            const birth = new Date(data.dateOfBirth);
+            const start = new Date(data.dateOfStart);
+            const ageAtStart = start.getFullYear() - birth.getFullYear();
+            const hadBirthdayByStart =
+                start.getMonth() > birth.getMonth() ||
+                (start.getMonth() === birth.getMonth() && start.getDate() >= birth.getDate());
+            return ageAtStart - (hadBirthdayByStart ? 0 : 1) >= 18;
+        },
+        {
+            message: "Працівнику/-ці повинно бути принаймні 18 років під час влаштування на роботу",
+            path: ["dateOfStart"]
+        }
+    )
 
 export type CreateEmployee = z.infer<typeof CreateEmployeeSchema>;
 

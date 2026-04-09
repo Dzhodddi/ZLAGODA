@@ -83,6 +83,8 @@ export const ProductList = () => {
     };
 
     const handleSortToggle = (value: "name") => {
+        setSearchName("");
+        setNameInput("");
         setSortedBy(prev => prev === value ? undefined : value);
         setCurrentIndex(0);
     };
@@ -173,6 +175,7 @@ export const ProductList = () => {
                                 if (e.key === "Enter") {
                                     setSearchName(nameInput);
                                     setSearchCategoryId(undefined);
+                                    setSortedBy(undefined);
                                     handleSetView("byName");
                                 }
                             }}

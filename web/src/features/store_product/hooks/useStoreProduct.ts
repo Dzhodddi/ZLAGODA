@@ -5,7 +5,8 @@ import {
     getAllStoreProducts,
     deleteStoreProduct,
     getStoreProduct,
-    getStoreProductPriceAndQuantity,
+    getStoreProductSearchManager,
+    getStoreProductSearchCashier,
     deleteExpired,
     downloadStoreProductPdf, receiveNewBatch, getStoreProductsList
 } from "@/features/store_product/api/storeProductApi.ts";
@@ -91,12 +92,19 @@ export const useStoreProduct = (upc: string) => {
     });
 };
 
-export const useStoreProductPriceAndQuantity = (upc: string) => {
+export const useStoreProductManagerSearch = (upc: string) => {
     return useQuery({
-        queryKey: [QUERY_KEY, upc, "price-quantity"],
-        queryFn: () => getStoreProductPriceAndQuantity(upc),
+        queryKey: [QUERY_KEY, upc, "search-manager"],
+        queryFn: () => getStoreProductSearchManager(upc),
         enabled: !!upc,
-        staleTime: staleTime,
+    });
+};
+
+export const useStoreProductCahierSearch = (upc: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEY, upc, "search-cashier"],
+        queryFn: () => getStoreProductSearchCashier(upc),
+        enabled: !!upc,
     });
 };
 

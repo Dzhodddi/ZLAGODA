@@ -122,12 +122,12 @@ public class StoreProductController {
         storeProductService.deleteByUPC(upc);
     }
 
-    @GetMapping("/{upc}")
+    @GetMapping("/search/{upc}")
     @Operation(
             summary = "Find store product info by UPC",
             description = "Returns different data based on user role"
     )
-    public ResponseEntity<?> findByUpc(
+    public ResponseEntity<?> getByUpc(
             @PathVariable String upc
     ) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -136,11 +136,22 @@ public class StoreProductController {
         boolean isCashier = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("CASHIER"));
         if (isManager) {
-            return ResponseEntity.ok(storeProductService.findByUPC(upc));
+            return ResponseEntity.ok(storeProductService.getProductInfoByUPC(upc));
         } else if (isCashier) {
-            return ResponseEntity.ok(storeProductService.findPriceAndQuantityByUPC(upc));
+            return ResponseEntity.ok(storeProductService.getPriceAndQuantityByUPC(upc));
         }
         return ResponseEntity.unprocessableEntity().build();
+    }
+
+    @GetMapping("/{upc}")
+    @Operation(
+            summary = "Find all store product info by UPC",
+            description = "Find all store product info by UPC"
+    )
+    public StoreProductWithNameDto getAllInfoByUpc(
+            @PathVariable String upc
+    ) {
+        return storeProductService.getByUPC(upc);
     }
 
     @PostMapping("/receive")

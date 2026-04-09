@@ -56,12 +56,21 @@ export const CreateStoreProductSchema = BaseStoreProductSchema
 
 export type CreateStoreProduct = z.infer<typeof CreateStoreProductSchema>;
 
-export const StoreProductPriceAndQuantitySchema = z.object({
+export const StoreProductSearchManagerSchema = z.object({
+    sellingPrice: z.number(),
+    productsNumber: z.number(),
+    productName: z.string(),
+    productCharacteristics: z.string()
+});
+
+export type StoreProductManagerSearch = z.infer<typeof StoreProductSearchManagerSchema>;
+
+export const StoreProductSearchCashierSchema = z.object({
     sellingPrice: z.number(),
     productsNumber: z.number(),
 });
 
-export type StoreProductPriceAndQuantity = z.infer<typeof StoreProductPriceAndQuantitySchema>;
+export type StoreProductCashierSearch = z.infer<typeof StoreProductSearchCashierSchema>;
 
 export const BatchRequestSchema = z.object({
     UPC: z

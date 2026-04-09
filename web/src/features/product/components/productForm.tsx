@@ -36,6 +36,9 @@ export const UpsertProductForm = ({ initialData }: Props) => {
                         <h2 className="col-span-12 text-xl font-bold mb-4">
                             {isEditMode ? "Редагувати товар" : "Додати товар"}
                         </h2>
+                        {isEditMode &&
+                            <InputField name="idProduct" label="ID" disabled={isEditMode}/>
+                        }
                         <InputField name="productName" label="Назва товару" />
                         <div className="col-span-12"><CategoryComboboxField /></div>
                         <InputField name="producer" label="Виробник" />

@@ -3,10 +3,7 @@ package org.example.service.store_product;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.page.PageResponseDto;
-import org.example.dto.store_product.product.StoreProductDto;
-import org.example.dto.store_product.product.StoreProductPriceAndQuantityDto;
-import org.example.dto.store_product.product.StoreProductRequestDto;
-import org.example.dto.store_product.product.StoreProductWithNameDto;
+import org.example.dto.store_product.product.*;
 import org.example.exception.custom_exception.EntityNotFoundException;
 import org.example.mapper.store_product.StoreProductMapper;
 import org.example.repository.store_product.StoreProductRepository;
@@ -19,6 +16,12 @@ public class StoreProductServiceImpl implements StoreProductService {
 
     private final StoreProductRepository repository;
     private final StoreProductMapper storeProductMapper;
+
+    @Override
+    public StoreProductCharacteristicsDto getProductInfoByUPC(String upc) {
+        return repository.findProductInfoByUPC(upc)
+                .orElseThrow(() -> new EntityNotFoundException("No store product found with UPC: " + upc));
+    }
 
     public PageResponseDto<?> getAll(String sortedBy, Boolean prom, Pageable pageable) {
         if ("name".equals(sortedBy)) {
@@ -124,14 +127,14 @@ public class StoreProductServiceImpl implements StoreProductService {
     }
 
     @Override
-    public StoreProductWithNameDto findByUPC(String upc) {
+    public StoreProductWithNameDto getByUPC(String upc) {
         return repository.findByUPC(upc)
-                .orElseThrow(() -> new EntityNotFoundException("No product found with UPC: " + upc));
+                .orElseThrow(() -> new EntityNotFoundException("No store product found with UPC: " + upc));
     }
 
     @Override
-    public StoreProductPriceAndQuantityDto findPriceAndQuantityByUPC(String upc) {
+    public StoreProductPriceAndQuantityDto getPriceAndQuantityByUPC(String upc) {
         return repository.findPriceAndQuantityByUPC(upc)
-                .orElseThrow(() -> new EntityNotFoundException("No product found with UPC: " + upc));
+                .orElseThrow(() -> new EntityNotFoundException("No store product found with UPC: " + upc));
     }
 }

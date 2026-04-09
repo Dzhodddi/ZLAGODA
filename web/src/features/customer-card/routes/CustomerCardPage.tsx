@@ -1,4 +1,4 @@
-import { CustomerCardComponent } from '@/features/customer-card/components/CustomerCardComponent.tsx';
+import CustomerCardComponent from '@/features/customer-card/components/CustomerCardComponent.tsx';
 import { useParams } from 'react-router-dom';
 import { useCustomerCard } from '@/features/customer-card/hooks/useCustomerCard.ts';
 import {NotFoundEntity} from "@/components/ui/NotFoundEntity.tsx";

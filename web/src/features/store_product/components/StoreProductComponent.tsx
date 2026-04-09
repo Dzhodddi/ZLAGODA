@@ -23,7 +23,7 @@ export const StoreProductComponent = ({ data }: Props) => {
                 </div>)}
             <p><span className="font-medium">Товар:</span> {data.idProduct} {data.productName}</p>
             <p><span className="font-medium">Ціна продажу:</span> {data.sellingPrice} грн</p>
-            <p><span className="font-medium">Кількість:</span> {data.productsNumber} шт.</p>
+            <p><span className="font-medium">Кількість одиниць:</span> {data.productsNumber}</p>
             {data.promotionalProduct && (
                 <div className="flex items-left gap-2 font-medium py-2">
                     <img src="/src/logos/discount.png" alt="discount" className="h-6" />

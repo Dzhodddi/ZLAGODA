@@ -77,11 +77,11 @@ export const useAllCashiers = (page: number, enabled = true, sortedBySurname: bo
         staleTime: staleTime,
     });
 
-export const useEmployeePhoneAndAddress = (surname: string, page: number, enabled = true) =>
+export const useEmployeePhoneAndAddress = (surname: string | null, page: number, enabled = true) =>
     useQuery({
         queryKey: ["employees-contact", surname, page],
         queryFn: () => getEmployeePhoneAndAddress(surname, page),
-        enabled: !!surname && enabled,
+        enabled: enabled,
         staleTime: staleTime,
     });
 

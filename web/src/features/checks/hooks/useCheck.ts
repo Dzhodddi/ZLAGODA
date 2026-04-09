@@ -48,6 +48,8 @@ export const useCreateCheck = () => {
         mutationFn: createCheck,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["checks"] });
+            queryClient.invalidateQueries({ queryKey: ["checks-today"] });
+            queryClient.invalidateQueries({ queryKey: ["checks-total-sum"] });
             toast.success("Чек успішно створений");
         },
         onError: (error) => {
@@ -63,6 +65,8 @@ export const useDeleteCheck = () => {
         mutationFn: deleteCheck,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["checks"] });
+            queryClient.invalidateQueries({ queryKey: ["checks-today"] });
+            queryClient.invalidateQueries({ queryKey: ["checks-total-sum"] });
         },
         onError: (error) => {
             toast.error(getErrorMessage(error, "Не вдалося видалити чек"));
@@ -91,6 +95,7 @@ export const useCheckList = (
         },
         placeholderData: (previousData) => previousData,
         enabled: options?.enabled ?? true,
+        staleTime: staleTime,
     });
 };
 
@@ -122,6 +127,7 @@ export const useCheckTotalSum = (
             }
         },
         enabled: enabled && Boolean(startDate && endDate && new Date(startDate) <= new Date(endDate)),
+        staleTime: staleTime,
     });
 };
 

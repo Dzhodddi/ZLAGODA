@@ -28,8 +28,13 @@ export const getAllCashiers = async (page = 0, sortedBySurname = false) => {
     return PageEmployeeSchema.parse(response.data);
 };
 
-export const getEmployeePhoneAndAddress = async (surname: string, page = 0) => {
-    const response = await javaApiClient.get(prefix, { params: { surname, page } });
+export const getEmployeePhoneAndAddress = async (surname: string | null, page = 0) => {
+    const response = await javaApiClient.get(prefix, {
+        params: {
+            ...(surname !== null && { surname }),
+            page,
+        }
+    });
     return PageEmployeeContactSchema.parse(response.data);
 };
 
