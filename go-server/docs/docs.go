@@ -1442,8 +1442,6 @@ const docTemplate = `{
             "required": [
                 "card_number",
                 "check_number",
-                "id_employee",
-                "print_date",
                 "products"
             ],
             "properties": {
@@ -1456,14 +1454,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 10,
                     "minLength": 1
-                },
-                "id_employee": {
-                    "type": "string",
-                    "maxLength": 10,
-                    "minLength": 1
-                },
-                "print_date": {
-                    "type": "string"
                 },
                 "products": {
                     "type": "array",
