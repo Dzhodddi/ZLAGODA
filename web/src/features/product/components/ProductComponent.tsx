@@ -4,7 +4,6 @@ import {useProductSoldNumber} from "@/features/product/hooks/useProduct.ts";
 import {useRole} from "@/hooks/useRole.ts";
 
 interface Props {
-    dataForPeriod: ProductWithPeriod,
     data: Product,
 }
 
@@ -15,7 +14,7 @@ const getDecadeAgoDateString = () => {
     return d.toISOString().split("T")[0];
 };
 
-export const ProductComponent = ({ dataForPeriod, data }: Props) => {
+export const ProductComponent = ({ data }: Props) => {
     const title = "Інформація про товар";
 
     const [showSoldNumber, setShowSoldNumber] = useState(false);
@@ -52,7 +51,7 @@ export const ProductComponent = ({ dataForPeriod, data }: Props) => {
                         onClick={() => setShowSoldNumber((prev) => !prev)}
                         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors text-sm font-medium"
                     >
-                        {showSoldNumber ? "Приховати продані в магазині товари" : "Продані в магазині одиниці товару"}
+                        {showSoldNumber ? "Приховати кількість проданих одиниць" : "Кількість проданих одиниць"}
                     </button>
                 </div>
             )}
