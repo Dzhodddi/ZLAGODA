@@ -1,5 +1,8 @@
 package org.example.repository.product;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
@@ -15,8 +18,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -25,6 +26,45 @@ public class ProductRepository {
     private final JdbcTemplate jdbcTemplate;
     private final ProductRowMapper rowMapper;
     private final ProductMapper productMapper;
+
+    public Optional<ProductDto> findProductSoldQuantityForPeriod(int id_product,
+                                                                           LocalDate startDate,
+                                                                           LocalDate endDate) {
+        if (findById(id_product).isEmpty()) {
+            throw new EntityNotFoundException("Product not found with id " + id_product);
+        }
+        ProductDto res;
+        try {
+            res = jdbcTemplate.queryForObject(
+                    """
+                SELECT p.id_product, SUM(s.product_number) AS sold_number
+                FROM product p
+                INNER JOIN store_product sp
+                ON sp.id_product = p.id_product
+                INNER JOIN sale s
+                ON s.UPC = sp.UPC
+                INNER JOIN checks c
+                ON s.check_number = c.check_number
+                WHERE p.id_product = ? AND c.print_date BETWEEN ? AND ?
+                GROUP BY p.id_product
+                """,
+                (rs, rowNum) -> {
+                    ProductDto dto = new ProductDto();
+                    dto.setId_product(rs.getInt("id_product"));
+                    dto.setSold_number(rs.getInt("sold_number"));
+                    return dto;
+                },
+                id_product,
+                startDate,
+                endDate
+            );
+        } catch (EmptyResultDataAccessException e) {
+            res = new ProductDto();
+            res.setId_product(id_product);
+            res.setSold_number(0);
+        }
+        return Optional.ofNullable(res);
+    }
 
     public PageResponseDto<ProductDto> findSold(Pageable pageable, double minTotalSold) {
         long offset = pageable.getOffset();

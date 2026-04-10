@@ -206,7 +206,10 @@ export const StoreProductList = () => {
                                 value={upcInput}
                                 onChange={e => setUpcInput(e.target.value)}
                                 placeholder="Введіть UPC"
-                                title="Шукати ціну і кількість товару у магазині за його UPC"
+                                title={isManager
+                                    ? "Шукати ціну, кількість, назву та характеристики товару за його UPC"
+                                    : "Шукати ціну та кількість товару в магазині за його UPC"
+                                }
                                 className="w-full border rounded px-3 py-1.5 text-sm pr-9 text-zinc-900"
                                 onKeyDown={e => { if (e.key === "Enter") handleUpcSearch(); }}
                             />

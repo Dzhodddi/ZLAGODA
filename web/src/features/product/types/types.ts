@@ -59,6 +59,15 @@ export const SoldProductSchema = z.object({
     totalSold: z.coerce.number(),
 });
 
+export const ProductWithPeriodSchema = z.object({
+    idProduct: z
+        .coerce
+        .number(),
+    soldNumber: z.coerce.number(),
+})
+
+export type ProductWithPeriod = z.infer<typeof ProductWithPeriodSchema>;
+
 export const PageSoldProductSchema = z.object({
     content: z.array(SoldProductSchema),
     pageSize: z.number(),

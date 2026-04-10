@@ -7,6 +7,8 @@ import {
     PageProductSchema,
     type PageSoldProduct,
     PageSoldProductSchema,
+    ProductWithPeriodSchema,
+    type ProductWithPeriod
 } from "@/features/product/types/types";
 
 const prefix = "/products";
@@ -14,6 +16,19 @@ const prefix = "/products";
 export const getProduct = async (idProduct: number): Promise<Product> => {
     const response = await javaApiClient.get(`${prefix}/${idProduct}`);
     return BaseProductSchema.parse(response.data);
+};
+
+export const getProductSoldNumber = async (idProduct: number,
+                                           startDate: string,
+                                           endDate: string): Promise<ProductWithPeriod> => {
+    const response = await javaApiClient.get(`${prefix}/sold-number/${idProduct}`,
+        {
+            params: {
+                start_date: startDate,
+                end_date: endDate
+            }
+        });
+    return ProductWithPeriodSchema.parse(response.data);
 };
 
 export const createProduct = async (data: CreateProduct): Promise<Product> => {

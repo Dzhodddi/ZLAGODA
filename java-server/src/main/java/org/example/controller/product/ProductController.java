@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.employee.registration.EmployeeResponseDto;
@@ -17,6 +18,7 @@ import org.example.service.product.ProductService;
 import org.example.service.report.PdfReportGeneratorService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -67,6 +69,23 @@ public class ProductController {
                                                        required = false) Double minTotalSold) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         return productService.getSold(pageable, minTotalSold != null ? minTotalSold : 0.0);
+    }
+
+    // overloading
+    @GetMapping("/sold-number/{id}")
+    @Operation(
+            summary = "Get product's sold number",
+            description = "Get product's sold number"
+    )
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public ProductDto getSold(@PathVariable int id,
+                                        @RequestParam(value = "start_date")
+                                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                                            LocalDate startDate,
+                                        @RequestParam(value = "end_date")
+                                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                                            LocalDate endDate) {
+        return productService.getProductSoldQuantityForPeriod(id, startDate, endDate);
     }
 
     @GetMapping

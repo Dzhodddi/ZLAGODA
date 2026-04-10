@@ -50,12 +50,6 @@ definitions:
         maxLength: 10
         minLength: 1
         type: string
-      id_employee:
-        maxLength: 10
-        minLength: 1
-        type: string
-      print_date:
-        type: string
       products:
         items:
           $ref: '#/definitions/views.StoreProduct'
@@ -64,8 +58,6 @@ definitions:
     required:
     - card_number
     - check_number
-    - id_employee
-    - print_date
     - products
     type: object
   views.CreateNewCustomerCard:

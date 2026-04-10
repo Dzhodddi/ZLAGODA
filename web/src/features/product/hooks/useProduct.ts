@@ -7,6 +7,7 @@ import {
     downloadProductPdf,
     getSoldProducts,
     getProduct,
+    getProductSoldNumber,
 } from "@/features/product/api/productApi";
 import type {CreateProduct} from "@/features/product/types/types.ts";
 import {staleTime} from "@/constants/constants.ts";
@@ -20,6 +21,18 @@ export const useProduct = (id: number) => {
         queryKey: [QUERY_KEY, id],
         queryFn: () => getProduct(id),
         enabled: !!id,
+        staleTime: staleTime,
+    });
+};
+
+export const useProductSoldNumber = (idProduct: number,
+                                     startDate: string,
+                                     endDate: string,
+                                     isEnabled: boolean) => {
+    return useQuery({
+        queryKey: ["sold-number", idProduct, startDate, endDate],
+        queryFn: () => getProductSoldNumber(idProduct, startDate, endDate),
+        enabled: isEnabled,
         staleTime: staleTime,
     });
 };

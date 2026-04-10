@@ -1,5 +1,6 @@
 package org.example.service.product;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
@@ -9,6 +10,10 @@ import org.springframework.data.domain.Pageable;
 public interface ProductService {
 
     ProductDto getById(int id);
+
+    ProductDto getProductSoldQuantityForPeriod(int id_product,
+                                                         LocalDate startDate,
+                                                         LocalDate endDate);
 
     PageResponseDto<ProductDto> getSold(Pageable pageable, Double minTotalSold);
 

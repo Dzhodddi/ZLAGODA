@@ -1,5 +1,7 @@
 package org.example.service.product;
 
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
@@ -10,7 +12,6 @@ import org.example.model.product.Product;
 import org.example.repository.product.ProductRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -23,6 +24,14 @@ public class ProductServiceImpl implements ProductService {
     public ProductDto getById(int id) {
         return repository.findById(id).orElseThrow(()
                 -> new InvalidProductException("No product with such id: " + id));
+    }
+
+    @Override
+    public ProductDto getProductSoldQuantityForPeriod(int id_product,
+                                                                LocalDate startDate,
+                                                                LocalDate endDate) {
+        return repository.findProductSoldQuantityForPeriod(id_product, startDate, endDate)
+                .orElseThrow(() -> new InvalidProductException("No product with such id: " + id_product));
     }
 
     @Override
