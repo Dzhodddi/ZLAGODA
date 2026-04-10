@@ -299,6 +299,7 @@ public class StoreProductRepository {
                 .setScale(2, RoundingMode.HALF_UP);
         try {
         if (requestDto.isPromotional_product()) {
+            validateDb(requestDto.getId_product(), true);
             jdbcTemplate.update(
                     """
                     INSERT INTO store_product (
@@ -319,6 +320,7 @@ public class StoreProductRepository {
             );
         } else {
             if (requestDto.getUPC_prom() != null) {
+                validateDb(requestDto.getId_product(), true);
                 jdbcTemplate.update(
                         """
                         INSERT INTO store_product (
@@ -338,6 +340,7 @@ public class StoreProductRepository {
                         true
                 );
             }
+            validateDb(requestDto.getId_product(), false);
             jdbcTemplate.update(
                     """
                     INSERT INTO store_product (
@@ -389,11 +392,18 @@ public class StoreProductRepository {
                 throw new InvalidProductException(
                         "Promotional record already exists for product: " + requestDto.getId_product());
             }
+        } else {
+            Optional<StoreProduct> existingProm = findNonPromById_Product(requestDto.getId_product());
+            if (existingProm.isPresent() && !existingProm.get().getUPC().equals(upc)) {
+                throw new InvalidProductException(
+                        "Non-promotional record already exists for product: " + requestDto.getId_product());
+            }
         }
 
         if (!requestDto.isPromotional_product() && requestDto.getUPC_prom() != null) {
             try {
                 if (!existsByUPC(requestDto.getUPC_prom())) {
+                    validateDb(requestDto.getId_product(), true);
                     jdbcTemplate.update(
                             """
                             INSERT INTO store_product (
@@ -711,5 +721,28 @@ public class StoreProductRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    private void validateDb(int id_product, boolean isPromotional) {
+       if (!promotionalCheck(id_product, isPromotional)) {
+           throw new InvalidProductException("Can't insert store product as the"
+                   + " database already has such kind of store product for this type of product: "
+                   + id_product);
+       }
+    }
+
+    private boolean promotionalCheck(int id_product,
+                                     boolean isPromotional) {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM store_product
+                WHERE id_product = ? AND promotional_product = ?
+                """,
+                Integer.class,
+                id_product,
+                isPromotional
+        );
+        return count != null && count < 1;
     }
 }

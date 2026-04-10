@@ -59,12 +59,19 @@ class StoreProductRepositoryTest {
     void save_shouldInsertProduct() {
         when(jdbcTemplate.queryForObject(anyString(), eq(rowMapper), anyString()))
                 .thenReturn(storeProduct);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyInt(), eq(false)))
+                .thenReturn(0);
 
         StoreProduct result = repository.save(requestDto);
 
         assertNotNull(result);
         verify(jdbcTemplate).update(contains("INSERT INTO store_product"),
-                eq("123456789012"), any(), eq(1), eq(new BigDecimal("12.00")), anyInt(), eq(false));
+                eq("123456789012"),
+                any(),
+                eq(1),
+                eq(new BigDecimal("12.00")),
+                anyInt(),
+                eq(false));
     }
 
     @Test

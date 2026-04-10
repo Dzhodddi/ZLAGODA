@@ -27,7 +27,7 @@ export const useCreateStoreProduct = () => {
         },
         onError: (error: any) => {
             if (error.response?.status === 422) {
-                toast.error("У магазині вже є звичайний та акційний товари цього виду")
+                toast.error("У магазині вже є одиниця цього товару цього виду")
             } else {
                 toast.error(getErrorMessage(error, "Не вдалося створити товар у магазині"))
             }
@@ -46,7 +46,7 @@ export const useUpdateStoreProduct = () => {
         },
         onError: (error: any) => {
             if (error.response?.status === 422) {
-                toast.error("У магазині вже є звичайний та акційний товари цього виду")
+                toast.error("У магазині вже є одиниця цього товару цього виду")
             } else {
                 toast.error(getErrorMessage(error, "Не вдалося оновити товар у магазині"))
             }
