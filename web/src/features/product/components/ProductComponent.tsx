@@ -64,6 +64,7 @@ export const ProductComponent = ({ data }: Props) => {
                         <input
                             type="date"
                             value={startDate}
+                            title={"Оберіть початкову дату для отримання кількості проданих одиниць цього товару"}
                             onChange={(e) => {
                                 setStartDate(e.target.value);
                             }}
@@ -75,6 +76,7 @@ export const ProductComponent = ({ data }: Props) => {
                             type="date"
                             min={startDate}
                             value={endDate}
+                            title={"Оберіть кінцеву дату для отримання кількості проданих одиниць цього товару"}
                             onChange={(e) => {
                                 setEndDate(e.target.value);
                             }}
@@ -82,7 +84,9 @@ export const ProductComponent = ({ data }: Props) => {
                         />
                     </div>
 
-                    {isLoading ? (
+                    { isDateInvalid ? (
+                        <p className="py-3 text-red-500 text-sm">Кінцева дата не може бути меншою за початкову</p>
+                    ) : isLoading ? (
                         <p className="text-zinc-500 text-sm">Завантаження даних про продані одиниці товару...</p>
                     ) : isError ? (
                     <p className="text-red-500 text-sm">Не вдалося завантажити дані про продаж цього товару в магазині</p>

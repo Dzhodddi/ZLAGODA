@@ -187,6 +187,7 @@ export const CheckListPage = () => {
                                 <input
                                     type="date"
                                     value={startDate}
+                                    title={"Оберіть початкову дату для пошуку чеків"}
                                     onChange={(e) => {
                                         setStartDate(e.target.value);
                                         resetPagination();
@@ -201,6 +202,7 @@ export const CheckListPage = () => {
                                     type="date"
                                     min={startDate}
                                     value={endDate}
+                                    title={"Оберіть кінцеву дату для пошуку чеків"}
                                     onChange={(e) => {
                                         setEndDate(e.target.value);
                                         resetPagination();
