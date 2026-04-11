@@ -88,6 +88,7 @@ export const useCheckList = (
                 return await listChecks(startDate, endDate, employeeId, checkNumber);
             } catch (error) {
                 if (employeeId && isAxiosError(error) && error.response?.status === 400) {
+                    toast.dismiss()
                     toast.error(`Касира з ID ${employeeId!} не знайдено, або неправильний формат`);
                 }
                 return []
