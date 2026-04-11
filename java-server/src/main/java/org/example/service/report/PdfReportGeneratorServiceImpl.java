@@ -257,7 +257,7 @@ public class PdfReportGeneratorServiceImpl implements PdfReportGeneratorService 
                     c.getCheck_number(),
                     c.getId_employee(),
                     c.getCard_number(),
-                    c.getPrint_date().format(formatter),
+                    c.getPrint_date().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                     String.valueOf(c.getSum_total()),
                     String.valueOf(c.getVat())
             }) {

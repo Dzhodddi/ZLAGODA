@@ -254,19 +254,20 @@ export const CheckListPage = () => {
                         </Link>
                     )}
                 </div>
+                {isManager && (
                 <button
                     onClick={() => pdfMutation.mutate()}
                     disabled={pdfMutation.isPending}
                     className="bg-zinc-700 text-white px-3 py-2 rounded hover:bg-zinc-800 text-xs whitespace-nowrap"
                 >
                     Друкувати звіт
-                </button>
+                </button>)}
             </div>
 
             {!isShowTodayOnly && isDateInvalid && (
                 <p className="text-red-500 text-sm">Кінцева дата не може бути меншою за початкову</p>
             )}
-            {isStartTooOld && <p className="text-red-500 text-sm">Початкова дата не може бути старішою за 3 роки.</p>}
+            {isStartTooOld && <p className="text-red-500 text-sm">Початкова дата не може бути меншою за поточну на понад 3 роки</p>}
 
             {isShowTodayOnly && !idEmployee ? (
                 <p className="text-zinc-500 text-sm text-center bg-white p-4 rounded border border-blue-200">
@@ -315,7 +316,7 @@ export const CheckListPage = () => {
                                 >
                                     <td className="px-3 py-2 font-medium border border-blue-200">{check.checkNumber}</td>
                                     <td className="px-3 py-2 border border-blue-200">{check.idEmployee}</td>
-                                    <td className="px-3 py-2 border border-blue-200 truncate">{check.cardNumber || "-"}</td>
+                                    <td className="px-3 py-2 border border-blue-200 truncate">{check.cardNumber || "—"}</td>
                                     <td className="px-3 py-2 border border-blue-200">{check.printDate}</td>
                                     <td className="px-3 py-2 border border-blue-200">{check.sumTotal}</td>
                                     <td className="px-3 py-2 border border-blue-200">{check.vat}</td>
