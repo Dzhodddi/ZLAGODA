@@ -7,14 +7,15 @@ package generated
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
 const createNewCheck = `-- name: CreateNewCheck :one
 INSERT INTO
-    checks (check_number, id_employee, card_number, print_date, sum_total, vat)
+    checks (check_number, id_employee, card_number, sum_total, vat)
 VALUES
-    ($1, $2, $3, $4, $5, $6)
+    ($1, $2, $3,$4, $5)
 RETURNING
 	check_number,
 	id_employee,
@@ -27,8 +28,7 @@ RETURNING
 type CreateNewCheckParams struct {
 	CheckNumber string
 	IDEmployee  string
-	CardNumber  string
-	PrintDate   time.Time
+	CardNumber  sql.NullString
 	SumTotal    float64
 	Vat         float64
 }
@@ -38,7 +38,6 @@ func (q *Queries) CreateNewCheck(ctx context.Context, arg CreateNewCheckParams) 
 		arg.CheckNumber,
 		arg.IDEmployee,
 		arg.CardNumber,
-		arg.PrintDate,
 		arg.SumTotal,
 		arg.Vat,
 	)

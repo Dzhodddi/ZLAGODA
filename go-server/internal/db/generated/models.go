@@ -26,7 +26,7 @@ type Category struct {
 type Check struct {
 	CheckNumber string
 	IDEmployee  string
-	CardNumber  string
+	CardNumber  sql.NullString
 	PrintDate   time.Time
 	SumTotal    float64
 	Vat         float64
@@ -35,7 +35,7 @@ type Check struct {
 type CheckListView struct {
 	CheckNumber   string
 	IDEmployee    string
-	CardNumber    string
+	CardNumber    sql.NullString
 	PrintDate     time.Time
 	SumTotal      float64
 	Vat           float64

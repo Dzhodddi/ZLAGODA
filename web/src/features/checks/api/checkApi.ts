@@ -2,7 +2,6 @@ import {goApiClient, javaApiClient} from '@/lib/axios.ts';
 import { z } from 'zod';
 import {
     type Check,
-    CheckSchema,
     CheckItemSchema,
     type CheckItem,
     type CheckListItem,
@@ -25,7 +24,13 @@ export const createCheck = async (data: Check): Promise<CheckListItem> => {
 
 export const getCheck = async (checkNumber: string): Promise<CheckItem> => {
     const response = await goApiClient.get(prefix + '/' + checkNumber);
-    return CheckItemSchema.parse(response.data);
+    try {
+        return CheckItemSchema.parse(response.data);
+
+    } catch (e) {
+        console.error(e)
+        throw e
+    }
 };
 
 export const deleteCheck = async (checkNumber: string): Promise<void> => {

@@ -33,7 +33,7 @@ func (s *cardService) GetCustomerPurchaseHistory(ctx context.Context, cardNumber
 	var response []views.CustomerHistory
 	for i := range items {
 		response = append(response, views.CustomerHistory{
-			PrintDate:    items[i].PrintDate.Format(constants.DateLayout),
+			PrintDate:    items[i].PrintDate.Format(constants.DateResponseLayout),
 			CheckNumber:  items[i].CheckNumber,
 			ProductName:  items[i].ProductName,
 			Quantity:     items[i].Quantity,

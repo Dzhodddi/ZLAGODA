@@ -27,12 +27,12 @@ func NewCardHandler(service services.CardService, auth auth.Authenticator) *Card
 
 func (h *CardHandler) RegisterRouts(route *echo.Group) {
 	card := route.Group("/customer-cards")
-	card.POST("", h.createNewCustomerCard, h.auth.CheckRole(auth.Manager, auth.Cashier))
+	card.POST("", h.createNewCustomerCard, h.auth.CheckRole(auth.Manager))
 	card.GET("", h.listCustomerCards, h.auth.CheckRole(auth.Manager, auth.Cashier))
 	cardNumber := card.Group("/:cardNumber")
-	cardNumber.GET("", h.getCustomerCard, h.auth.CheckRole(auth.Manager))
-	cardNumber.GET("/history", h.getCustomerCardHistory, h.auth.CheckRole(auth.Manager))
-	cardNumber.PUT("", h.updateCustomerCard, h.auth.CheckRole(auth.Manager, auth.Cashier))
+	cardNumber.GET("", h.getCustomerCard)
+	cardNumber.GET("/history", h.getCustomerCardHistory)
+	cardNumber.PUT("", h.updateCustomerCard)
 	cardNumber.DELETE("", h.deleteCustomerCard, h.auth.CheckRole(auth.Manager))
 }
 

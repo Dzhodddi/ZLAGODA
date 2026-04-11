@@ -5,14 +5,6 @@ interface Props {
 }
 
 export const CheckComponent = ({ data }: Props) => {
-    const formattedDate = new Date(data.check.printDate).toLocaleString('uk-UA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-
     return (
         <div className="p-6 bg-white rounded text-zinc-900 shadow-md max-w-2xl mx-auto">
             <h2 className="text-xl font-bold mb-4">Інформація про чек</h2>
@@ -21,7 +13,7 @@ export const CheckComponent = ({ data }: Props) => {
                 <p><span className="font-medium">Номер чека:</span> {data.check.checkNumber}</p>
                 <p><span className="font-medium">ID працівника/-ці:</span> {data.check.idEmployee}</p>
                 <p><span className="font-medium">Номер картки клієнта/-ки:</span> {data.check.cardNumber}</p>
-                <p><span className="font-medium">Дата друку:</span> {formattedDate}</p>
+                <p><span className="font-medium">Дата друку:</span> {data.check.printDate}</p>
                 <p><span className="font-medium">Сума чека:</span> {data.check.sumTotal} грн</p>
                 <p><span className="font-medium">ПДВ:</span> {data.check.vat} грн</p>
             </div>

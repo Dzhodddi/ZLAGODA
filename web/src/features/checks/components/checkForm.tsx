@@ -4,7 +4,6 @@ import {type Check, CreateCheckSchema} from "@/features/checks/types/types.ts";
 import { GenericUpsertForm } from "@/components/ui/GenericUpsertForm.tsx";
 import { useCreateCheck} from "@/features/checks/hooks/useCheck.ts";
 import { useNavigate } from "react-router-dom";
-import { EmployeeComboboxField } from "@/features/employee/components/EmployeeDropBox.tsx";
 import { CustomerCardComboboxField } from "@/features/customer-card/components/CustomerCardDropBox.tsx";
 import { StoreProductComboboxField } from "@/features/store_product/components/StoreProductDropBox.tsx";
 
@@ -46,14 +45,8 @@ export const UpsertCheckForm = ({ initialData }: Props) => {
                                 label="Номер чека"
                                 disabled={isEditMode}
                             />
-                            <div className="col-span-12"><EmployeeComboboxField /></div>
                             <div className="col-span-12"><CustomerCardComboboxField /></div>
 
-                            <InputField
-                                name="printDate"
-                                label="Дата друку"
-                                type="datetime-local"
-                            />
                             <div className="col-span-12 mt-4">
                                 <h3 className="font-semibold mb-2">Товари</h3>
 

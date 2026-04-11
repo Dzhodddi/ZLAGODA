@@ -10,18 +10,22 @@ type Cursor = {
     checkNumber: string;
 };
 
-const getTodayDateString = () => new Date().toISOString().split("T")[0];
-const getDecadeAgoDateString = () => {
+const getTomorrowDateString = () => {
+    const d = new Date()
+    d.setHours(d.getHours() + 24);
+    return d.toISOString().split("T")[0];
+}
+const getThreeYearsAgoDateString = () => {
     const d = new Date();
-    d.setFullYear(d.getFullYear() - 10);
+    d.setFullYear(d.getFullYear() - 3);
     return d.toISOString().split("T")[0];
 };
 
 export const CheckListPage = () => {
     const { isManager, isCashier } = useRole();
 
-    const [startDate, setStartDate] = useState(getDecadeAgoDateString());
-    const [endDate, setEndDate] = useState(getTodayDateString());
+    const [startDate, setStartDate] = useState(getThreeYearsAgoDateString());
+    const [endDate, setEndDate] = useState(getTomorrowDateString());
     const [idEmployee, setIdEmployee] = useState("");
 
     const [isShowTodayOnly, setIsShowTodayOnly] = useState(false);
@@ -73,6 +77,7 @@ export const CheckListPage = () => {
     const navigate = useNavigate();
 
     const isDateInvalid = Boolean(startDate && endDate && new Date(startDate) > new Date(endDate));
+    const isStartTooOld = Boolean(startDate && new Date(startDate) < new Date(getThreeYearsAgoDateString()!));
 
     const lastCheck = checks && checks.length > 0 ? checks[checks.length - 1] : null;
     const nextCheckNumber = lastCheck?.checkNumber ?? "";
@@ -192,6 +197,7 @@ export const CheckListPage = () => {
                                         setStartDate(e.target.value);
                                         resetPagination();
                                     }}
+                                    max={getThreeYearsAgoDateString()}
                                     className={`border rounded px-2 py-1.5 text-sm text-zinc-800 focus:outline-none focus:ring-1 ${isDateInvalid ? 'border-red-500 focus:ring-red-500' : 'border-blue-300 focus:ring-blue-500'}`}
                                 />
                             </div>
@@ -260,6 +266,7 @@ export const CheckListPage = () => {
             {!isShowTodayOnly && isDateInvalid && (
                 <p className="text-red-500 text-sm">Кінцева дата не може бути меншою за початкову</p>
             )}
+            {isStartTooOld && <p className="text-red-500 text-sm">Початкова дата не може бути старішою за 3 роки.</p>}
 
             {isShowTodayOnly && !idEmployee ? (
                 <p className="text-zinc-500 text-sm text-center bg-white p-4 rounded border border-blue-200">
@@ -309,12 +316,7 @@ export const CheckListPage = () => {
                                     <td className="px-3 py-2 font-medium border border-blue-200">{check.checkNumber}</td>
                                     <td className="px-3 py-2 border border-blue-200">{check.idEmployee}</td>
                                     <td className="px-3 py-2 border border-blue-200 truncate">{check.cardNumber || "-"}</td>
-                                    <td className="px-3 py-2 border border-blue-200">
-                                        {new Date(check.printDate).toLocaleString('uk-UA', {
-                                            year: 'numeric', month: '2-digit', day: '2-digit',
-                                            hour: '2-digit', minute: '2-digit'
-                                        })}
-                                    </td>
+                                    <td className="px-3 py-2 border border-blue-200">{check.printDate}</td>
                                     <td className="px-3 py-2 border border-blue-200">{check.sumTotal}</td>
                                     <td className="px-3 py-2 border border-blue-200">{check.vat}</td>
                                     {isManager &&

@@ -55,7 +55,10 @@ func (r *cardRepository) GetCustomerPurchaseHistory(ctx context.Context, cardNum
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
-	card, err := r.queries.GetCustomerPurchaseHistory(ctx, cardNumber)
+	card, err := r.queries.GetCustomerPurchaseHistory(ctx, sql.NullString{
+		String: cardNumber,
+		Valid:  true,
+	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound

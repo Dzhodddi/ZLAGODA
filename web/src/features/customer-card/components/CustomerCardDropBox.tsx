@@ -18,7 +18,7 @@ export const CustomerCardComboboxField = ({ name = "cardNumber" }: { name?: stri
             render={({ field, fieldState }) => (
                 <div className="col-span-12 flex flex-col gap-1 py-1.5">
                     <label className="text-sm font-medium text-zinc-700">
-                        Номер картки клієнта/-ки <span className="text-red-500">*</span>
+                        Номер картки клієнта/-ки
                     </label>
                     <Combobox
                         options={options}

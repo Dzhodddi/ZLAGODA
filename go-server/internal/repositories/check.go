@@ -225,16 +225,13 @@ func (r *checkRepository) CreateNewCheck(
 	if err != nil {
 		return nil, err
 	}
-	customerCard, err := txQueries.GetCustomerCardByID(ctx, check.CardNumber)
-	if err != nil {
-		return nil, err
-	}
+	customerCard, _ := txQueries.GetCustomerCardByID(ctx, check.CardNumber)
 	newCheck, err := txQueries.CreateNewCheck(
 		ctx,
 		generated.CreateNewCheckParams{
 			CheckNumber: check.CheckNumber,
 			IDEmployee:  id,
-			CardNumber:  check.CardNumber,
+			CardNumber:  sql.NullString{String: check.CardNumber, Valid: check.CardNumber != ""},
 			SumTotal:    totalPrice * (1 - float64(customerCard.CustomerPercent)/100.0),
 			Vat:         totalPrice * constants.Vat,
 		},

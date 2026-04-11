@@ -1440,7 +1440,6 @@ const docTemplate = `{
         "views.CreateNewCheck": {
             "type": "object",
             "required": [
-                "card_number",
                 "check_number",
                 "products"
             ],

@@ -1,18 +1,18 @@
 package mappers
 
 import (
+	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
 	"github.com/Dzhodddi/ZLAGODA/internal/views"
-	"time"
 )
 
 func CheckModelToResponse(check *generated.Check) *views.CheckResponse {
 	return &views.CheckResponse{
 		CheckNumber: check.CheckNumber,
 		IDEmployee:  check.IDEmployee,
-		CardNumber:  check.CardNumber,
-		PrintDate:   check.PrintDate.Format(time.RFC3339),
+		CardNumber:  check.CardNumber.String,
+		PrintDate:   check.PrintDate.Format(constants.DateResponseLayout),
 		SumTotal:    check.SumTotal,
 		VAT:         check.Vat,
 	}

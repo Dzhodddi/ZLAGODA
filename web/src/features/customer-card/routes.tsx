@@ -9,10 +9,10 @@ const customerCardRoutes = (
     <>
         <Route element={<ProtectedRoute allowedRoles={["MANAGER"]} />}>
             <Route path="/customer-card/create" element={<CreateCustomerCardPage/>} />
-            <Route path="/customer-card/edit/:id" element={<EditCustomerCardPage/>} />
-            <Route path="/customer-card/:id" element={<CustomerCardPage/>} />
         </Route>
         <Route path="/customer-card" element={<CustomerCardListPage/>} />
+        <Route path="/customer-card/:id" element={<CustomerCardPage/>} />
+        <Route path="/customer-card/edit/:id" element={<EditCustomerCardPage/>} />
     </>
 );
 

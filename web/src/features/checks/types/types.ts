@@ -23,16 +23,17 @@ export const CheckSchema = z.object({
         .min(1, "ID працівника занадто короткий")
         .max(10, "ID працівника занадто довгий"),
     cardNumber: z
-        .string("Оберіть картку клієнта")
-        .min(1, "Номер картки занадто короткий")
-        .max(13, "Номер картки занадто довгий"),
+        .string()
+        .max(13, "Номер картки занадто довгий")
+        .optional()
+        .nullable()
+        .transform(val => val?.trim() === "" ? null : val),
     printDate: z
         .string()
         .min(1, "Укажіть дату друку")
         .refine((val) => !isNaN(Date.parse(val)), {
             message: "Неправильний формат дати",
-        })
-        .transform((val) => new Date(val).toISOString()),
+        }),
     products: z
         .array(StoreProductSchema)
         .min(1, "Додайте хоча б один товар"),
@@ -43,7 +44,7 @@ export const CheckSchema = z.object({
         .max(999999999.9999, "ПДВ занадто великий"),
 });
 
-export const CreateCheckSchema = CheckSchema.omit({vat: true})
+export const CreateCheckSchema = CheckSchema.omit({vat: true, idEmployee: true, printDate: true})
 
 export const CheckListItemSchema = CheckSchema.omit({ products: true }).extend(
     {
@@ -60,7 +61,11 @@ const ProductInListSchema = z.object({
 const CheckDetailsInListSchema = z.object({
     checkNumber: z.string().min(1, "Номер чека обов'язковий"),
     idEmployee: z.string().min(1, "ID працівника обов'язковий"),
-    cardNumber: z.string().min(1, "Номер картки обов'язковий"),
+    cardNumber: z.string()
+        .max(13, "Номер картки занадто довгий")
+        .optional()
+        .nullable()
+        .transform(val => val?.trim() === "" ? null : val),
     printDate: z.string(),
     sumTotal: z.coerce.number().min(0),
     vat: z.coerce.number().min(0, "ПДВ не може бути від'ємним")

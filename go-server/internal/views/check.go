@@ -2,7 +2,7 @@ package views
 
 type CreateNewCheck struct {
 	CheckNumber string         `json:"check_number" validate:"required,min=1,max=10"`
-	CardNumber  string         `json:"card_number" validate:"required,min=1,max=13"`
+	CardNumber  string         `json:"card_number" validate:"omitempty,min=1,max=13"`
 	Products    []StoreProduct `json:"products" validate:"required,min=1"`
 }
 

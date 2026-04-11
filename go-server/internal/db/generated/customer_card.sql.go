@@ -346,7 +346,7 @@ type GetCustomerPurchaseHistoryRow struct {
 	PrintDate    time.Time
 }
 
-func (q *Queries) GetCustomerPurchaseHistory(ctx context.Context, cardNumber string) ([]GetCustomerPurchaseHistoryRow, error) {
+func (q *Queries) GetCustomerPurchaseHistory(ctx context.Context, cardNumber sql.NullString) ([]GetCustomerPurchaseHistoryRow, error) {
 	rows, err := q.db.QueryContext(ctx, getCustomerPurchaseHistory, cardNumber)
 	if err != nil {
 		return nil, err
