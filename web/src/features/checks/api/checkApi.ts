@@ -78,15 +78,12 @@ export const getChecksTotalSum = async (
 };
 
 export const getTodayChecks = async (
-    employeeId: string,
     checkNumber?: string
 ): Promise<CheckListItem[]> => {
-    const response = await goApiClient.get(`${prefix}/today`, {
-        params: {
-            employee_id: employeeId,
-            check_number: checkNumber
-        }
-    });
+    const params: Record<string, string> = {};
+    if (checkNumber)
+        params.check_number = checkNumber;
+    const response = await goApiClient.get(`${prefix}/today`, params);
     if (!response.data) return [];
     return z.array(CheckListItemSchema).parse(response.data);
 };

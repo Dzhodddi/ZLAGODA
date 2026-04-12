@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS checks(
     check_number VARCHAR(10) PRIMARY KEY,
     id_employee VARCHAR(10) NOT NULL,
     card_number VARCHAR(13),
-    print_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+    print_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     sum_total DECIMAL(13,4) NOT NULL,
     vat DECIMAL(13,4) NOT NULL,
 

@@ -1,10 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
-import {useCheckList, useDeleteCheck, useCheckTotalSum, useTodayCheckList} from "@/features/checks/hooks/useCheck.ts";
+import { useCheckList, useDeleteCheck, useCheckTotalSum, useTodayCheckList } from "@/features/checks/hooks/useCheck.ts";
 import { useRole } from "@/hooks/useRole.ts";
-import {useDownloadCheckPdf} from "@/features/checks/hooks/useCheck.ts";
-import {PAGE_SIZE} from "@/constants/constants.ts";
+import { useDownloadCheckPdf } from "@/features/checks/hooks/useCheck.ts";
+import { PAGE_SIZE } from "@/constants/constants.ts";
 
 type Cursor = {
     checkNumber: string;
@@ -15,6 +15,7 @@ const getTomorrowDateString = () => {
     d.setHours(d.getHours() + 24);
     return d.toISOString().split("T")[0];
 }
+
 const getThreeYearsAgoDateString = () => {
     const d = new Date();
     d.setFullYear(d.getFullYear() - 3);
@@ -45,7 +46,7 @@ export const CheckListPage = () => {
         endDate!,
         idEmployee || undefined,
         currentCursor.checkNumber,
-        {enabled: !isShowTodayOnly},
+        { enabled: !isShowTodayOnly },
     );
 
     const {
@@ -54,7 +55,6 @@ export const CheckListPage = () => {
         isError: isTodayError,
         isFetching: isTodayFetching
     } = useTodayCheckList(
-        idEmployee,
         isShowTodayOnly,
         currentCursor.checkNumber,
     );
@@ -92,7 +92,6 @@ export const CheckListPage = () => {
     );
 
     const { data: nextPageTodayChecks } = useTodayCheckList(
-        idEmployee,
         isShowTodayOnly && canPrefetch,
         nextCheckNumber,
     );
@@ -148,7 +147,7 @@ export const CheckListPage = () => {
         (checks ? checks.length < PAGE_SIZE : true) ||
         (nextPageChecks !== undefined && nextPageChecks.length === 0);
 
-    if (isLoading && currentIndex === 0 && (!isShowTodayOnly || idEmployee)) {
+    if (isLoading && currentIndex === 0) {
         return <div className="p-6 text-center text-zinc-500">Завантаження чеків...</div>;
     }
 
@@ -218,28 +217,29 @@ export const CheckListPage = () => {
                             </div>
                         </>
                     )}
-
-                    <div className="flex flex-col">
-                        <label className="text-xs text-zinc-600 font-medium mb-1">
-                            ID касира/-ки {isShowTodayOnly && <span className="text-red-500">*</span>}
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="Усі касири"
-                            title="Шукати чек за ID касира/-ки, який(-а) його надрукував(-ла)"
-                            value={idEmployee}
-                            onChange={(e) => {
-                                setIdEmployee(e.target.value);
-                                resetPagination();
-                            }}
-                            className={`border rounded px-2 py-1.5 text-sm text-zinc-800 focus:outline-none focus:ring-1 w-36 ${isShowTodayOnly && !idEmployee ? 'border-red-400 focus:ring-red-400' : 'border-blue-300 focus:ring-blue-500'}`}
-                        />
-                    </div>
+                    {isManager &&
+                        <div className="flex flex-col">
+                            <label className="text-xs text-zinc-600 font-medium mb-1">
+                                ID касира/-ки
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Усі касири"
+                                title="Шукати чек за ID касира/-ки, який(-а) його надрукував(-ла)"
+                                value={idEmployee}
+                                onChange={(e) => {
+                                    setIdEmployee(e.target.value);
+                                    resetPagination();
+                                }}
+                                className={`border rounded px-2 py-1.5 text-sm text-zinc-800 focus:outline-none focus:ring-1 w-36 ${isShowTodayOnly && !idEmployee ? 'border-red-400 focus:ring-red-400' : 'border-blue-300 focus:ring-blue-500'}`}
+                            />
+                        </div>
+                    }
                     {!isCashier && !isShowTodayOnly && !isDateInvalid && (
                         <div className="flex justify-end px-2">
                             <span className="text-sm font-semibold text-zinc-800 bg-white border border-blue-200 px-3 py-1.5 rounded shadow-sm">
                                 Загальна сума чеків: {" "}
-                                    <span className="text-green-600">{Number(totalSum || 0).toFixed(2)} грн</span>
+                                <span className="text-green-600">{Number(totalSum || 0).toFixed(2)} грн</span>
                             </span>
                         </div>
                     )}
@@ -269,13 +269,9 @@ export const CheckListPage = () => {
             )}
             {isStartTooOld && <p className="text-red-500 text-sm">Початкова дата не може бути меншою за поточну на понад 3 роки</p>}
 
-            {isShowTodayOnly && !idEmployee ? (
+            {checks?.length === 0 && currentIndex === 0 ? (
                 <p className="text-zinc-500 text-sm text-center bg-white p-4 rounded border border-blue-200">
-                    Будь ласка, введіть ID касира/-ки, щоб переглянути його чеки за сьогодні
-                </p>
-            ) : checks?.length === 0 && currentIndex === 0 ? (
-                <p className="text-zinc-400 text-sm text-center bg-white p-4 rounded border border-blue-200">
-                    Чеків не знайдено
+                    {isShowTodayOnly ? "Чеків за сьогодні не знайдено" : "Чеків не знайдено"}
                 </p>
             ) : (
                 <div className="overflow-x-auto bg-white border border-blue-300 relative">
