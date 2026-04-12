@@ -47,7 +47,10 @@ const authInterceptor = async (error: any) => {
     if (originalRequest.url?.includes('/login') || originalRequest.url?.includes('/refresh')) {
         return Promise.reject(error);
     }
-
+    if (error.response?.status === 403) {
+        window.location.href = "/";
+        return Promise.reject(error);
+    }
     if (error.response?.status === 401 && !originalRequest._retry) {
 
         if (isRefreshing) {

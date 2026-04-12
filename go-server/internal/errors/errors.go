@@ -2,8 +2,9 @@ package error_response
 
 import (
 	"fmt"
-	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"net/http"
+
+	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 )
 
 type HTTPErrorResponse struct {
@@ -45,4 +46,8 @@ func UnAuthorized(err error) *HTTPErrorResponse {
 
 func Forbidden(err error) *HTTPErrorResponse {
 	return NewError(http.StatusForbidden, constants.Forbidden, err)
+}
+
+func Internal(err error) *HTTPErrorResponse {
+	return NewError(http.StatusInternalServerError, constants.Internal, err)
 }

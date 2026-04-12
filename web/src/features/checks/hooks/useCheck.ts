@@ -9,7 +9,7 @@ import {
     getTodayChecks,
     listChecks,
 } from "@/features/checks/api/checkApi.ts";
-import {isAxiosError} from "axios";
+import {AxiosError, isAxiosError} from "axios";
 import {getErrorMessage} from "@/lib/errorUtils.ts";
 
 export const useDownloadCheckPdf = () => {
@@ -106,6 +106,12 @@ export const useCheck = (checkNumber: string) => {
         queryFn: () => getCheck(checkNumber),
         enabled: !!checkNumber,
         staleTime: staleTime,
+        retry: (failureCount, error) => {
+            if (error instanceof AxiosError && error.response?.status === 404) {
+                return false;
+            }
+            return failureCount < 3;
+        }
     });
 };
 

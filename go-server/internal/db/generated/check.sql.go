@@ -11,6 +11,24 @@ import (
 	"time"
 )
 
+const checkOwnership = `-- name: CheckOwnership :one
+SELECT 1
+FROM checks
+WHERE check_number = $1 AND id_employee = $2
+`
+
+type CheckOwnershipParams struct {
+	CheckNumber string
+	IDEmployee  string
+}
+
+func (q *Queries) CheckOwnership(ctx context.Context, arg CheckOwnershipParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, checkOwnership, arg.CheckNumber, arg.IDEmployee)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const createNewCheck = `-- name: CreateNewCheck :one
 INSERT INTO
     checks (check_number, id_employee, card_number, print_date, sum_total, vat)

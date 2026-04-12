@@ -32,7 +32,7 @@ func (h *CheckHandler) RegisterRouts(e *echo.Group) {
 	check.GET("", h.getCheckList)
 	check.GET("/today", h.getCheckListWithinToday, h.auth.CheckRole(auth.Cashier))
 	check.GET("/price", h.getTotalPrice, h.auth.CheckRole(auth.Manager))
-	checkNumberGroup := check.Group("/:checkNumber")
+	checkNumberGroup := check.Group("/:checkNumber", h.auth.CheckOwnershipMiddleware(h.checkService))
 	checkNumberGroup.DELETE("", h.deleteCheck, h.auth.CheckRole(auth.Manager))
 	checkNumberGroup.GET("", h.getCheckWithProducts)
 }
@@ -155,18 +155,21 @@ func (h *CheckHandler) getCheckList(c echo.Context) error {
 	if err := c.Bind(&q); err != nil {
 		return errorResponse.BadRequest(constants.ValidationError, err)
 	}
-	role, _ := c.Get("role").(string)
-	if role == string(auth.Cashier) && q.EmployeeID == nil {
-		return errorResponse.Forbidden(fmt.Errorf("employee_id query param can't be nil for cashier"))
-	}
+	role := auth.GetRoleFromCtx(c.Request())
 	startDate, endDate, err := h.validateQueryParams(&q)
 	if err != nil {
 		return err
+	}
+	var ctxID *string
+	id := auth.GetEmployeeIDFromCtx(c.Request())
+	if id != "" && role == string(auth.Cashier) {
+		ctxID = &id
 	}
 	checkList, err := h.checkService.GetCheckList(
 		c.Request().Context(),
 		q.EmployeeID,
 		q.LastCheckNumber,
+		ctxID,
 		*startDate,
 		*endDate,
 	)
@@ -213,6 +216,7 @@ func (h *CheckHandler) getCheckListWithinToday(c echo.Context) error {
 		c.Request().Context(),
 		&id,
 		q.LastCheckNumber,
+		&id,
 		today,
 		today.Add(24*time.Hour-time.Nanosecond),
 	)

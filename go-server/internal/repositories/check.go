@@ -64,11 +64,30 @@ type CheckRepository interface {
 		ctx context.Context,
 		startDate, endDate time.Time,
 	) (float64, error)
+	CheckOwnership(
+		ctx context.Context,
+		employeeId,
+		checkNumber string,
+	) (int32, error)
 }
 
 type checkRepository struct {
 	db      *sqlx.DB
 	queries *generated.Queries
+}
+
+func (r *checkRepository) CheckOwnership(ctx context.Context, employeeId, checkNumber string) (int32, error) {
+	own, err := r.queries.CheckOwnership(ctx, generated.CheckOwnershipParams{
+		CheckNumber: checkNumber,
+		IDEmployee:  employeeId,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, ErrNotFound
+		}
+		return 0, err
+	}
+	return own, nil
 }
 
 func NewCheckRepository(db *sqlx.DB) CheckRepository {

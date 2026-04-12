@@ -105,3 +105,8 @@ FROM
     checks
 WHERE
   print_date BETWEEN $1 AND $2;
+
+-- name: CheckOwnership :one
+SELECT 1
+FROM checks
+WHERE check_number = $1 AND id_employee = $2;

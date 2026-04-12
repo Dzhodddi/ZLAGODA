@@ -9,6 +9,7 @@ import (
 	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	errorResponse "github.com/Dzhodddi/ZLAGODA/internal/errors"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
+	"github.com/Dzhodddi/ZLAGODA/internal/services"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -54,6 +55,30 @@ func (auth *JWTAuth) AuthMiddleware(employeeRepo repository.EmployeeRepository) 
 			ctx = context.WithValue(ctx, employeeCtx, employee.IDEmployee)
 			ctx = context.WithValue(ctx, RoleCtx, employee.EmplRole)
 			c.SetRequest(c.Request().WithContext(ctx))
+			return next(c)
+		}
+	}
+}
+
+func (auth *JWTAuth) CheckOwnershipMiddleware(service services.CheckService) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			id := GetEmployeeIDFromCtx(c.Request())
+			if id == "" {
+				return errorResponse.UnAuthorized(fmt.Errorf("employee_id not found in context"))
+			}
+			role := GetRoleFromCtx(c.Request())
+			if role == string(Manager) {
+				return next(c)
+			}
+			checkNumber := c.Param("checkNumber")
+			own, err := service.CheckOwnership(c.Request().Context(), id, checkNumber)
+			if err != nil {
+				return err
+			}
+			if !own {
+				return errorResponse.Forbidden(fmt.Errorf("employee didn't created this check"))
+			}
 			return next(c)
 		}
 	}

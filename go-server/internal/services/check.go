@@ -20,6 +20,7 @@ type CheckService interface {
 		ctx context.Context,
 		employeeID *string,
 		lastCheckNumber *string,
+		ctxID *string,
 		startDate, endDate time.Time,
 	) (*[]views.CheckResponse, error)
 	GetTotalCheckPrice(
@@ -27,10 +28,23 @@ type CheckService interface {
 		q views.CheckListQueryParams,
 		startDate, endDate time.Time,
 	) (float64, error)
+	CheckOwnership(
+		ctx context.Context,
+		employeeId,
+		checkNumber string,
+	) (bool, error)
 }
 
 type checkService struct {
 	checkRepository repository.CheckRepository
+}
+
+func (s *checkService) CheckOwnership(ctx context.Context, employeeId, checkNumber string) (bool, error) {
+	own, err := s.checkRepository.CheckOwnership(ctx, employeeId, checkNumber)
+	if err != nil {
+		return false, err
+	}
+	return own == 1, nil
 }
 
 func NewCheckService(checkRepository repository.CheckRepository) CheckService {
@@ -85,6 +99,7 @@ func (s *checkService) GetCheckList(
 	ctx context.Context,
 	employeeID *string,
 	lastCheckNumber *string,
+	ctxID *string,
 	startDate, endDate time.Time,
 ) (*[]views.CheckResponse, error) {
 	var checkList []generated.Check
@@ -102,6 +117,16 @@ func (s *checkService) GetCheckList(
 			endDate,
 		)
 	default:
+		if ctxID != nil {
+			checkList, err = s.checkRepository.GetChecksByCashierWithinDate(
+				ctx,
+				*lastCheckNumber,
+				*ctxID,
+				startDate,
+				endDate,
+			)
+			break
+		}
 		checkList, err = s.checkRepository.GetAllChecksWithinDate(
 			ctx,
 			*lastCheckNumber,

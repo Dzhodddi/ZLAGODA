@@ -10,4 +10,5 @@ const (
 	InvalidTimeFormat   = "Invalid format, must be RFC3339"
 	EntityDoesNotExist  = "Entity does not exist"
 	InvalidAuthHeader   = "invalid auth header"
+	Internal            = "internal server error"
 )
