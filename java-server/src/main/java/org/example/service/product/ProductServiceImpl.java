@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
+import org.example.exception.custom_exception.EntityNotFoundException;
 import org.example.exception.custom_exception.InvalidProductException;
 import org.example.mapper.product.ProductMapper;
 import org.example.model.product.Product;
@@ -23,7 +24,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDto getById(int id) {
         return repository.findById(id).orElseThrow(()
-                -> new InvalidProductException("No product with such id: " + id));
+                -> new EntityNotFoundException("No product with such id: " + id));
     }
 
     @Override

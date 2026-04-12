@@ -140,7 +140,7 @@ public class StoreProductController {
         } else if (isCashier) {
             return ResponseEntity.ok(storeProductService.getPriceAndQuantityByUPC(upc));
         }
-        return ResponseEntity.unprocessableEntity().build();
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{upc}")

@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.example.dto.page.PageResponseDto;
 import org.example.dto.product.ProductDto;
 import org.example.dto.product.ProductRequestDto;
+import org.example.exception.custom_exception.EntityNotFoundException;
 import org.example.mapper.product.ProductMapper;
 import org.example.model.product.Product;
 import org.example.repository.product.ProductRepository;
@@ -184,7 +185,7 @@ class ProductServiceTest {
         when(repository.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(
-                InvalidProductException.class,
+                EntityNotFoundException.class,
                 () -> service.getById(99)
         );
         verify(repository).findById(99);
