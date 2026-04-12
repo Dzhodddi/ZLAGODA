@@ -28,6 +28,5 @@ type CheckListQueryParams struct {
 }
 
 type CheckListQueryWithThisDayParams struct {
-	EmployeeID      string  `query:"employee_id" validate:"required,min=1,max=10"`
 	LastCheckNumber *string `query:"check_number" validate:"omitempty,min=1,max=10"`
 }

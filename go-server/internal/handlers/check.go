@@ -184,8 +184,6 @@ func (h *CheckHandler) getCheckList(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 //
-//	@Param			employee_id 	query		string	true	"employee_id"
-//
 //	@Param			check_number 	query		string	false	"check_number"
 //
 // @Success      200  {array}  views.CheckResponse
@@ -207,9 +205,13 @@ func (h *CheckHandler) getCheckListWithinToday(c echo.Context) error {
 	}
 	timeNow := time.Now()
 	today := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 0, 0, 0, 0, timeNow.Location())
+	id := auth.GetEmployeeIDFromCtx(c.Request())
+	if id == "" {
+		return errorResponse.UnAuthorized(fmt.Errorf("employee_id not found in context"))
+	}
 	checkList, err := h.checkService.GetCheckList(
 		c.Request().Context(),
-		&q.EmployeeID,
+		&id,
 		q.LastCheckNumber,
 		today,
 		today.Add(24*time.Hour-time.Nanosecond),

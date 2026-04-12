@@ -133,23 +133,13 @@ export const useCheckTotalSum = (
 };
 
 export const useTodayCheckList = (
-    employeeId: string,
     enabled: boolean,
     checkNumber?: string
 ) => {
     return useQuery({
-        queryKey: ["checks-today", employeeId, checkNumber],
-        queryFn: async () => {
-            try {
-                return await getTodayChecks(employeeId, checkNumber);
-            } catch (error) {
-                if (employeeId && isAxiosError(error) && error.response?.status === 400) {
-                    toast.error(`Касира з ID ${employeeId!} не знайдено, або неправильний формат`);
-                }
-                return []
-            }
-        },
-        enabled: enabled && Boolean(employeeId),
+        queryKey: ["checks-today", checkNumber],
+        queryFn: () => getTodayChecks(checkNumber),
+        enabled: enabled,
         placeholderData: (previousData) => previousData,
     });
 };

@@ -685,13 +685,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "employee_id",
-                        "name": "employee_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "check_number",
                         "name": "check_number",
                         "in": "query"
