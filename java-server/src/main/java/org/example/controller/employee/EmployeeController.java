@@ -12,6 +12,7 @@ import org.example.dto.employee.EmployeeUpdateRequestDto;
 import org.example.dto.employee.registration.EmployeeRegistrationRequestDto;
 import org.example.dto.employee.registration.EmployeeResponseDto;
 import org.example.dto.page.PageResponseDto;
+import org.example.exception.custom_exception.EntityNotFoundException;
 import org.example.exception.custom_exception.RegistrationException;
 import org.example.service.employee.EmployeeService;
 import org.example.service.report.PdfReportGeneratorService;
@@ -52,7 +53,8 @@ public class EmployeeController {
     )
     @PreAuthorize("hasAuthority('MANAGER')")
     public EmployeeResponseDto getEmployee(@PathVariable String id) {
-        return employeeService.getEmployee(id).orElseThrow();
+        return employeeService.getEmployee(id).orElseThrow(()
+                -> new EntityNotFoundException("Employee with id: " + id + " not found"));
     }
 
     @GetMapping
