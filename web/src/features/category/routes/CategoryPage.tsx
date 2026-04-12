@@ -12,8 +12,8 @@ export const CategoryPage = () => {
         return (
             <NotFoundEntity
                 title="Категорію не знайдено"
-                redirectTiList="/categories"
-                message={`Категорію з ID ${id} не існує в базі даних`}
+                redirectTiList="/category"
+                message={`Категорія з ID ${id} не існує в базі даних`}
             />
     );
 
@@ -27,7 +27,7 @@ export const CategoryPage = () => {
             <NotFoundEntity
                 title="Категорію не знайдено"
                 redirectTiList="/category"
-                message={`Категорію з ID ${id} не існує в базі даних`}
+                message={`Категорія з ID ${id} не існує в базі даних`}
             />
         );
 

@@ -16,7 +16,7 @@ export const CustomerCardPage = () => {
             <NotFoundEntity
                 title="Картку не знайдено"
                 redirectTiList="/customer-card"
-                message={`Клієнта з номером картки ${id} не існує в базі даних.`}
+                message={`Клієнта з номером картки ${id} не існує в базі даних`}
             />
         );
     }
