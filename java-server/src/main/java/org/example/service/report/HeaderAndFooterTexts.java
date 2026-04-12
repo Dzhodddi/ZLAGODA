@@ -13,7 +13,7 @@ public class HeaderAndFooterTexts extends PdfPageEventHelper {
     private static final String HEADER = "ZLAGODA";
     private static final String ICON_PATH = "logos/icon-blue.png";
     private static final DateTimeFormatter formatter
-            = DateTimeFormatter.ofPattern("HH:mm yyyy-MM-dd");
+            = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final Font FONT;
     private final String MANAGER_NAME;
 
@@ -51,8 +51,8 @@ public class HeaderAndFooterTexts extends PdfPageEventHelper {
                 writer.getDirectContent(),
                 Element.ALIGN_CENTER,
                 new Phrase("Звіт сформований менеджером(-кою) " +
-                        MANAGER_NAME + " о " + LocalDateTime.now().plusHours(3).format(formatter)
-                        + " р.", FONT),
+                        MANAGER_NAME + ", " + LocalDateTime.now().plusHours(3)
+                        .format(formatter), FONT),
                 document.getPageSize().getWidth() / 2,
                 document.getPageSize().getBottom() + 25,
                 0

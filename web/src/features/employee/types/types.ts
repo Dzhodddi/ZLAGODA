@@ -16,7 +16,7 @@ export const EmployeeSchema = z.object({
 
     dateOfBirth: z
         .string()
-        .refine((val) => new Date(val).getFullYear() > 1900, "Дата має бути пізніше за 1900")
+        .refine((val) => new Date(val).getFullYear() > 1900, "Дата має бути пізнішою за 1900")
         .refine((val) => new Date().getFullYear() - new Date(val).getFullYear() >= 18, "Вік працівника має бути більшим за 18 років"),
 
     dateOfStart: z
