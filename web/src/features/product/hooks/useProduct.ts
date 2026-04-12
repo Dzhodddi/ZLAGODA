@@ -13,6 +13,7 @@ import type {CreateProduct} from "@/features/product/types/types.ts";
 import {staleTime} from "@/constants/constants.ts";
 import {toast} from "sonner";
 import {getErrorMessage} from "@/lib/errorUtils.ts";
+import {AxiosError} from "axios";
 
 const QUERY_KEY = "products";
 
@@ -22,6 +23,12 @@ export const useProduct = (id: number) => {
         queryFn: () => getProduct(id),
         enabled: !!id,
         staleTime: staleTime,
+        retry: (failureCount, error) => {
+            if (error instanceof AxiosError && error.response?.status === 404) {
+                return false;
+            }
+            return failureCount < 3;
+        }
     });
 };
 

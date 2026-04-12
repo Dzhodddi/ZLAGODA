@@ -14,6 +14,7 @@ import {staleTime} from "@/constants/constants.ts";
 import type {BatchRequest, CreateStoreProduct} from "@/features/store_product/types/types.ts";
 import {toast} from "sonner";
 import {getErrorMessage} from "@/lib/errorUtils.ts";
+import {AxiosError} from "axios";
 
 const QUERY_KEY = "store-products";
 
@@ -89,6 +90,12 @@ export const useStoreProduct = (upc: string) => {
         queryFn: () => getStoreProduct(upc),
         enabled: !!upc,
         staleTime: staleTime,
+        retry: (failureCount, error) => {
+            if (error instanceof AxiosError && error.response?.status === 404) {
+                return false;
+            }
+            return failureCount < 3;
+        }
     });
 };
 

@@ -11,8 +11,8 @@ import {
 } from "@/features/employee/api/employeeApi.ts";
 import {staleTime} from "@/constants/constants.ts";
 import {toast} from "sonner";
-import {isAxiosError} from "axios";
 import {getErrorMessage} from "@/lib/errorUtils.ts";
+import {AxiosError} from "axios";
 
 const QUERY_KEY = "employees";
 
@@ -99,6 +99,12 @@ export const useEmployee = (id: string) => {
         queryFn: () => getEmployee(id),
         enabled: !!id,
         staleTime: staleTime,
+        retry: (failureCount, error) => {
+            if (error instanceof AxiosError && error.response?.status === 404) {
+                return false;
+            }
+            return failureCount < 3;
+        }
     });
 };
 

@@ -20,13 +20,13 @@ export const CategoryPage = () => {
     const { data, isLoading, isError } = useCategory(categoryId);
 
     if (isLoading)
-        return <div className="p-4 text-center">Завантаження...</div>;
+        return <div className="p-4 text-center text-zinc-500">Завантаження...</div>;
 
     if (isError || !data)
         return (
             <NotFoundEntity
                 title="Категорію не знайдено"
-                redirectTiList="/categories"
+                redirectTiList="/category"
                 message={`Категорію з ID ${id} не існує в базі даних`}
             />
         );
