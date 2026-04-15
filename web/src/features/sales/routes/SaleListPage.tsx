@@ -9,14 +9,14 @@ type Cursor = {
 };
 
 const getTodayDateString = () => new Date().toISOString().split("T")[0];
-const getDecadeAgoDateString = () => {
+const getThreeYearsAgoDateString = () => {
     const d = new Date();
-    d.setFullYear(d.getFullYear() - 10);
+    d.setFullYear(d.getFullYear() - 3);
     return d.toISOString().split("T")[0];
 };
 
 export const SaleListPage = () => {
-    const [startDate, setStartDate] = useState(getDecadeAgoDateString());
+    const [startDate, setStartDate] = useState(getThreeYearsAgoDateString());
     const [endDate, setEndDate] = useState(getTodayDateString());
 
     const [cursorHistory, setCursorHistory] = useState<Cursor[]>([{ checkNumber: undefined, upc: undefined}]);

@@ -104,14 +104,28 @@ export const useStoreProductManagerSearch = (upc: string) => {
         queryKey: [QUERY_KEY, upc, "search-manager"],
         queryFn: () => getStoreProductSearchManager(upc),
         enabled: !!upc,
+        staleTime: staleTime,
+        retry: (failureCount, error) => {
+            if (error instanceof AxiosError && error.response?.status === 404) {
+                return false;
+            }
+            return failureCount < 3;
+        }
     });
 };
 
-export const useStoreProductCahierSearch = (upc: string) => {
+export const useStoreProductCashierSearch = (upc: string) => {
     return useQuery({
         queryKey: [QUERY_KEY, upc, "search-cashier"],
         queryFn: () => getStoreProductSearchCashier(upc),
         enabled: !!upc,
+        staleTime: staleTime,
+        retry: (failureCount, error) => {
+            if (error instanceof AxiosError && error.response?.status === 404) {
+                return false;
+            }
+            return failureCount < 3;
+        }
     });
 };
 

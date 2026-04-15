@@ -5,7 +5,7 @@ import {
     useDeleteExpired,
     useDeleteStoreProduct,
     useDownloadStoreProductPdf,
-    useStoreProductCahierSearch,
+    useStoreProductCashierSearch,
     useStoreProductManagerSearch
 } from "@/features/store_product/hooks/useStoreProduct.ts";
 import { type StoreProduct } from "@/features/store_product/types/types.ts";
@@ -58,7 +58,7 @@ export const StoreProductList = () => {
     const [searchUpc, setSearchUpc] = useState("");
     const isUpcSearch = searchUpc.trim() !== "";
 
-    const upcQueryCahier = useStoreProductCahierSearch(searchUpc);
+    const upcQueryCahier = useStoreProductCashierSearch(searchUpc);
     const upcQueryManager = useStoreProductManagerSearch(searchUpc);
 
     const { data, isLoading, error, isFetching } = useAllStoreProducts({
@@ -261,7 +261,7 @@ export const StoreProductList = () => {
                 <div>
                     {upcQueryManager.isLoading && <p className="text-zinc-500">Завантаження…</p>}
                     {upcQueryManager.error && (
-                        <p className="text-red-500">Товар з UPC "{searchUpc}" не знайдено</p>
+                        <p className="text-zinc-400 text-sm">Товар з UPC {searchUpc} не знайдено</p>
                     )}
                     {upcQueryManager.data && (
                         <div className="overflow-x-auto bg-white border border-blue-300 relative">
@@ -297,7 +297,7 @@ export const StoreProductList = () => {
                 <div>
                     {upcQueryCahier.isLoading && <p className="text-zinc-500">Завантаження…</p>}
                     {upcQueryCahier.error && (
-                        <p className="text-red-500">Товар з UPC "{searchUpc}" не знайдено</p>
+                        <p className="text-zinc-400 text-sm">Товар з UPC {searchUpc} не знайдено</p>
                     )}
                     {upcQueryCahier.data && (
                         <div className="overflow-x-auto bg-white border border-blue-300 relative">
