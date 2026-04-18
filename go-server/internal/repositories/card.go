@@ -36,7 +36,7 @@ type CardRepository interface {
 		lastCustomerSurname string,
 	) ([]generated.CustomerCard, error)
 	GetCustomerCardIDList(ctx context.Context) ([]generated.GetCustomerCardIDListRow, error)
-	GetCustomerPurchaseHistory(ctx context.Context, cardNumber string) ([]generated.GetCustomerPurchaseHistoryRow, error)
+	GetCustomerFavoriteProducts(ctx context.Context, cardNumber string) ([]generated.GetCustomerFavoriteProductsRow, error)
 }
 
 type cardRepository struct {
@@ -51,11 +51,11 @@ func (r *cardRepository) GetCustomerCardIDList(ctx context.Context) ([]generated
 	return r.queries.GetCustomerCardIDList(ctx)
 }
 
-func (r *cardRepository) GetCustomerPurchaseHistory(ctx context.Context, cardNumber string) ([]generated.GetCustomerPurchaseHistoryRow, error) {
+func (r *cardRepository) GetCustomerFavoriteProducts(ctx context.Context, cardNumber string) ([]generated.GetCustomerFavoriteProductsRow, error) {
 	ctx, cancel := context.WithTimeout(ctx, constants.DatabaseTimeOut)
 	defer cancel()
 
-	card, err := r.queries.GetCustomerPurchaseHistory(ctx, sql.NullString{
+	card, err := r.queries.GetCustomerFavoriteProducts(ctx, sql.NullString{
 		String: cardNumber,
 		Valid:  true,
 	})

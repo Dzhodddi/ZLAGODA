@@ -103,7 +103,7 @@ func (h *CardHandler) getCustomerCard(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Param        cardNumber path string true "Customer card number"
-// @Success      200  {object}  []views.CustomerHistory
+// @Success      200  {object}  []views.CustomerCardProductResponse
 // @Failure      401  {object}  map[string]any  "Unauthorized"
 // @Failure      403  {object}  map[string]any  "Forbidden"
 // @Failure      404  {object}  map[string]any  "Entity not found"
@@ -114,7 +114,7 @@ func (h *CardHandler) getCustomerCard(c echo.Context) error {
 // @Router       /customer-cards/{cardNumber}/history [get]
 func (h *CardHandler) getCustomerCardHistory(c echo.Context) error {
 	cardNumber := c.Param("cardNumber")
-	history, err := h.service.GetCustomerPurchaseHistory(c.Request().Context(), cardNumber)
+	history, err := h.service.GetCustomerFavoriteProducts(c.Request().Context(), cardNumber)
 	if err != nil {
 		return err
 	}

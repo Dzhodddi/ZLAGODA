@@ -3,7 +3,8 @@ import {
     type CreateCustomerCard,
     type CustomerCard,
     type CustomerCardDropdownItem, CustomerCardDropdownItemSchema,
-    CustomerCardSchema, type PurchaseHistoryItem, PurchaseHistoryItemSchema
+    CustomerCardSchema,
+    type FavouriteProductItem, FavouriteProductItemSchema
 } from "@/features/customer-card/types/types.ts";
 import {z} from "zod";
 
@@ -61,7 +62,9 @@ export const getCustomerCardIDList = async (): Promise<CustomerCardDropdownItem[
     return CustomerCardDropdownItemSchema.array().parse(response.data);
 }
 
-export const getCustomerCardHistory = async (cardNumber: string): Promise<PurchaseHistoryItem[]> => {
+export const getCustomerFavouriteProducts = async (cardNumber: string): Promise<FavouriteProductItem[]> => {
     const response = await goApiClient.get(`${prefix}/${cardNumber}/history`);
-    return PurchaseHistoryItemSchema.array().parse(response.data);
+    if (!response.data)
+        return []
+    return FavouriteProductItemSchema.array().parse(response.data);
 };

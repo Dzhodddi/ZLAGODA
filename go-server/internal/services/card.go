@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Dzhodddi/ZLAGODA/internal/constants"
 	"github.com/Dzhodddi/ZLAGODA/internal/db/generated"
 	"github.com/Dzhodddi/ZLAGODA/internal/mappers"
 	repository "github.com/Dzhodddi/ZLAGODA/internal/repositories"
@@ -18,26 +17,24 @@ type CardService interface {
 	DeleteCustomerCard(ctx context.Context, cardNumber string) error
 	ListCustomerCards(ctx context.Context, q views.ListCustomerCardsQueryParams) ([]views.CustomerCardResponse, error)
 	GetCustomerCardIDList(ctx context.Context) (*[]views.DropdownCardItem, error)
-	GetCustomerPurchaseHistory(ctx context.Context, cardNumber string) ([]views.CustomerHistory, error)
+	GetCustomerFavoriteProducts(ctx context.Context, cardNumber string) ([]views.CustomerCardProductResponse, error)
 }
 
 type cardService struct {
 	cardRepository repository.CardRepository
 }
 
-func (s *cardService) GetCustomerPurchaseHistory(ctx context.Context, cardNumber string) ([]views.CustomerHistory, error) {
-	items, err := s.cardRepository.GetCustomerPurchaseHistory(ctx, cardNumber)
+func (s *cardService) GetCustomerFavoriteProducts(ctx context.Context, cardNumber string) ([]views.CustomerCardProductResponse, error) {
+	items, err := s.cardRepository.GetCustomerFavoriteProducts(ctx, cardNumber)
 	if err != nil {
 		return nil, err
 	}
-	var response []views.CustomerHistory
+	var response []views.CustomerCardProductResponse
 	for i := range items {
-		response = append(response, views.CustomerHistory{
-			PrintDate:    items[i].PrintDate.Format(constants.DateResponseLayout),
-			CheckNumber:  items[i].CheckNumber,
-			ProductName:  items[i].ProductName,
-			Quantity:     items[i].Quantity,
-			SellingPrice: items[i].SellingPrice,
+		response = append(response, views.CustomerCardProductResponse{
+			ProductName:   items[i].ProductName,
+			TotalQuantity: items[i].TotalQuantityBought,
+			TotalPrice:    items[i].TotalSpentOnProduct,
 		})
 	}
 	return response, nil

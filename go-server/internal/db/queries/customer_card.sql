@@ -124,13 +124,11 @@ FETCH FIRST $3 ROWS ONLY;
 SELECT card_number, CONCAT(customer_surname, ' ', customer_name)::VARCHAR as full_name
 FROM customer_card;
 
--- name: GetCustomerPurchaseHistory :many
+-- name: GetCustomerFavoriteProducts :many
 SELECT
-    c.check_number,
     p.product_name,
-    s.product_number AS quantity,
-    s.selling_price::DOUBLE PRECISION as selling_price,
-    c.print_date
+    SUM(s.product_number) AS total_quantity_bought,
+    SUM(s.product_number * s.selling_price)::DOUBLE PRECISION AS total_spent_on_product
 FROM
     checks c
         JOIN sale s ON c.check_number = s.check_number
@@ -138,7 +136,8 @@ FROM
         JOIN product p ON sp.id_product = p.id_product
 WHERE
     c.card_number = $1
-    AND c.print_date >= CURRENT_DATE - INTERVAL '5 years'
+  AND c.print_date >= CURRENT_DATE - INTERVAL '3 years'
+GROUP BY
+    p.product_name
 ORDER BY
-    c.print_date DESC,
-    c.check_number;
+    total_quantity_bought DESC;

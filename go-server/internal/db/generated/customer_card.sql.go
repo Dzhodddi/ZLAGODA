@@ -8,7 +8,6 @@ package generated
 import (
 	"context"
 	"database/sql"
-	"time"
 )
 
 const createNewCustomerCard = `-- name: CreateNewCustomerCard :one
@@ -318,13 +317,11 @@ func (q *Queries) GetCustomerCardsByPercentSorted(ctx context.Context, arg GetCu
 	return items, nil
 }
 
-const getCustomerPurchaseHistory = `-- name: GetCustomerPurchaseHistory :many
+const getCustomerFavoriteProducts = `-- name: GetCustomerFavoriteProducts :many
 SELECT
-    c.check_number,
     p.product_name,
-    s.product_number AS quantity,
-    s.selling_price::DOUBLE PRECISION as selling_price,
-    c.print_date
+    SUM(s.product_number) AS total_quantity_bought,
+    SUM(s.product_number * s.selling_price)::DOUBLE PRECISION AS total_spent_on_product
 FROM
     checks c
         JOIN sale s ON c.check_number = s.check_number
@@ -332,36 +329,29 @@ FROM
         JOIN product p ON sp.id_product = p.id_product
 WHERE
     c.card_number = $1
-    AND c.print_date >= CURRENT_DATE - INTERVAL '5 years'
+  AND c.print_date >= CURRENT_DATE - INTERVAL '3 years'
+GROUP BY
+    p.product_name
 ORDER BY
-    c.print_date DESC,
-    c.check_number
+    total_quantity_bought DESC
 `
 
-type GetCustomerPurchaseHistoryRow struct {
-	CheckNumber  string
-	ProductName  string
-	Quantity     int32
-	SellingPrice float64
-	PrintDate    time.Time
+type GetCustomerFavoriteProductsRow struct {
+	ProductName         string
+	TotalQuantityBought int64
+	TotalSpentOnProduct float64
 }
 
-func (q *Queries) GetCustomerPurchaseHistory(ctx context.Context, cardNumber sql.NullString) ([]GetCustomerPurchaseHistoryRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCustomerPurchaseHistory, cardNumber)
+func (q *Queries) GetCustomerFavoriteProducts(ctx context.Context, cardNumber sql.NullString) ([]GetCustomerFavoriteProductsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCustomerFavoriteProducts, cardNumber)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetCustomerPurchaseHistoryRow
+	var items []GetCustomerFavoriteProductsRow
 	for rows.Next() {
-		var i GetCustomerPurchaseHistoryRow
-		if err := rows.Scan(
-			&i.CheckNumber,
-			&i.ProductName,
-			&i.Quantity,
-			&i.SellingPrice,
-			&i.PrintDate,
-		); err != nil {
+		var i GetCustomerFavoriteProductsRow
+		if err := rows.Scan(&i.ProductName, &i.TotalQuantityBought, &i.TotalSpentOnProduct); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -1,7 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     createCustomerCard, deleteCustomerCard, downloadCustomerCardPdf,
-    getCustomerCard, getCustomerCardHistory, getCustomerCardIDList,
+    getCustomerCard, getCustomerCardIDList, getCustomerFavouriteProducts,
     listCustomerCard,
     updateCustomerCard
 } from "@/features/customer-card/api/customerCardApi.ts";
@@ -124,10 +124,10 @@ export const useCustomerCardIDList = () => {
     })
 }
 
-export const useCustomerCardHistory = (cardNumber: string, isEnabled: boolean) => {
+export const useCustomerFavouriteProducts = (cardNumber: string, isEnabled: boolean) => {
     return useQuery({
         queryKey: ["customer-card-history", cardNumber],
-        queryFn: () => getCustomerCardHistory(cardNumber),
+        queryFn: () => getCustomerFavouriteProducts(cardNumber),
         enabled: isEnabled,
     });
 };

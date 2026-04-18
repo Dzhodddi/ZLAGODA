@@ -63,12 +63,10 @@ export const CustomerCardDropdownItemSchema = z.object({
 
 export type CustomerCardDropdownItem = z.infer<typeof CustomerCardDropdownItemSchema>
 
-export const PurchaseHistoryItemSchema = z.object({
-    printDate: z.string(),
-    checkNumber: z.string(),
+export const FavouriteProductItemSchema = z.object({
     productName: z.string(),
     quantity: z.number(),
-    sellingPrice: z.number(),
+    totalPrice: z.number(),
 });
 
-export type PurchaseHistoryItem = z.infer<typeof PurchaseHistoryItemSchema>;
+export type FavouriteProductItem = z.infer<typeof FavouriteProductItemSchema>;
