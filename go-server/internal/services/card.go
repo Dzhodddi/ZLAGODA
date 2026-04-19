@@ -31,11 +31,7 @@ func (s *cardService) GetCustomerFavoriteProducts(ctx context.Context, cardNumbe
 	}
 	var response []views.CustomerCardProductResponse
 	for i := range items {
-		response = append(response, views.CustomerCardProductResponse{
-			ProductName:   items[i].ProductName,
-			TotalQuantity: items[i].TotalQuantityBought,
-			TotalPrice:    items[i].TotalSpentOnProduct,
-		})
+		response = append(response, mappers.CardModelToFavouriteProductResponse(items[i]))
 	}
 	return response, nil
 }

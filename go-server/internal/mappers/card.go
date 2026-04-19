@@ -19,3 +19,11 @@ func CardModelToResponse(card *generated.CustomerCard) *views.CustomerCardRespon
 		CustomerPercent:    card.CustomerPercent,
 	}
 }
+
+func CardModelToFavouriteProductResponse(card generated.GetCustomerFavoriteProductsRow) views.CustomerCardProductResponse {
+	return views.CustomerCardProductResponse{
+		ProductName:   card.ProductName,
+		TotalQuantity: card.TotalQuantityBought,
+		TotalPrice:    card.TotalSpentOnProduct,
+	}
+}
