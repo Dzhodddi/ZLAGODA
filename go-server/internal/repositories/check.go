@@ -252,7 +252,7 @@ func (r *checkRepository) CreateNewCheck(
 			IDEmployee:  id,
 			CardNumber:  sql.NullString{String: check.CardNumber, Valid: check.CardNumber != ""},
 			SumTotal:    totalPrice * (1 - float64(customerCard.CustomerPercent)/100.0),
-			Vat:         totalPrice * constants.Vat,
+			Vat:         totalPrice * (1 - float64(customerCard.CustomerPercent)/100.0) * constants.Vat,
 		},
 	)
 	if err != nil {

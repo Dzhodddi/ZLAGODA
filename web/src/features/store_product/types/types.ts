@@ -13,7 +13,7 @@ export const BaseStoreProductSchema = z.object({
         .transform(val => val?.trim() === "" ? null : val),
     idProduct: z
         .coerce
-        .number()
+        .number("Виберіть товар")
         .int()
         .min(1, "ID товару має бути позитивним"),
     productName: z
@@ -21,19 +21,26 @@ export const BaseStoreProductSchema = z.object({
         .min(1, "Назва занадто коротка")
         .max(50, "Назва занадто довга")
         .nullish(),
-    sellingPrice: z
-        .coerce
-        .number()
-        .min(0, "Ціна має бути позитивною")
-        .max(999999999.9999, "Ціна завелика"),
-    productsNumber: z
-        .coerce
-        .number()
-        .int()
-        .min(0, "Кількість має бути невід'ємною"),
+    sellingPrice: z.preprocess(
+        (val) => (val === "" || val === null || val === undefined ? undefined : val),
+        z.coerce.number({ message: "Введіть число" })
+            .min(0, "Ціна не може набувати від'ємних значень")
+            .max(999999999.9999, "Ціна завелика")
+    ),
+    productsNumber: z.preprocess(
+        (val) => (val === "" || val === null || val === undefined ? undefined : val),
+        z.coerce.number({ message: "Введіть число" })
+            .min(0, "Кількість не може набувати від'ємних значень")
+            .max(999999999, "Кількість завелика")
+    ),
     promotionalProduct: z
         .boolean()
         .default(false),
+}).refine(
+    (data) =>  data.upc !== data.upcProm,
+    {
+        message: "UPC звичайного та акційного товарів мають бути різними",
+        path: ["upcProm"]
 });
 
 export const PageStoreProductSchema = z.object({
@@ -46,13 +53,6 @@ export const PageStoreProductSchema = z.object({
 export type StoreProduct = z.infer<typeof BaseStoreProductSchema>;
 
 export const CreateStoreProductSchema = BaseStoreProductSchema
-    .extend({
-        productsNumber: z
-            .coerce
-            .number()
-            .int()
-            .min(1, "Кількість має бути позитивною"),
-    });
 
 export type CreateStoreProduct = z.infer<typeof CreateStoreProductSchema>;
 
@@ -87,7 +87,7 @@ export const BatchRequestSchema = z.object({
         .coerce
         .number()
         .int()
-        .min(1, "Кількість має бути не менше 1"),
+        .min(0, "Кількість має бути не менше 1"),
     price: z
         .coerce
         .number()

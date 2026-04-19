@@ -100,6 +100,15 @@ definitions:
     - customer_surname
     - phone_number
     type: object
+  views.CustomerCardProductResponse:
+    properties:
+      product_name:
+        type: string
+      quantity:
+        type: integer
+      total_price:
+        type: number
+    type: object
   views.CustomerCardResponse:
     properties:
       card_number:
@@ -120,19 +129,6 @@ definitions:
         type: string
       zip_code:
         type: string
-    type: object
-  views.CustomerHistory:
-    properties:
-      check_number:
-        type: string
-      print_date:
-        type: string
-      product_name:
-        type: string
-      quantity:
-        type: integer
-      selling_price:
-        type: number
     type: object
   views.ProductResponse:
     properties:
@@ -1039,7 +1035,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/views.CustomerHistory'
+              $ref: '#/definitions/views.CustomerCardProductResponse'
             type: array
         "401":
           description: Unauthorized

@@ -114,15 +114,20 @@ func (q *Queries) GetAllCategoriesSortedByName(ctx context.Context, arg GetAllCa
 
 const getCategoriesWithNoUnsoldProduct = `-- name: GetCategoriesWithNoUnsoldProduct :many
 SELECT
-    category_number,
-    category_name
+    c.category_number,
+    c.category_name
 FROM
-    category с
+    category c
 WHERE
+    EXISTS (
+        SELECT 1
+        FROM product p
+        WHERE p.category_number = c.category_number
+    ) AND
     NOT EXISTS (
         SELECT p.id_product
         FROM product p
-        WHERE p.category_number = с.category_number
+        WHERE p.category_number = c.category_number
           AND NOT EXISTS (
             SELECT 1
             FROM sale s

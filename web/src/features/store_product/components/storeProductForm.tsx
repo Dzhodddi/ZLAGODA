@@ -26,12 +26,12 @@ const StoreProductFormFields = ({ isEditMode }: { isEditMode: boolean }) => {
         <>
             <div className="col-span-12"><InputField name="upc" label="UPC" disabled={isEditMode} /></div>
             <div className="col-span-12"><ProductComboboxField /></div>
-            <div className="col-span-12"><InputField type="number" name="sellingPrice" label="Ціна продажу (без ПДВ), грн" min="0" step="0.01" /></div>
+            <div className="col-span-12"><InputField type="number" name="sellingPrice" label="Ціна продажу (без ПДВ), грн" min="0.01" step="0.01"/></div>
             {isEditMode && (
                 <div className="col-span-12 text-red-800 text-xs align-text-top italic">
                     Зверніть увагу! Ціна в цьому полі вважається БЕЗ ПДВ. Не забудьте оновити її за потреби! </div>
             )}
-            <div className="col-span-12 py-4"><InputField type="number" name="productsNumber" label="Кількість одиниць, шт." min="0" /></div>
+            <div className="col-span-12 py-4"><InputField autoComplete="off" type="number" name="productsNumber" label="Кількість одиниць, шт." min="1" step={1}/></div>
             <div className="col-span-12 py-2">
                 <CheckboxField name="promotionalProduct" label="Акційний товар" />
             </div>

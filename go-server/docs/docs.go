@@ -1252,7 +1252,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/views.CustomerHistory"
+                                "$ref": "#/definitions/views.CustomerCardProductResponse"
                             }
                         }
                     },
@@ -1509,6 +1509,20 @@ const docTemplate = `{
                 }
             }
         },
+        "views.CustomerCardProductResponse": {
+            "type": "object",
+            "properties": {
+                "product_name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "total_price": {
+                    "type": "number"
+                }
+            }
+        },
         "views.CustomerCardResponse": {
             "type": "object",
             "properties": {
@@ -1538,26 +1552,6 @@ const docTemplate = `{
                 },
                 "zip_code": {
                     "type": "string"
-                }
-            }
-        },
-        "views.CustomerHistory": {
-            "type": "object",
-            "properties": {
-                "check_number": {
-                    "type": "string"
-                },
-                "print_date": {
-                    "type": "string"
-                },
-                "product_name": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "selling_price": {
-                    "type": "number"
                 }
             }
         },

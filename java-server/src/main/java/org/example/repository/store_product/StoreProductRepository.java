@@ -419,7 +419,7 @@ public class StoreProductRepository {
                             null,
                             requestDto.getId_product(),
                             priceWithVatAndDiscount,
-                            requestDto.getProducts_number(),
+                            0,
                             true
                     );
                 } else {

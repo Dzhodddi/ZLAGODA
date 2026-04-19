@@ -21,7 +21,7 @@ export const StoreProductComponent = ({ data }: Props) => {
                 >
                     <span className="font-medium">UPC акційного товару:</span> {data.upcProm}
                 </div>)}
-            <p><span className="font-medium">Товар:</span> {data.idProduct} {data.productName}</p>
+            <p><span className="font-medium">Товар:</span> #{data.idProduct} {data.productName}</p>
             <p><span className="font-medium">Ціна продажу:</span> {data.sellingPrice} грн</p>
             <p><span className="font-medium">Кількість одиниць:</span> {data.productsNumber}</p>
             {data.promotionalProduct && (

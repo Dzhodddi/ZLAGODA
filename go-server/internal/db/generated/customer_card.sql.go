@@ -333,7 +333,7 @@ WHERE
 GROUP BY
     p.product_name
 ORDER BY
-    total_quantity_bought DESC
+    total_quantity_bought DESC, total_spent_on_product DESC
 `
 
 type GetCustomerFavoriteProductsRow struct {

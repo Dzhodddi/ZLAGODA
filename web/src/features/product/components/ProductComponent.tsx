@@ -40,7 +40,7 @@ export const ProductComponent = ({ data }: Props) => {
             <div className="space-y-1">
             <p><span className="font-medium">ID:</span> {data.idProduct}</p>
             <p><span className="font-medium">Назва:</span> {data.productName}</p>
-            <p><span className="font-medium">Категорія:</span> {data.categoryNumber} {data.categoryName}</p>
+            <p><span className="font-medium">Категорія:</span> #{data.categoryNumber} {data.categoryName}</p>
             <p><span className="font-medium">Виробник:</span> {data.producer}</p>
             <p><span className="font-medium">Характеристики:</span> {data.productCharacteristics}</p>
             </div>

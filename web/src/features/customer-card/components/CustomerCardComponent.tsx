@@ -57,7 +57,7 @@ const CustomerCardComponent = ({ data, isOwnProfile }: Props) => {
                                         <span><span className="font-medium text-gray-600">Назва:</span> {item.productName}</span>
                                     </div>
                                     <div className="w-36">
-                                        <span><span className="font-medium text-gray-600">Ціна:</span> {item.totalPrice} грн.</span>
+                                        <span><span className="font-medium text-gray-600">Сума:</span> {item.totalPrice} грн</span>
                                     </div>
                                     <div className="w-32">
                                         <span><span className="font-medium text-gray-600">Кількість:</span> {item.quantity} шт.</span>

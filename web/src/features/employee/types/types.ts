@@ -48,6 +48,12 @@ export const CreateEmployeeSchema = EmployeeSchema
     {
         message: "Паролі не збігаються",
         path: ["repeatPassword"]
+    })
+    .refine(
+        (data) => (new Date(data.dateOfStart).valueOf() -  new Date(data.dateOfBirth).valueOf()) / (1000 * 60 * 60 * 24 * 365.25) >= 18,
+        {
+            message: "На момент початку роботи працівнику має бути 18 років",
+            path: ["dateOfStart"]
     }
 )
 
