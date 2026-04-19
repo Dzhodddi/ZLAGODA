@@ -31,7 +31,7 @@ func (h *CardHandler) RegisterRouts(route *echo.Group) {
 	card.GET("", h.listCustomerCards, h.auth.CheckRole(auth.Manager, auth.Cashier))
 	cardNumber := card.Group("/:cardNumber")
 	cardNumber.GET("", h.getCustomerCard)
-	cardNumber.GET("/history", h.getCustomerCardHistory)
+	cardNumber.GET("/favourite", h.getCustomerFavoriteProducts)
 	cardNumber.PUT("", h.updateCustomerCard)
 	cardNumber.DELETE("", h.deleteCustomerCard, h.auth.CheckRole(auth.Manager))
 }
@@ -111,14 +111,14 @@ func (h *CardHandler) getCustomerCard(c echo.Context) error {
 //
 //	@Security		ApiKeyAuth
 //
-// @Router       /customer-cards/{cardNumber}/history [get]
-func (h *CardHandler) getCustomerCardHistory(c echo.Context) error {
+// @Router       /customer-cards/{cardNumber}/favourite [get]
+func (h *CardHandler) getCustomerFavoriteProducts(c echo.Context) error {
 	cardNumber := c.Param("cardNumber")
-	history, err := h.service.GetCustomerFavoriteProducts(c.Request().Context(), cardNumber)
+	items, err := h.service.GetCustomerFavoriteProducts(c.Request().Context(), cardNumber)
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, history)
+	return c.JSON(http.StatusOK, items)
 }
 
 // updateCustomerCard godoc

@@ -1017,7 +1017,7 @@ paths:
       summary: Update a customer card
       tags:
       - CustomerCard
-  /customer-cards/{cardNumber}/history:
+  /customer-cards/{cardNumber}/favourite:
     get:
       consumes:
       - application/json

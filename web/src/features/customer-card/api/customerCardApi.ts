@@ -63,7 +63,7 @@ export const getCustomerCardIDList = async (): Promise<CustomerCardDropdownItem[
 }
 
 export const getCustomerFavouriteProducts = async (cardNumber: string): Promise<FavouriteProductItem[]> => {
-    const response = await goApiClient.get(`${prefix}/${cardNumber}/history`);
+    const response = await goApiClient.get(`${prefix}/${cardNumber}/favourite`);
     if (!response.data)
         return []
     return FavouriteProductItemSchema.array().parse(response.data);

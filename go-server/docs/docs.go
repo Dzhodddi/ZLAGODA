@@ -1219,7 +1219,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/customer-cards/{cardNumber}/history": {
+        "/customer-cards/{cardNumber}/favourite": {
             "get": {
                 "security": [
                     {
