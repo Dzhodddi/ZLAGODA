@@ -87,11 +87,11 @@ export const BatchRequestSchema = z.object({
         .coerce
         .number()
         .int()
-        .min(0, "Кількість має бути не менше 1"),
+        .min(0, "Кількість має бути не меншою за 1"),
     price: z
         .coerce
         .number()
-        .min(0.01, "Ціна має бути більше 0"),
+        .min(0.01, "Ціна має бути більшою за 0"),
 });
 
 export type BatchRequest = z.infer<typeof BatchRequestSchema>;
